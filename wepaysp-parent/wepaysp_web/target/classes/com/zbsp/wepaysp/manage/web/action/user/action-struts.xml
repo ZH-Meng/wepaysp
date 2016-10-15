@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+ "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<package name="user" namespace="/resources/user" extends="wepaysp-manage-default">
+		<!-- 获取左侧菜单 -->
+		<action name="modifyPwd" class="modifyPwdAction">
+			<result name="success">/resources/user/modifyPwd.jsp</result>
+		</action>
+	</package>
+</struts>

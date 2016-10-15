@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+	    http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<security:http entry-point-ref="loginEntryPoint" access-denied-page="/resources/include/accessDenied.jsp">
+		<!-- 不过滤静态、公共资源、登录页面 -->
+		<security:intercept-url pattern="/images/**/*" filters="none" />
+		<security:intercept-url pattern="/css/**/*" filters="none" />
+		<security:intercept-url pattern="/common/**/*" filters="none" />
+		<security:intercept-url pattern="/js/**/*" filters="none" />
+		<security:intercept-url pattern="/tools/**/*" filters="none" />
+		<security:intercept-url pattern="/adImages/**/*" filters="none" />
+		<security:intercept-url pattern="/index.jsp" filters="none" />
+		
+		<!-- 所有需要登录后访问的页面存放在/resources/目录下 -->
+		<security:intercept-url pattern="/resources/*/*" access="IS_AUTHENTICATED_FULLY" />
+
+		<!-- 检测失效的sessionId,超时时定位到另外一个URL -->
+		<security:session-management invalid-session-url="/index.jsp" session-authentication-error-url="/index.jsp" />
+		
+		<!-- 登录过滤器，替换原有 -->
+		<security:custom-filter ref="manageLoginFilter" position="FORM_LOGIN_FILTER" />
+		<!-- 退出登录过滤器 -->
+		<security:custom-filter ref="logOutFilter" position="LOGOUT_FILTER" />
+		<!-- 权限控制过滤器 -->
+		<security:custom-filter ref="manageSecurityFilter" after="FILTER_SECURITY_INTERCEPTOR" />
+		
+	</security:http>
+	
+	<!-- 登录端点 -->
+	<bean id="loginEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/index.jsp" />
+	</bean>
+
+	<bean id="manageLoginFilter" class="com.zbsp.wepaysp.manage.web.security.ManageLoginFilter">
+			<!-- 校验登录url -->
+		<property name="filterProcessesUrl" value="/checklogin" />
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="usernameParameter" value="username" />
+		<property name="passwordParameter" value="password" />
+		<property name="authenticationSuccessHandler">
+			<bean class="com.zbsp.wepaysp.manage.web.security.SavedRequestSuccessHandler">
+				<!-- 登录成功后默认地址 -->
+				<property name="defaultTargetUrl" value="/resources/main.jsp" />
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<!-- 登录失败后的默认地址l -->
+				<property name="defaultFailureUrl" value="/index.jsp" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 权限控制过滤器 -->
+	<bean id="manageSecurityFilter" class="com.zbsp.wepaysp.manage.web.security.ManageSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="manageAccessDecisionManager" />
+		<property name="securityMetadataSource" ref="manageSecurityMetadataSource" />
+	</bean>
+	
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider ref="manageAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean id="manageAuthenticationProvider" class="com.zbsp.wepaysp.manage.web.security.ManageAuthenticationProvider" >
+		<property name="sysUserService" ref="sysUserService" />
+		<property name="sysAuthorityService" ref="sysAuthorityService" />
+	</bean>
+	<bean id="manageAccessDecisionManager" class="com.zbsp.wepaysp.manage.web.security.ManageAccessDecisionManager" />
+	<bean id="manageSecurityMetadataSource" class="com.zbsp.wepaysp.manage.web.security.ManageSecurityMetadataSource" >
+		<property name="sysFunctionService" ref="sysFunctionService" />
+		<property name="sysPermissionService" ref="sysPermissionService" />
+	</bean>
+	
+	<bean id="logOutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+		<property name="filterProcessesUrl" value="/logout" />
+		<constructor-arg index="0" value="/index.jsp" />
+		<constructor-arg index="1">
+			<list>
+				<bean id="manageLogOutHandler" class="com.zbsp.wepaysp.manage.web.security.ManageLogoutHandler">
+					<property name="sysUserService" ref="sysUserService" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+</beans>

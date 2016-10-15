@@ -1,0 +1,312 @@
+/*
+--------------------------------------------------------------------
+		文件名称：	zxbgstyle.css
+		开发人员：	李琰
+		描述：	样式
+		版本： V1.0
+----------------------------------------------------------------------
+*/
+
+/* v1.0 */
+body,textarea,input,option{font-size:14px;color:#000;font-family:"微软雅黑",Arial, Helvetica, sans-serif;}
+body,div,h1,h2,h3,h4,h5,h6,p,dl,dd,ul,ol,textarea,input,select,form,em,strong,a,span{margin:0;}
+dl,th,td,ul,ol,textarea,select,input,form,em,strong,a,span{padding:0;}
+textarea,select,input{outline:none;}
+a{text-decoration:none;}
+table{border-collapse:collapse;}
+li{list-style:none;}
+img{border:none;}
+img,label,input,span{vertical-align:middle;}
+textarea,a,input{outline:none;}
+textarea{overflow:auto;resize:none;}
+.clear:after{content:'';display:block;clear:both;}
+.clear{zoom:1;}
+/* css reset */
+
+/* body */
+.bdbj{background:#fff;}
+.bgbj{background:#fff;}
+.box{width:1024px;min-width:1024px;margin:70px auto;}
+/* end body */
+
+/* bg */
+.rightbg{width:100%;min-width:1000px;}
+.bgbottom{width:99%;min-width:1000px;margin:12px auto;height:40px;line-height:40px;background:#fff;border-bottom:4px solid #ccc;text-align:center;font-size:12px;color:#5c5c5c;}
+
+.bgposition{width:99%;min-width:1000px;margin:8px auto;height:36px;line-height:36px;border-bottom:1px solid #d9d9d9;text-indent:40px;background:url(../images/bg-wzico.jpg) no-repeat 10px 8px;font-size:12px;color:#a6a6a6;}
+
+.bgtj{width:99%;min-width:1000px;background:#fff;margin:8px auto;}
+.topbai{padding-top:20px;}
+.tj_title{widht:100%;min-width:1000px;height:30px;line-height:30px;background:url(../images/tablebj.jpg) repeat-x;text-indent:20px;color:#de3442;color:#fff;font-weight:bold;}
+
+.tj_titletxt{widht:100%;min-width:1000px;height:38px;line-height:38px;background:#ecf0f1;text-indent:20px;color:#de3442;color:#000;margin-bottom:10px;}
+.tj_titletxt strong{font-weight:normal;}
+
+.bg_tjtab{widht:100%;min-width:1000px;}
+
+
+.bgtable{width:99%;min-width:1000px;background:#fff;margin:auto;}
+.title_button{widht:100%;height:42px;line-height:42px;border-bottom:1px solid #de3442;background:url(../images/bg-tjico.jpg) no-repeat 8px 15px #fff;}
+.title_button li{padding:8px 0 0 20px;}
+.title_button li a,.btn-1{display:block;width:124px;height:26px;line-height:26px;text-align:center;color:#fff;font-size:14px;background:url(../images/tablebj.jpg) repeat-x;}
+.title_button li a:hover,.btn-1:hover{background:#c82f3f;color:#fff;}
+.bg_all{width:100%;min-width:1000px;}
+.bg_all1{overflow-x:auto;overflow-y:auto;}
+.bg_table{width:100%;min-width:1000px;padding-bottom:10px;}
+.bg_table table{width:100%;min-width:1000px;table-layout:fixed;}
+.bg_table tr{background:#f1f4f5;}
+.bg_table th{height:30px;line-height:20px;text-align:center;background:#e0e0e0;border:1px solid #fff;font-size:14px;padding:0 2px;color:#000;}
+.bg_table td{height:34px;padding:0 2px;line-height:16px;text-align:center;border:1px solid #fff;font-size:12px;max-width:70px;word-wrap:break-word;}
+.bg_table td a{color:#0e6390;font-weight:bold;text-decoration:underline;}
+.bg_table td a:hover{color:#c72e3e;text-decoration:underline;}
+.bg_table td strong{color:#c3c3c3}
+.bg_table td .tzjlred{color:#F00;vertical-align:middle;}
+.bg_table td .tzjlblue{color:#03F;font-style:normal;vertical-align:middle;}
+.bg_table td i{font-style:normal;vertical-align:middle;}
+
+
+.bg_table .bgleft{text-align:left;padding-left:4px;}
+.bg_table .bgright{text-align:right;padding-right:4px;}
+.bg_table .gdkd{width:160px;}
+.bg_table .gdkd1{width:230px;}
+.bg_table .twenty{width:20%;}
+.bg_table .fifteen{width:15%;}
+.bg_table .twelve{width:12%;}
+.bg_table .ten{width:10%;}
+.bg_table .eight{width:8%;}
+.bg_table .seven{width:7%;}
+.bg_table .six{width:6%;}
+.bg_table .five{width:5%;}
+.bg_table .thr{width:3%;}
+.bg_table .two{width:2%;}
+.bg_table .nozh{white-space: nowrap;}
+.bg_table .tablesorter td {
+  min-width: 10px;
+}
+.bg_table .tablesorter th {
+  min-width: 10px;
+}
+
+.bg_table .perput{width:80px;height:18px;line-height:18px;font-size:12px;border:1px solid #c7c7c7;background:#fff;padding:0 4px;}
+.bg_table .perput1{width:120px;}
+.bg_table .perbtn{width:70px;height:26px;line-height:26px;text-align:center;color:#fff;background:#bc1b2d;cursor:pointer;border:none;font-size:12px;}
+.bg_table .perbtn:hover{background:#c72c3e;color:#fff;}
+.bg_table .perbtnh{width:70px;height:26px;line-height:26px;text-align:center;background:#ccc;cursor:pointer;border:none;font-size:12px;color:#999;}
+.bg_table .perbtnh:hover{background:#ccc;;color:#999;}
+
+.bg_page{height:80px;line-height:80px;text-align:center;display: inline-block;font-size:14px;font-family:"微软雅黑";}
+.bg_page1{padding-top:24px;}
+.bg_page p{display:inline-block;padding:0 10px;}
+.bg_page p a{color:#000;text-decoration:underline;}
+.bg_page p a:hover{color:#cb3242;text-decoration:underline;}
+.bg_pagebutton{width:110px;height:30px;line-height:30px;background:url(../images/tablebj.jpg) repeat-x;padding:0;display:inline-block;text-align: center;color:#fff;}
+.bg_pagebutton a{display:block;width:110px;height:30px;line-height:30px;background:url(../images/bg-sjico.png) no-repeat 10px 6px;text-indent:12px;color:#fff;text-decoration:none;}
+.bg_pagebutton a:hover{color:#fff;text-decoration:none;background:url(../images/bg-sjico.png) no-repeat 10px 6px #c82f3f;}
+
+.bg_pagebutton,.bg_page{*display: inline;}
+.bg_page .bg_pagebutton a{display:block;width:110px;height:30px;line-height:30px;background:url(../images/bg-sjico.png) no-repeat 10px 6px;text-indent:12px;color:#fff;text-decoration:none;}
+.bg_page .bg_pagebutton a:hover{text-decoration:none;background:url(../images/bg-sjico.png) no-repeat 10px 6px;color:#fff;}
+.bg_page .bg_pagebutton .sjbtn{background:url(../images/bg-fhico.png) no-repeat 10px 6px;}
+.bg_page .bg_pagebutton .sjbtn:hover{background:url(../images/bg-fhico.png) no-repeat 10px 6px;}
+
+.page_num{width:30px;height:18px;line-height:16px;border:1px solid #c7c7c7;vertical-align:middle;text-align:center;}
+
+.bg_tjall{width:100%;min-width:1000px;}
+.bg_tjall table{width:100%;min-width:1000px;}
+.bg_tjall th{width:130px;height:36px;line-height:16px;text-align:right;background:#ecf0f1;border:1px solid #fff;font-size:12px;padding:0 8px 0 0;font-weight:normal;}
+.bg_tjall td{height:36px;padding-left:6px;line-height:16px;text-align:left;border:1px solid #fff;font-size:12px;background:#ecf0f1;}
+.bg_tjall input{width:200px;height:22px;line-height:22px;font-size:12px;border:1px solid #c7c7c7;background:#fff;}
+.bg_tjall select{width:202px;height:24px;line-height:24px;font-size:12px;border:1px solid #c7c7c7;background:#fff;font-family:"微软雅黑";}
+.bg_tjall .slcone{width:100px;}
+.bg_tjall textarea{width:200px;font-size:12px;border:1px solid #c7c7c7;}
+.bg_tjall .txty{width:200px;height:80px;}
+.bg_tjall .dxbtn{width:14px;height:14px;border:none;background:none;}
+.bg_tjall .timetj{font-weight:normal;margin-right:20px;}
+.bg_tjall .five{width:8%;}
+
+.tj_bt{color:#F00;font-size:14px;}
+.bg_button{width:100%;min-width:1000px;height:60px;line-height:50px;padding-top:10px;text-align:center;}
+.bg_button a,.btn,.btn-2{vertical-align:middle;display:inline-block;width:100px;height:30px;line-height:30px;text-align:center;color:#fff;background:url(../images/tablebj.jpg) repeat-x;margin-right:20px;cursor:pointer;border:none;}
+.bg_button a:hover,.btn:hover,.btn-2:hover{color:#fff;background:#c72c3e;}
+.bg_button .btn-3{width:130px;}
+.btnh{background:#999;color:#666;}
+.btnh:hover{background:#999;color:#666;}
+
+.title_text{widht:100%;min-width:1000px;height:30px;line-height:30px;background:url(../images/bg-tjico.jpg) no-repeat 4px center;border-bottom:2px solid #bc1b2e;text-indent:20px;color:#000;margin-top:10px;}
+.title_text li{float:left;}
+.title_text .title_textl{float:left;text-indent:20px;}
+.title_textl em{font-style:normal;}
+.title_text .title_text2{float:right;}
+.title_text2 .perbtn{width:110px;height:26px;line-height:26px;text-align:center;color:#fff;background:#bc1b2d;cursor:pointer;border:none;font-size:12px;margin:0 2px 4px 6px;}
+.title_text2 .perbtn1{float:left;block;width:120px;height:26px;line-height:26px;color:#fff;background:#bc1b2d;border:none;font-size:12px;margin-left:4px;text-indent:0;text-align:center;}
+
+.yygk{width:100%;}
+.yygk h1{font-size:20px;height:50px;line-height:50px;padding-left:20px;background:url(../images/bg-tjico.jpg) no-repeat 10px 20px;}
+.gltjtx{float:left;padding:12px 20px 40px 18px;}
+.gltjtx img{width:150px;}
+.yygklist{width:70%;float:left;padding:20px 0 0 0;}
+.yygklist table{width:100%;}
+.yygklist td{border:1px solid #ccc;height:48px;line-height:48px;padding-left:6px;}
+.yygklist .one{width:300px;}
+
+
+.yhsstj{height:40px;line-height:40px;margin-bottom:30px;}
+.yhstopput{width: 200px;height:24px;line-height:24px;font-size:14px;border:1px solid #c7c7c7;background:#fff;margin-right:8px;}
+.yhstopputz{color:#c1c1c1;}
+
+
+.yhmess{width:100%;min-width:1000px;}
+.yhtximg{float:left;padding:20px 20px 20px 20px;width:10%;}
+.yhtximg img{width:80px;}
+.yhmesstxt{float:left;padding:20px 0 20px 0;width:80%;}
+.yhmesstxt ol li{float:left;height:40px;line-height:40px;margin:0 5px;width:30%;overflow:hidden;}
+
+
+.yhmessbtn{height:40px;padding-top:20px;}
+
+
+.fbgg{width:100%;min-width:1000px;}
+.fbgglist{width:100%;padding:30px 0 0 0;}
+.fbgglist ol li{padding:20px 0 0 0;}
+.fbgglist ol li h3{float:left;width:120px;font-size:14px;font-weight:normal;padding-left:16px;}
+.fbgglist ol li .fbput{float:left;}
+.fbgglist ol .bfimgsm{padding:0 0 0 40px;}
+.fbgglist ol .bfimgsm h3{width:80px;height:20px;}
+.fbgglist ol .bfimgsm a{color:#000;text-decoration:underline;}
+.fbgglist ol .bfimgsm a:hover{color:#c72c3e;}
+.fbgglist ol .fbggimg{padding:20px 0 40px 80px;}
+.fbgglist ol .fbggimg img{width:700px;}
+.fbgglist ol li .fbts{float:left;color:#ccc;font-size:12px;height:24px;line-height:24px;}
+.fbgglist ol li .fbts span{color:#c72c3e;}
+.fbput .fbsel{width:302px;height:24px;line-height:22px;font-size:14px;border:1px solid #ccc;font-family:"微软雅黑";}
+.fbgglist ol li em{font-size:12px;color:#c72e3e;font-style:normal;line-height:24px;}
+.fbgglist ol li input{width:300px;border:1px solid #ccc;height:24px;line-height:24px;}
+.fbgglist ol li .txty{width:300px;height:100px;border:1px solid #ccc;line-height:22px;} 
+.fbgglist ol li span{vertical-align:middle;}
+.fbgglist ol li .scput{border:none;border:1px solid #ccc\0;border:1px solid #ccc\0/IE9;*+border:1px solid #ccc;background:#fff;}
+.fbgglist ol li .dateput{width:138px;}
+.fbgglist ol li .dateput1{width:80px;}
+.fbgglist ol li .fberr{padding-left:10px;float:left;height:24px;line-height:24px;font-size:12px;color:#c72c3e;}
+.slggimg{width:96%;}
+.fbgglist ol li .dxbtn1{width:14px;height:14px;border:none;background:none;}
+
+.fbgg .ggbtn{padding:0 0 20px 80px;}
+.fbgg .ggbt{width:100px;height:30px;line-height:26px;border:none;cursor:pointer;}
+.fbgg .ggbt1{width:60px;height:24px;line-height:20px;border:1px solid #ccc;background:#f0f0f0;cursor:pointer;}
+.fbgg .ggbt2{width:70px;height:26px;line-height:26px;border:none;cursor:pointer;}
+.fbgg .ggbt3{width:140px;}
+
+
+.tanc{width:360px;border:1px solid #ccc;text-align:center;border-radius:6px;-moz-border-radius:6px;-webkit-border-radius:6px;}
+.tanctop{widht:100%;height:30px;line-height:30px;background:url(../images/tablebj.jpg) repeat-x;text-indent:10px;color:#de3442;color:#fff;font-weight:bold;}
+.tanctop p{float:left;}
+.tanctop .tanright{float:right;padding-right:10px;cursor:pointer;}
+.tanctxt{padding:20px 0;}
+.tanctxt p{line-height:26px;}
+.tancbtn{padding:0 0 20px 0;}
+
+
+
+/* end bg */
+
+/*ding*/
+.bgtj{overflow: hidden;}
+.bg_table .bg_c_1{background:#e6eaeb;}
+.juese_m{width:90%;margin:30px auto;border:1px solid #e1e1e1}
+.f-right{float:right}
+.f-left{float:left}
+.juese_m .js-m-left,.juese_m .js-m-right{min-height:200px;float: left;}
+.juese_m .js-m-left{padding:2%;width:36%;background: #fff;}
+.juese_m .js-m-right{padding:2%;width:50%;background: #FFF;border-left:1px solid #e1e1e1}
+.t-center{text-align: center;}
+.mg-10{margin-top:10px;}
+.mg-20{margin-top:20px;}
+.mg-30{margin-top:30px;}
+.mg-40{margin-top:40px;}
+.mg-50{margin-top:50px;}
+.mgl-10{margin-left:10px}
+.mgl-20{margin-left:20px}
+.header-1{font-size:16px;color:#666;padding-left:10px;height:36px;line-height: 36px;background: #f9f9f9;}
+.block{padding:2%;}
+.w-50{width:50%;}
+.w-30{width:30%;}
+.m-auto{margin-left:auto;margin-right:auto;}
+.bg-block{width:100%;margin-left:auto;margin-right:auto;min-width: auto;}
+.bg-block table{min-width: auto;}
+.bg-block li{min-width: auto;}
+.header-2{background:none;text-indent: 1rem;}
+.bg_page p,.bg_button a,.btn,.btn-2{*display: inline;outline: none;}
+.block-1{width:66%;margin:10px auto;}
+.block-1 .b-table{width:100%}
+.block-1 .b-table th{text-align: left}
+.block-1 .b-table td,.block-1 .b-table th{padding:5px 10px;}
+.block-1 .b-table .b-select{width:100%;}
+.header-3{width:100%;min-width:1000px;height:42px;line-height:42px;border-bottom:1px solid #fe793a;/*text-indent:1rem;*//*border-top:4px solid #ccc;*/background:none}
+.header-2 .h-input,.header-3 .h-input{vertical-align: middle;margin-right:4px;}
+.hide{display: none;}
+.tip-2{background: #FFF;border:1px solid #f9f9f9;padding:2%;margin-left:auto;margin-right:auto; min-width: 1000px; width: 92%;}
+.tip-2 p{	color:#333;	font-size: 14px;	line-height:2;	margin-bottom:10px}
+.tab{height:40px;border-bottom:1px solid #c72e3e;font-size:14px;color:#a4a4a4;width:99%;min-width: 1000px;margin-left:auto;margin-right:auto;}
+.tab ul{zoom:1}
+.tab ul:after{clear:both;height:0;display: block;content:""}
+.tab li{text-align: center;margin-right:4px;width:113px;background:#fff;height:39px;line-height:39px;float:left;cursor: pointer;}
+.tab li a{display:block;text-align:center;width:111px;background:#fff;border:1px solid #d5d5d5;border-bottom:none;height:39px;line-height:39px;color:#c7c7c7;}
+.tab li a:hover{color:#fff;background:#c93040;border:1px solid #c93040;border-bottom:none;}
+
+.tab1 li{text-align: center;margin-right:4px;width:163px;background:#fff;height:39px;line-height:39px;float:left;cursor: pointer;}
+.tab1 li a{display:block;text-align:center;width:161px;background:#fff;border:1px solid #d5d5d5;border-bottom:none;height:39px;line-height:39px;color:#c7c7c7;}
+.tab1 li a:hover{color:#fff;background:#c93040;border:1px solid #c93040;border-bottom:none;}
+
+.tab .current a{color:#fff;background:#c93040;border:1px solid #c93040;border-bottom:none;}
+.tab .current a:hover{color:#fff;}
+.tab .current a:visited{color:#fff;}
+.tab-content .bgtj{margin-top:0;min-height:300px}
+.header-3{height:42px;line-height: 42px;text-align: center;}
+.header-3 span{font-size:18px;font-weight: bold;}
+.header-3 .h3-btn{text-align:left;height:42px;line-height:42px;float: left;background: #fff url("../images/bg-tjico.jpg") no-repeat scroll 8px 15px;padding-left:20px}
+.header-3 .h3-btn .btn-1{margin-top:7px;}
+.dialog .bgtj{width:100%;min-width:1000px;}
+.dialog .tj_title{width:100%;min-width:1000px;}
+.dialog .bg_tjtab,.dialog .bg_tjall,.dialog .bg_button,.dialog .bg_tjall table,.dialog .bg_table table,.dialog .bgtable,.dialog .title_text,.dialog .bg_tjall .bg_all{width:100%;min-width:1000px;}
+.bg_tjall1{width:100%;min-width:1000px;text-align:center;padding-top:20px;text-indent:-20px;font-size:16px;}
+.dialog .bg_button{height:40px;line-height:30px}
+.dialog .bg_table td{height:24px}
+.dialog .bg_page{height:40px;line-height: 40px;}
+.dialog .close{float:right;clear: right;cursor: pointer;margin-right:10px;font-size: 18px;font-family: arial;}
+.dialog .rightbg{min-width:100%}
+.tanchuang{display:none;position: relative;width:369px;background: #fbf8f1;}
+.tanchuang .tc-title{height:113px;background: url(../images/t-bg.gif) no-repeat;line-height:113px;text-align: center;color:#FFF;font-size: 14px;}
+.tanchuang .tc-title img{margin-right:10px;vertical-align: middle;}
+.tanchuang .tc-close{position: absolute;top:10px;right:10px;cursor: pointer;}
+.tanchuang .tc-content{padding:20px}
+.tanchuang .tc-content ul{font-size: 0;}
+.tanchuang .tc-content ul li div{width:310px;height:50px;line-height:50px;border:1px solid #ccc;font-size: 14px;background: #FFF;display: inline-block;margin-right: 4px;}
+.tanchuang .tc-content ul li *{vertical-align: middle;}
+.tanchuang .tc-content ul li label,.tanchuang .tc-content ul li div,.tanchuang .tc-content ul li span{display: inline-block;vertical-align: middle;}
+.tanchuang .tc-content ul li input{border:none;padding-left:4px}
+.tanchuang .tc-content ul li label{width:72px;text-align: right;}
+.tanchuang .tc-content ul li span{font-size: 14px;}
+.tc-btn,.tc-btn-1{border:none;display: inline-block;vertical-align: middle;width:117px;height:37px;background:#55acee;color:#FFF;text-align: center;line-height: 37px;}
+.tc-btn-1{color:#000;background:none;border:1px solid #dbd1ce}
+.tanchuang .tc-content ul li label,.tanchuang .tc-content ul li span,.tc-btn,.tc-btn-1{*display: inline;}
+.tanchuang .tc-error{height:30px;line-height:30px;color:#F00;text-align: center;}
+
+
+.mgl-10{margin-left:10px}
+.table-2{width:900px;margin-left:auto;margin-right:auto;text-align: center;color:#5e5e5e;font:14px/28px "宋体";}
+.t-left{text-align:left;width:100%;}
+
+#importResultPanel{
+    position: absolute;
+    top: 35%;
+    left: 40%;
+}
+
+/*my ding*/
+
+
+
+
+
+
+

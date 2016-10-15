@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+ "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<package name="logmanage" namespace="/resources/logmanage" extends="wepaysp-manage-default">
+		<!-- 用户操作日志 -->
+		<action name="userprocesslog" class="userProcessLogAction">
+			<result name="userProcessLog">/resources/logmanage/userProcessLog.jsp</result>
+			<result name="excportExcel">/resources/logmanage/userProcessLogExport.jsp</result>
+			
+			<result name="success" type="stream">  
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${downFileName}"</param>  
+				<param name="inputName">downFile</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			
+		</action>
+	</package>
+</struts>

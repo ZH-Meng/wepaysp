@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+ "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />   
+	<constant name="struts.devMode" value="true" />
+	<constant name="struts.ui.theme" value="simple" />
+	<constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
+	<constant name="struts.multipart.maxSize" value="50000000"/>
+	
+	<package name="wepaysp-manage-default" extends="struts-default">
+		<interceptors>
+	        <interceptor name="loginAuthentication" class="com.zbsp.wepaysp.manage.web.security.ManageLoginInterceptor"/>
+	        <interceptor-stack name="manageStack">
+	        	<interceptor-ref name="loginAuthentication"/>
+	            <interceptor-ref name="defaultStack"/>
+	        </interceptor-stack>
+    	</interceptors>
+    	<default-interceptor-ref name="manageStack"></default-interceptor-ref>
+    	<global-results>
+			<result name="login">/index.jsp</result>
+			<result name="error">/resources/include/error.jsp</result>
+		</global-results>
+		<global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error"/>
+        </global-exception-mappings>
+	</package>
+	
+	<include file="com/zbsp/wepaysp/manage/web/action/common/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/function/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/usermanage/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/user/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/logmanage/action-struts.xml" />
+</struts>

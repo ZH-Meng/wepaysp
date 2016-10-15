@@ -1,0 +1,161 @@
+/*
+--------------------------------------------------------------------
+		文件名称：	zxstyle.css
+		开发人员：	李琰
+		描述：	样式
+		版本： V1.0
+----------------------------------------------------------------------
+*/
+
+/* v1.0 */
+body,textarea,input,option{font-size:14px;color:#000;font-family:"微软雅黑";}
+body,div,h1,h2,h3,h4,h5,h6,p,dl,dd,ul,ol,textarea,input,select,form,em,strong,a,span{margin:0;}
+dl,th,td,ul,ol,textarea,select,input,form,em,strong,a,span{padding:0;}
+textarea,select,input{outline:none;}
+a{text-decoration:none;}
+table{border-collapse:collapse;}
+li{list-style:none;}
+img{border:none;}
+img,label,input{vertical-align:middle;}
+textarea,a,input{outline:none;}
+textarea{overflow:auto;resize:none;}
+.clear:after{content:'';display:block;clear:both;}
+.clear{zoom:1;}
+/* css reset */
+
+/* body */
+.bdbj{background:#fff;}
+.bgbj{background:#fff;}
+.box{width:1024px;min-width:1024px;margin:70px auto;}
+/* end body */
+
+/* dl */
+.logo{width:1024px;}
+.logo img{width:1024px;height:72px;}
+.login{width:486px;height:416px;padding:42px 0 0 538px;background:url(../images/login-bj.jpg) no-repeat;}
+.loginbj{width:292px;height:352px;padding-left:38px;background:url(../images/login-dlbj.png) no-repeat;}
+.logintitle{width:254px;height:56px;line-height:56px;font-size:14px;color:#7b7b7b;text-align:center;font-weight:bold;}
+.logindl{width:288px;}
+.logintext{width:288px;}
+.loginname{width:254px;height:20px;line-height:20px;font-size:12px;color:#9e9e9e;text-align:left;font-weight:bold;}
+.loginput{width:254px;height:34px;padding-bottom:8px;}
+.loginput span{float:left;}
+.loginconput1{width:154px;}
+.putin{width:248px;height:32px;padding:0 2px;line-height:32px;border:1px solid #d8d8d8;}
+.putin1{width:134px;}
+.loginerror{width:254px;height:28px;padding:4px 0 4px 0;line-height:14px;font-size:12px;color:#e60012;text-align:center;}
+.loginbtn{width:254px;height:34px;}
+.loginbtn a{float:left;width:254px;height:34px;background:url(../images/login-button.jpg) no-repeat;text-indent:-50px;overflow:hidden;}
+.loginbtn a:hover{width:254px;height:34px;background:url(../images/login-buttonhover.jpg) no-repeat;}
+.bottom{width:1024px;height:46px;line-height:46px;font-size:12px;color:#fff;text-align:center;background:#bc1b21;margin-top:14px;}
+
+/* end dl */
+
+/* top */
+.top{width:100%;min-width:1000px;height:76px;background:#fff;border-bottom:1px solid #ccc;}
+.logocon{width:100%;height:78px;background:url(../images/top-bj.jpg) repeat-x;}
+.top_logo{float:left;width:451px;height:78px;line-height:78px;background:url(../images/top-logo.jpg) no-repeat;}
+.top_button{float:right;height:60px;padding:16px 24px 0 0;}
+.top_button p{float:left;height:44px;line-height:44px;font-size:14px;}
+.top_button p a{display:inline-block;height:14px;line-height:14px;padding:0 10px;border-right:1px solid #fff;color:#fff;}
+.top_button .topuser{background:url(../images/user.png) no-repeat 0 8px;}
+.top_button .topuser a{display:block;border-right:none;height:44px;line-height:44px;padding:0 10px 0 30px;}
+.top_button .toppass{display:inline-block;height:14px;line-height:14px;padding:0 10px;background:none;border-left:1px solid #fff;border-right:1px solid #fff;color:#fff;}
+.top_button .topexit{border-right:none;}
+.top_button p a:hover{color:#fff;text-decoration:none;}
+
+/* endtop */
+
+/* leftmenu */
+.menu_bj{background:#ecf0f1;}
+.leftmenu{width:246px;border-right:1px solid #dcdcdc}
+
+/* 一级菜单 */
+.topmenu{width:246px;}
+.topmenu li{width:246px;}
+.topmenu li h1{border-top:1px solid #d4d6d7;background:#ecf0f1;}
+.topmenu li h1 a{display:block;width:246px;height:40px;line-height:40px;font-size:14px;color:#667b90;text-indent:36px;font-family:"微软雅黑";background:url(../images/menuico.png) no-repeat 28px 4px;text-indent:48px;}
+/*.topmenu li .top_menuico2{background-position:18px -42px;}
+.topmenu li .top_menuico2:hover{background-position:0 -42px;}
+.topmenu li .top_menuico3{background-position:18px -84px;}
+.topmenu li .top_menuico3:hover{background-position:0 -84px;}
+.topmenu li .top_menuico4{background-position:18px -126px;}
+.topmenu li .top_menuico4:hover{background-position:0 -126px;}
+.topmenu li .top_menuico5{background-position:18px -168px;}
+.topmenu li .top_menuico5:hover{background-position:0 -168px;}
+.topmenu li .top_menuico6{background-position:18px -210px;}
+.topmenu li .top_menuico6:hover{background-position:0 -210px;}
+.topmenu li .top_menuico7{background-position:18px -252px;}
+.topmenu li .top_menuico7:hover{background-position:0 -252px;}
+.topmenu li .top_menuico8{background-position:18px -294px;}
+.topmenu li .top_menuico8:hover{background-position:0 -294px;}
+.h1active{width:286px;height:42px;background:url(../images/activeico.jpg) no-repeat 0 0 #0e6390;color:#fff;}
+
+*/
+.topmenu .h1active a{background:url(../images/menuicohover.png) no-repeat 28px 4px #ecf0f1;}
+
+
+
+/* 二级菜单 */
+.top_menulist{width:246px;background:#ecf0f1;}
+.top_menulist li{width:246px;}
+.top_menulist li h2{width:246px;height:34px;line-height:34px;font-size:14px;font-weight:normal;color:#fff;text-indent:46px;background:#ecf0f1;font-family:"微软雅黑";}
+.top_menulist li h2:hover,.top_menulist li.active h2{background:#bc1b2e;color:#fff;}
+.top_menulist li h2 a{display:block;width:246px;height:34px;line-height:34px;font-size:14px;font-weight:bold;color:#667b90;}
+.top_menulist li h2 a:hover ,.top_menulist li.active h2 a{color:#fff;}
+.top_menulist .h2active{width:246px;height:34px;line-height:34px;background:#bc1b2e;color:#fff;}
+.top_menulist .h2active a{color:#fff;}
+
+/* 三四五级菜单 */
+.top_menuconlist{width:246px;}
+.top_menuconlist li{width:246px;line-height:34px;font-size:14px;text-indent:60px;background:url(../images/menuico1.png) no-repeat 44px 10px;color:#fff;font-family:"微软雅黑";}
+.top_menuconlist li a{display:block;width:246px;height:34px;line-height:34px;color:#000;font-size:14px;}
+.top_menuconlist li a:hover{display:block;width:246px;height:34px;line-height:34px;background:url(../images/menuico1hover.png) no-repeat 44px 10px #f4f3f3;color:#000;}
+.top_menuconlist li h3{font-weight:normal;font-size:14px;}
+.top_menuconlist .h3active{width:246px;height:34px;line-height:34px;background:url(../images/menuico1hover.png) no-repeat 44px 10px #f4f3f3;color:#000;border-bottom:1px solid #ccc;}
+.top_menuconlist .h3active a{color:#000;background:url(../images/menuico1hover.png) no-repeat 44px 10px #f4f3f3;}
+.top_menuconlist .h3active a:hover{color:#000;background:url(../images/menuico1hover.png) no-repeat 44px 10px #f4f3f3;}
+
+.top_menuconlist .top_menuconlist1{width:246px;}
+/*.top_menuconlist2 li h4{width:286px;line-height:42px;border-top:1px solid #389bcf;font-size:14px;text-indent:72px;font-weight:normal;}
+.top_menuconlist2 li h4 a{display:block;width:286px;height:42px;line-height:42px;background:url(../images/menuico.png) no-repeat 50px -462px;}
+.top_menuconlist2 li h4 a:hover{display:block;width:286px;height:42px;line-height:42px;background:url(../images/menuicohover.png) no-repeat 30px -378px #108fd2;}
+
+.top_menuconlist2 li{width:286px;line-height:42px;border-top:1px solid #389bcf;font-size:14px;text-indent:72px;font-weight:normal;}
+.top_menuconlist2 li a{display:block;width:286px;height:42px;line-height:42px;background:url(../images/menuico.png) no-repeat 50px -462px;}
+.top_menuconlist2 li a:hover{display:block;width:286px;height:42px;line-height:42px;background:url(../images/menuicohover.png) no-repeat 30px -378px #108fd2;}
+
+.top_menuconlist2 .h4active{width:286px;height:42px;background:url(../images/menuico1.png) no-repeat 18px 0 #108fd2;color:fff;}
+
+.top_menuconlist3 li{width:286px;height:42px;line-height:42px;border-top:1px solid #389bcf;background:url(../images/menuico1.png) no-repeat 18px 0 #389bcf;font-size:14px;text-indent:82px;}
+.top_menuconlist3 li a{display:block;width:286px;height:height:42px;line-height:42px;background:url(../images/menuico.png) no-repeat 62px -504px;}
+.top_menuconlist3 li a:hover{display:block;width:286px;height:height:42px;line-height:42px;background:url(../images/menuicohover.png) no-repeat 30px -420px #129be3;}
+.top_menuconlist3 .h5active{width:286px;height:42px;background:url(../images/menuico1.png) no-repeat 18px 0 #129be3;color:fff;}
+*/
+.menuopen{display:block;}
+.menuclose{display:none;}
+
+/* end leftmenu */
+
+
+/* welcome */
+.right{width:100%;min-width:1000px;}
+.welcome{width:98%;min-width:1000px;margin:7px auto;background:#fff;text-align:center;}
+.welbottom{width:98%;min-width:1000px;margin:6px auto;height:50px;line-height:50px;background:#fff;text-align:center;font-size:12px;color:#979797;border-top:1px solid #ccc;}
+
+/* end welcome */
+
+.bg_c_1{background:#f9f9f9}
+
+.clock_txt{font-size: 18px;color:#706967;font-family: "微软雅黑";font-weight: bold;margin-left:10px;}
+.clock_txt a{color:#248dc1;text-decoration: underline;}
+.clock .welimg{padding:60px;}
+
+
+
+
+
+
+
+
+

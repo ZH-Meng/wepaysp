@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+ "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<package name="usermanage" namespace="/resources/usermanage" extends="wepaysp-manage-default">
+		<!-- 角色管理 -->
+		<action name="rolemanage" class="roleManageAction">
+			<result name="roleManage">/resources/usermanage/roleManage.jsp</result>
+			<result name="createRole">/resources/usermanage/createRole.jsp</result>
+			<result name="excportExcel">/resources/usermanage/roleManageExport.jsp</result>
+			<result name="updateRole">/resources/usermanage/updateRole.jsp</result>
+			<result name="success" type="stream">  
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${downFileName}"</param>  
+				<param name="inputName">downFile</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+		<!-- 角色权限查询 -->
+		<action name="rolesearch" class="roleSearchAction">
+			<result name="roleSearch">/resources/usermanage/roleSearch.jsp</result>
+			<result name="excportExcel">/resources/usermanage/roleSearchExport.jsp</result>
+			<result name="checkRoleFunction">/resources/usermanage/checkRoleFunction.jsp</result>
+			<result name="success" type="stream">  
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${downFileName}"</param>  
+				<param name="inputName">downFile</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+		<!-- 用户权限查询 -->
+		<action name="usersearch" class="userSearchAction">
+			<result name="userSearch">/resources/usermanage/userSearch.jsp</result>
+			<result name="excportExcel">/resources/usermanage/userSearchExport.jsp</result>
+			<result name="checkUserFunction">/resources/usermanage/checkUserFunction.jsp</result>
+			<result name="success" type="stream">  
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${downFileName}"</param>  
+				<param name="inputName">downFile</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+		
+		<!-- 重置用户密码 -->
+		<action name="userrestpwd" class="userRestPwdAction">
+			<result name="userList">/resources/usermanage/userRestPwdList.jsp</result>
+			<result name="toRestUserPwd">/resources/usermanage/userRestPwd.jsp</result>
+		</action>
+		
+		<!-- 用户权限管理 -->
+		<action name="usermanage" class="userManageAction">
+			<result name="userList">/resources/usermanage/userManageList.jsp</result>
+			<result name="createUser">/resources/usermanage/createUser.jsp</result>
+			<result name="updateUser">/resources/usermanage/updateUser.jsp</result>
+			<result name="exportUser">/resources/usermanage/userManageExport.jsp</result>
+			<result name="success" type="stream">  
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${downFileName}"</param>  
+				<param name="inputName">downFile</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+		
+		<!-- 角色权限管理 -->
+		<action name="rolepermissionmanage" class="rolePermissionManageAction">
+			<result name="rolePermissionManage">/resources/usermanage/rolePermissionManage.jsp</result>
+		</action>
+	</package>
+</struts>

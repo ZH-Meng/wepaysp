@@ -1,0 +1,19 @@
+/*
+--------------------------------------------------------------------
+		文件名称：	auto-width.css
+		开发人员：	Mr.ding dingls@iwgroup.com.cn
+		描述：	自动适应视口宽度样式
+		版本： V1.0
+----------------------------------------------------------------------
+*/
+@media screen and (max-width:1366px){
+
+.bgtable table{width:100%;max-width:1200px;background:#fff;}
+.bgtable table td{white-space:nowrap;text-overflow:ellipsis;}
+
+
+
+	
+}
+
+
