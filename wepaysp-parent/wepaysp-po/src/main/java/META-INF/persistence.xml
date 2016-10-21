@@ -16,5 +16,7 @@
 		<class>com.zbsp.wepaysp.po.manage.SysRole</class>
 		<class>com.zbsp.wepaysp.po.manage.SysUser</class>
 		<class>com.zbsp.wepaysp.po.manage.SysUserLoginToken</class>
+		<class>com.zbsp.wepaysp.po.partner.Partner</class>
+		<class>com.zbsp.wepaysp.po.partner.Merchant</class>
 	</persistence-unit>
 </persistence>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+ "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<package name="partner" namespace="/resources/partner" extends="wepaysp-manage-default">
+		<!-- 代理商管理 -->
+		<action name="partner" class="partnerAction">
+			<result name="partnerList">/resources/partner/partnerManage.jsp</result>
+			<result name="createPartner">/resources/partner/createPartner.jsp</result>
+			<result name="updatePartner">/resources/partner/updatePartner.jsp</result>
+		</action>
+	</package>
+</struts>

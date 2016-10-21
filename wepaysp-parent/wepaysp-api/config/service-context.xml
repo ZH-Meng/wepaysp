@@ -25,7 +25,8 @@
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	<bean id="sysLogService" class="com.zbsp.wepaysp.service.manage.impl.SysLogServiceImpl" parent="baseService" />
-
 	<bean id="zoneService" class="com.zbsp.wepaysp.service.dic.impl.ZoneServiceImpl" parent="baseService" />
+	
+	<bean id="partnerService" class="com.zbsp.wepaysp.service.partner.impl.PartnerServiceImpl" parent="baseService" />
     
 </beans>

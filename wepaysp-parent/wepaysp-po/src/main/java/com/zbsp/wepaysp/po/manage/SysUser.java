@@ -15,6 +15,8 @@ import javax.persistence.TemporalType;
 
 import com.zbsp.wepaysp.po.dic.SysCity;
 import com.zbsp.wepaysp.po.dic.SysProvince;
+import com.zbsp.wepaysp.po.partner.Merchant;
+import com.zbsp.wepaysp.po.partner.Partner;
 
 @Entity
 @Table(name = "sys_user_t")
@@ -38,11 +40,32 @@ public class SysUser implements Serializable {
     private Integer dataPermisionType;
     private SysProvince dataPermisionProvince;
     private SysCity dataPermisionCity;
+    private Integer userLevel;
+    private Merchant merchant;
+    private Partner partner;
     private String creator;
     private Date createTime;
     private String modifier;
     private Date modifyTime;
     private String remark;
+    
+    public static enum userLevel {
+        /** 服务商、一级代理商、二级代理商...  */     partner(1),
+        /** 业务员 */                                           salesman(2),
+        /** 商户老板 */                                      merchant(3),
+        /** 店长 */                                           shopManager(4),
+        /** 收银员 */                                       cashier(5);
+        
+        private int value;
+
+        public int getValue() {
+            return value;
+        }
+
+        private userLevel(int value) {
+            this.value = value;
+        }
+    }
 
     public static enum Gender {
         /** 性别:男 */        male(0),
@@ -242,7 +265,7 @@ public class SysUser implements Serializable {
         this.state = state;
     }
     
-    @Column(name = "data_permision_type", nullable = false)
+    @Column(name = "data_permision_type")
     public Integer getDataPermisionType() {
         return this.dataPermisionType;
     }
@@ -269,6 +292,35 @@ public class SysUser implements Serializable {
 
     public void setDataPermisionCity(SysCity dataPermisionCity) {
         this.dataPermisionCity = dataPermisionCity;
+    }
+    
+    @Column(name = "user_level")
+    public Integer getUserLevel() {
+        return this.userLevel;
+    }
+
+    public void setUserLevel(Integer userLevel) {
+        this.userLevel = userLevel;
+    }
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "merchant_oid")
+    public Merchant getMerchant() {
+        return this.merchant;
+    }
+
+    public void setMerchant(Merchant merchant) {
+        this.merchant = merchant;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "partner_oid")
+    public Partner getPartner() {
+        return this.partner;
+    }
+
+    public void setPartner(Partner partner) {
+        this.partner = partner;
     }
 
     @Column(name = "creator", nullable = false, length = 32)
