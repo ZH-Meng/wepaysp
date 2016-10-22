@@ -12,19 +12,25 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：子代理商管理&gt;创建子代理商</div>
+		<div class="bgposition">您现在的位置：子代理商管理&gt;创建子代理商&gt;修改子代理商</div>
 	    <div class="bgtj">
-	    	<form action="<%=request.getContextPath()%>/resources/partner/partnermanage!createPartner.action" method="post" id="partnerForm">
-	    		<s:hidden name="partnerVO.parentPartnerOid"/>
+	    	<form action="<%=request.getContextPath()%>/resources/partner/partnermanage!updatePartner.action" method="post" id="partnerForm">
+	    		<s:hidden name="partnerVO.iwoid"/>
 	            <ul class="bg_tjtab">
 	                <li class="bg_tjall">
 	                	<table>
 	                    	<tbody>
 	                        	<tr>
 	                            	<th>登录名</th>
-	                                <td><s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" /><span class="tj_bt">*</span></td>
-	                                <th>登录密码</th>
-	                                <td><s:password id="loginPwd" maxlength="20" name="partnerVO.loginPwd" /><span class="tj_bt">*</span></td>
+	                                <td>
+	                                	<s:if test="partnerVO.state == 1">
+			                                <s:set var="readFlag" value="readonly"/>
+	                                	</s:if>  
+		                                <s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="<s:property value='#readFlag' />"/>
+		                                <span class="tj_bt">*</span>
+	                                </td>
+	                                <%-- <th>登录密码</th>
+	                                <td><s:password id="loginPwd" maxlength="20" name="partnerVO.loginPwd" /><span class="tj_bt">*</span></td> --%>
 	                            </tr>
 	                            <tr>
 	                                <th>分润比率</th>

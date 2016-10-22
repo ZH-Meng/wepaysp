@@ -148,7 +148,7 @@ public class Partner
         this.moblieNumber = moblieNumber;
     }
 
-    @Column(name = "EMAIL", nullable = false, length = 100)
+    @Column(name = "EMAIL", length = 100)
     public String getEmail() {
         return this.email;
     }

@@ -4,8 +4,8 @@
 <struts>
 	<package name="partner" namespace="/resources/partner" extends="wepaysp-manage-default">
 		<!-- 代理商管理 -->
-		<action name="partner" class="partnerAction">
-			<result name="partnerList">/resources/partner/partnerManage.jsp</result>
+		<action name="partnermanage" class="partnerAction">
+			<result name="partnerList">/resources/partner/partnerList.jsp</result>
 			<result name="createPartner">/resources/partner/createPartner.jsp</result>
 			<result name="updatePartner">/resources/partner/updatePartner.jsp</result>
 		</action>
