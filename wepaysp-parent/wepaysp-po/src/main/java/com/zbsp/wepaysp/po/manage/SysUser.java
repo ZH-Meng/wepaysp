@@ -15,8 +15,12 @@ import javax.persistence.TemporalType;
 
 import com.zbsp.wepaysp.po.dic.SysCity;
 import com.zbsp.wepaysp.po.dic.SysProvince;
+import com.zbsp.wepaysp.po.partner.Dealer;
+import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Merchant;
 import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
+import com.zbsp.wepaysp.po.partner.Store;
 
 @Entity
 @Table(name = "sys_user_t")
@@ -42,7 +46,11 @@ public class SysUser implements Serializable {
     private SysCity dataPermisionCity;
     private Integer userLevel;
     private Merchant merchant;
+    private Dealer dealer;
+    private Store store;
+    private DealerEmployee dealerEmployee;
     private Partner partner;
+    private PartnerEmployee partnerEmployee;
     private String creator;
     private Date createTime;
     private String modifier;
@@ -304,7 +312,7 @@ public class SysUser implements Serializable {
     }
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_oid")
+    @JoinColumn(name = "DEALER_OID")
     public Merchant getMerchant() {
         return this.merchant;
     }
@@ -314,13 +322,53 @@ public class SysUser implements Serializable {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "partner_oid")
+    @JoinColumn(name = "DEALER_OID", insertable = false, updatable = false)
+    public Dealer getDealer() {
+        return this.dealer;
+    }
+
+    public void setDealer(Dealer dealer) {
+        this.dealer = dealer;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "STORE_OID")
+    public Store getStore() {
+        return this.store;
+    }
+
+    public void setStore(Store store) {
+        this.store = store;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEALER_EMPLOYEE_OID")
+    public DealerEmployee getDealerEmployee() {
+        return this.dealerEmployee;
+    }
+
+    public void setDealerEmployee(DealerEmployee dealerEmployee) {
+        this.dealerEmployee = dealerEmployee;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARTNER_OID")
     public Partner getPartner() {
         return this.partner;
     }
 
     public void setPartner(Partner partner) {
         this.partner = partner;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARTNER_EMPLOYEE_OID")
+    public PartnerEmployee getPartnerEmployee() {
+        return this.partnerEmployee;
+    }
+
+    public void setPartnerEmployee(PartnerEmployee partnerEmployee) {
+        this.partnerEmployee = partnerEmployee;
     }
 
     @Column(name = "creator", nullable = false, length = 32)

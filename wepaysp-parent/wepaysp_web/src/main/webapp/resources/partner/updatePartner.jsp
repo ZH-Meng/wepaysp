@@ -22,11 +22,13 @@
 	                    	<tbody>
 	                        	<tr>
 	                            	<th>登录名</th>
-	                                <td>
-	                                	<s:if test="partnerVO.state == 1">
-			                                <s:set var="readFlag" value="readonly"/>
-	                                	</s:if>  
-		                                <s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="<s:property value='#readFlag' />"/>
+	                                <td  colspan="3">
+	                                	<s:if test="partnerVO.state != 1">
+			                                <s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/>
+	                                	</s:if>
+	                                	<s:else>
+	                                		<s:textfield id="loginId" maxlength="20" name="partnerVO.loginId"/>
+	                                	</s:else>
 		                                <span class="tj_bt">*</span>
 	                                </td>
 	                                <%-- <th>登录密码</th>
@@ -41,11 +43,13 @@
 	                            <tr>
 									<th>使用期限</th>
 									<td colspan="3">
-										<input type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})" 
-											name="contractBegin" id="contractBegin" maxlength="20" value="" /><span class="tj_bt">*</span>
-									<span>-</span>
-										<input type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})"
-											name="contractEnd" id="contractEnd" maxlength="20" value="" /><span class="tj_bt">*</span>
+										<input type="text" name="contractBegin" id="contractBegin" class="Wdate" readonly="readonly" value="<s:property value="contractBegin"/>"
+												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'contractEnd\')}'})"/>
+										<span class="tj_bt">*</span>
+										<span>至</span>
+										<input type="text" name="contractEnd" id="contractEnd"	class="Wdate" readonly="readonly" value="<s:property value="contractEnd"/>"
+													onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'contractBegin\')}'})"/>
+										<span class="tj_bt">*</span>
 									</td>
 								</tr>
 	                            <tr>
@@ -59,12 +63,7 @@
 	                                <td><s:textfield id="moblieNumber" maxlength="32" name="partnerVO.moblieNumber" /><span class="tj_bt">*</span></td>
 	                            	<th>状态</th>
 	                                <td>
-	                                	<select id="state" name="partnerVO.state">
-	                                		<option value="">请选择</option>
-	                                		<option value="1">未使用</option>
-	                                		<option value="2">使用中</option>
-	                                		<option value="3">冻结</option>
-	                                	</select>
+	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerVO.state"  id="state"/>
 	                                	 <span class="tj_bt">*</span>
 	                                </td>
 	                            </tr>	
@@ -94,7 +93,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="createPartner();return false;">新增</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="updatePartner();return false;">修改</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -111,9 +110,7 @@
 		});	
 	
 		//TODO
-		function createPartner() {
-			var loginId = $("#loginId").val();
-			var loginPwd = $("#loginPwd").val();
+		function updatePartner() {
 			var contactor = $("#contactor").val();
 			var telephone = $("#telephone").val();
 			var moblieNumber = $("#moblieNumber").val();
@@ -127,23 +124,7 @@
 			
 			var remark = $("#remark").val();
 			
-			if (isBlank(loginId)) {
-				alert("登录名不能为空！");
-				$("#loginId").focus();
-				return false;
-			} else if (!isAlphaNumeric(loginId)) {
-				alert("登录名应为1-20位长度的字母或数字！");
-				$("#loginId").focus();
-				return false;
-			} else if (isBlank(loginPwd)) {
-				alert("登陆密码不能为空！");
-				$("#loginPwd").focus();
-				return false;
-			} else if (!isWord(loginPwd)) {
-				alert("登陆密码只能输入数字字母或汉字！");
-				$("#loginPwd").focus();
-				return false;
-			} else if (isBlank(contactor)) {
+			if (isBlank(contactor)) {
 				alert("联系人不能为空！");
 				$("#contactor").focus();
 				return false;
@@ -189,7 +170,7 @@
 				return false;
 			}
 			
-			if (!window.confirm("确认新增？")) {
+			if (!window.confirm("确认修改？")) {
 				return false;
 			}
 			

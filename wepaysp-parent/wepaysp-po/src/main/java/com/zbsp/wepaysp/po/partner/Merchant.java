@@ -4,7 +4,10 @@ import java.sql.Timestamp;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -16,7 +19,7 @@ public class Merchant
 
     private static final long serialVersionUID = 2185740448720204906L;
     private String iwoid;
-    private String partnerOid;
+    private Partner partner;
     private String contactor;
     private String moblieNumber;
     private String email;
@@ -78,13 +81,14 @@ public class Merchant
         this.iwoid = iwoid;
     }
 
-    @Column(name = "PARTNER_OID", length = 32)
-    public String getPartnerOid() {
-        return this.partnerOid;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARTNER_OID")
+    public Partner getPartner() {
+        return this.partner;
     }
 
-    public void setPartnerOid(String partnerOid) {
-        this.partnerOid = partnerOid;
+    public void setPartner(Partner partner) {
+        this.partner = partner;
     }
 
     @Column(name = "CONTACTOR", nullable = false, length = 32)

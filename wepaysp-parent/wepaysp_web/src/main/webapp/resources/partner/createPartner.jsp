@@ -35,11 +35,13 @@
 	                            <tr>
 									<th>使用期限</th>
 									<td colspan="3">
-										<input type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})" 
-											name="contractBegin" id="contractBegin" maxlength="20" value="" /><span class="tj_bt">*</span>
-									<span>-</span>
-										<input type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})"
-											name="contractEnd" id="contractEnd" maxlength="20" value="" /><span class="tj_bt">*</span>
+										<input type="text" name="contractBegin" id="contractBegin" class="Wdate" readonly="readonly" value="<s:property value="contractBegin"/>"
+												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'contractEnd\')}'})"/>
+										<span class="tj_bt">*</span>
+										<span>至</span>
+										<input type="text" name="contractEnd" id="contractEnd"	class="Wdate" readonly="readonly" value="<s:property value="contractEnd"/>"
+													onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'contractBegin\')}'})"/>
+										<span class="tj_bt">*</span>
 									</td>
 								</tr>
 	                            <tr>

@@ -11,25 +11,62 @@
 <body class="bgbj">
 	<div class="rightbg">
 		<div class="bgposition">您现在的位置：代理商管理&gt;子代理商列表</div>
-	    <div class="bgtable">
-	        <s:form method="post">
-	        	<s:hidden id="parentPartnerOid" name="partnerVO.parentPartnerOid"/>
-	        	<s:hidden id="iwoid" name="partnerVO.iwoid"/>
-	        	<manage:permission validateUrl="/resources/partner/partnermanage!goToCreatePartner.action">
-	        		<manage:pass>
-	        			<ul class="title_button">
-			                <li><a href="javascript:void(0);" onclick="toCreatePartner()">创建子代理商</a></li>
-			            </ul>
-	        		</manage:pass>
-	            </manage:permission>
-	            <manage:permission validateUrl="/resources/partner/partnermanage!goToUpdatePartner.action">
-	        		<manage:pass>
-	        			<s:set var="hasUpdatePermission">yes</s:set>
-	        		</manage:pass>
-	        		<manage:notPass>
-	        			<s:set var="hasUpdatePermission">no</s:set>
-	        		</manage:notPass>
-	            </manage:permission>
+		<s:form method="post">
+			<s:hidden id="parentPartnerOid" name="partnerVO.parentPartnerOid"/>
+	        <s:hidden id="iwoid" name="partnerVO.iwoid"/>
+			<div class="bgtj">
+				<ul class="tj_title">
+					<li>查询条件</li>
+				</ul>
+				<ul class="bg_tjtab">
+					<li class="bg_tjall">
+						<table>
+							<tbody>
+								<tr>
+									<th>状态</th>
+									<td>
+										<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerVO.state"  id="state" headerKey="" headerValue="全部"/>
+									</td>
+									<th>联系人</th>
+									<td><s:textfield name="partnerVO.contactor" id="contactor" maxlength="20"/></td>
+									<th>登录名</th>
+									<td><s:textfield name="partnerVO.loginId" id="loginId" maxlength="20"/></td>
+									<th>代理商</th>
+									<td><s:textfield name="partnerVO.company" id="parentCompany" maxlength="20" /></td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+					<li class="bg_button">
+						<manage:permission validateUrl="/resources/partner/partnermanage!goToCreatePartner.action">
+			        		<manage:pass>
+			        			<s:if test="isChildPage==1">
+									<a href="javascript:void(0);" onclick="toCreatePartner()">创建子代理商</a>
+			        			</s:if>
+			        		</manage:pass>
+			            </manage:permission>
+			            <manage:permission validateUrl="/resources/partner/partnermanage!goToUpdatePartner.action">
+			        		<manage:pass>
+			        			<s:set var="hasUpdatePermission">yes</s:set>
+			        		</manage:pass>
+			        		<manage:notPass>
+			        			<s:set var="hasUpdatePermission">no</s:set>
+			        		</manage:notPass>
+			            </manage:permission>
+			            
+						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>						
+						
+						<s:if test="returnParentFlag == 1">
+							<div class="bg_page bg_page1">
+								<p class="bg_pagebutton">
+									<a class="sjbtn" href="javascript:void(0);" onclick="returnParent();">返回上级</a>
+								</p>
+							</div>
+						</s:if>
+					</li>
+				</ul>
+			</div>
+	    	<div class="bgtable">
 	            <ul class="bg_all">
 	                <li class="bg_table bg_table1">
 	                    <table class="bg_odd">
@@ -75,7 +112,7 @@
 						  			<td title="<s:property value="#partnerLevelStr" />">
 						  				<s:property value="#partnerLevelStr" />
 						  			</td>
-						  			<td style="text-align: left" title="<s:property value="#partnerVo.contactor" />">
+						  			<td title="<s:property value="#partnerVo.contactor" />">
 						  				<s:property value="#partnerVo.contactor" />
 						  			</td>
 						  			<td style="text-align: left" title="<s:property value="#partnerVo.company" />">
@@ -93,16 +130,16 @@
 						  			
 						  			<td title="<s:date name="#partnerVo.contractBegin" format="yyyy-MM-dd" />-<s:date name="#partnerVo.contractEnd" format="yyyy-MM-dd" />">
 						  				<s:date name="#partnerVo.contractBegin" format="yyyy-MM-dd" />
-						  				-
+						  				至
 						  				<s:date name="#partnerVo.contractEnd" format="yyyy-MM-dd" />
 						  			</td>
 						  			<s:if test="#partnerVo.state == 1">
 						  				<s:set var="stateStr">未使用</s:set>
 						  			</s:if>
-						  			<s:elseif test="#partnerVo.state == 1">
+						  			<s:elseif test="#partnerVo.state == 2">
 						  				<s:set var="stateStr">使用中</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#partnerVo.state == 2">
+						  			<s:elseif test="#partnerVo.state == 3">
 						  				<s:set var="stateStr">冻结</s:set>
 									</s:elseif>
 						  			<td title="<s:property value="#stateStr" />">
@@ -112,11 +149,11 @@
 						  				<s:property value="#partnerVo.balance" />
 						  			</td>
 						  			<td title="修改">
-						  				<s:if test="#hasUpdatePermission eq 'yes' && #partnerVo.state != 2">
+						  				<s:if test="#hasUpdatePermission eq 'yes' && #partnerVo.state != 3 && isChildPage==1">
 						  					<a href="javascript:void(0);" onclick="toUpdatePartner('<s:property value="#partnerVo.iwoid" />')">修改</a>
 						  				</s:if>
 						  				<s:else><strong>修改</strong></s:else>
-						  				<s:if test="#partnerVo.level < 2">
+						  				<s:if test="#partnerVo.level < 3">
 						  					<a href="javascript:void(0);" onclick="findChildPartners('<s:property value="#partnerVo.iwoid" />')">子代理商</a>
 						  				</s:if>
 						  			</td>
@@ -135,8 +172,8 @@
 	                	<s:include value="/resources/include/page.jsp"></s:include>
 	                </li>
 	            </ul>
-	        </s:form>
-	    </div>
+	    	</div>
+	    </s:form>
 	</div>
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>

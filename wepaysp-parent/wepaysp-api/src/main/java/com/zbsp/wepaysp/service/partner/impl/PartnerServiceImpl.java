@@ -27,294 +27,287 @@ import com.zbsp.wepaysp.service.manage.SysLogService;
 import com.zbsp.wepaysp.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 
-public class PartnerServiceImpl extends BaseService implements PartnerService {
+public class PartnerServiceImpl
+    extends BaseService
+    implements PartnerService {
 
-	private SysLogService sysLogService;
+    private SysLogService sysLogService;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid) {
-		Validator.checkArgument(StringUtils.isBlank(partnerOid), "代理商Oid不能为空");
-		PartnerVO partnerVO = new PartnerVO();
-		Partner partner = commonDAO.findObject(Partner.class, partnerOid);
-		BeanCopierUtil.copyProperties(partner, partnerVO);
-		// 查找用户
-		String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
-		Map<String, Object> sqlMap = new HashMap<String, Object>();
-		sqlMap.put("IWOID", partner.getIwoid());
-		List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
-		if (userList != null && !userList.isEmpty()) {
-			partnerVO.setLoginId(userList.get(0).getUserId());
-			//partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
-		}
-		return partnerVO;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid) {
+        Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空");
+        PartnerVO partnerVO = new PartnerVO();
+        Partner partner = commonDAO.findObject(Partner.class, partnerOid);
+        BeanCopierUtil.copyProperties(partner, partnerVO);
+        // 查找用户
+        String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        sqlMap.put("IWOID", partner.getIwoid());
+        List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+        if (userList != null && !userList.isEmpty()) {
+            partnerVO.setLoginId(userList.get(0).getUserId());
+            // partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
+        }
+        return partnerVO;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<PartnerVO> doJoinTransQueryPartnerList(Map<String, Object> paramMap, int startIndex, int maxResult) {
-		String loginId = MapUtils.getString(paramMap, "loginId");
-		String contactor = MapUtils.getString(paramMap, "contactor");
-		String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
-		String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
-		String state = MapUtils.getString(paramMap, "state");
-		// FIXME
-		String parentCompany = MapUtils.getString(paramMap, "parentCompany");
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PartnerVO> doJoinTransQueryPartnerList(Map<String, Object> paramMap, int startIndex, int maxResult) {
+        List<PartnerVO> resultList = new ArrayList<PartnerVO>();
 
-		StringBuffer sql = new StringBuffer("from Partner p  where 1=1");
-		Map<String, Object> sqlMap = new HashMap<String, Object>();
+        /* 在当前用户所属服务商的下级服务商集合中模糊查询 */
+        String loginId = MapUtils.getString(paramMap, "loginId");
+        String contactor = MapUtils.getString(paramMap, "contactor");
+        String state = MapUtils.getString(paramMap, "state");
+        String company = MapUtils.getString(paramMap, "company");
 
-		if (StringUtils.isNotBlank(loginId)) {
-			sql.append(" and p.loginId like :LOGINID");
-			sqlMap.put("LOGINID", "%" + loginId + "%");
-		}
+        String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
+        String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
 
-		if (StringUtils.isNotBlank(contactor)) {
-			sql.append(" and p.contactor like :CONTACTOR");
-			sqlMap.put("CONTACTOR", "%" + contactor + "%");
-		}
+        StringBuffer sql = new StringBuffer("select distinct(p) from Partner p, SysUser u where u.partner=p");
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
 
-		sql.append(" and p.parentPartner.iwoid = :PARENTPARTNEROID");
-		if (StringUtils.isBlank(parentPartnerOid)) {// 当前用户的代理商oid
-			SysUser user = commonDAO.findObject(SysUser.class, currentUserOid);
-			// 查找父代理商
-			if (user != null && user.getPartner() != null) {
-				parentPartnerOid = user.getPartner().getIwoid();
-			}
-		}
-		sqlMap.put("PARENTPARTNEROID", parentPartnerOid);
+        if (StringUtils.isNotBlank(loginId)) {
+            sql.append(" and u.userId like :LOGINID");
+            sqlMap.put("LOGINID", "%" + loginId + "%");
+        }
+        if (StringUtils.isNotBlank(contactor)) {
+            sql.append(" and p.contactor like :CONTACTOR");
+            sqlMap.put("CONTACTOR", "%" + contactor + "%");
+        }
+        if (StringUtils.isNotBlank(state)) {
+            sql.append(" and p.state = :STATE");
+            sqlMap.put("STATE", state);
+        }
+        if (StringUtils.isNotBlank(company)) {
+            sql.append(" and p.company like :COMPANY");
+            sqlMap.put("COMPANY", "%" + company + "%");
+        }
 
-		if (StringUtils.isNotBlank(state)) {
-			sql.append(" and p.state = :STATE");
-			sqlMap.put("STATE", state);
-		}
+        sql.append(" and p.parentPartner.iwoid = :PARENTPARTNEROID");
+        // 如果没有限制父级服务商oid，需要将当前用户的服务商oid作为限制
+        if (StringUtils.isBlank(parentPartnerOid)) {
+            SysUser user = commonDAO.findObject(SysUser.class, currentUserOid);
+            // 查找父服务商
+            if (user != null && user.getPartner() != null) {
+                parentPartnerOid = user.getPartner().getIwoid();
+            }
+        }
+        sqlMap.put("PARENTPARTNEROID", parentPartnerOid);
 
-		if (StringUtils.isNotBlank(parentCompany)) {
-			// TODO
-		}
+        sql.append(" order by p.createTime desc");
+        List<Partner> partnerList = (List<Partner>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
-		sql.append(" order by p.createTime desc");
+        if (partnerList != null && !partnerList.isEmpty()) {
+            for (Partner partner : partnerList) {
+                PartnerVO vo = new PartnerVO();
+                BeanCopierUtil.copyProperties(partner, vo);
 
-		List<PartnerVO> resultList = new ArrayList<PartnerVO>();
-		List<Partner> partnerList = (List<Partner>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex,
-				maxResult);
-		if (partnerList != null && !partnerList.isEmpty()) {
-			for (Partner partner : partnerList) {
-				PartnerVO vo = new PartnerVO();
+                String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
+                sqlMap.clear();
+                sqlMap.put("IWOID", partner.getIwoid());
+                List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                if (userList != null && !userList.isEmpty()) {
+                    vo.setLoginId(userList.get(0).getUserId());
+                }
+                vo.setParentCompany(partner.getParentPartner().getCompany());
+                resultList.add(vo);
+            }
+        }
 
-				BeanCopierUtil.copyProperties(partner, vo);
+        return resultList;
+    }
 
-				String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
-				sqlMap.clear();
-				sqlMap.put("IWOID", partner.getIwoid());
-				List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
-				if (userList != null && !userList.isEmpty()) {
-					vo.setLoginId(userList.get(0).getUserId());
-				}
-				vo.setParentCompany(partner.getParentPartner().getCompany());
-				resultList.add(vo);
-			}
-		}
+    @Override
+    public int doJoinTransQueryPartnerCount(Map<String, Object> paramMap) {
+        String loginId = MapUtils.getString(paramMap, "loginId");
+        String contactor = MapUtils.getString(paramMap, "contactor");
+        String state = MapUtils.getString(paramMap, "state");
+        String company = MapUtils.getString(paramMap, "company");
 
-		return resultList;
-	}
+        String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
+        String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
 
-	@Override
-	public int doJoinTransQueryPartnerCount(Map<String, Object> paramMap) {
-		String loginId = MapUtils.getString(paramMap, "loginId");
-		String contactor = MapUtils.getString(paramMap, "contactor");
-		String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
-		String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
-		String state = MapUtils.getString(paramMap, "state");
-		// FIXME
-		String parentCompany = MapUtils.getString(paramMap, "parentCompany");
+        StringBuffer sql = new StringBuffer("select count(distinct p.iwoid) from Partner p, SysUser u where u.partner=p");
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
 
-		StringBuffer sql = new StringBuffer("select count(p.iwoid) from Partner p  where 1=1");
-		Map<String, Object> sqlMap = new HashMap<String, Object>();
+        if (StringUtils.isNotBlank(loginId)) {
+            sql.append(" and u.userId like :LOGINID");
+            sqlMap.put("LOGINID", "%" + loginId + "%");
+        }
+        if (StringUtils.isNotBlank(contactor)) {
+            sql.append(" and p.contactor like :CONTACTOR");
+            sqlMap.put("CONTACTOR", "%" + contactor + "%");
+        }
+        if (StringUtils.isNotBlank(state)) {
+            sql.append(" and p.state = :STATE");
+            sqlMap.put("STATE", state);
+        }
+        if (StringUtils.isNotBlank(company)) {
+            sql.append(" and p.company like :COMPANY");
+            sqlMap.put("COMPANY", "%" + company + "%");
+        }
 
-		if (StringUtils.isNotBlank(loginId)) {
-			sql.append(" and p.loginId like :LOGINID");
-			sqlMap.put("LOGINID", "%" + loginId + "%");
-		}
+        sql.append(" and p.parentPartner.iwoid = :PARENTPARTNEROID");
+        if (StringUtils.isBlank(parentPartnerOid)) {// 当前用户的服务商oid
+            SysUser user = commonDAO.findObject(SysUser.class, currentUserOid);
+            // 查找父服务商
+            if (user != null && user.getPartner() != null) {
+                parentPartnerOid = user.getPartner().getIwoid();
+            }
+        }
+        sqlMap.put("PARENTPARTNEROID", parentPartnerOid);
+        return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
+    }
 
-		if (StringUtils.isNotBlank(contactor)) {
-			sql.append(" and p.contactor like :CONTACTOR");
-			sqlMap.put("CONTACTOR", "%" + contactor + "%");
-		}
+    @Override
+    public PartnerVO doTransAddPartner(PartnerVO partnerVO, String creator, String operatorUserOid, String logFunctionOid)
+        throws AlreadyExistsException {
+        Validator.checkArgument(partnerVO == null, "服务商对象不能为空");
+        // TODO 校验参数
+        Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
+        Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
+        Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getLoginId()), "登录名不能为空");
 
-		sql.append(" and p.parentPartner.iwoid = :PARENTPARTNEROID");
-		if (StringUtils.isBlank(parentPartnerOid)) {// 当前用户的代理商oid
-			SysUser user = commonDAO.findObject(SysUser.class, currentUserOid);
-			// 查找父代理商
-			if (user != null && user.getPartner() != null) {
-				parentPartnerOid = user.getPartner().getIwoid();
-			}
-		}
-		sqlMap.put("PARENTPARTNEROID", parentPartnerOid);
+        String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
-		if (StringUtils.isNotBlank(state)) {
-			sql.append(" and p.state = :STATE");
-			sqlMap.put("STATE", state);
-		}
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("USERID", partnerVO.getLoginId());
+        paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
 
-		if (StringUtils.isNotBlank(parentCompany)) {
-			// TODO
-		}
-		return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
-	}
+        int idResult = commonDAO.queryObjectCount(sql, paramMap, false);
 
-	@Override
-	public PartnerVO doTransAddPartner(PartnerVO partnerVO, String creator, String operatorUserOid,
-			String logFunctionOid) throws AlreadyExistsException {
-		Validator.checkArgument(partnerVO == null, "代理商对象不能为空");
-		// TODO 校验参数
-		Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
-		Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
-		Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
-		Validator.checkArgument(StringUtils.isBlank(partnerVO.getLoginId()), "日志记录项Oid不能为空");
+        if (idResult > 0) {
+            throw new AlreadyExistsException("登录名重复！");
+        }
 
-		String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
+        SysUser newUser = new SysUser();
+        Partner partner = new Partner();
+        Partner parentPartner = null;
+        SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
+        // 查找父服务商
+        if (user != null && user.getPartner() != null) {
+            parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
+        }
 
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("USERID", partnerVO.getLoginId());
-		paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
+        // 保存服务商
+        BeanCopierUtil.copyProperties(partnerVO, partner);
+        if (parentPartner != null) {
+            partner.setParentPartner(parentPartner);
+            partner.setLevel(parentPartner.getLevel() + 1);
+        } else {
+            partner.setLevel(1);// 顶级服务商
+        }
+        partner.setIwoid(Generator.generateIwoid());
+        // TODO 服务商ID
+        partner.setCreator(creator);
+        commonDAO.save(partner, false);
 
-		int idResult = commonDAO.queryObjectCount(sql, paramMap, false);
+        // 保存用户
+        newUser.setIwoid(Generator.generateIwoid());
+        newUser.setState(SysUser.State.normal.getValue());
+        newUser.setUserId(partnerVO.getLoginId());
+        newUser.setUserName(partnerVO.getContactor());
+        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(partnerVO.getLoginPwd())));
+        newUser.setLineTel(StringUtils.isNotBlank(partnerVO.getMoblieNumber()) ? partnerVO.getMoblieNumber() : partnerVO.getTelephone());
+        newUser.setEmail(partnerVO.getEmail());
+        newUser.setBuildType(SysUser.BuildType.create.getValue());
+        newUser.setLastLoginTime(null);
+        newUser.setUserLevel(userLevel.partner.getValue());
+        newUser.setPartner(partner);
+        newUser.setCreator(creator);
+        commonDAO.save(newUser, false);
 
-		if (idResult > 0) {
-			throw new AlreadyExistsException("登录名重复！");
-		}
+        // 设置默认角色
+        String roleCode = "";
+        if (partner.getLevel() == 1) {
+            roleCode = NestedRoleCode.SERVICE_PROVIDER;
+        } else if (partner.getLevel() == 2) {
+            roleCode = NestedRoleCode.FIRST_LEVEL_AGENT;
+        } else if (partner.getLevel() == 3) {
+            roleCode = NestedRoleCode.SECOND_LEVEL_AGENT;
+        }
 
-		SysUser newUser = new SysUser();
-		Partner partner = new Partner();
-		Partner parentPartner = null;
-		SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
-		// 查找父代理商
-		if (user != null && user.getPartner() != null) {
-			parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
-		}
+        sql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
+        paramMap.clear();
+        paramMap.put("ROLEID", roleCode);
+        paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
+        SysRole role = commonDAO.findObject(sql, paramMap, false);
 
-		// 保存代理商
-		BeanCopierUtil.copyProperties(partnerVO, partner);
-		if (parentPartner != null) {
-			partner.setParentPartner(parentPartner);
-			if (parentPartner.getLevel() == 0) {
-				partner.setLevel(1);
-			} else {
-				partner.setLevel(parentPartner.getLevel() + 1);
-			}
-		} else {
-			partner.setLevel(0);// FIXME 服务商
-		}
-		partner.setIwoid(Generator.generateIwoid());
-		partner.setCreator(creator);
-		commonDAO.save(partner, false);
+        if (role == null) {
+            throw new NotExistsException("未找到角色信息");
+        } else {
+            // 创建角色用户关系
+            SysAuthority sysAuthority = new SysAuthority();
+            sysAuthority.setIwoid(Generator.generateIwoid());
+            sysAuthority.setSysRole(role);
+            sysAuthority.setSysUser(newUser);
 
-		// 保存用户
-		newUser.setIwoid(Generator.generateIwoid());
-		newUser.setState(SysUser.State.normal.getValue());
-		newUser.setUserId(partnerVO.getLoginId());
-		newUser.setUserName(partnerVO.getContactor());
-		newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(partnerVO.getLoginPwd())));
-		newUser.setBuildType(SysUser.BuildType.create.getValue());
-		newUser.setLastLoginTime(null);
-		newUser.setUserLevel(userLevel.partner.getValue());
-		newUser.setPartner(partner);
-		newUser.setCreator(creator);
-		commonDAO.save(newUser, false);
+            commonDAO.save(sysAuthority, false);
 
-		// 设置默认角色
-		String roleCode = "";
-		if (partner.getLevel() == 0) {
-			roleCode = NestedRoleCode.SERVICE_PROVIDER;
-		} else if (partner.getLevel() == 1) {
-			roleCode = NestedRoleCode.FIRST_LEVEL_AGENT;
-		} else if (partner.getLevel() == 2) {
-			roleCode = NestedRoleCode.SECOND_LEVEL_AGENT;
-		}
+            if (role.getUseState().intValue() != SysRole.UseState.used.getValue()) {
+                role.setUseState(SysRole.UseState.used.getValue());
+                commonDAO.update(role);
+            }
+        }
 
-		sql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
-		paramMap.clear();
-		paramMap.put("ROLEID", roleCode);
-		paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
-		SysRole role = commonDAO.findObject(sql, paramMap, false);
+        BeanCopierUtil.copyProperties(partner, partnerVO);
 
-		if (role == null) {
-			throw new NotExistsException("未找到角色信息");
-		} else {
-			// 创建角色用户关系
-			SysAuthority sysAuthority = new SysAuthority();
-			sysAuthority.setIwoid(Generator.generateIwoid());
-			sysAuthority.setSysRole(role);
-			sysAuthority.setSysUser(newUser);
+        Date processTime = new Date();
 
-			commonDAO.save(sysAuthority, false);
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime, null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
 
-			if (role.getUseState().intValue() != SysRole.UseState.used.getValue()) {
-				role.setUseState(SysRole.UseState.used.getValue());
-				commonDAO.update(role);
-			}
-		}
+        return partnerVO;
+    }
 
-		BeanCopierUtil.copyProperties(partner, partnerVO);
+    @Override
+    public PartnerVO doTransUpdatePartner(PartnerVO partnerVO, String modifier, String operatorUserOid, String logFunctionOid)
+        throws AlreadyExistsException {
+        Validator.checkArgument(partnerVO == null, "服务商对象不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getIwoid()), "服务商Oid不能为空");
+        // TODO 校验参数
+        Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
+        Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
+        Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
 
-		Date processTime = new Date();
+        Date processBeginTime = new Date();
+        // 查找服务商
+        Partner partner = commonDAO.findObject(Partner.class, partnerVO.getIwoid());
+        if (partner == null) {
+            throw new NotExistsException("未找到要修改的服务商对象");
+        } // TODO 是否需要判断状态
 
-		sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid,
-				"创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime,
-				null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid,
-				SysLog.ActionType.create.getValue());
+        // TODO 检查重复
+        String partnerStr = partner.toString();
+        partner.setContactor(partnerVO.getContactor());
+        partner.setCompany(partnerVO.getCompany());
+        partner.setMoblieNumber(partnerVO.getMoblieNumber());
+        partner.setAddress(partnerVO.getAddress());
+        partner.setTelephone(partnerVO.getTelephone());
+        partner.setBalance(partnerVO.getBalance());
+        partner.setContractBegin(partnerVO.getContractBegin());
+        partner.setContractEnd(partnerVO.getContractEnd());
+        partner.setFeeRate(partnerVO.getFeeRate());
+        partner.setState(partnerVO.getState());
+        partner.setRemark(partnerVO.getRemark());
+        partner.setEmail(partnerVO.getEmail());
+        partner.setModifier(modifier);
 
-		return partnerVO;
-	}
+        commonDAO.update(partner);
+        String newPartnerStr = partner.toString();
+        Date processEndTime = new Date();
+        // 记录日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改服务商[服务商联系人：" + partner.getContactor() + ",服务商公司：" + partner.getCompany() + "]", processBeginTime, processEndTime, partnerStr, newPartnerStr, SysLog.State.success.getValue(), partner.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
 
-	@Override
-	public PartnerVO doTransUpdatePartner(PartnerVO partnerVO, String modifier, String operatorUserOid,
-			String logFunctionOid) throws AlreadyExistsException {
-		Validator.checkArgument(partnerVO == null, "代理商对象不能为空");
-		Validator.checkArgument(StringUtils.isBlank(partnerVO.getIwoid()), "代理商Oid不能为空");
-		// TODO 校验参数
-		Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
-		Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
-		Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
-		Validator.checkArgument(StringUtils.isBlank(partnerVO.getLoginId()), "日志记录项Oid不能为空");
+        BeanCopierUtil.copyProperties(partner, partnerVO);
+        return partnerVO;
+    }
 
-		Date processBeginTime = new Date();
-		// 查找代理商
-		Partner oldPartner = commonDAO.findObject(Partner.class, partnerVO.getIwoid());
-		if (oldPartner == null) {
-			throw new NotExistsException("未找到要修改的代理商对象");
-		} // TODO 是否需要判断状态
-
-		// TODO 检查重复
-		String oldPartnerStr = oldPartner.toString();
-		oldPartner.setContactor(partnerVO.getContactor());
-		oldPartner.setCompany(partnerVO.getCompany());
-		oldPartner.setMoblieNumber(partnerVO.getMoblieNumber());
-		oldPartner.setAddress(partnerVO.getAddress());
-		oldPartner.setTelephone(partnerVO.getTelephone());
-		oldPartner.setBalance(partnerVO.getBalance());
-		oldPartner.setContractBegin(partnerVO.getContractBegin());
-		oldPartner.setContractEnd(partnerVO.getContractEnd());
-		oldPartner.setFeeRate(partnerVO.getFeeRate());
-		oldPartner.setState(partnerVO.getState());
-		oldPartner.setRemark(partnerVO.getRemark());
-		oldPartner.setEmail(partnerVO.getEmail());
-		oldPartner.setModifier(modifier);
-		
-		String newPartnerStr = oldPartner.toString();
-
-		Date processEndTime = new Date();
-		// 记录日志
-		sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid,
-				"修改代理商[代理商联系人：" + oldPartner.getContactor() + ",代理商公司：" + oldPartner.getCompany() + "]",
-				processBeginTime, processEndTime, oldPartnerStr, newPartnerStr, SysLog.State.success.getValue(),
-				oldPartner.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
-		return null;
-	}
-
-	public void setSysLogService(SysLogService sysLogService) {
-		this.sysLogService = sysLogService;
-	}
+    public void setSysLogService(SysLogService sysLogService) {
+        this.sysLogService = sysLogService;
+    }
 
 }
