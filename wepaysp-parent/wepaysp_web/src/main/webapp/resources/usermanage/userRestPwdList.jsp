@@ -75,7 +75,6 @@
 									<th>登录名</th>
 									<th>真实姓名</th>
 									<th>角色</th>
-									<th>组织机构</th>
 									<th>部门</th>
 									<th>职务</th>
 									<th>最后修改时间</th>
@@ -103,20 +102,6 @@
 												<s:property value="#roleStr" escape="fasle"/>
 											</td>
 											
-											<s:set name="dataPermision" value=""/>
-											<s:if test="#userInfo.dataPermisionType ==0 ">
-												<s:set name="dataPermision">无</s:set>
-											</s:if>
-											<s:elseif test="#userInfo.dataPermisionType ==1 ">
-												<s:set name="dataPermision">全国</s:set>
-											</s:elseif>
-											<s:elseif test="#userInfo.dataPermisionType ==2 ">
-												<s:set name="dataPermision"><s:property value="#userInfo.dataPermisionProvince.provinceName" /></s:set>
-											</s:elseif>
-											<s:elseif test="#userInfo.dataPermisionType ==3 ">
-												<s:set name="dataPermision"><s:property value="#userInfo.dataPermisionProvince.provinceName" /> <s:property value="#userInfo.dataPermisionCity.cityName" /></s:set>
-											</s:elseif>
-											<td title="<s:property value="#dataPermision" />"><s:property value="#dataPermision" /></td>
 											<td title="<s:property value="#userInfo.department"/>"><s:property value="#userInfo.department" /></td>
 											<td title="<s:property value="#userInfo.position"/>"><s:property value="#userInfo.position" /></td>
 											<td title="<s:date name="#userInfo.modifyTime" format="yyyy-MM-dd HH:mm:ss" />">

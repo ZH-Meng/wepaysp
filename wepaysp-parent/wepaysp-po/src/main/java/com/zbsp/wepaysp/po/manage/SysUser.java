@@ -13,8 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.zbsp.wepaysp.po.dic.SysCity;
-import com.zbsp.wepaysp.po.dic.SysProvince;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Merchant;
@@ -42,8 +40,6 @@ public class SysUser implements Serializable {
     private String lastLoginIp;
     private Integer state;
     private Integer dataPermisionType;
-    private SysProvince dataPermisionProvince;
-    private SysCity dataPermisionCity;
     private Integer userLevel;
     private Merchant merchant;
     private Dealer dealer;
@@ -282,26 +278,6 @@ public class SysUser implements Serializable {
         this.dataPermisionType = dataPermisionType;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sys_province_oid")
-    public SysProvince getDataPermisionProvince() {
-        return dataPermisionProvince;
-    }
-    
-    public void setDataPermisionProvince(SysProvince dataPermisionProvince) {
-        this.dataPermisionProvince = dataPermisionProvince;
-    }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sys_city_oid")
-    public SysCity getDataPermisionCity() {
-        return dataPermisionCity;
-    }
-
-    public void setDataPermisionCity(SysCity dataPermisionCity) {
-        this.dataPermisionCity = dataPermisionCity;
-    }
-    
     @Column(name = "user_level")
     public Integer getUserLevel() {
         return this.userLevel;

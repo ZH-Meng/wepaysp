@@ -49,7 +49,6 @@
 									<th nowrap="nowrap">性别</th>
 									<th nowrap="nowrap">年龄</th>
 									<th>角色</th>
-									<th>组织机构</th>
 									<th>部门</th>
 									<th>职务</th>
 									<th>联系电话</th>
@@ -90,12 +89,6 @@
 												<s:iterator value="#userInfo.userRoleList" var="role">
 													<s:property value="#role.roleName" />&nbsp;
 				  								</s:iterator>
-											</td>
-											<td>
-												<s:if test="#userInfo.dataPermisionType ==0 ">无</s:if>
-												<s:if test="#userInfo.dataPermisionType ==1 ">全国</s:if>
-												<s:if test="#userInfo.dataPermisionType ==2 "><s:property value="#userInfo.dataPermisionProvince.provinceName" /></s:if>
-												<s:if test="#userInfo.dataPermisionType ==3 "><s:property value="#userInfo.dataPermisionProvince.provinceName" /> <s:property value="#userInfo.dataPermisionCity.cityName" /></s:if>
 											</td>
 											<td title="<s:property value="#userInfo.department"/>"><s:property value="#userInfo.department" /></td>
 											<td title="<s:property value="#userInfo.position"/>"><s:property value="#userInfo.position" /></td>

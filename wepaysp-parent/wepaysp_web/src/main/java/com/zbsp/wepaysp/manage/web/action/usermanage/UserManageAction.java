@@ -8,9 +8,7 @@
  */
 package com.zbsp.wepaysp.manage.web.action.usermanage;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,18 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.CollectionUtils;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
@@ -37,11 +25,8 @@ import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.DateUtil;
 import com.zbsp.wepaysp.manage.web.util.ExcelUtil;
-import com.zbsp.wepaysp.po.dic.SysCity;
-import com.zbsp.wepaysp.po.dic.SysProvince;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.dic.ZoneService;
 import com.zbsp.wepaysp.service.manage.SysRoleService;
 import com.zbsp.wepaysp.service.manage.SysUserService;
 import com.zbsp.wepaysp.vo.manage.SysUserVO;
@@ -51,7 +36,7 @@ import com.zbsp.wepaysp.vo.manage.SysUserVO;
  */
 public class UserManageAction
     extends PageAction
-    implements SessionAware, ServletRequestAware, ServletResponseAware {
+    implements SessionAware {
 
     private static final long serialVersionUID = 1542152641844307005L;
 
@@ -67,20 +52,12 @@ public class UserManageAction
 
     private SysUserVO sysUserVo;
 
-    private List<SysProvince> sysProvinceList;
-
-    private List<SysCity> sysCityList;
-
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-
     private String provinceIwoid;
 
     private String downFileName;
 
     private SysUserService sysUserService;
     private SysRoleService sysRoleService;
-    private ZoneService zoneService;
 
     @Override
     protected String query(int start, int size) {
@@ -115,9 +92,6 @@ public class UserManageAction
 
         try {
             roleList = sysRoleService.doJoinTransQuerySysRoleList(paramMap, 0, -1);
-            // 组织机构查询
-            paramMap.clear();
-            sysProvinceList = zoneService.doJoinTransQuerySysProviceList(paramMap);
         } catch (Exception e) {
             logger.error("用户权限管理跳转创建用户错误：" + e.getMessage());
             setAlertMessage("用户权限管理跳转创建用户错误：" + e.getMessage());
@@ -133,22 +107,6 @@ public class UserManageAction
         roleOidList.add(roleOid);
 
         sysUser.setLoginPwd(DigestHelper.sha512HexUnicode(sysUser.getLoginPwd()));
-        // 组织机构->表单联动
-        if (StringUtils.isNotEmpty(sysUser.getDataPermisionProvince().getIwoid()) && StringUtils.isNotEmpty(sysUser.getDataPermisionCity().getIwoid())) {
-            // 省市都不为空,市级情况
-            sysUser.setDataPermisionType(3);
-            // sysUser.getDataPermisionProvince().setIwoid("");
-        } else if ("AllCountry".equals(sysUser.getDataPermisionProvince().getIwoid())) {
-            // 选全国情况
-            sysUser.setDataPermisionType(1);
-            sysUser.getDataPermisionProvince().setIwoid("");
-        } else if (StringUtils.isNotEmpty(sysUser.getDataPermisionProvince().getIwoid()) && StringUtils.isEmpty(sysUser.getDataPermisionCity().getIwoid())) {
-            // 省不为空，市为空,省级情况
-            sysUser.setDataPermisionType(2);
-        } else if (StringUtils.isEmpty(sysUser.getDataPermisionProvince().getIwoid()) && StringUtils.isEmpty(sysUser.getDataPermisionCity().getIwoid())) {
-            // 省市全为空
-            sysUser.setDataPermisionType(0);
-        }
 
         try {
             sysUserVo = sysUserService.doTransAddSysUser(sysUser, roleOidList, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
@@ -182,27 +140,6 @@ public class UserManageAction
 
             roleList = sysRoleService.doJoinTransQuerySysRoleList(paramMap, 0, -1);
 
-            // 组织机构查询
-            paramMap.clear();
-            sysProvinceList = zoneService.doJoinTransQuerySysProviceList(paramMap);
-
-            if (SysUser.DataPermisionType.city.getValue() == sysUserVo.getDataPermisionType()) {
-                List<String> sysProvinceOidList = new ArrayList<String>();
-                // 查询市级对应的省
-                sysProvinceOidList.add(sysUserVo.getDataPermisionCity().getSysProvince().getIwoid());
-                paramMap.put("sysProvinceOidList", sysProvinceOidList);
-                sysCityList = zoneService.doJoinTransQuerySysCityList(paramMap);
-            }
-
-            // 省级情况-默认显示省级下的所有市级信息
-            if (SysUser.DataPermisionType.province.getValue() == sysUserVo.getDataPermisionType()) {
-                List<String> sysProvinceOidList = new ArrayList<String>();
-                // 查询市级对应的省
-                sysProvinceOidList.add(sysUserVo.getDataPermisionProvince().getIwoid());
-                paramMap.put("sysProvinceOidList", sysProvinceOidList);
-                sysCityList = zoneService.doJoinTransQuerySysCityList(paramMap);
-            }
-
             roleOid = sysUserVo.getUserRoleList().get(0).getIwoid();
         } catch (Exception e) {
             logger.error("用户权限管理跳转修改用户错误：" + e.getMessage());
@@ -217,22 +154,6 @@ public class UserManageAction
 
         sysUser = new SysUser();
         BeanCopierUtil.copyProperties(sysUserVo, sysUser);
-        // 组织机构->表单联动
-        if (StringUtils.isNotEmpty(sysUser.getDataPermisionProvince().getIwoid()) && StringUtils.isNotEmpty(sysUser.getDataPermisionCity().getIwoid())) {
-            // 省市都不为空,市级情况
-            sysUser.setDataPermisionType(3);
-            // sysUser.getDataPermisionProvince().setIwoid("");
-        } else if ("AllCountry".equals(sysUser.getDataPermisionProvince().getIwoid())) {
-            // 选全国情况
-            sysUser.setDataPermisionType(1);
-            sysUser.getDataPermisionProvince().setIwoid("");
-        } else if (StringUtils.isNotEmpty(sysUser.getDataPermisionProvince().getIwoid()) && StringUtils.isEmpty(sysUser.getDataPermisionCity().getIwoid())) {
-            // 省不为空，市为空,省级情况
-            sysUser.setDataPermisionType(2);
-        } else if (StringUtils.isEmpty(sysUser.getDataPermisionProvince().getIwoid()) && StringUtils.isEmpty(sysUser.getDataPermisionCity().getIwoid())) {
-            // 省市全为空
-            sysUser.setDataPermisionType(0);
-        }
 
         List<String> roleOidList = new ArrayList<String>();
         roleOidList.add(roleOid);
@@ -278,16 +199,6 @@ public class UserManageAction
                     }
                 }
 
-                if (sysUser.getDataPermisionType() == 0) {
-                    sysUser.setDataPermisionTypeName("无");
-                } else if (sysUser.getDataPermisionType() == 1) {
-                    sysUser.setDataPermisionTypeName("全国");
-                } else if (sysUser.getDataPermisionType() == 2) {
-                    sysUser.setDataPermisionTypeName(sysUser.getDataPermisionProvince().getProvinceName());
-                } else if (sysUser.getDataPermisionType() == 3) {
-                    sysUser.setDataPermisionTypeName(sysUser.getDataPermisionProvince().getProvinceName());
-                }
-
                 if (sysUser.getState() == 0) {
                     sysUser.setStateName("正常");
                 } else if (sysUser.getState() == 1) {
@@ -313,42 +224,6 @@ public class UserManageAction
             logger.error("用户权限管理导出列表错误：" + e.getMessage());
         }
         return inputStream;
-    }
-
-    public String getSysCityListByAjax()
-        throws IOException {
-        request.setCharacterEncoding("utf-8"); // 这里不设置编码会有乱码
-        response.setContentType("text/html;charset=utf-8");
-        response.setHeader("Cache-Control", "no-cache");
-        PrintWriter out = response.getWriter();
-
-        Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("provinceIwoid", provinceIwoid);
-
-        List<String> sysProvinceOidList = new ArrayList<String>();
-        sysProvinceOidList.add(provinceIwoid);
-        paramMap.put("sysProvinceOidList", sysProvinceOidList);
-
-        try {
-            sysCityList = zoneService.doJoinTransQuerySysCityList(paramMap);
-            if (!CollectionUtils.isEmpty(sysCityList)) {
-                JSONArray jsonArray = new JSONArray();
-                for (SysCity city : sysCityList) {
-                    JSONObject json = new JSONObject();
-                    json.put("iwoid", city.getIwoid());
-                    json.put("cityName", city.getCityName());
-                    jsonArray.add(json);
-                }
-                out.print(jsonArray);
-                out.flush();
-                return null;
-            }
-        } catch (Exception e) {
-            logger.error("取得城市信息列表错误：" + e.getMessage());
-            setAlertMessage("取得城市信息列表错误！");
-        }
-
-        return null;
     }
 
     @Override
@@ -400,32 +275,6 @@ public class UserManageAction
         this.sysUserVo = sysUserVo;
     }
 
-    public List<SysProvince> getSysProvinceList() {
-        return sysProvinceList;
-    }
-
-    public void setSysProvinceList(List<SysProvince> sysProvinceList) {
-        this.sysProvinceList = sysProvinceList;
-    }
-
-    @Override
-    public void setServletRequest(HttpServletRequest request) {
-        this.request = request;
-    }
-
-    @Override
-    public void setServletResponse(HttpServletResponse response) {
-        this.response = response;
-    }
-
-    public List<SysCity> getSysCityList() {
-        return sysCityList;
-    }
-
-    public void setSysCityList(List<SysCity> sysCityList) {
-        this.sysCityList = sysCityList;
-    }
-
     public String getProvinceIwoid() {
         return provinceIwoid;
     }
@@ -448,10 +297,6 @@ public class UserManageAction
 
     public void setSysRoleService(SysRoleService sysRoleService) {
         this.sysRoleService = sysRoleService;
-    }
-
-    public void setZoneService(ZoneService zoneService) {
-        this.zoneService = zoneService;
     }
 
 }

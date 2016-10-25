@@ -24,7 +24,6 @@ import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.po.dic.SysProvince;
 import com.zbsp.wepaysp.po.manage.SysAuthority;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.manage.SysRole;
@@ -49,7 +48,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         Validator.checkArgument(StringUtils.isBlank(password), "登录密码不能为空");
         Validator.checkArgument(StringUtils.isBlank(ip), "登录ip不能为空");
 
-        String sql = "select u from SysUser u left join fetch u.dataPermisionProvince left join fetch u.dataPermisionCity where u.userId = :USERID "
+        String sql = "select u from SysUser u where u.userId = :USERID "
             + "and u.loginPwd = :LOGINPWD and u.state <> :DELETESTATE";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -173,7 +172,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         Integer state = MapUtils.getInteger(paramMap, "state");
         Integer buildType = MapUtils.getInteger(paramMap, "buildType");
         
-        StringBuffer sql = new StringBuffer("select u from SysUser u left join fetch u.dataPermisionProvince left join fetch u.dataPermisionCity where 1=1");
+        StringBuffer sql = new StringBuffer("select u from SysUser u where 1=1");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(userId)) {
@@ -277,7 +276,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         Integer state = MapUtils.getInteger(paramMap, "state");
         Integer buildType = MapUtils.getInteger(paramMap, "buildType");
 
-        StringBuffer sql = new StringBuffer("select u from SysUser u left join fetch u.dataPermisionProvince left join fetch u.dataPermisionCity where 1=1");
+        StringBuffer sql = new StringBuffer("select u from SysUser u where 1=1");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(userId)) {
@@ -366,24 +365,9 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         SysUserVO sysUserVO = null;
 
         if (sysUser != null) {
-        	//如果用户是市级情况，需要在修改页显示用户的省，市级信息
-        	if(sysUser.getDataPermisionType()== SysUser.DataPermisionType.city.getValue()){
-            	sysUser.getDataPermisionProvince().getDataType();
-            	sysUser.getDataPermisionCity().getDataType();
-            }
         	sysUserVO = new SysUserVO();
         	BeanCopierUtil.copyProperties(sysUser, sysUserVO);
-        	//如果用户是省级情况
-        	if(sysUser.getDataPermisionType()== SysUser.DataPermisionType.province.getValue()){
-//            	sysUser.getDataPermisionProvince().getDataType();
-//            	sysUser.getDataPermisionProvince().getIwoid();
-            	SysProvince dataPermisionProvince=new SysProvince();
-            	dataPermisionProvince.setIwoid(sysUser.getDataPermisionProvince().getIwoid());
-            	dataPermisionProvince.setDataType(sysUser.getDataPermisionProvince().getDataType());
-            	dataPermisionProvince.setProvinceName(sysUser.getDataPermisionProvince().getProvinceName());
-            	sysUserVO.setDataPermisionProvince(dataPermisionProvince);
-            }
-
+        	
             // 用户角色列表
             String sql = "select s.sysRole from SysAuthority s where s.sysUser.iwoid= :IWOID";
 
@@ -455,21 +439,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         sysUser.setModifier(creator);
         sysUser.setModifyTime(new Date());
         
-        if (SysUser.DataPermisionType.none.getValue() == sysUser.getDataPermisionType() || 
-                SysUser.DataPermisionType.country.getValue() == sysUser.getDataPermisionType()) {// 权限范围为无或全国
-            sysUser.setDataPermisionProvince(null);
-            sysUser.setDataPermisionCity(null);
-        } else if (SysUser.DataPermisionType.province.getValue()==sysUser.getDataPermisionType()) {//省级别分支
-            Validator.checkArgument(sysUser.getDataPermisionProvince() == null 
-                || StringUtils.isBlank(sysUser.getDataPermisionProvince().getIwoid()), "数据权限省份不能为空");
-            sysUser.setDataPermisionCity(null);
-        } else if (SysUser.DataPermisionType.city.getValue()==sysUser.getDataPermisionType()) {//市级别分支
-            Validator.checkArgument(sysUser.getDataPermisionProvince() == null || 
-                StringUtils.isBlank(sysUser.getDataPermisionProvince().getIwoid()), "数据权限省份不能为空");
-            Validator.checkArgument(sysUser.getDataPermisionCity() == null || 
-                StringUtils.isBlank(sysUser.getDataPermisionCity().getIwoid()), "数据权限城市不能为空");
-        }
-        
         commonDAO.save(sysUser, false);
 
         /******** 处理用户角色赋权 ********/
@@ -518,7 +487,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
-        Validator.checkArgument(!Validator.contains(SysUser.DataPermisionType.class, sysUser.getDataPermisionType()) , "数据权限范围取值不正确");
         
         String sql = "select u from SysUser u where u.iwoid = :USEROID and u.state <> :STATE";
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -562,24 +530,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
 
         oldSysUser.setUserName(sysUser.getUserName());
 
-        if (SysUser.DataPermisionType.none.getValue() == sysUser.getDataPermisionType() || 
-                SysUser.DataPermisionType.country.getValue() == sysUser.getDataPermisionType()) {// 权限范围为无或全国
-            oldSysUser.setDataPermisionProvince(null);
-            oldSysUser.setDataPermisionCity(null);
-        } else if (SysUser.DataPermisionType.province.getValue()==sysUser.getDataPermisionType()) {//省级别分支
-            Validator.checkArgument(sysUser.getDataPermisionProvince() == null 
-                || StringUtils.isBlank(sysUser.getDataPermisionProvince().getIwoid()), "数据权限省份不能为空");
-            oldSysUser.setDataPermisionProvince(sysUser.getDataPermisionProvince());
-            oldSysUser.setDataPermisionCity(null);
-        } else if (SysUser.DataPermisionType.city.getValue()==sysUser.getDataPermisionType()) {//市级别分支
-            Validator.checkArgument(sysUser.getDataPermisionProvince() == null || 
-                StringUtils.isBlank(sysUser.getDataPermisionProvince().getIwoid()), "数据权限省份不能为空");
-            Validator.checkArgument(sysUser.getDataPermisionCity() == null || 
-                StringUtils.isBlank(sysUser.getDataPermisionCity().getIwoid()), "数据权限城市不能为空");
-            oldSysUser.setDataPermisionProvince(sysUser.getDataPermisionProvince());
-            oldSysUser.setDataPermisionCity(sysUser.getDataPermisionCity());
-        }
-        
         oldSysUser.setDataPermisionType(sysUser.getDataPermisionType());
         commonDAO.update(oldSysUser);
 

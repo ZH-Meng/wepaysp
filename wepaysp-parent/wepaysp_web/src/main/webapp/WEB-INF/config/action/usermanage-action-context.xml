@@ -30,7 +30,6 @@
 	<bean id="userManageAction" class="com.zbsp.wepaysp.manage.web.action.usermanage.UserManageAction" scope="prototype">
 		<property name="sysRoleService" ref="sysRoleService"></property>
 		<property name="sysUserService" ref="sysUserService"></property>
-		<property name="zoneService" ref="zoneService"></property>
 	</bean>
 	<bean id="rolePermissionManageAction" class="com.zbsp.wepaysp.manage.web.action.usermanage.RolePermissionManageAction" scope="prototype">
 		<property name="sysRoleService" ref="sysRoleService"></property>

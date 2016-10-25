@@ -113,16 +113,6 @@ public class UserSearchAction
                     }
                 }
 
-                if (sysUser.getDataPermisionType() == 0) {
-                    sysUser.setDataPermisionTypeName("无");
-                } else if (sysUser.getDataPermisionType() == 1) {
-                    sysUser.setDataPermisionTypeName("全国");
-                } else if (sysUser.getDataPermisionType() == 2) {
-                    sysUser.setDataPermisionTypeName(sysUser.getDataPermisionProvince().getProvinceName());
-                } else if (sysUser.getDataPermisionType() == 3) {
-                    sysUser.setDataPermisionTypeName(sysUser.getDataPermisionProvince().getProvinceName());
-                }
-
                 if (sysUser.getState() == 0) {
                     sysUser.setStateName("正常");
                 } else if (sysUser.getState() == 1) {

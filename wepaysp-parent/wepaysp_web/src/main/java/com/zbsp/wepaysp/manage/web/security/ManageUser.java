@@ -14,9 +14,6 @@ import java.util.Date;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import com.zbsp.wepaysp.po.dic.SysCity;
-import com.zbsp.wepaysp.po.dic.SysProvince;
-
 
 /**
  * 后台管理用户对象
@@ -35,10 +32,6 @@ public class ManageUser extends User {
     
     private Integer dataPermissionType;
     
-    private SysProvince dataPermisionProvince;
-    
-    private SysCity dataPermisionCity;
-    
     private String lastLoginIp;
     
     private Date lastLoginTime;
@@ -46,15 +39,13 @@ public class ManageUser extends User {
     private String roleIndex;
 
     public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer dataPermissionType,
-            SysProvince sysProvince, SysCity sysCity, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
+            String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.iwoid = iwoid;
         this.userId = userId;
         this.loginToken = loginToken;
         this.dataPermissionType = dataPermissionType;
-        this.dataPermisionProvince = sysProvince;
-        this.dataPermisionCity = sysCity;
         this.lastLoginIp = lastLoginIp;
         this.lastLoginTime = lastLoginTime;
         this.roleIndex = roleIndex;
@@ -74,22 +65,6 @@ public class ManageUser extends User {
 
     public void setDataPermissionType(Integer dataPermissionType) {
         this.dataPermissionType = dataPermissionType;
-    }
-    
-    public SysProvince getDataPermisionProvince() {
-        return dataPermisionProvince;
-    }
-    
-    public void setDataPermisionProvince(SysProvince dataPermisionProvince) {
-        this.dataPermisionProvince = dataPermisionProvince;
-    }
-
-    public SysCity getDataPermisionCity() {
-        return dataPermisionCity;
-    }
-    
-    public void setDataPermisionCity(SysCity dataPermisionCity) {
-        this.dataPermisionCity = dataPermisionCity;
     }
     
     public String getLastLoginIp() {
