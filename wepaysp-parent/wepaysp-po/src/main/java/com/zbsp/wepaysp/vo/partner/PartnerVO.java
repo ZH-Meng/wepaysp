@@ -33,6 +33,7 @@ public class PartnerVO
     private String loginId;
     private String loginPwd;
     private String parentCompany;
+    private String partneId;
 
     public String getIwoid() {
         return iwoid;
@@ -225,5 +226,13 @@ public class PartnerVO
 	public void setParentCompany(String parentCompany) {
 		this.parentCompany = parentCompany;
 	}
+
+    public String getPartneId() {
+        return partneId;
+    }
+    
+    public void setPartneId(String partneId) {
+        this.partneId = partneId;
+    }
 
 }

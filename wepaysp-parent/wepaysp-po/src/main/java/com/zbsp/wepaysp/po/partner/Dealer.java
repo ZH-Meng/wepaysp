@@ -18,8 +18,10 @@ public class Dealer
     private String iwoid;
     private Partner partner;
     private String dealerId;
-    private Partner partner2;
-    private Partner partner3;
+    private Integer partnerLevel;
+    private String partner1Oid;
+    private String partner2Oid;
+    private String partner3Oid;
     private Merchant merchant;
     private String contactor;
     private String company;
@@ -72,24 +74,40 @@ public class Dealer
         this.dealerId = dealerId;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PARTNER2_OID")
-    public Partner getPartner2() {
-        return this.partner2;
+    @Column(name = "PARTNER_LEVEL")
+    public Integer getPartnerLevel() {
+        return this.partnerLevel;
     }
 
-    public void setPartner2(Partner partner2) {
-        this.partner2 = partner2;
+    public void setPartnerLevel(Integer partnerLevel) {
+        this.partnerLevel = partnerLevel;
+    }
+    
+    @Column(name = "PARTNER1_OID", length = 32)
+    public String getPartner1Oid() {
+        return this.partner1Oid;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PARTNER3_OID")
-    public Partner getPartner3() {
-        return this.partner3;
+    public void setPartner1Oid(String partner1Oid) {
+        this.partner1Oid = partner1Oid;
+    }
+    
+    @Column(name = "PARTNER2_OID", length = 32)
+    public String getPartner2Oid() {
+        return this.partner2Oid;
     }
 
-    public void setPartner3(Partner partner3) {
-        this.partner3 = partner3;
+    public void setPartner2Oid(String partner2Oid) {
+        this.partner2Oid = partner2Oid;
+    }
+
+    @Column(name = "PARTNER3_OID", length = 32)
+    public String getPartner3Oid() {
+        return this.partner3Oid;
+    }
+
+    public void setPartner3Oid(String partner3Oid) {
+        this.partner3Oid = partner3Oid;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

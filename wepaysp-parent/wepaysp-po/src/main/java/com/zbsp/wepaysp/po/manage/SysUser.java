@@ -118,10 +118,10 @@ public class SysUser implements Serializable {
     }
     
     public static enum DataPermisionType {
-        /** 数据权限范围:无 */        none(0),
-        /** 数据权限范围:全国 */     country(1),
-        /** 数据权限范围:省 */        province(2),
-        /** 数据权限范围:地市 */     city(3);
+        /** 数据权限范围:无 */                 none(0),
+        /** 数据权限范围:1级服务商 */     partner1(1),
+        /** 数据权限范围:2级服务商 */     partner2(2),
+        /** 数据权限范围:3级服务商 */    partner3(3);
 
         private int value;
 
@@ -442,12 +442,12 @@ public class SysUser implements Serializable {
         if (dataPermisionType != null) {
             if (dataPermisionType == DataPermisionType.none.getValue()) {
                 builder.append("无");
-            } else if (dataPermisionType == DataPermisionType.country.getValue()) {
-                builder.append("全国");
-            } else if (dataPermisionType == DataPermisionType.province.getValue()) {
-                builder.append("省市");
-            } else if (dataPermisionType == DataPermisionType.city.getValue()) {
-                builder.append("地市");
+            } else if (dataPermisionType == DataPermisionType.partner1.getValue()) {
+                builder.append("1级服务商");
+            } else if (dataPermisionType == DataPermisionType.partner2.getValue()) {
+                builder.append("2级服务商");
+            } else if (dataPermisionType == DataPermisionType.partner3.getValue()) {
+                builder.append("3级服务商");
             }
         }
         

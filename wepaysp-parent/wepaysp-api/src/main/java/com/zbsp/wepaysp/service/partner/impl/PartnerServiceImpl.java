@@ -38,16 +38,23 @@ public class PartnerServiceImpl
     public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid) {
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空");
         PartnerVO partnerVO = new PartnerVO();
-        Partner partner = commonDAO.findObject(Partner.class, partnerOid);
-        BeanCopierUtil.copyProperties(partner, partnerVO);
-        // 查找用户
-        String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
-        Map<String, Object> sqlMap = new HashMap<String, Object>();
-        sqlMap.put("IWOID", partner.getIwoid());
-        List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
-        if (userList != null && !userList.isEmpty()) {
-            partnerVO.setLoginId(userList.get(0).getUserId());
-            // partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
+        Partner partner = commonDAO.findObject(Partner.class, partnerOid);        
+        
+        if (partner != null) {
+            BeanCopierUtil.copyProperties(partner, partnerVO);
+            // 查找用户
+            String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
+            Map<String, Object> sqlMap = new HashMap<String, Object>();
+            sqlMap.put("IWOID", partner.getIwoid());
+            List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+            if (userList != null && !userList.isEmpty()) {
+                partnerVO.setLoginId(userList.get(0).getUserId());
+                // partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
+            }
+            // 查找上级
+            if (partner.getParentPartner() != null) {
+                partnerVO.setParentPartnerOid(partner.getParentPartner().getIwoid());
+            }
         }
         return partnerVO;
     }
@@ -166,11 +173,21 @@ public class PartnerServiceImpl
     public PartnerVO doTransAddPartner(PartnerVO partnerVO, String creator, String operatorUserOid, String logFunctionOid)
         throws AlreadyExistsException {
         Validator.checkArgument(partnerVO == null, "服务商对象不能为空");
-        // TODO 校验参数
         Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerVO.getLoginId()), "登录名不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getLoginPwd()), "登录密码不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getContactor()), "联系人不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getMoblieNumber()), "手机号不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getTelephone()), "固定电话不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getCompany()), "公司不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getAddress()), "地址不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getState()), "状态不能为空");
+        Validator.checkArgument(partnerVO.getFeeRate() == null, "分润比率不能为空");
+        Validator.checkArgument(partnerVO.getBalance() == null, "余额不能为空");
+        Validator.checkArgument(partnerVO.getContractBegin() == null, "期限开始日期不能为空");
+        Validator.checkArgument(partnerVO.getContractEnd() == null, "期限截止日期不能为空");
 
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
@@ -216,6 +233,13 @@ public class PartnerServiceImpl
         newUser.setEmail(partnerVO.getEmail());
         newUser.setBuildType(SysUser.BuildType.create.getValue());
         newUser.setLastLoginTime(null);
+        if (partner.getLevel() == 1) {
+            newUser.setDataPermisionType(SysUser.DataPermisionType.partner1.getValue());
+        } else if (partner.getLevel() == 2) {
+            newUser.setDataPermisionType(SysUser.DataPermisionType.partner2.getValue());
+        } else if (partner.getLevel() == 3) {
+            newUser.setDataPermisionType(SysUser.DataPermisionType.partner3.getValue());
+        }
         newUser.setUserLevel(userLevel.partner.getValue());
         newUser.setPartner(partner);
         newUser.setCreator(creator);
@@ -258,6 +282,9 @@ public class PartnerServiceImpl
 
         Date processTime = new Date();
 
+        // 增加服务商日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建服务商[服务商ID=" + partner.getPartneId() + ", 公司=" + partner.getCompany() + ", 联系人=" + partner.getContactor() + "]", processTime, processTime, null, partner.toString(), SysLog.State.success.getValue(), partner.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        // 添加用户日志logFunctionOid 存 服务商添加按钮oid
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime, null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
 
         return partnerVO;
@@ -268,20 +295,32 @@ public class PartnerServiceImpl
         throws AlreadyExistsException {
         Validator.checkArgument(partnerVO == null, "服务商对象不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerVO.getIwoid()), "服务商Oid不能为空");
-        // TODO 校验参数
         Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
+        // 登录名、登录密码不允许修改
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getContactor()), "联系人不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getMoblieNumber()), "手机号不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getTelephone()), "固定电话不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getCompany()), "公司不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getAddress()), "地址不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerVO.getState()), "状态不能为空");
+        Validator.checkArgument(partnerVO.getFeeRate() == null, "分润比率不能为空");
+        Validator.checkArgument(partnerVO.getBalance() == null, "余额不能为空");
+        Validator.checkArgument(partnerVO.getContractBegin() == null, "期限开始日期不能为空");
+        Validator.checkArgument(partnerVO.getContractEnd() == null, "期限截止日期不能为空");
 
         Date processBeginTime = new Date();
         // 查找服务商
         Partner partner = commonDAO.findObject(Partner.class, partnerVO.getIwoid());
         if (partner == null) {
             throw new NotExistsException("未找到要修改的服务商对象");
-        } // TODO 是否需要判断状态
+        } else if (Partner.State.frozen.getValue().equals(partner.getState())) {// 冻结
+            throw new IllegalStateException("非法修改：服务商冻结状态不允许修改！");
+        }
 
-        // TODO 检查重复
         String partnerStr = partner.toString();
+
         partner.setContactor(partnerVO.getContactor());
         partner.setCompany(partnerVO.getCompany());
         partner.setMoblieNumber(partnerVO.getMoblieNumber());
@@ -292,11 +331,13 @@ public class PartnerServiceImpl
         partner.setContractEnd(partnerVO.getContractEnd());
         partner.setFeeRate(partnerVO.getFeeRate());
         partner.setState(partnerVO.getState());
+        partner.setCopyright(partnerVO.getCopyright());
+        partner.setCopyrightUrl(partnerVO.getCopyrightUrl());
         partner.setRemark(partnerVO.getRemark());
         partner.setEmail(partnerVO.getEmail());
         partner.setModifier(modifier);
-
         commonDAO.update(partner);
+
         String newPartnerStr = partner.toString();
         Date processEndTime = new Date();
         // 记录日志

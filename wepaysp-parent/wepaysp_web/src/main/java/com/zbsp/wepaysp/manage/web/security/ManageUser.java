@@ -14,6 +14,8 @@ import java.util.Date;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import com.zbsp.wepaysp.po.partner.Partner;
+
 
 /**
  * 后台管理用户对象
@@ -32,13 +34,15 @@ public class ManageUser extends User {
     
     private Integer dataPermissionType;
     
+    private Partner dataPartner;
+    
     private String lastLoginIp;
     
     private Date lastLoginTime;
     
     private String roleIndex;
 
-    public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer dataPermissionType,
+    public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer dataPermissionType, Partner dataPartner,
             String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
@@ -46,6 +50,7 @@ public class ManageUser extends User {
         this.userId = userId;
         this.loginToken = loginToken;
         this.dataPermissionType = dataPermissionType;
+        this.dataPartner = dataPartner;
         this.lastLoginIp = lastLoginIp;
         this.lastLoginTime = lastLoginTime;
         this.roleIndex = roleIndex;
@@ -67,6 +72,14 @@ public class ManageUser extends User {
         this.dataPermissionType = dataPermissionType;
     }
     
+    public Partner getDataPartner() {
+        return dataPartner;
+    }
+    
+    public void setDataPartner(Partner dataPartner) {
+        this.dataPartner = dataPartner;
+    }
+
     public String getLastLoginIp() {
         return lastLoginIp;
     }

@@ -21,6 +21,7 @@ public class Partner
     private String iwoid;
     private Integer level;
     private Partner parentPartner;
+    private String partneId;
     private Date contractBegin;
     private Date contractEnd;
     private Integer feeRate;
@@ -51,6 +52,22 @@ public class Partner
     private Timestamp modifyTime;
     private String remark;
 
+    public static enum State {
+        /** 状态:未使用 */        nouse("1"),
+        /** 状态:使用 */        using("2"),
+        /** 状态:冻结 */        frozen("3");
+
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        private State(String value) {
+            this.value = value;
+        }
+    }
+    
     public Partner() {
     }
 
@@ -82,6 +99,16 @@ public class Partner
     public void setParentPartner(Partner parentPartner) {
         this.parentPartner = parentPartner;
     }
+    
+    @Column(name = "PARTNE_ID", length = 32)
+    public String getPartneId() {
+        return this.partneId;
+    }
+
+    public void setPartneId(String partneId) {
+        this.partneId = partneId;
+    }
+
 
     @Temporal(TemporalType.DATE)
     @Column(name = "CONTRACT_BEGIN", nullable = false, length = 0)
@@ -344,6 +371,11 @@ public class Partner
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    @Override
+    public String toString() {
+        return "Partner [iwoid=" + iwoid + ", level=" + level + ", parentPartner=" + parentPartner + ", contractBegin=" + contractBegin + ", contractEnd=" + contractEnd + ", feeRate=" + feeRate + ", balance=" + balance + ", state=" + state + ", contactor=" + contactor + ", moblieNumber=" + moblieNumber + ", email=" + email + ", company=" + company + ", address=" + address + ", telephone=" + telephone + "]";
     }
 
 }

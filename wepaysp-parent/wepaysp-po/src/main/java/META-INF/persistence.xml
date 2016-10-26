@@ -20,5 +20,11 @@
 		<class>com.zbsp.wepaysp.po.partner.DealerEmployee</class>
 		<class>com.zbsp.wepaysp.po.partner.PartnerEmployee</class>
 		<class>com.zbsp.wepaysp.po.partner.Store</class>
+		<!-- pay -->
+		<class>com.zbsp.wepaysp.po.pay.WeixinPayDetails</class>
+		<class>com.zbsp.wepaysp.po.pay.WeixinRefundDetails</class>
+		<!-- report -->
+		<class>com.zbsp.wepaysp.po.report.RptDealerStatDay</class>
+		<class>com.zbsp.wepaysp.po.report.RptDealerStatMonth</class>
 	</persistence-unit>
 </persistence>

@@ -9,6 +9,9 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
+	<style>
+		.bg_tjall th {width: 30%;}
+	</style>
 </head>
 <body class="bgbj">
 	<div class="rightbg">
@@ -23,12 +26,12 @@
 	                        	<tr>
 	                            	<th>登录名</th>
 	                                <td  colspan="3">
-	                                	<s:if test="partnerVO.state != 1">
-			                                <s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/>
-	                                	</s:if>
-	                                	<s:else>
-	                                		<s:textfield id="loginId" maxlength="20" name="partnerVO.loginId"/>
-	                                	</s:else>
+	                                	 <s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/>
+		                                <span class="tj_bt">*</span>
+	                                </td>
+	                                <th>代理商编号</th>
+	                                <td  colspan="3">
+	                                	 <s:textfield id="partneId" name="partnerVO.partneId" readonly="true"/>
 		                                <span class="tj_bt">*</span>
 	                                </td>
 	                                <%-- <th>登录密码</th>
@@ -36,13 +39,15 @@
 	                            </tr>
 	                            <tr>
 	                                <th>分润比率</th>
-	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerVO.feeRate" /><span class="tj_bt">*</span></td>
-	                                <th>余额</th>
-	                                <td><s:textfield id="balance" maxlength="20" name="partnerVO.balance" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数！</span></td>
+	                            </tr>
+	                            <tr>
+	                            	<th>余额</th>
+	                                <td><s:textfield id="balance" maxlength="20" name="partnerVO.balance" /><span class="tj_bt">*</span><span>余额只能填整数！</span></td>
 	                            </tr>
 	                            <tr>
 									<th>使用期限</th>
-									<td colspan="3">
+									<td>
 										<input type="text" name="contractBegin" id="contractBegin" class="Wdate" readonly="readonly" value="<s:property value="contractBegin"/>"
 												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'contractEnd\')}'})"/>
 										<span class="tj_bt">*</span>
@@ -55,12 +60,16 @@
 	                            <tr>
 	                            	<th>联系人</th>
 	                                <td><s:textfield id="contactor" maxlength="32" name="partnerVO.contactor" /><span class="tj_bt">*</span></td>
-	                                <th>固定电话</th>
-	                                <td><s:textfield id="telephone" maxlength="32" name="partnerVO.telephone" /><span class="tj_bt">*</span></td>
+	                            </tr>
+	                            <tr>
+	                            	<th>固定电话</th>
+	                                <td><s:textfield id="telephone" maxlength="32" name="partnerVO.telephone" /><span class="tj_bt">*</span><span>比如： 010-88888888，没有固定电话填手机号</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>手机</th>
-	                                <td><s:textfield id="moblieNumber" maxlength="32" name="partnerVO.moblieNumber" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="moblieNumber" maxlength="32" name="partnerVO.moblieNumber" /><span class="tj_bt">*</span><span>比如：13111110101</span></td>
+	                            </tr>
+	                            <tr>
 	                            	<th>状态</th>
 	                                <td>
 	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerVO.state"  id="state"/>
@@ -69,23 +78,23 @@
 	                            </tr>	
 	                            <tr>
 	                            	<th>公司名称</th>
-	                                <td colspan="3"><s:textfield id="company" maxlength="32" name="partnerVO.company" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="company" maxlength="32" name="partnerVO.company" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>地址</th>
-	                                <td colspan="3"><s:textfield id="address" maxlength="32" name="partnerVO.address" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="address" maxlength="32" name="partnerVO.address" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>版权</th>
-	                                <td colspan="3"><s:textfield id="copyright" maxlength="32" name="partnerVO.copyright" /></td>
+	                                <td><s:textfield id="copyright" maxlength="32" name="partnerVO.copyright" /><span>例如: © 2013-2020 ******有限公司</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>版权URL</th>
-	                                <td colspan="3"><s:textfield id="copyrightUrl" maxlength="32" name="partnerVO.copyrightUrl" /></td>
+	                                <td><s:textfield id="copyrightUrl" maxlength="32" name="partnerVO.copyrightUrl" /><span>例如: http://www.****.com</span></td>
 	                            </tr>
 	                            <tr>
 	                                <th>备注</th>
-	                                <td colspan="3" >
+	                                <td>
 	                                	<s:textarea id="remark" cols="25" rows="4" name="partnerVO.remark"></s:textarea>
 	                                </td>
 	                            </tr>
@@ -109,7 +118,6 @@
 			$("#loginId").focus();
 		});	
 	
-		//TODO
 		function updatePartner() {
 			var contactor = $("#contactor").val();
 			var telephone = $("#telephone").val();
@@ -132,8 +140,16 @@
 				alert("固定电话不能为空！");
 				$("#telephone").focus();
 				return false;
+			} else if (!islineTel(telephone)) {
+				alert("固定电话应为7-18位数字或-！");
+				$("#telephone").focus();
+				return false;
 			} else if (isBlank(moblieNumber)) {
 				alert("手机号码不能为空！");
+				$("#moblieNumber").focus();
+				return false;
+			} else if (!isMobile(moblieNumber)) {
+				alert("手机号码格式不正确！");
 				$("#moblieNumber").focus();
 				return false;
 			} else if (isBlank(contractBegin)) {
@@ -152,8 +168,16 @@
 				alert("分润费率不能为空！");
 				$("#feeRate").focus();
 				return false;
+			} else if (!isPositiveInteger1(feeRate)) {
+				alert("分润费率只能填正整数！");
+				$("#feeRate").focus();
+				return false;
 			} else if (isBlank(balance)) {
 				alert("余额不能为空！");
+				$("#balance").focus();
+				return false;
+			} else if (!isPositiveInteger(balance)) {
+				alert("余额只能填整数！");
 				$("#balance").focus();
 				return false;
 			} else if (isBlank(company)) {

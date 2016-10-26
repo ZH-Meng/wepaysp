@@ -14,6 +14,8 @@
 		<s:form method="post">
 			<s:hidden id="parentPartnerOid" name="partnerVO.parentPartnerOid"/>
 	        <s:hidden id="iwoid" name="partnerVO.iwoid"/>
+	        <s:hidden id="returnParentPartnerOid" name="returnParentPartnerOid"/>
+	        <s:hidden id="doReturnParent" name="doReturnParent"/>
 			<div class="bgtj">
 				<ul class="tj_title">
 					<li>查询条件</li>
@@ -56,7 +58,7 @@
 			            
 						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>						
 						
-						<s:if test="returnParentFlag == 1">
+						<s:if test="returnParentFlag == 'on'">
 							<div class="bg_page bg_page1">
 								<p class="bg_pagebutton">
 									<a class="sjbtn" href="javascript:void(0);" onclick="returnParent();">返回上级</a>
@@ -73,6 +75,7 @@
 	                        <thead>
 	                            <tr>
 	                                <th>序号</th>
+	                                <th>代理商编号</th>
 	                                <th>登录名</th>
 	                                <th>上级代理商</th>
 	                                <th>级别类型</th>
@@ -94,20 +97,23 @@
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
+						  			<td title="<s:property value="#partnerVo.partneId" />">
+						  				<s:property value="#partnerVo.partneId" />
+						  			</td>
 						  			<td title="<s:property value="#partnerVo.loginId" />">
 						  				<s:property value="#partnerVo.loginId" />
 						  			</td>
 						  			<td title="<s:property value="#partnerVo.parentCompany" />">
 						  				<s:property value="#partnerVo.parentCompany" />
 						  			</td>
-						  			<s:if test="#partnerVo.level == 0">
-						  				<s:set var="partnerLevelStr">服務商</s:set>
+						  			<s:if test="#partnerVo.level == 1">
+						  				<s:set var="partnerLevelStr">一级</s:set>
 						  			</s:if>
-						  			<s:elseif test="#partnerVo.level == 1">
-						  				<s:set var="partnerLevelStr">一級</s:set>
-						  			</s:elseif>
 						  			<s:elseif test="#partnerVo.level == 2">
-						  				<s:set var="partnerLevelStr">二級</s:set>
+						  				<s:set var="partnerLevelStr">二级</s:set>
+						  			</s:elseif>
+						  			<s:elseif test="#partnerVo.level == 3">
+						  				<s:set var="partnerLevelStr">三级</s:set>
 						  			</s:elseif>
 						  			<td title="<s:property value="#partnerLevelStr" />">
 						  				<s:property value="#partnerLevelStr" />
@@ -161,7 +167,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="13">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="14">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>
@@ -188,6 +194,10 @@
 		}
 		function findChildPartners(iwoid){
 			$("#parentPartnerOid").val(iwoid);
+			invokeAction('list');
+		}
+		function returnParent(){
+			$("#doReturnParent").val("yes");
 			invokeAction('list');
 		}
 	</script>
