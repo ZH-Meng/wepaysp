@@ -85,7 +85,7 @@ public class ManageAuthenticationProvider
             }
 
             loadedUser = new ManageUser(sysUser.getIwoid(), sysUser.getUserId(), sysUser.getUserName(), sysUser.getLoginPwd(), null,
-                sysUser.getDataPermisionType(), sysUser.getPartner(),sysUser.getLastLoginIp(), sysUser.getLastLoginTime(), roleIndex, true, true, true, true, auths);
+                sysUser.getDataPermisionType(), sysUser.getPartner(), sysUser.getDealer(), sysUser.getLastLoginIp(), sysUser.getLastLoginTime(), roleIndex, true, true, true, true, auths);
 
         } catch (IllegalStateException e) {
             throw new AuthenticationServiceException(e.getMessage());

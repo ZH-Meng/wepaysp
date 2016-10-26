@@ -56,7 +56,7 @@ public class SysUser implements Serializable {
     public static enum userLevel {
         /** 服务商、一级代理商、二级代理商...  */     partner(1),
         /** 业务员 */                                           salesman(2),
-        /** 商户老板 */                                      merchant(3),
+        /** 商户老板 */                                      dealer(3),
         /** 店长 */                                           shopManager(4),
         /** 收银员 */                                       cashier(5);
         

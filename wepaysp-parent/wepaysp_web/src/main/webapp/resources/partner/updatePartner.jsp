@@ -25,17 +25,19 @@
 	                    	<tbody>
 	                        	<tr>
 	                            	<th>登录名</th>
-	                                <td  colspan="3">
-	                                	 <s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/>
-		                                <span class="tj_bt">*</span>
-	                                </td>
-	                                <th>代理商编号</th>
-	                                <td  colspan="3">
-	                                	 <s:textfield id="partneId" name="partnerVO.partneId" readonly="true"/>
+	                                <td>
+	                                	<s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/>
 		                                <span class="tj_bt">*</span>
 	                                </td>
 	                                <%-- <th>登录密码</th>
 	                                <td><s:password id="loginPwd" maxlength="20" name="partnerVO.loginPwd" /><span class="tj_bt">*</span></td> --%>
+	                            </tr>
+	                            <tr>
+	                            	<th>代理商编号</th>
+	                                <td>
+	                                	<s:textfield id="partneId" name="partnerVO.partneId" readonly="true"/>
+		                                <span class="tj_bt">*</span>
+	                                </td>
 	                            </tr>
 	                            <tr>
 	                                <th>分润比率</th>

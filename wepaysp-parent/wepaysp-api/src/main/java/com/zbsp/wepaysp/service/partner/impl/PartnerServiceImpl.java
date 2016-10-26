@@ -207,7 +207,8 @@ public class PartnerServiceImpl
         SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
         // 查找父服务商
         if (user != null && user.getPartner() != null) {
-            parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
+            //parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
+        	parentPartner = user.getPartner().getParentPartner();
         }
 
         // 保存服务商

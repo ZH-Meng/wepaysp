@@ -48,7 +48,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         Validator.checkArgument(StringUtils.isBlank(password), "登录密码不能为空");
         Validator.checkArgument(StringUtils.isBlank(ip), "登录ip不能为空");
 
-        String sql = "select u from SysUser u left join fetch u.partner where u.userId = :USERID "
+        String sql = "select u from SysUser u left join fetch u.partner left join fetch u.dealer where u.userId = :USERID "
             + "and u.loginPwd = :LOGINPWD and u.state <> :DELETESTATE";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();

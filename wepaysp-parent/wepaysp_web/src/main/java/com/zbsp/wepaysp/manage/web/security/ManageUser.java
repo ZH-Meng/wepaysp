@@ -14,6 +14,7 @@ import java.util.Date;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.Partner;
 
 
@@ -36,6 +37,8 @@ public class ManageUser extends User {
     
     private Partner dataPartner;
     
+    private Dealer dataDealer;
+    
     private String lastLoginIp;
     
     private Date lastLoginTime;
@@ -43,7 +46,7 @@ public class ManageUser extends User {
     private String roleIndex;
 
     public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer dataPermissionType, Partner dataPartner,
-            String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
+    		Dealer dataDealer, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.iwoid = iwoid;
@@ -51,6 +54,7 @@ public class ManageUser extends User {
         this.loginToken = loginToken;
         this.dataPermissionType = dataPermissionType;
         this.dataPartner = dataPartner;
+        this.dataDealer = dataDealer;
         this.lastLoginIp = lastLoginIp;
         this.lastLoginTime = lastLoginTime;
         this.roleIndex = roleIndex;
@@ -80,7 +84,15 @@ public class ManageUser extends User {
         this.dataPartner = dataPartner;
     }
 
-    public String getLastLoginIp() {
+    public Dealer getDataDealer() {
+		return dataDealer;
+	}
+
+	public void setDataDealer(Dealer dataDealer) {
+		this.dataDealer = dataDealer;
+	}
+
+	public String getLastLoginIp() {
         return lastLoginIp;
     }
 

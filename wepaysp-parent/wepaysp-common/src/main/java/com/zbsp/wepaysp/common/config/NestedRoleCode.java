@@ -20,7 +20,7 @@ public class NestedRoleCode {
 	public static String SALESMAN = "salesman";
 
 	/** 商户 */
-	public static String MERCHANT = "merchant";
+	public static String DEALER = "merchant";
 
 	/** 收银员 */
 	public static String CASHIER = "cashier";

@@ -9,5 +9,11 @@
 			<result name="createPartner">/resources/partner/createPartner.jsp</result>
 			<result name="updatePartner">/resources/partner/updatePartner.jsp</result>
 		</action>
+		<!-- 商户管理 -->
+		<action name="dealermanage" class="dealerAction">
+			<result name="dealerList">/resources/partner/dealerList.jsp</result>
+			<result name="createDealer">/resources/partner/createDealer.jsp</result>
+			<result name="updateDealer">/resources/partner/updateDealer.jsp</result>
+		</action>
 	</package>
 </struts>
