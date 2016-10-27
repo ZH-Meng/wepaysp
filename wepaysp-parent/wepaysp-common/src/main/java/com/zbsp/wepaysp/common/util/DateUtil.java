@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.manage.web.util;
+package com.zbsp.wepaysp.common.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

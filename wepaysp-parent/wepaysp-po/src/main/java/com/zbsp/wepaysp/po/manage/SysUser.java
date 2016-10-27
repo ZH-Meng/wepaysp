@@ -15,7 +15,6 @@ import javax.persistence.TemporalType;
 
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
-import com.zbsp.wepaysp.po.partner.Merchant;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
@@ -41,7 +40,6 @@ public class SysUser implements Serializable {
     private Integer state;
     private Integer dataPermisionType;
     private Integer userLevel;
-    private Merchant merchant;
     private Dealer dealer;
     private Store store;
     private DealerEmployee dealerEmployee;
@@ -53,7 +51,7 @@ public class SysUser implements Serializable {
     private Date modifyTime;
     private String remark;
     
-    public static enum userLevel {
+    public static enum UserLevel {
         /** 服务商、一级代理商、二级代理商...  */     partner(1),
         /** 业务员 */                                           salesman(2),
         /** 商户老板 */                                      dealer(3),
@@ -66,7 +64,7 @@ public class SysUser implements Serializable {
             return value;
         }
 
-        private userLevel(int value) {
+        private UserLevel(int value) {
             this.value = value;
         }
     }
@@ -289,16 +287,6 @@ public class SysUser implements Serializable {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DEALER_OID")
-    public Merchant getMerchant() {
-        return this.merchant;
-    }
-
-    public void setMerchant(Merchant merchant) {
-        this.merchant = merchant;
-    }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEALER_OID", insertable = false, updatable = false)
     public Dealer getDealer() {
         return this.dealer;
     }

@@ -14,7 +14,7 @@ import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.manage.web.util.DateUtil;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
@@ -119,9 +119,11 @@ public class PartnerAction
         } catch (AlreadyExistsException e) {
             logger.error("代理商添加失败：" + e.getMessage());
             setAlertMessage("代理商添加失败：" + e.getMessage());
+            return "createPartner";
         } catch (Exception e) {
             logger.error("代理商添加错误：" + e.getMessage());
             setAlertMessage("代理商添加错误：" + e.getMessage());
+            return "createPartner";
         }
         return list();
     }
@@ -135,6 +137,7 @@ public class PartnerAction
         } else {
             logger.warn("非法修改代理商，参数partnerVO为空，partnerVO.getIwoid()或者！");
             setAlertMessage("非法修改代理商！");
+            return list();
         }
         return "updatePartner";
     }
@@ -157,9 +160,11 @@ public class PartnerAction
         } catch (NotExistsException e) {
             logger.error("代理商修改失败：" + e.getMessage());
             setAlertMessage("代理商修改失败：" + e.getMessage());
+            return "updatePartner";
         } catch (Exception e) {
             logger.error("代理商添加错误：" + e.getMessage());
             setAlertMessage("代理商添加错误：" + e.getMessage());
+            return "updatePartner";
         }
         return list();
     }

@@ -8,6 +8,8 @@
  */
 package com.zbsp.wepaysp.common.util;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -17,6 +19,20 @@ import java.util.UUID;
  * @author 杨帆
  */
 public final class Generator {
+    public static void main(String[] args) {
+        System.out.println(generateSequenceNum(1));
+    }
+    
+    /**
+     * 生成YYMMdd+五位数序列值，例如：16102700001.
+     * 
+     * @return 
+     */
+    public static String generateSequenceNum(int nextval) {
+        int multiple = 100000;
+        String seqPrefix = DateUtil.getDate(new Date(), "YYYYMMdd").substring(2);
+        return (new BigDecimal(Long.valueOf(seqPrefix)).multiply(new BigDecimal(multiple)).add(new BigDecimal(nextval))).toString();
+    }
     
     /**
      * 生成iwoid.
