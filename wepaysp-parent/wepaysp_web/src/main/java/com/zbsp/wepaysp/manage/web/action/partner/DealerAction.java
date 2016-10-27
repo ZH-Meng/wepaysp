@@ -26,12 +26,24 @@ public class DealerAction
     private DealerVO dealerVO;
     private List<DealerVO> dealerVoList;
     private DealerService dealerService;
+    private String coreDataFlag;// on,off
 
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
+        String result = "dealerList";
         try {
-            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        	ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if ("on".equals(coreDataFlag)) {
+				if (isTopPartner()) {
+					result = "dealerCoreList";
+				} else {
+					logger.warn("角色分配不当：非顶级服务商（代理商）不能管理商户交易核心数据");
+					setAlertMessage("角色分配不当：非服务商（代理商）不能管理商户交易核心数据");
+		            return "accessDenied";
+				}
+			}
+			
             if (dealerVO == null) {
                 dealerVO = new DealerVO();
             }
@@ -49,11 +61,23 @@ public class DealerAction
             logger.error("商户查询列表错误：" + e.getMessage());
             setAlertMessage("商户查询列表错误：" + e.getMessage());
         }
-        return "dealerList";
+        
+        return result;
     }
 
     public String list() {
         initPageData(100);
+        return goCurrent();
+    }
+    
+    /**
+     * 商户交易核心数据管理
+     * 
+     * @return
+     */
+    public String transCoreDataList() {
+    	initPageData(100);
+    	coreDataFlag = "on";
         return goCurrent();
     }
 
@@ -120,6 +144,48 @@ public class DealerAction
         }
         return "updateDealer";
     }
+    
+    /**
+     * 商户交易核心数据修改 -顶级服务商权限
+     * 
+     * @return
+     */
+    public String goToUpdateDealerCore() {
+        logger.info("跳转修改商户页面-含交易核心数据.");
+        if (!isTopPartner()) {
+            logger.warn("角色分配不当：非顶级服务商（代理商）不能修改商户交易核心数据");
+            setAlertMessage("角色分配不当：非顶级服务商（代理商）不能修改商户交易核心数据");
+            return "accessDenied";
+        }
+        if (dealerVO != null && StringUtils.isNotBlank(dealerVO.getIwoid())) {
+            dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerVO.getIwoid());
+        } else {
+            logger.warn("非法修改商户，参数dealerVO为空，dealerVO.getIwoid()或者！");
+            setAlertMessage("非法修改商户！");
+            return list();
+        }
+        return "updateDealerCore";
+    }
+    
+    /**
+     * 商户基本信息维护 -商户权限
+     * 
+     * @return
+     */
+    public String goToUpdateDealerBase() {
+        logger.info("跳转修改商户页面-含交易核心数据.");
+        if (!isDealer()) {
+        	logger.warn("非商户用户正在维护商户基本信息！");
+        }
+        if (dealerVO != null && StringUtils.isNotBlank(dealerVO.getIwoid())) {
+            dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerVO.getIwoid());
+        } else {
+            logger.warn("非法修改商户，参数dealerVO为空，dealerVO.getIwoid()或者！");
+            setAlertMessage("非法修改商户！");
+            return list();
+        }
+        return "updateDealerBase";
+    }
 
     public String updateDealer() {
         logger.info("开始修改商户.");
@@ -169,6 +235,25 @@ public class DealerAction
         }
         return true;
     }
+    
+    /**
+     * 是否是顶级服务商，角色权限校验通过，如果给其他角色配置了一级服务商的菜单仍不能使用
+     * 
+     * @return
+     */
+    private boolean isTopPartner() {
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner().getLevel() == 1) {// 顶级服务商
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 是否是商户
@@ -182,7 +267,7 @@ public class DealerAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level > SysUser.UserLevel.partner.getValue()) {// 非服务商
+            if (level != SysUser.UserLevel.dealer.getValue()) {// 非商户
                 return false;
             }
         }

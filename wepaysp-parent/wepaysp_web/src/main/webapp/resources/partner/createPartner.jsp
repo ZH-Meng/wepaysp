@@ -63,12 +63,7 @@
 	                            <tr>
 	                            	<th>状态</th>
 	                                <td>
-	                                	<select id="state" name="partnerVO.state">
-	                                		<option value="">请选择</option>
-	                                		<option value="1">未使用</option>
-	                                		<option value="2">使用中</option>
-	                                		<option value="3">冻结</option>
-	                                	</select>
+	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerVO.state"  id="state" headerKey="" headerValue="请选择"/>
 	                                	 <span class="tj_bt">*</span>
 	                                </td>
 	                            </tr>	
