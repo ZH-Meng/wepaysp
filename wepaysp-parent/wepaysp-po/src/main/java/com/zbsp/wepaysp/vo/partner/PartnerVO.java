@@ -33,7 +33,7 @@ public class PartnerVO
     private String loginId;
     private String loginPwd;
     private String parentCompany;
-    private String partneId;
+    private String partnerId;
 
     public String getIwoid() {
         return iwoid;
@@ -227,12 +227,12 @@ public class PartnerVO
 		this.parentCompany = parentCompany;
 	}
 
-    public String getPartneId() {
-        return partneId;
+    public String getPartnerId() {
+        return partnerId;
     }
-    
-    public void setPartneId(String partneId) {
-        this.partneId = partneId;
+
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
     }
 
 }

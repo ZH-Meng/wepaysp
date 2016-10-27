@@ -10,7 +10,7 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：代理商管理&gt;子代理商列表</div>
+		<div class="bgposition">您现在的位置：代理商管理&gt;子代理商管理</div>
 		<s:form method="post">
 			<s:hidden id="parentPartnerOid" name="partnerVO.parentPartnerOid"/>
 	        <s:hidden id="iwoid" name="partnerVO.iwoid"/>
@@ -77,7 +77,7 @@
 	                                <th>序号</th>
 	                                <th>代理商编号</th>
 	                                <th>登录名</th>
-	                                <th>上级代理商</th>
+	                                <th>父代理商</th>
 	                                <th>级别类型</th>
 	                                <th>联系人</th>
 	                                <th>公司名称</th>
@@ -97,8 +97,8 @@
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:property value="#partnerVo.partneId" />">
-						  				<s:property value="#partnerVo.partneId" />
+						  			<td title="<s:property value="#partnerVo.partnerId" />">
+						  				<s:property value="#partnerVo.partnerId" />
 						  			</td>
 						  			<td title="<s:property value="#partnerVo.loginId" />">
 						  				<s:property value="#partnerVo.loginId" />
@@ -160,7 +160,7 @@
 						  				</s:if>
 						  				<s:else><strong>修改</strong></s:else>
 						  				<s:if test="#partnerVo.level < 3">
-						  					<a href="javascript:void(0);" onclick="findChildPartners('<s:property value="#partnerVo.iwoid" />')">子代理商</a>
+						  					<a href="javascript:void(0);" onclick="findChildPartners('<s:property value="#partnerVo.iwoid" />')">查看下级代理商</a>
 						  				</s:if>
 						  			</td>
 						  		</tr>

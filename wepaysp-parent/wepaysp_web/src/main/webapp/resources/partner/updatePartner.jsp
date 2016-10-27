@@ -15,7 +15,7 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：子代理商管理&gt;创建子代理商&gt;修改子代理商</div>
+		<div class="bgposition">您现在的位置：代理商管理&gt;子代理商管理&gt;修改子代理商</div>
 	    <div class="bgtj">
 	    	<form action="<%=request.getContextPath()%>/resources/partner/partnermanage!updatePartner.action" method="post" id="partnerForm">
 	    		<s:hidden name="partnerVO.iwoid"/>
@@ -35,7 +35,7 @@
 	                            <tr>
 	                            	<th>代理商编号</th>
 	                                <td>
-	                                	<s:textfield id="partneId" name="partnerVO.partneId" readonly="true"/>
+	                                	<s:textfield id="partnerId" name="partnerVO.partnerId" readonly="true"/>
 		                                <span class="tj_bt">*</span>
 	                                </td>
 	                            </tr>

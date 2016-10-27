@@ -23,7 +23,7 @@ import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.manage.web.util.DateUtil;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.manage.web.util.ExcelUtil;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;

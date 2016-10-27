@@ -111,7 +111,7 @@ public class Dealer
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEALER_OID")
+    @JoinColumn(name = "merchant_oid")
     public Merchant getMerchant() {
         return this.merchant;
     }
@@ -228,7 +228,7 @@ public class Dealer
         this.subAppid = subAppid;
     }
 
-    @Column(name = "SUB_MCH_ID", nullable = false, length = 32)
+    @Column(name = "SUB_MCH_ID", length = 32)
     public String getSubMchId() {
         return this.subMchId;
     }
@@ -280,6 +280,11 @@ public class Dealer
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    @Override
+    public String toString() {
+        return "Dealer [iwoid=" + iwoid + ", partner=" + partner + ", dealerId=" + dealerId + ", partnerLevel=" + partnerLevel + ", partner1Oid=" + partner1Oid + ", partner2Oid=" + partner2Oid + ", partner3Oid=" + partner3Oid + ", merchant=" + merchant + ", contactor=" + contactor + ", company=" + company + ", address=" + address + ", telephone=" + telephone + ", moblieNumber=" + moblieNumber + ", qqNumber=" + qqNumber + ", email=" + email + ", state=" + state + ", techSupportPerson=" + techSupportPerson + ", techSupportPhone=" + techSupportPhone + ", feeRate=" + feeRate + "]";
     }
 
 }

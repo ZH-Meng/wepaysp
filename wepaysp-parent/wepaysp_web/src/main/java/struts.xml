@@ -20,6 +20,7 @@
     	<global-results>
 			<result name="login">/index.jsp</result>
 			<result name="error">/resources/include/error.jsp</result>
+			<result name="accessDenied">/resources/include/accessDenied.jsp</result>
 		</global-results>
 		<global-exception-mappings>
             <exception-mapping exception="java.lang.Exception" result="error"/>

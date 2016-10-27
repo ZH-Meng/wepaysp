@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>创建子代理商</title>
+	<title>创建商户</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
@@ -12,86 +12,78 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：代理商管理&gt;子代理商管理&gt;创建子代理商</div>
+		<div class="bgposition">您现在的位置：代理商管理&gt;商户信息管理&gt;创建商户</div>
 	    <div class="bgtj">
-	    	<form action="<%=request.getContextPath()%>/resources/partner/partnermanage!createPartner.action" method="post" id="partnerForm">
-	    		<s:hidden name="partnerVO.parentPartnerOid"/>
+	    	<form action="<%=request.getContextPath()%>/resources/partner/dealermanage!createDealer.action" method="post" id="dealerForm">
 	            <ul class="bg_tjtab">
 	                <li class="bg_tjall">
 	                	<table>
 	                    	<tbody>
 	                        	<tr>
 	                            	<th>登录名</th>
-	                                <td><s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" /><span class="tj_bt">*</span><span>1-20位长度的字母或数字，保存后不能修改！</span></td>
+	                                <td><s:textfield id="loginId" maxlength="20" name="dealerVO.loginId" /><span class="tj_bt">*</span><span>1-20位长度的字母或数字，保存后不能修改！</span></td>
 	                            </tr>
 	                            <tr>
 	                            	 <th>登录密码</th>
-	                                <td><s:password id="loginPwd" maxlength="20" name="partnerVO.loginPwd" /><span class="tj_bt">*</span><span>6-20位长度的字母或数字！</span></td>
+	                                <td><s:password id="loginPwd" maxlength="20" name="dealerVO.loginPwd" /><span class="tj_bt">*</span><span>6-20位长度的字母或数字！</span></td>
 	                            </tr>
 	                            <tr>
 	                                <th>分润比率</th>
-	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数！</span></td>
+	                                <td><s:textfield id="feeRate" maxlength="20" name="dealerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数，例如：千分之三点八填38  千分之四填40！</span></td>
 	                            </tr>
-	                            <tr>
-	                            	<th>余额</th>
-	                                <td><s:textfield id="balance" maxlength="20" name="partnerVO.balance" /><span class="tj_bt">*</span><span>余额只能填整数！</span></td>
-	                            </tr>
-	                            <tr>
-									<th>使用期限</th>
-									<td>
-										<input type="text" name="contractBegin" id="contractBegin" class="Wdate" readonly="readonly" value="<s:property value="contractBegin"/>"
-												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'contractEnd\')}'})"/>
-										<span class="tj_bt">*</span>
-										<span>至</span>
-										<input type="text" name="contractEnd" id="contractEnd"	class="Wdate" readonly="readonly" value="<s:property value="contractEnd"/>"
-													onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'contractBegin\')}'})"/>
-										<span class="tj_bt">*</span>
-									</td>
-								</tr>
 	                            <tr>
 	                            	<th>联系人</th>
-	                                <td><s:textfield id="contactor" maxlength="32" name="partnerVO.contactor" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="contactor" maxlength="32" name="dealerVO.contactor" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
-	                            	<th>固定电话</th>
-	                                <td><s:textfield id="telephone" maxlength="32" name="partnerVO.telephone" /><span class="tj_bt">*</span><span>比如： 010-88888888，没有固定电话填手机号</span></td>
+	                            	<th>公司名称</th>
+	                                <td><s:textfield id="company" maxlength="32" name="dealerVO.company" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>手机</th>
-	                                <td><s:textfield id="moblieNumber" maxlength="32" name="partnerVO.moblieNumber" /><span class="tj_bt">*</span><span>比如：13111110101</span></td>
+	                                <td><s:textfield id="moblieNumber" maxlength="32" name="dealerVO.moblieNumber" /><span class="tj_bt">*</span><span>比如：13111110101</span></td>
+	                            </tr>
+	                            <tr>
+	                            	<th>固定电话</th>
+	                                <td><s:textfield id="telephone" maxlength="32" name="dealerVO.telephone" /><span>比如： 010-88888888</span></td>
+	                            </tr>
+	                             <tr>
+	                            	<th>qq</th>
+	                                <td><s:textfield id="qqNumber" maxlength="16" name="dealerVO.qqNumber" /></td>
+	                            </tr>
+	                           	<tr>
+	                            	<th>邮箱</th>
+	                                <td><s:textfield id="email" maxlength="16" name="dealerVO.email" /></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>状态</th>
 	                                <td>
-	                                	<select id="state" name="partnerVO.state">
+	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="dealerVO.state"  id="state" headerKey="" headerValue="请选择"/>
+	                                	<%-- <select id="state" name="dealerVO.state">
 	                                		<option value="">请选择</option>
 	                                		<option value="1">未使用</option>
 	                                		<option value="2">使用中</option>
 	                                		<option value="3">冻结</option>
-	                                	</select>
+	                                	</select> --%>
 	                                	 <span class="tj_bt">*</span>
 	                                </td>
 	                            </tr>	
 	                            <tr>
-	                            	<th>公司名称</th>
-	                                <td><s:textfield id="company" maxlength="32" name="partnerVO.company" /><span class="tj_bt">*</span></td>
-	                            </tr>
-	                            <tr>
 	                            	<th>地址</th>
-	                                <td><s:textfield id="address" maxlength="32" name="partnerVO.address" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="address" maxlength="32" name="dealerVO.address" /></td>
 	                            </tr>
 	                            <tr>
-	                            	<th>版权</th>
-	                                <td><s:textfield id="copyright" maxlength="32" name="partnerVO.copyright" /><span>例如: © 2013-2020 ******有限公司</span></td>
+	                            	<th>技术联系人</th>
+	                                <td><s:textfield id="techSupportPerson" maxlength="32" name="dealerVO.techSupportPerson" /></td>
 	                            </tr>
 	                            <tr>
-	                            	<th>版权URL</th>
-	                                <td><s:textfield id="copyrightUrl" maxlength="32" name="partnerVO.copyrightUrl" /><span>例如: http://www.****.com</span></td>
+	                            	<th>技术联系电话</th>
+	                                <td><s:textfield id="techSupportPhone" maxlength="32" name="dealerVO.techSupportPhone" /></td>
 	                            </tr>
 	                            <tr>
 	                                <th>备注</th>
 	                                <td>
-	                                	<s:textarea id="remark" cols="25" rows="4" name="partnerVO.remark"></s:textarea>
+	                                	<s:textarea id="remark" cols="25" rows="4" name="dealerVO.remark"></s:textarea>
 	                                </td>
 	                            </tr>
 	                        </tbody>
@@ -114,21 +106,22 @@
 			$("#loginId").focus();
 		});	
 	
+		//TODO 校验QQ
 		function createPartner() {
 			var loginId = $("#loginId").val();
 			var loginPwd = $("#loginPwd").val();
 			var contactor = $("#contactor").val();
-			var telephone = $("#telephone").val();
 			var moblieNumber = $("#moblieNumber").val();
-			var contractBegin = $("#contractBegin").val();
-			var contractEnd = $("#contractEnd").val();
 			var state = $("#state").val();
 			var feeRate = $("#feeRate").val();
-			var balance = $("#balance").val();
-			var company = $("#company").val();
-			var address = $("#address").val();
-			
+			var company = $("#company").val();			
 			var remark = $("#remark").val();
+			
+			var telephone = $("#telephone").val();
+			var qqNumber = $("#qqNumber").val();
+			var email = $("#email").val();
+			var email = $("#email").val();
+			var techSupportPhone = $("#techSupportPhone").val();
 			
 			if (isBlank(loginId)) {
 				alert("登录名不能为空！");
@@ -154,31 +147,13 @@
 				alert("分润费率只能填正整数！");
 				$("#feeRate").focus();
 				return false;
-			} else if (isBlank(balance)) {
-				alert("余额不能为空！");
-				$("#balance").focus();
-				return false;
-			} else if (!isPositiveInteger(balance)) {
-				alert("余额只能填整数！");
-				$("#balance").focus();
-				return false;
-			} else if (isBlank(contractBegin)) {
-				alert("使用期限不能为空！");
-				return false;
-			} else if (isBlank(contractEnd)) {
-				alert("使用期限不能为空！");
-				return false;
 			} else if (isBlank(contactor)) {
 				alert("联系人不能为空！");
 				$("#contactor").focus();
 				return false;
-			} else if (isBlank(telephone)) {
-				alert("固定电话不能为空！");
-				$("#telephone").focus();
-				return false;
-			} else if (!islineTel(telephone)) {
-				alert("固定电话应为7-18位数字或-！");
-				$("#telephone").focus();
+			} else if (isBlank(company)) {
+				alert("公司不能为空！");
+				$("#company").focus();
 				return false;
 			} else if (isBlank(moblieNumber)) {
 				alert("手机号码不能为空！");
@@ -188,17 +163,21 @@
 				alert("手机号码格式不正确！");
 				$("#moblieNumber").focus();
 				return false;
+			} else if (!isBlank(telephone) && !islineTel(telephone)) {
+				alert("固定电话应为7-18位数字或-！");
+				$("#telephone").focus();
+				return false;
+			} else if (!isBlank(email) && !isEmail(email)) {
+				alert("邮箱格式不正确！");
+				$("#email").focus();
+				return false;
 			} else if (isBlank(state)) {
 				alert("状态不能为空！");
 				$("#state").focus();
 				return false;
-			} else if (isBlank(company)) {
-				alert("公司不能为空！");
-				$("#company").focus();
-				return false;
-			} else if (isBlank(address)) {
-				alert("地址不能为空！");
-				$("#address").focus();
+			} else if (!isBlank(techSupportPhone) && (!isMobile(moblieNumber) || !islineTel(techSupportPhone))) {
+				alert("技术联系电话应为固定电话或者手机！");
+				$("#telephone").focus();
 				return false;
 			} else if (remark.length > 256) {
 				alert("备注长度不能大于256！");
@@ -210,7 +189,7 @@
 				return false;
 			}
 			
-			$("#partnerForm").submit();
+			$("#dealerForm").submit();
 		}
 		
 		function returnList() {

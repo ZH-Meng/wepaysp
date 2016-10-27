@@ -8,7 +8,7 @@ public class DealerVO implements Serializable {
 
 	private String iwoid;
 	private String partnerOid;
-	private String partnerName;
+	private String partnerCompany;
 	private String dealerId;
 	private String contactor;
 	private String company;
@@ -44,15 +44,15 @@ public class DealerVO implements Serializable {
 		this.partnerOid = partnerOid;
 	}
 
-	public String getPartnerName() {
-		return partnerName;
-	}
+    public String getPartnerCompany() {
+        return partnerCompany;
+    }
+    
+    public void setPartnerCompany(String partnerCompany) {
+        this.partnerCompany = partnerCompany;
+    }
 
-	public void setPartnerName(String partnerName) {
-		this.partnerName = partnerName;
-	}
-
-	public String getDealerId() {
+    public String getDealerId() {
 		return dealerId;
 	}
 

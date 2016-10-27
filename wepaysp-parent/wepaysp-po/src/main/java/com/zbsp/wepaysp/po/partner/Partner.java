@@ -21,7 +21,7 @@ public class Partner
     private String iwoid;
     private Integer level;
     private Partner parentPartner;
-    private String partneId;
+    private String partnerId;
     private Date contractBegin;
     private Date contractEnd;
     private Integer feeRate;
@@ -100,15 +100,14 @@ public class Partner
         this.parentPartner = parentPartner;
     }
     
-    @Column(name = "PARTNE_ID", length = 32)
-    public String getPartneId() {
-        return this.partneId;
+    @Column(name = "PARTNER_ID", length = 32)
+    public String getPartnerId() {
+        return partnerId;
     }
-
-    public void setPartneId(String partneId) {
-        this.partneId = partneId;
+    
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
     }
-
 
     @Temporal(TemporalType.DATE)
     @Column(name = "CONTRACT_BEGIN", nullable = false, length = 0)

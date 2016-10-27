@@ -33,7 +33,9 @@ public class ManageUser extends User {
 
     private String loginToken;
     
-    private Integer dataPermissionType;
+    private Integer userLevel;
+    
+    private Integer dataPermissionType;    
     
     private Partner dataPartner;
     
@@ -45,13 +47,14 @@ public class ManageUser extends User {
     
     private String roleIndex;
 
-    public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer dataPermissionType, Partner dataPartner,
+    public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer userLevel,Integer dataPermissionType, Partner dataPartner,
     		Dealer dataDealer, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.iwoid = iwoid;
         this.userId = userId;
         this.loginToken = loginToken;
+        this.userLevel = userLevel;
         this.dataPermissionType = dataPermissionType;
         this.dataPartner = dataPartner;
         this.dataDealer = dataDealer;
@@ -66,6 +69,14 @@ public class ManageUser extends User {
 
     public void setLoginToken(String loginToken) {
         this.loginToken = loginToken;
+    }
+
+    public Integer getUserLevel() {
+        return userLevel;
+    }
+    
+    public void setUserLevel(Integer userLevel) {
+        this.userLevel = userLevel;
     }
 
     public Integer getDataPermissionType() {

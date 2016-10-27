@@ -9,7 +9,8 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.zbsp.wepaysp.common.config.NestedRoleCode;
+import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
+import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
@@ -20,7 +21,6 @@ import com.zbsp.wepaysp.po.manage.SysAuthority;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.po.manage.SysUser.userLevel;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.service.BaseService;
 import com.zbsp.wepaysp.service.manage.SysLogService;
@@ -38,8 +38,8 @@ public class PartnerServiceImpl
     public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid) {
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空");
         PartnerVO partnerVO = new PartnerVO();
-        Partner partner = commonDAO.findObject(Partner.class, partnerOid);        
-        
+        Partner partner = commonDAO.findObject(Partner.class, partnerOid);
+
         if (partner != null) {
             BeanCopierUtil.copyProperties(partner, partnerVO);
             // 查找用户
@@ -201,30 +201,40 @@ public class PartnerServiceImpl
             throw new AlreadyExistsException("登录名重复！");
         }
 
-        SysUser newUser = new SysUser();
+        // 创建服务商
         Partner partner = new Partner();
+        BeanCopierUtil.copyProperties(partnerVO, partner);
+        partner.setIwoid(Generator.generateIwoid());
+        
+        // 获取 服务商ID 下一个序列值
+        sql = "select nextval('" + SysSequenceCode.PARTNER + "') as sequence_value";
+        paramMap.clear();
+        // paramMap.put("SEQUENCE_NAME", SysSequenceCode.PARTNER);
+        Object seqObj = commonDAO.findObject(sql, paramMap, true);
+        if (seqObj == null) {
+            throw new IllegalArgumentException("服务商Id对应序列记录不存在");
+        }
+        String partnerId = Generator.generateSequenceNum((Integer) seqObj);
+        partner.setPartnerId(partnerId);
+        
+        // 查找父服务商
         Partner parentPartner = null;
         SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
-        // 查找父服务商
         if (user != null && user.getPartner() != null) {
-            //parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
-        	parentPartner = user.getPartner().getParentPartner();
+            // parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
+            parentPartner = user.getPartner();
         }
-
-        // 保存服务商
-        BeanCopierUtil.copyProperties(partnerVO, partner);
         if (parentPartner != null) {
             partner.setParentPartner(parentPartner);
             partner.setLevel(parentPartner.getLevel() + 1);
         } else {
             partner.setLevel(1);// 顶级服务商
         }
-        partner.setIwoid(Generator.generateIwoid());
-        // TODO 服务商ID
         partner.setCreator(creator);
         commonDAO.save(partner, false);
 
-        // 保存用户
+        // 创建服务商用户
+        SysUser newUser = new SysUser();
         newUser.setIwoid(Generator.generateIwoid());
         newUser.setState(SysUser.State.normal.getValue());
         newUser.setUserId(partnerVO.getLoginId());
@@ -241,7 +251,7 @@ public class PartnerServiceImpl
         } else if (partner.getLevel() == 3) {
             newUser.setDataPermisionType(SysUser.DataPermisionType.partner3.getValue());
         }
-        newUser.setUserLevel(userLevel.partner.getValue());
+        newUser.setUserLevel(SysUser.UserLevel.partner.getValue());
         newUser.setPartner(partner);
         newUser.setCreator(creator);
         commonDAO.save(newUser, false);
@@ -249,11 +259,11 @@ public class PartnerServiceImpl
         // 设置默认角色
         String roleCode = "";
         if (partner.getLevel() == 1) {
-            roleCode = NestedRoleCode.SERVICE_PROVIDER;
+            roleCode = SysNestedRoleCode.PARTNER1;
         } else if (partner.getLevel() == 2) {
-            roleCode = NestedRoleCode.FIRST_LEVEL_AGENT;
+            roleCode = SysNestedRoleCode.PARTNER2;
         } else if (partner.getLevel() == 3) {
-            roleCode = NestedRoleCode.SECOND_LEVEL_AGENT;
+            roleCode = SysNestedRoleCode.PARTNER3;
         }
 
         sql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
@@ -284,7 +294,7 @@ public class PartnerServiceImpl
         Date processTime = new Date();
 
         // 增加服务商日志
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建服务商[服务商ID=" + partner.getPartneId() + ", 公司=" + partner.getCompany() + ", 联系人=" + partner.getContactor() + "]", processTime, processTime, null, partner.toString(), SysLog.State.success.getValue(), partner.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建服务商[服务商ID=" + partner.getPartnerId() + ", 公司=" + partner.getCompany() + ", 联系人=" + partner.getContactor() + "]", processTime, processTime, null, partner.toString(), SysLog.State.success.getValue(), partner.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
         // 添加用户日志logFunctionOid 存 服务商添加按钮oid
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime, null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
 
