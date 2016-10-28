@@ -145,28 +145,29 @@ public class PartnerAction
     public String updatePartner() {
         logger.info("开始修改代理商.");
         try {
-            if (partnerVO == null) {
-                logger.warn("修改代理商失败，参数" + partnerVO + "为空！");
+            if (partnerVO != null && StringUtils.isNotBlank(partnerVO.getIwoid())) {
+                partnerVO.setContractBegin(convertS2D(contractBegin));
+                partnerVO.setContractEnd(convertS2D(contractEnd));
+                
+                ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                partnerService.doTransUpdatePartner(partnerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                logger.info("代理商" + partnerVO.getCompany() + "修改成功");
+                setAlertMessage("代理商" + partnerVO.getCompany() + "修改成功");
+                partnerVO = null;
+            } else {
+                logger.warn("修改代理商失败，参数partnerVO或者partnerVO.getIwoid()为空！");
                 setAlertMessage("修改代理商失败！");
             }
-            partnerVO.setContractBegin(convertS2D(contractBegin));
-            partnerVO.setContractEnd(convertS2D(contractEnd));
-
-            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            partnerService.doTransUpdatePartner(partnerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
-            logger.info("代理商" + partnerVO.getCompany() + "修改成功");
-            setAlertMessage("代理商" + partnerVO.getCompany() + "修改成功");
-            partnerVO = null;
         } catch (NotExistsException e) {
             logger.error("代理商修改失败：" + e.getMessage());
             setAlertMessage("代理商修改失败：" + e.getMessage());
-            return "updatePartner";
+            return list();
         } catch (Exception e) {
-            logger.error("代理商添加错误：" + e.getMessage());
-            setAlertMessage("代理商添加错误：" + e.getMessage());
+            logger.error("代理商修改错误：" + e.getMessage());
+            setAlertMessage("代理商修改错误：" + e.getMessage());
             return "updatePartner";
         }
-        return list();
+        return "updatePartner";
     }
 
     private Date convertS2D(String dateStr) {

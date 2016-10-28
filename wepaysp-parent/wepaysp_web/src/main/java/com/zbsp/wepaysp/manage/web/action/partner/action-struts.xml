@@ -14,6 +14,13 @@
 			<result name="dealerList">/resources/partner/dealerList.jsp</result>
 			<result name="createDealer">/resources/partner/createDealer.jsp</result>
 			<result name="updateDealer">/resources/partner/updateDealer.jsp</result>
+			<result name="updateDealerBase">/resources/partner/updateDealerBase.jsp</result>
+		</action>
+		<!-- 门店管理 -->
+		<action name="storemanage" class="storeAction">
+			<result name="storeList">/resources/partner/storeList.jsp</result>
+			<result name="createStore">/resources/partner/createStore.jsp</result>
+			<result name="updateStore">/resources/partner/updateStore.jsp</result>
 		</action>
 	</package>
 </struts>

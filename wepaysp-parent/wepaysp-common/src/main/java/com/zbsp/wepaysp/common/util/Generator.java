@@ -20,7 +20,7 @@ import java.util.UUID;
  */
 public final class Generator {
     public static void main(String[] args) {
-        System.out.println(generateSequenceNum(1));
+        System.out.println(generateSequenceNum(1, 100000));
     }
     
     /**
@@ -28,8 +28,7 @@ public final class Generator {
      * 
      * @return 
      */
-    public static String generateSequenceNum(int nextval) {
-        int multiple = 100000;
+    public static String generateSequenceNum(int nextval, int multiple) {
         String seqPrefix = DateUtil.getDate(new Date(), "YYYYMMdd").substring(2);
         return (new BigDecimal(Long.valueOf(seqPrefix)).multiply(new BigDecimal(multiple)).add(new BigDecimal(nextval))).toString();
     }

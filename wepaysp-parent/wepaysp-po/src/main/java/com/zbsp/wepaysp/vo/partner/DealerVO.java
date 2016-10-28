@@ -2,6 +2,11 @@ package com.zbsp.wepaysp.vo.partner;
 
 import java.io.Serializable;
 
+/**
+ * 商户VO
+ * 
+ * @author 孟郑宏
+ */
 public class DealerVO implements Serializable {
 
 	private static final long serialVersionUID = 2712799168814035691L;
@@ -27,6 +32,7 @@ public class DealerVO implements Serializable {
 	
     private String loginId;
     private String loginPwd;
+    private String coreDataFlag;// on;off 顶级服务商可以编辑商户核心数据，其他用户不可以 
 
 	public String getIwoid() {
 		return iwoid;
@@ -187,5 +193,13 @@ public class DealerVO implements Serializable {
 	public void setLoginPwd(String loginPwd) {
 		this.loginPwd = loginPwd;
 	}
+    
+    public String getCoreDataFlag() {
+        return coreDataFlag;
+    }
+    
+    public void setCoreDataFlag(String coreDataFlag) {
+        this.coreDataFlag = coreDataFlag;
+    }
 
 }

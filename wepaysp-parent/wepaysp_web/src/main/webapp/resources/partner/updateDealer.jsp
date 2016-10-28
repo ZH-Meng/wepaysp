@@ -19,6 +19,7 @@
 	    <div class="bgtj">
 	    	<form action="<%=request.getContextPath()%>/resources/partner/dealermanage!updateDealer.action" method="post" id="dealerForm">
 	    		<s:hidden id="iwoid" name="dealerVO.iwoid"/>
+	    		<s:hidden id="coreDataFlag" name="coreDataFlag"/>
 	            <ul class="bg_tjtab">
 	                <li class="bg_tjall">
 	                	<table>
@@ -60,7 +61,7 @@
 	                                <td><s:textfield id="telephone" maxlength="32" name="dealerVO.telephone" /><span>比如： 010-88888888</span></td>
 	                            </tr>
 	                             <tr>
-	                            	<th>qq</th>
+	                            	<th>QQ</th>
 	                                <td><s:textfield id="qqNumber" maxlength="16" name="dealerVO.qqNumber" /></td>
 	                            </tr>
 	                           	<tr>
@@ -86,6 +87,17 @@
 	                            	<th>技术联系电话</th>
 	                                <td><s:textfield id="techSupportPhone" maxlength="32" name="dealerVO.techSupportPhone" /></td>
 	                            </tr>
+	                            <%-- 商户核心数据 --%>
+	                            <s:if test="dealerVO != null && 'on' == dealerVO.coreDataFlag">
+	                            	<tr>
+		                            	<th>子商户公众号ID</th>
+		                                <td><s:textfield id="subAppid" maxlength="32" name="dealerVO.subAppid" /></td>
+		                            </tr>
+		                            <tr>
+		                            	<th>子商户号</th>
+		                                <td><s:textfield id="subMchId" maxlength="32" name="dealerVO.subMchId" /></td>
+		                            </tr>
+	                            </s:if>	                            
 	                            <tr>
 	                                <th>备注</th>
 	                                <td>
@@ -112,18 +124,17 @@
 			$("#loginId").focus();
 		});	
 		
-		//TODO 校验QQ
 		function updateDealer() {
-			var contactor = $("#contactor").val();
-			var moblieNumber = $("#moblieNumber").val();
-			var state = $("#state").val();
 			var feeRate = $("#feeRate").val();
+			var contactor = $("#contactor").val();
 			var company = $("#company").val();			
-			var remark = $("#remark").val();
-			
+			var moblieNumber = $("#moblieNumber").val();
 			var telephone = $("#telephone").val();
-			var qqNumber = $("#qqNumber").val();
 			var email = $("#email").val();
+			var qqNumber = $("#qqNumber").val();
+			var state = $("#state").val();
+			var techSupportPhone = $("#techSupportPhone").val();
+			var remark = $("#remark").val();			
 			
 			if (isBlank(feeRate)) {
 				alert("分润费率不能为空！");
@@ -149,17 +160,25 @@
 				alert("手机号码格式不正确！");
 				$("#moblieNumber").focus();
 				return false;
-			} else if (!islineTel(telephone)) {
+			} else if (!isBlank(telephone) && !islineTel(telephone)) {
 				alert("固定电话应为7-18位数字或-！");
 				$("#telephone").focus();
 				return false;
-			} else if (!isEmail(email)) {
+			} else if (!isBlank(qqNumber) && !isQQ(qqNumber)) {
+				alert("QQ号码格式不正确！");
+				$("#qqNumber").focus();
+				return false;
+			} else if (!isBlank(email) && !isEmail(email)) {
 				alert("邮箱格式不正确！");
 				$("#email").focus();
 				return false;
 			} else if (isBlank(state)) {
 				alert("状态不能为空！");
 				$("#state").focus();
+				return false;
+			} else if (!isBlank(techSupportPhone) && (!isMobile(moblieNumber) || !islineTel(techSupportPhone))) {
+				alert("技术联系电话应为固定电话或者手机！");
+				$("#telephone").focus();
 				return false;
 			} else if (remark.length > 256) {
 				alert("备注长度不能大于256！");
@@ -170,7 +189,6 @@
 			if (!window.confirm("确认修改？")) {
 				return false;
 			}
-			
 			$("#dealerForm").submit();
 		}
 		
@@ -186,7 +204,7 @@
 
 			var prefix = actionURL.substring(lastLine + 1, lastPoint);
 
-			formObj.action = prefix + "!goCurrent.action";
+			formObj.action = prefix + "!goCurrent.action?dealerVO.coreDataFlag=${dealerVO.coreDataFlag}";
 			formObj.submit();
 		}
 	</script>	

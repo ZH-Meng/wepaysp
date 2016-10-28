@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
+import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
@@ -214,7 +215,7 @@ public class PartnerServiceImpl
         if (seqObj == null) {
             throw new IllegalArgumentException("服务商Id对应序列记录不存在");
         }
-        String partnerId = Generator.generateSequenceNum((Integer) seqObj);
+        String partnerId = Generator.generateSequenceNum((Integer) seqObj, SysSequenceMultiple.PARTNER);
         partner.setPartnerId(partnerId);
         
         // 查找父服务商

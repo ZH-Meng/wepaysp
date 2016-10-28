@@ -141,4 +141,9 @@ public class Store
         this.remark = remark;
     }
 
+    @Override
+    public String toString() {
+        return "Store [iwoid=" + iwoid + ", dealer=" + dealer + ", storeId=" + storeId + ", storeName=" + storeName + ", storeAddress=" + storeAddress + ", storeTel=" + storeTel + ", qrCode=" + qrCode + "]";
+    }
+    
 }

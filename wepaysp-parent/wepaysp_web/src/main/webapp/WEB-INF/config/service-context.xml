@@ -34,4 +34,12 @@
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	
+	<bean id="storeService" class="com.zbsp.wepaysp.service.partner.impl.StoreServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="partnerEmployeeService" class="com.zbsp.wepaysp.service.partner.impl.PartnerEmployeeServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
 </beans>

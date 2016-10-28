@@ -13,6 +13,7 @@
 		<div class="bgposition">您现在的位置：代理商管理&gt;商户信息管理</div>
 		<s:form method="post">
 			<s:hidden id="iwoid" name="dealerVO.iwoid"/>
+			<s:hidden id="coreDataFlag" name="dealerVO.coreDataFlag"/>
 			<div class="bgtj">
 				<ul class="tj_title">
 					<li>查询条件</li>
@@ -37,20 +38,31 @@
 						</table>
 					</li>
 					<li class="bg_button">
-						<manage:permission validateUrl="/resources/partner/dealermanage!goToCreateDealer.action">
-			        		<manage:pass>
-								<a href="javascript:void(0);" onclick="toCreateDealer()">创建商户</a>
-			        		</manage:pass>
-			            </manage:permission>
-			            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealer.action">
-			        		<manage:pass>
-			        			<s:set var="hasUpdatePermission">yes</s:set>
-			        		</manage:pass>
-			        		<manage:notPass>
-			        			<s:set var="hasUpdatePermission">no</s:set>
-			        		</manage:notPass>
-			            </manage:permission>
-			            
+						<s:if test="dealerVO != null && 'on' == dealerVO.coreDataFlag">
+				            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealerCore.action">
+				        		<manage:pass>
+				        			<s:set var="hasUpdateCorePermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasUpdateCorePermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
+						</s:if>
+						<s:else>
+							<manage:permission validateUrl="/resources/partner/dealermanage!goToCreateDealer.action">
+				        		<manage:pass>
+									<a href="javascript:void(0);" onclick="toCreateDealer()">创建商户</a>
+				        		</manage:pass>
+				            </manage:permission>
+				            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealer.action">
+				        		<manage:pass>
+				        			<s:set var="hasUpdatePermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasUpdatePermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
+						</s:else>
 						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>						
 					</li>
 				</ul>
@@ -122,9 +134,12 @@
 						  				<s:property value="#dealerVo.techSupportPhone" />
 						  			</td>
 						  			<td title="修改">
-						  				<s:if test="#hasUpdatePermission eq 'yes' && #dealerVo.state != 3">
-						  					<a href="javascript:void(0);" onclick="toUpdateDealer('<s:property value="#dealerVo.iwoid" />')">修改</a>
+	  									<s:if test="#hasUpdateCorePermission eq 'yes' && #dealerVo.state != 3">
+						  					<a href="javascript:void(0);" onclick="toUpdateDealerCore('<s:property value="#dealerVo.iwoid" />')">修改</a>
 						  				</s:if>
+						  				<s:elseif test="#hasUpdatePermission eq 'yes' && #dealerVo.state != 3">
+						  					<a href="javascript:void(0);" onclick="toUpdateDealer('<s:property value="#dealerVo.iwoid" />')">修改</a>
+						  				</s:elseif>
 						  				<s:else><strong>修改</strong></s:else>
 						  			</td>
 						  		</tr>
@@ -155,6 +170,10 @@
 		function toUpdateDealer(iwoid){
 			$("#iwoid").val(iwoid);
 			invokeAction('goToUpdateDealer');
+		}
+		function toUpdateDealerCore(iwoid){
+			$("#iwoid").val(iwoid);
+			invokeAction('goToUpdateDealerCore');
 		}
 	</script>
 	

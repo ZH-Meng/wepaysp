@@ -48,7 +48,7 @@
 	                                <td><s:textfield id="telephone" maxlength="32" name="dealerVO.telephone" /><span>比如： 010-88888888</span></td>
 	                            </tr>
 	                             <tr>
-	                            	<th>qq</th>
+	                            	<th>QQ</th>
 	                                <td><s:textfield id="qqNumber" maxlength="16" name="dealerVO.qqNumber" /></td>
 	                            </tr>
 	                           	<tr>
@@ -90,7 +90,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="createPartner();return false;">新增</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="createDealer();return false;">新增</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -106,22 +106,19 @@
 			$("#loginId").focus();
 		});	
 	
-		//TODO 校验QQ
-		function createPartner() {
+		function createDealer() {
 			var loginId = $("#loginId").val();
 			var loginPwd = $("#loginPwd").val();
-			var contactor = $("#contactor").val();
-			var moblieNumber = $("#moblieNumber").val();
-			var state = $("#state").val();
 			var feeRate = $("#feeRate").val();
+			var contactor = $("#contactor").val();
 			var company = $("#company").val();			
-			var remark = $("#remark").val();
-			
+			var moblieNumber = $("#moblieNumber").val();
 			var telephone = $("#telephone").val();
+			var email = $("#email").val();
 			var qqNumber = $("#qqNumber").val();
-			var email = $("#email").val();
-			var email = $("#email").val();
+			var state = $("#state").val();
 			var techSupportPhone = $("#techSupportPhone").val();
+			var remark = $("#remark").val();
 			
 			if (isBlank(loginId)) {
 				alert("登录名不能为空！");
@@ -166,6 +163,10 @@
 			} else if (!isBlank(telephone) && !islineTel(telephone)) {
 				alert("固定电话应为7-18位数字或-！");
 				$("#telephone").focus();
+				return false;
+			} else if (!isBlank(qqNumber) && !isQQ(qqNumber)) {
+				alert("QQ号码格式不正确！");
+				$("#qqNumber").focus();
 				return false;
 			} else if (!isBlank(email) && !isEmail(email)) {
 				alert("邮箱格式不正确！");
