@@ -19,6 +19,11 @@ import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 
+/**
+ * 服务商（代理商管理）
+ * @author mengzh
+ *
+ */
 public class PartnerAction
     extends PageAction
     implements SessionAware {

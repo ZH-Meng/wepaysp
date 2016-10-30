@@ -8,18 +8,18 @@ package com.zbsp.wepaysp.common.config;
 public class SysSequenceMultiple {
 
     /** 服务商序列名中1的整数倍数-> partner表 partnerId */
-    public static int PARTNER = 10;
+    public static int PARTNER = 100;
 
     /** 商户序列名中1的整数倍数-> dealer表 dealerId */
-    public static int DEALER = 100;
+    public static int DEALER = 1000;
 
     /** 门店序列名中1的整数倍数-> store表 storeId */
-    public static int STORE = 100;
+    public static int STORE = 1000;
 
     /** 服务商员工（业务员）序列名中1的整数倍数 -> partner_employee表 partnerEmployeeId */
-    public static int PARTNER_EMPLOYEE = 1000;
+    public static int PARTNER_EMPLOYEE = 10000;
 
     /** 商户员工（收银员） 序列名中1的整数倍数 -> dealer_employee表 dealerEmployeeId */
-    public static int DEALER_EMPLOYEE = 10000;
+    public static int DEALER_EMPLOYEE = 100000;
 
 }

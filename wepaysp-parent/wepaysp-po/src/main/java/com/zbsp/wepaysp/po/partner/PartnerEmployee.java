@@ -131,4 +131,10 @@ public class PartnerEmployee
         this.remark = remark;
     }
 
+	@Override
+	public String toString() {
+		return "PartnerEmployee [iwoid=" + iwoid + ", partnerEmployeeId=" + partnerEmployeeId + ", employeeName="
+				+ employeeName + ", moblieNumber=" + moblieNumber + ", state=" + state + "]";
+	}
+
 }

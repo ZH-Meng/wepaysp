@@ -22,5 +22,19 @@
 			<result name="createStore">/resources/partner/createStore.jsp</result>
 			<result name="updateStore">/resources/partner/updateStore.jsp</result>
 		</action>
+		<!-- 服务商员工管理 -->
+		<action name="partneremployeemanage" class="partnerEmployeeAction">
+			<result name="partnerEmployeeList">/resources/partner/partnerEmployeeList.jsp</result>
+			<result name="createPartnerEmployee">/resources/partner/createPartnerEmployee.jsp</result>
+			<result name="updatePartnerEmployee">/resources/partner/updatePartnerEmployee.jsp</result>
+		</action>
+		<!-- 商户员工管理 -->
+		<action name="dealeremployeemanage" class="dealerEmployeeAction">
+			<result name="dealerEmployeeList">/resources/partner/dealerEmployeeList.jsp</result>
+			<result name="createDealerEmployee">/resources/partner/createDealerEmployee.jsp</result>
+			<result name="updateDealerEmployee">/resources/partner/updateDealerEmployee.jsp</result>
+			<result name="resetRefundPwd">/resources/partner/resetRefundPwd.jsp</result>
+			<result name="modifyRefundPwd">/resources/partner/modifyRefundPwd.jsp</result>
+		</action>
 	</package>
 </struts>

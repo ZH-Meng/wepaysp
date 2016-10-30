@@ -15,7 +15,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import com.zbsp.wepaysp.po.partner.Dealer;
+import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 
 
 /**
@@ -41,6 +43,10 @@ public class ManageUser extends User {
     
     private Dealer dataDealer;
     
+    private PartnerEmployee dataPartnerEmployee;
+    
+    private DealerEmployee dataDealerEmployee;    
+    
     private String lastLoginIp;
     
     private Date lastLoginTime;
@@ -48,7 +54,7 @@ public class ManageUser extends User {
     private String roleIndex;
 
     public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer userLevel,Integer dataPermissionType, Partner dataPartner,
-    		Dealer dataDealer, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
+    		Dealer dataDealer, PartnerEmployee dataPartnerEmployee, DealerEmployee dataDealerEmployee, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.iwoid = iwoid;
@@ -58,6 +64,8 @@ public class ManageUser extends User {
         this.dataPermissionType = dataPermissionType;
         this.dataPartner = dataPartner;
         this.dataDealer = dataDealer;
+        this.dataPartnerEmployee = dataPartnerEmployee;
+        this.dataDealerEmployee = dataDealerEmployee;
         this.lastLoginIp = lastLoginIp;
         this.lastLoginTime = lastLoginTime;
         this.roleIndex = roleIndex;
@@ -101,6 +109,22 @@ public class ManageUser extends User {
 
 	public void setDataDealer(Dealer dataDealer) {
 		this.dataDealer = dataDealer;
+	}
+	
+	public PartnerEmployee getDataPartnerEmployee() {
+		return dataPartnerEmployee;
+	}
+
+	public void setDataPartnerEmployee(PartnerEmployee dataPartnerEmployee) {
+		this.dataPartnerEmployee = dataPartnerEmployee;
+	}
+
+	public DealerEmployee getDataDealerEmployee() {
+		return dataDealerEmployee;
+	}
+
+	public void setDataDealerEmployee(DealerEmployee dataDealerEmployee) {
+		this.dataDealerEmployee = dataDealerEmployee;
 	}
 
 	public String getLastLoginIp() {

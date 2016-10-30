@@ -16,6 +16,12 @@ import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.service.partner.DealerService;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
 
+/**
+ * 商户管理
+ * 
+ * @author mengzh
+ *
+ */
 public class DealerAction
     extends PageAction
     implements SessionAware {
@@ -150,9 +156,10 @@ public class DealerAction
     public String goToUpdateDealer() {
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
+            String coreDataFlag = "off";
             if (dealerVO != null && StringUtils.isNotBlank(dealerVO.getIwoid())) {
                 if ("on".equals(dealerVO.getCoreDataFlag())) {// 顶级服务商权限
+                	coreDataFlag = "on";
                     logger.info("跳转修改商户页面-含交易核心数据.");
                     if (!isTopPartner(manageUser)) {
                         logger.warn("角色分配不当：非顶级服务商（代理商）不能修改商户交易核心数据");
@@ -169,7 +176,8 @@ public class DealerAction
                 }
                 
                 dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerVO.getIwoid());
-                if (!"on".equals(dealerVO.getCoreDataFlag())) {
+                dealerVO.setCoreDataFlag(coreDataFlag);
+                if (!"on".equals(coreDataFlag)) {
                     dealerVO.setSubAppid(null);
                     dealerVO.setSubMchId(null);                    
                 }
@@ -290,7 +298,6 @@ public class DealerAction
                 dealerService.doTransUpdateDealer(dealerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 logger.info("商户" + dealerVO.getCompany() + "修改成功");
                 setAlertMessage("商户" + dealerVO.getCompany() + "修改成功");
-                dealerVO = null;
             } else {
                 logger.warn("修改商户失败，参数dealerVO或者dealerVO.getIwoid()为空！");
                 setAlertMessage("修改商户失败！");

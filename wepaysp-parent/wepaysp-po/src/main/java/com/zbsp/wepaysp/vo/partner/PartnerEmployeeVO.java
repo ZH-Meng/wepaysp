@@ -3,7 +3,7 @@ package com.zbsp.wepaysp.vo.partner;
 import java.io.Serializable;
 
 /**
- * 服务商（代理商）员工VO
+ * 代理商员工（业务员）VO
  * 
  * @author 孟郑宏
  */
@@ -19,7 +19,9 @@ public class PartnerEmployeeVO
     private String employeeName;
     private String moblieNumber;
     private String state;
+    private String remark;
     private String loginId;
+    private String loginPwd;
     
     public String getIwoid() {
         return iwoid;
@@ -61,6 +63,14 @@ public class PartnerEmployeeVO
         this.state = state;
     }
     
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+    
     public String getLoginId() {
         return loginId;
     }
@@ -69,4 +79,12 @@ public class PartnerEmployeeVO
         this.loginId = loginId;
     }
     
+	public String getLoginPwd() {
+		return loginPwd;
+	}
+
+	public void setLoginPwd(String loginPwd) {
+		this.loginPwd = loginPwd;
+	}
+	
 }

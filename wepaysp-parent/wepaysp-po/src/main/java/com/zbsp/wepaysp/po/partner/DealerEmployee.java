@@ -152,4 +152,10 @@ public class DealerEmployee
         this.remark = remark;
     }
 
+	@Override
+	public String toString() {
+		return "DealerEmployee [iwoid=" + iwoid + ", dealerEmployeeId=" + dealerEmployeeId + ", employeeName="
+				+ employeeName + ", moblieNumber=" + moblieNumber + ", state=" + state + "]";
+	}
+
 }

@@ -7,7 +7,6 @@
 	<title>商户信息维护</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
-	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
 		.bg_tjall th {width: 45%;}

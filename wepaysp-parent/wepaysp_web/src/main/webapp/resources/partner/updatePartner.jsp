@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>创建子代理商</title>
+	<title>添加子代理商</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>

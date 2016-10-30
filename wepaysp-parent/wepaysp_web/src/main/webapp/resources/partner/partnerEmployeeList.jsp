@@ -5,14 +5,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>门店信息管理</title>
+	<title>代理商员工管理</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：商户信息管理&gt;门店信息管理</div>
+		<div class="bgposition">您现在的位置：代理商员工管理&gt;员工管理</div>
 		<s:form method="post">
-			<s:hidden id="iwoid" name="storeVO.iwoid"/>
+			<s:hidden id="iwoid" name="partnerEmployeeVO.iwoid"/>
 			<div class="bgtj">
 				<ul class="tj_title">
 					<li>查询条件</li>
@@ -22,21 +22,21 @@
 						<table>
 							<tbody>
 								<tr>
-									<th>联系电话</th>
-									<td><s:textfield name="storeVO.storeTel" id="storeTel" maxlength="20"/></td>
-									<th>门店名称</th>
-									<td><s:textfield name="storeVO.storeName" id="storeName" maxlength="20"/></td>
+									<th>姓名</th>
+									<td><s:textfield name="partnerEmployeeVO.employeeName" id="employeeName" maxlength="20"/></td>
+									<th>手机号码</th>
+									<td><s:textfield name="partnerEmployeeVO.moblieNumber" id="moblieNumber" maxlength="20"/></td>
 								</tr>
 							</tbody>
 						</table>
 					</li>
 					<li class="bg_button">
-						<manage:permission validateUrl="/resources/partner/storemanage!goToCreateStore.action">
+						<manage:permission validateUrl="/resources/partner/partneremployeemanage!goToCreatePartnerEmployee.action">
 			        		<manage:pass>
-								<a href="javascript:void(0);" onclick="toCreateStore()">添加门店</a>
+								<a href="javascript:void(0);" onclick="toCreatePartnerEmployee()">添加员工</a>
 			        		</manage:pass>
 			            </manage:permission>
-			            <manage:permission validateUrl="/resources/partner/storemanage!goToUpdateStore.action">
+			            <manage:permission validateUrl="/resources/partner/partneremployeemanage!goToUpdatePartnerEmployee.action">
 			        		<manage:pass>
 			        			<s:set var="hasUpdatePermission">yes</s:set>
 			        		</manage:pass>
@@ -55,43 +55,48 @@
 	                        <thead>
 	                            <tr>
 	                                <th>序号</th>
-	                                <th>门店编号</th>
-	                                <th>门店名称</th>
-	                                <th>门店地址</th>
-	                                <th>联系电话</th>
-	                                <th>商户</th>
-	                                <th>代理商</th>	                                
+	                                <th>员工编号</th>
+	                                <th>登录名</th>
+	                                <th>姓名</th>
+	                                <th>手机号码</th>
+	                                <th>状态</th>
 	                                <th>操作</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
-	                        <s:if test="storeVoList != null && storeVoList.size() > 0">
-			  					<s:iterator value="storeVoList" var="storeVo" status="rowStatus">
+	                        <s:if test="partnerEmployeeVoList != null && partnerEmployeeVoList.size() > 0">
+			  					<s:iterator value="partnerEmployeeVoList" var="partnerEmployeeVo" status="rowStatus">
 						  		<tr>
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:property value="#storeVo.storeId" />">
-						  				<s:property value="#storeVo.storeId" />
+						  			<td title="<s:property value="#partnerEmployeeVo.partnerEmployeeId" />">
+						  				<s:property value="#partnerEmployeeVo.partnerEmployeeId" />
 						  			</td>
-						  			<td title="<s:property value="#storeVo.storeName" />">
-						  				<s:property value="#storeVo.storeName" />
+						  			<td title="<s:property value="#partnerEmployeeVo.loginId" />">
+						  				<s:property value="#partnerEmployeeVo.loginId" />
 						  			</td>
-						  			<td title="<s:property value="#storeVo.storeAddress" />">
-						  				<s:property value="#storeVo.storeAddress" />
+						  			<td title="<s:property value="#partnerEmployeeVo.employeeName" />">
+						  				<s:property value="#partnerEmployeeVo.employeeName" />
 						  			</td>
-						  			<td style="text-align: left" title="<s:property value="#storeVo.storeTel" />">
-						  				<s:property value="#storeVo.storeTel" />
+						  			<td title="<s:property value="#partnerEmployeeVo.moblieNumber" />">
+						  				<s:property value="#partnerEmployeeVo.moblieNumber" />
 						  			</td>
-						  			<td title="<s:property value="#storeVo.dealerCompany" />">
-						  				<s:property value="#storeVo.dealerCompany" />
-						  			</td>
-						  			<td title="<s:property value="#storeVo.partnerCompany" />">
-						  				<s:property value="#storeVo.partnerCompany" />
+						  			<s:if test="#partnerEmployeeVo.state == 1">
+						  				<s:set var="stateStr">未使用</s:set>
+						  			</s:if>
+						  			<s:elseif test="#partnerEmployeeVo.state == 2">
+						  				<s:set var="stateStr">使用中</s:set>
+						  			</s:elseif>
+						  			<s:elseif test="#partnerEmployeeVo.state == 3">
+						  				<s:set var="stateStr">冻结</s:set>
+									</s:elseif>
+						  			<td title="<s:property value="#stateStr" />">
+						  				<s:property value="#stateStr" />
 						  			</td>
 						  			<td title="修改">
 	  									<s:if test="#hasUpdatePermission eq 'yes'">
-						  					<a href="javascript:void(0);" onclick="toUpdateStore('<s:property value="#storeVo.iwoid" />')">修改</a>
+						  					<a href="javascript:void(0);" onclick="toUpdatePartnerEmployee('<s:property value="#partnerEmployeeVo.iwoid" />')">修改</a>
 						  				</s:if>
 						  				<s:else><strong>修改</strong></s:else>
 						  			</td>
@@ -99,7 +104,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="8">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="7">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>
@@ -117,16 +122,12 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
 	<script type="text/javascript">
-		function toCreateStore(){
-			invokeAction('goToCreateStore');
+		function toCreatePartnerEmployee(){
+			invokeAction('goToCreatePartnerEmployee');
 		}
-		function toUpdateStore(iwoid){
+		function toUpdatePartnerEmployee(iwoid){
 			$("#iwoid").val(iwoid);
-			invokeAction('goToUpdateStore');
-		}
-		function toUpdateStoreCore(iwoid){
-			$("#iwoid").val(iwoid);
-			invokeAction('goToUpdateStoreCore');
+			invokeAction('goToUpdatePartnerEmployee');
 		}
 	</script>
 	

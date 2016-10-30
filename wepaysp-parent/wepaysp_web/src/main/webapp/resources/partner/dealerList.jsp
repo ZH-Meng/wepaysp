@@ -51,7 +51,7 @@
 						<s:else>
 							<manage:permission validateUrl="/resources/partner/dealermanage!goToCreateDealer.action">
 				        		<manage:pass>
-									<a href="javascript:void(0);" onclick="toCreateDealer()">创建商户</a>
+									<a href="javascript:void(0);" onclick="toCreateDealer()">添加商户</a>
 				        		</manage:pass>
 				            </manage:permission>
 				            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealer.action">

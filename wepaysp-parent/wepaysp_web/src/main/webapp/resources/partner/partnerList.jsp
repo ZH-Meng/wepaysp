@@ -43,7 +43,7 @@
 						<manage:permission validateUrl="/resources/partner/partnermanage!goToCreatePartner.action">
 			        		<manage:pass>
 			        			<s:if test="isChildPage==1">
-									<a href="javascript:void(0);" onclick="toCreatePartner()">创建子代理商</a>
+									<a href="javascript:void(0);" onclick="toCreatePartner()">添加子代理商</a>
 			        			</s:if>
 			        		</manage:pass>
 			            </manage:permission>

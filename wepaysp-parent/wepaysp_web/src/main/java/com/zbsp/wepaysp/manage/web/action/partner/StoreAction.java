@@ -16,6 +16,12 @@ import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.service.partner.StoreService;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
 
+/**
+ * 门店管理
+ * 
+ * @author mengzh
+ *
+ */
 public class StoreAction
     extends PageAction
     implements SessionAware {
@@ -148,7 +154,6 @@ public class StoreAction
                 storeService.doTransUpdateStore(storeVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 logger.info("门店" + storeVO.getStoreName() + "修改成功");
                 setAlertMessage("门店" + storeVO.getStoreName() + "修改成功");
-                storeVO = null;
             } else {
                 logger.warn("修改门店失败，参数storeVO或者storeVO.getIwoid()为空！");
                 setAlertMessage("修改门店失败！");
@@ -167,7 +172,7 @@ public class StoreAction
     }
 
     /**
-     * 是否是商户
+     * 是否是商户并且用户有关联商户
      * 
      * @return
      */

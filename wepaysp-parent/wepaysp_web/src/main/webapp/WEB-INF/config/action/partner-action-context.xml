@@ -19,4 +19,17 @@
 		<property name="dealerService" ref="dealerService"></property>
 	</bean>
 	
+	<bean id="storeAction" class="com.zbsp.wepaysp.manage.web.action.partner.StoreAction" scope="prototype">
+		<property name="storeService" ref="storeService"></property>
+	</bean>
+	
+	<bean id="partnerEmployeeAction" class="com.zbsp.wepaysp.manage.web.action.partner.PartnerEmployeeAction" scope="prototype">
+		<property name="partnerEmployeeService" ref="partnerEmployeeService"></property>
+	</bean>
+	
+	<bean id="dealerEmployeeAction" class="com.zbsp.wepaysp.manage.web.action.partner.DealerEmployeeAction" scope="prototype">
+		<property name="dealerEmployeeService" ref="dealerEmployeeService"></property>
+		<property name="storeService" ref="storeService"></property>
+	</bean>
+	
 </beans>

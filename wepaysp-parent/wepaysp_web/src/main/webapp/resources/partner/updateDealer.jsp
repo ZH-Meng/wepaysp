@@ -7,7 +7,6 @@
 	<title>修改商户</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
-	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
 		.bg_tjall th {width: 30%;}
@@ -19,7 +18,7 @@
 	    <div class="bgtj">
 	    	<form action="<%=request.getContextPath()%>/resources/partner/dealermanage!updateDealer.action" method="post" id="dealerForm">
 	    		<s:hidden id="iwoid" name="dealerVO.iwoid"/>
-	    		<s:hidden id="coreDataFlag" name="coreDataFlag"/>
+	    		<s:hidden id="coreDataFlag" name="dealerVO.coreDataFlag"/>
 	            <ul class="bg_tjtab">
 	                <li class="bg_tjall">
 	                	<table>
@@ -176,7 +175,7 @@
 				alert("状态不能为空！");
 				$("#state").focus();
 				return false;
-			} else if (!isBlank(techSupportPhone) && (!isMobile(moblieNumber) || !islineTel(techSupportPhone))) {
+			} else if (!isBlank(techSupportPhone) && (!isMobile(moblieNumber) && !islineTel(techSupportPhone))) {
 				alert("技术联系电话应为固定电话或者手机！");
 				$("#telephone").focus();
 				return false;
