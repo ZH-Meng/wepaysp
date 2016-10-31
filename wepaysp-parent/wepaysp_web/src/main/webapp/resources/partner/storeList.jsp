@@ -54,7 +54,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th>序号</th>
+	                                <th class="six">序号</th>
 	                                <th>门店编号</th>
 	                                <th>门店名称</th>
 	                                <th>门店地址</th>
@@ -80,7 +80,7 @@
 						  			<td title="<s:property value="#storeVo.storeAddress" />">
 						  				<s:property value="#storeVo.storeAddress" />
 						  			</td>
-						  			<td style="text-align: left" title="<s:property value="#storeVo.storeTel" />">
+						  			<td title="<s:property value="#storeVo.storeTel" />">
 						  				<s:property value="#storeVo.storeTel" />
 						  			</td>
 						  			<td title="<s:property value="#storeVo.dealerCompany" />">

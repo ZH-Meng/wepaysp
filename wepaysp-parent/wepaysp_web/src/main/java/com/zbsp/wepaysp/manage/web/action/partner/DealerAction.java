@@ -14,7 +14,9 @@ import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.service.partner.DealerService;
+import com.zbsp.wepaysp.service.partner.PartnerEmployeeService;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
+import com.zbsp.wepaysp.vo.partner.PartnerEmployeeVO;
 
 /**
  * 商户管理
@@ -32,6 +34,8 @@ public class DealerAction
     private DealerVO dealerVO;
     private List<DealerVO> dealerVoList;
     private DealerService dealerService;
+    private List<PartnerEmployeeVO> partnerEmployeeVoList;
+    private PartnerEmployeeService partnerEmployeeService;
 
     @Override
     protected String query(int start, int size) {
@@ -48,20 +52,22 @@ public class DealerAction
                     return "accessDenied";
                 }
             } else {
-                if (!isPartner(manageUser)) {
-                    logger.warn("角色分配不当：非服务商（代理商）不能管理商户信息");
-                    setAlertMessage("角色分配不当：非服务商（代理商）不能管理商户信息");
+                if (isPartnerEmployee(manageUser)) {
+                    paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
+                } else if (!isPartner(manageUser)) {
+                    logger.warn("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
+                    setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
                     return "accessDenied";
                 }
+                
             }
+            paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
 
             paramMap.put("state", dealerVO.getState());
             paramMap.put("moblieNumber", dealerVO.getMoblieNumber());
             paramMap.put("loginId", dealerVO.getLoginId());
             paramMap.put("company", dealerVO.getCompany());
 
-            // paramMap.put("partnerOid", dealerVO.getPartnerOid());
-            paramMap.put("currentUserOid", manageUser.getIwoid());
             paramMap.put("coreDataFlag", dealerVO.getCoreDataFlag());
 
             dealerVoList = dealerService.doJoinTransQueryDealerList(paramMap, start, size);
@@ -97,18 +103,25 @@ public class DealerAction
         logger.info("跳转创建商户页面.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!isPartner(manageUser)) {
-                logger.warn("角色分配不当：非服务商（代理商）不能创建商户");
-                setAlertMessage("角色分配不当：非服务商（代理商）不能创建商户");
+            dealerVO = new DealerVO();
+            
+            if (isPartnerEmployee(manageUser)) {
+                dealerVO.setPartnerEmployeeOid(manageUser.getDataPartnerEmployee().getIwoid());
+                dealerVO.setPartnerEmployeeName(manageUser.getDataPartnerEmployee().getEmployeeName());
+            } else if (isPartner(manageUser)) {
+                Map<String, Object> paramMap = new HashMap<String, Object>();
+                paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+                partnerEmployeeVoList = partnerEmployeeService.doJoinTransQueryPartnerEmployeeList(paramMap, 0, -1);
+                if (partnerEmployeeVoList == null || partnerEmployeeVoList.isEmpty()) {
+                    logger.warn("没有业务员不能添加商户信息");
+                    setAlertMessage("请先添加代理商员工（业务员）");
+                }
+            } else {
+                logger.warn("角色分配不当：非服务商（代理商）、业务员不能添加商户信息");
+                setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能添加商户信息");
                 return "accessDenied";
             }
             
-            if (dealerVO == null) {
-                dealerVO = new DealerVO();
-            }
-/*            if (manageUser.getDataPartner() != null) {
-                dealerVO.setPartnerOid(manageUser.getDataPartner().getIwoid());
-            }*/
         } catch (Exception e) {
             logger.error("商户添加错误：" + e.getMessage());
             setAlertMessage("商户添加错误：" + e.getMessage());
@@ -121,9 +134,9 @@ public class DealerAction
         logger.info("开始创建商户.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!isPartner(manageUser)) {
-                logger.warn("创建商户失败：非服务商（代理商）不能创建商户");
-                setAlertMessage("创建商户失败：非服务商（代理商）不能创建商户");
+            if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
+                logger.warn("创建商户失败：非服务商（代理商）、业务员不能添加商户信息");
+                setAlertMessage("创建商户失败：非服务商（代理商）、业务员不能添加商户信息");
                 return "accessDenied";
             }
 
@@ -168,14 +181,16 @@ public class DealerAction
                     }
                 } else {
                     logger.info("跳转修改商户页面.");
-                    if (!isPartner(manageUser)) {
-                        logger.warn("角色分配不当：非服务商（代理商）不能修改商户信息");
-                        setAlertMessage("角色分配不当：非服务商（代理商）不能修改商户信息");
+                    if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
+                        logger.warn("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
+                        setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
                         return "accessDenied";
                     }
                 }
                 
                 dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerVO.getIwoid());
+                //TODO 校验被修改商户与当前用户的关系
+                
                 dealerVO.setCoreDataFlag(coreDataFlag);
                 if (!"on".equals(coreDataFlag)) {
                     dealerVO.setSubAppid(null);
@@ -222,21 +237,15 @@ public class DealerAction
                 setAlertMessage("角色分配不当：非商户用户不能维护商户基本信息");
                 return "accessDenied";
             }
-            if (manageUser.getDataDealer() != null) {
-                dealerVO = dealerService.doJoinTransQueryDealerByOid(manageUser.getDataDealer().getIwoid());
-                // 重新组装需要编辑的商户基本信息（当然也不包含公众号等核心信息）
-                DealerVO temp = new DealerVO();
-                temp.setIwoid(dealerVO.getIwoid());
-                temp.setCompany(dealerVO.getCompany());
-                temp.setMoblieNumber(dealerVO.getMoblieNumber());
-                temp.setQqNumber(dealerVO.getQqNumber());
-                temp.setEmail(dealerVO.getEmail());
-                dealerVO = temp;
-            } else {
-                logger.warn("当前用户未关联商户，无法修改商户基本信息！");
-                setAlertMessage("当前用户未关联商户，无法修改商户基本信息！");
-                return "error";
-            }
+            dealerVO = dealerService.doJoinTransQueryDealerByOid(manageUser.getDataDealer().getIwoid());
+            // 重新组装需要编辑的商户基本信息（当然也不包含公众号等核心信息）
+            DealerVO temp = new DealerVO();
+            temp.setIwoid(dealerVO.getIwoid());
+            temp.setCompany(dealerVO.getCompany());
+            temp.setMoblieNumber(dealerVO.getMoblieNumber());
+            temp.setQqNumber(dealerVO.getQqNumber());
+            temp.setEmail(dealerVO.getEmail());
+            dealerVO = temp;
         } catch (Exception e) {
             logger.error("修改商户基本信息错误：" + e.getMessage());
             setAlertMessage("修改商户基本信息错误：" + e.getMessage());
@@ -288,11 +297,12 @@ public class DealerAction
                         return "accessDenied";
                     }
                 } else {
-                    if (!isPartner(manageUser)) {
-                        logger.warn("角色分配不当：非服务商（代理商）不能修改商户信息");
-                        setAlertMessage("角色分配不当：非服务商（代理商）不能修改商户信息");
+                    if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
+                        logger.warn("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
+                        setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
                         return "accessDenied";
                     }
+                    //TODO 校验商户当前用户的关系
                 }
                 
                 dealerService.doTransUpdateDealer(dealerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
@@ -313,9 +323,28 @@ public class DealerAction
         }
         return "updateDealer";
     }
+    
 
     /**
-     * 是否是服务商，角色权限校验通过，如果给商户角色配置了服务商的菜单仍不能使用
+     * 是否是业务员
+     * 
+     * @return
+     */
+    private boolean isPartnerEmployee(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.salesman.getValue() && manageUser.getDataPartnerEmployee() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否是服务商
      * 
      * @return
      */
@@ -325,11 +354,11 @@ public class DealerAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level > SysUser.UserLevel.partner.getValue()) {// 非服务商
-                return false;
+            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     /**
@@ -361,11 +390,11 @@ public class DealerAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.dealer.getValue()) {// 非商户
-                return false;
+            if (level == SysUser.UserLevel.dealer.getValue() && manageUser.getDataDealer() != null) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -391,6 +420,14 @@ public class DealerAction
 
     public void setDealerService(DealerService dealerService) {
         this.dealerService = dealerService;
+    }
+
+    public List<PartnerEmployeeVO> getPartnerEmployeeVoList() {
+        return partnerEmployeeVoList;
+    }
+
+    public void setPartnerEmployeeService(PartnerEmployeeService partnerEmployeeService) {
+        this.partnerEmployeeService = partnerEmployeeService;
     }
 
 }

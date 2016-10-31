@@ -17,6 +17,7 @@
 	
 	<bean id="dealerAction" class="com.zbsp.wepaysp.manage.web.action.partner.DealerAction" scope="prototype">
 		<property name="dealerService" ref="dealerService"></property>
+		<property name="partnerEmployeeService" ref="partnerEmployeeService"></property>
 	</bean>
 	
 	<bean id="storeAction" class="com.zbsp.wepaysp.manage.web.action.partner.StoreAction" scope="prototype">

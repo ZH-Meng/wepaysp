@@ -24,7 +24,7 @@
 	                    	<tbody>
 	                            <tr>
 	                            	<th>商户名称</th>
-	                                <td><s:textfield id="company" maxlength="32" name="dealerVO.company" readonly="true"/></td>
+	                                <td><s:textfield id="company" maxlength="32" name="dealerVO.company" readonly="true"/><span class="tj_bt">*</span>此项不可修改</td>
 	                            </tr>
 	                            <tr>
 	                            	<th>手机号码</th>
@@ -42,7 +42,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="updateDealerBase();return false;">修改</a>
+	                    <a href="javascript:void(0);" onclick="updateDealerBase();return false;">保存</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -55,20 +55,15 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			$("#loginId").focus();
+			$("#moblieNumber").focus();
 		});	
 		
 		function updateDealerBase() {
 			var moblieNumber = $("#moblieNumber").val();
-			var company = $("#company").val();
 			var qqNumber = $("#qqNumber").val();
 			var email = $("#email").val();
 			
-			if (isBlank(company)) {
-				alert("商户名称不能为空！");
-				$("#company").focus();
-				return false;
-			} else if (isBlank(moblieNumber)) {
+			if (isBlank(moblieNumber)) {
 				alert("手机号码不能为空！");
 				$("#moblieNumber").focus();
 				return false;

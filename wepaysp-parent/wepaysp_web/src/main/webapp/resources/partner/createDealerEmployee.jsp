@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
-		.bg_tjall th {width: 30%;}
+		.bg_tjall th {width: 40%;}
 	</style>
 </head>
 <body class="bgbj">
@@ -45,7 +45,7 @@
 	                                </td>
 	                            </tr>
 	                            <tr>
-	                            	 <th>退款密码</th>
+	                            	 <th>退款权限密码</th>
 	                                <td><s:password id="refundPassword" maxlength="6" name="dealerEmployeeVO.refundPassword" /><span class="tj_bt">*</span><span>6-20位长度的字母或数字！</span></td>
 	                            </tr>
 	                            <tr>
@@ -65,7 +65,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="createDealerEmployee();return false;">新增</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="createDealerEmployee();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -123,11 +123,11 @@
 				$("#storeOid").focus();
 				return false;
 			} else if (isBlank(refundPassword)) {
-				alert("退款密码不能为空！");
+				alert("退款权限密码不能为空！");
 				$("#refundPassword").focus();
 				return false;
 			} else if (!isDigital6Exp(refundPassword)) {
-				alert("退款密码应为6数字！");
+				alert("退款权限密码应为6数字！");
 				$("#refundPassword").focus();
 				return false;
 			} else if (isBlank(state)) {
@@ -140,7 +140,7 @@
 				return false;
 			}
 			
-			if (!window.confirm("确认新增？")) {
+			if (!window.confirm("确认添加？")) {
 				return false;
 			}
 			

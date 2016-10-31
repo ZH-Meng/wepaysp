@@ -6,6 +6,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>重置退款权限密码</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
+	<style>
+		.bg_tjall th {width: 40%;}
+	</style>
 </head>
 <body class="bgbj">
 	<div class="rightbg">
@@ -15,7 +18,7 @@
 				<s:hidden id="iwoid" name="dealerEmployeeVO.iwoid"/>
 				<s:hidden name="resetFlag"/>
 				<ul class="tj_title">
-                	<li>修改密码</li>
+                	<li>重置密码</li>
             	</ul>
 				<ul class="bg_tjtab bg-block">
 					<li class="bg_tjall">
@@ -41,7 +44,7 @@
 						</table>
 					</li>
 					<li class="bg_button">
-					 	<a href="javascript:void(0);" onclick="resetPwd();return false;">重置密码</a>
+					 	<a href="javascript:void(0);" onclick="resetPwd();return false;">保存</a>
 						<a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 					</li>
 				</ul>
@@ -87,7 +90,7 @@
 				return false;
 			} 
 			
-			if (!window.confirm("确认重置？")) {
+			if (!window.confirm("确认重置退款权限密码？")) {
 				return false;
 			}
 			

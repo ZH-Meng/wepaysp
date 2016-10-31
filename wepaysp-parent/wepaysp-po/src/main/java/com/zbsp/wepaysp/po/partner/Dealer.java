@@ -22,6 +22,7 @@ public class Dealer
     private String partner1Oid;
     private String partner2Oid;
     private String partner3Oid;
+    private PartnerEmployee partnerEmployee;
     private Merchant merchant;
     private String contactor;
     private String company;
@@ -110,6 +111,16 @@ public class Dealer
         this.partner3Oid = partner3Oid;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARTNER_EMPLOYEE_OID")
+    public PartnerEmployee getPartnerEmployee() {
+        return this.partnerEmployee;
+    }
+
+    public void setPartnerEmployee(PartnerEmployee partnerEmployee) {
+        this.partnerEmployee = partnerEmployee;
+    }
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "merchant_oid")
     public Merchant getMerchant() {

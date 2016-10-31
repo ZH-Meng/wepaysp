@@ -74,7 +74,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th>序号</th>
+	                                <th class="five">序号</th>
 	                                <th>代理商编号</th>
 	                                <th>登录名</th>
 	                                <th>父代理商</th>
@@ -121,10 +121,10 @@
 						  			<td title="<s:property value="#partnerVo.contactor" />">
 						  				<s:property value="#partnerVo.contactor" />
 						  			</td>
-						  			<td style="text-align: left" title="<s:property value="#partnerVo.company" />">
+						  			<td title="<s:property value="#partnerVo.company" />">
 						  				<s:property value="#partnerVo.company" />
 						  			</td>
-						  			<td style="text-align: left" title="<s:property value="#partnerVo.address" />">
+						  			<td title="<s:property value="#partnerVo.address" />">
 						  				<s:property value="#partnerVo.address" />
 						  			</td>
 						  			<td title="<s:property value="#partnerVo.telephone" />">

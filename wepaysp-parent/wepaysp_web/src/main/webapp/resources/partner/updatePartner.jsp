@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
-		.bg_tjall th {width: 30%;}
+		.bg_tjall th {width: 35%;}
 	</style>
 </head>
 <body class="bgbj">
@@ -26,17 +26,13 @@
 	                        	<tr>
 	                            	<th>登录名</th>
 	                                <td>
-	                                	<s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/>
-		                                <span class="tj_bt">*</span>
+	                                	<s:textfield id="loginId" maxlength="20" name="partnerVO.loginId" readonly="true"/><span class="tj_bt">*</span>此项不可修改
 	                                </td>
-	                                <%-- <th>登录密码</th>
-	                                <td><s:password id="loginPwd" maxlength="20" name="partnerVO.loginPwd" /><span class="tj_bt">*</span></td> --%>
 	                            </tr>
 	                            <tr>
 	                            	<th>代理商编号</th>
 	                                <td>
-	                                	<s:textfield id="partnerId" name="partnerVO.partnerId" readonly="true"/>
-		                                <span class="tj_bt">*</span>
+	                                	<s:textfield id="partnerId" name="partnerVO.partnerId" readonly="true"/><span class="tj_bt">*</span>此项不可修改
 	                                </td>
 	                            </tr>
 	                            <tr>
@@ -104,7 +100,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="updatePartner();return false;">修改</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="updatePartner();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -117,24 +113,47 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			$("#loginId").focus();
+			$("#feeRate").focus();
 		});	
 	
 		function updatePartner() {
+			var feeRate = $("#feeRate").val();
+			var balance = $("#balance").val();
+			var contractBegin = $("#contractBegin").val();
+			var contractEnd = $("#contractEnd").val();
 			var contactor = $("#contactor").val();
 			var telephone = $("#telephone").val();
 			var moblieNumber = $("#moblieNumber").val();
-			var contractBegin = $("#contractBegin").val();
-			var contractEnd = $("#contractEnd").val();
-			var state = $("#state").val();
-			var feeRate = $("#feeRate").val();
-			var balance = $("#balance").val();
+			var state = $("#state").val();			
 			var company = $("#company").val();
 			var address = $("#address").val();
-			
 			var remark = $("#remark").val();
 			
-			if (isBlank(contactor)) {
+			 if (isBlank(feeRate)) {
+				alert("分润费率不能为空！");
+				$("#feeRate").focus();
+				return false;
+			} else if (!isPositiveInteger1(feeRate)) {
+				alert("分润费率只能填正整数！");
+				$("#feeRate").focus();
+				return false;
+			} else if (isBlank(balance)) {
+				alert("余额不能为空！");
+				$("#balance").focus();
+				return false;
+			} else if (!isPositiveInteger(balance)) {
+				alert("余额只能填整数！");
+				$("#balance").focus();
+				return false;
+			} else if (isBlank(contractBegin)) {
+				alert("使用期限不能为空！");
+				$("#contractBegin").focus();
+				return false;
+			} else if (isBlank(contractEnd)) {
+				alert("使用期限不能为空！");
+				$("#contractEnd").focus();
+				return false;
+			} else if (isBlank(contactor)) {
 				alert("联系人不能为空！");
 				$("#contactor").focus();
 				return false;
@@ -154,33 +173,9 @@
 				alert("手机号码格式不正确！");
 				$("#moblieNumber").focus();
 				return false;
-			} else if (isBlank(contractBegin)) {
-				alert("使用期限不能为空！");
-				$("#contractBegin").focus();
-				return false;
-			} else if (isBlank(contractEnd)) {
-				alert("使用期限不能为空！");
-				$("#contractEnd").focus();
-				return false;
 			} else if (isBlank(state)) {
 				alert("状态不能为空！");
 				$("#state").focus();
-				return false;
-			} else if (isBlank(feeRate)) {
-				alert("分润费率不能为空！");
-				$("#feeRate").focus();
-				return false;
-			} else if (!isPositiveInteger1(feeRate)) {
-				alert("分润费率只能填正整数！");
-				$("#feeRate").focus();
-				return false;
-			} else if (isBlank(balance)) {
-				alert("余额不能为空！");
-				$("#balance").focus();
-				return false;
-			} else if (!isPositiveInteger(balance)) {
-				alert("余额只能填整数！");
-				$("#balance").focus();
 				return false;
 			} else if (isBlank(company)) {
 				alert("公司不能为空！");

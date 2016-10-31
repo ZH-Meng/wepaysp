@@ -45,5 +45,9 @@
 	<bean id="dealerEmployeeService" class="com.zbsp.wepaysp.service.partner.impl.DealerEmployeeServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>
+	
+	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
     
 </beans>

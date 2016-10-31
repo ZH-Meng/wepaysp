@@ -260,7 +260,8 @@ public class PartnerEmployeeServiceImpl
         partnerEmployee.setMoblieNumber(partnerEmployeeVO.getMoblieNumber());
         partnerEmployee.setEmployeeName(partnerEmployeeVO.getEmployeeName());
         partnerEmployee.setState(partnerEmployeeVO.getState());
-
+        partnerEmployee.setRemark(partnerEmployeeVO.getRemark());
+        
         partnerEmployee.setModifier(modifier);
         commonDAO.update(partnerEmployee);
 

@@ -67,7 +67,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th>序号</th>
+	                                <th class="six">序号</th>
 	                                <th>门店编号</th>
 	                                <th>员工编号</th>
 	                                <th>登录名</th>
@@ -116,7 +116,7 @@
 						  					<a href="javascript:void(0);" onclick="toUpdateDealerEmployee('<s:property value="#dealerEmployeeVo.iwoid" />')">修改</a>
 						  				</s:if>
 						  				<s:if test="#hasResetPermission eq 'yes'">
-						  					<a href="javascript:void(0);" onclick="goToResetRefundPwd('<s:property value="#dealerEmployeeVo.iwoid" />')">重置退款密码</a>
+						  					<a href="javascript:void(0);" onclick="goToResetRefundPwd('<s:property value="#dealerEmployeeVo.iwoid" />')">重置退款权限密码</a>
 						  				</s:if>
 						  			</td>
 						  		</tr>

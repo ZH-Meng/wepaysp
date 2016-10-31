@@ -6,6 +6,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>修改退款权限密码</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
+	<style>
+		.bg_tjall th {width: 40%;}
+	</style>
 </head>
 <body class="bgbj">
 	<div class="rightbg">
@@ -42,7 +45,7 @@
 						</table>
 					</li>
 					<li class="bg_button">
-						<a href="javascript:void(0);" onclick="modify();return false;">确定</a>
+						<a href="javascript:void(0);" onclick="modify();return false;">保存</a>
 						<a href="javascript:void(0);" onclick="reset();" >重写</a>
 					</li>
 				</ul>
@@ -88,7 +91,7 @@
 				return false;
 			} 
 			
-			if (!window.confirm("确认修改？")) {
+			if (!window.confirm("确认修改退款权限密码？")) {
 				return false;
 			}
 			

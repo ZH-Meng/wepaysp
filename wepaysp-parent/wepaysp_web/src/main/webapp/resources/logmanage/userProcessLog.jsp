@@ -10,7 +10,10 @@
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
+
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -183,9 +186,20 @@
 											<s:else>
 												<td title="<s:property value="#actionTypeStr" />"><s:property value="#actionTypeStr" /></td>
 											</s:else>
-											<td style="text-align: left;" title="<s:property value="#sysLogVo.dataBefore" />"><s:property value="#sysLogVo.dataBefore" /></td>
-											<td style="text-align: left;" title="<s:property value="#sysLogVo.dataAfter" />"><s:property value="#sysLogVo.dataAfter" /></td>
-											<td style="text-align: left;" title="<s:property value="#sysLogVo.logAbstract" />"><s:property value="#sysLogVo.logAbstract" /></td>
+											<td style="text-align: left;" title="<s:property value="#sysLogVo.dataBefore" />">
+												<c:if test="${fn:length(sysLogVo.dataBefore)>=28}">${fn:substring(sysLogVo.dataBefore, 0, 28)}...</c:if>
+												<c:if test="${fn:length(sysLogVo.dataBefore)<28}">${sysLogVo.dataBefore}</c:if>
+												<%-- <s:property value="#sysLogVo.dataBefore" /> --%>
+											</td>
+											<td style="text-align: left;" title="<s:property value="#sysLogVo.dataAfter" />">
+												<c:if test="${fn:length(sysLogVo.dataAfter)>=28}">${fn:substring(sysLogVo.dataAfter, 0, 28)}...</c:if>
+												<c:if test="${fn:length(sysLogVo.dataAfter)<28}">${sysLogVo.dataAfter}</c:if>
+												<%-- <s:property value="#sysLogVo.dataAfter" /> --%>
+											</td>
+											<td style="text-align: left;" title="<s:property value="#sysLogVo.logAbstract" />">
+												<c:if test="${fn:length(sysLogVo.logAbstract)>=10}">${fn:substring(sysLogVo.logAbstract, 0, 10)}...</c:if>
+												<c:if test="${fn:length(sysLogVo.logAbstract)<10}">${sysLogVo.logAbstract}</c:if>
+											</td>
 											<td title="<s:date name="#sysLogVo.processTimeBegin" format="yyyy-MM-dd HH:mm:ss" />">
 												<s:date name="#sysLogVo.processTimeBegin" format="yyyy-MM-dd HH:mm:ss" />
 											</td>

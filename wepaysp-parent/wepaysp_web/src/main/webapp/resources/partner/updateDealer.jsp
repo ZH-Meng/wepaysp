@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
-		.bg_tjall th {width: 30%;}
+		.bg_tjall th {width: 40%;}
 	</style>
 </head>
 <body class="bgbj">
@@ -26,17 +26,13 @@
 	                        	<tr>
 	                            	<th>登录名</th>
 	                                <td>
-	                                	<s:textfield id="loginId" maxlength="20" name="dealerVO.loginId" readonly="true"/>
-		                                <span class="tj_bt">*</span>
+	                                	<s:textfield id="loginId" maxlength="20" name="dealerVO.loginId" readonly="true"/><span class="tj_bt">*</span>此项不可修改
 	                                </td>
-	                                <%-- <th>登录密码</th>
-	                                <td><s:password id="loginPwd" maxlength="20" name="dealerVO.loginPwd" /><span class="tj_bt">*</span></td> --%>
 	                            </tr>
 	                            <tr>
 	                            	<th>商户编号</th>
 	                                <td>
-	                                	<s:textfield id="dealerId" name="dealerVO.dealerId" readonly="true"/>
-		                                <span class="tj_bt">*</span>
+	                                	<s:textfield id="dealerId" name="dealerVO.dealerId" readonly="true"/><span class="tj_bt">*</span>此项不可修改
 	                                </td>
 	                            </tr>
 	                            <tr>
@@ -48,7 +44,7 @@
 	                                <td><s:textfield id="contactor" maxlength="32" name="dealerVO.contactor" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
-	                            	<th>公司名称</th>
+	                            	<th>公司名称(商户名称)</th>
 	                                <td><s:textfield id="company" maxlength="32" name="dealerVO.company" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
@@ -107,7 +103,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="updateDealer();return false;">修改</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="updateDealer();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -120,7 +116,7 @@
 	</div>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			$("#loginId").focus();
+			$("#feeRate").focus();
 		});	
 		
 		function updateDealer() {

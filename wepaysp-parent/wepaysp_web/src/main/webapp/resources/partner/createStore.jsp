@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
-		.bg_tjall th {width: 30%;}
+		.bg_tjall th {width: 40%;}
 	</style>
 </head>
 <body class="bgbj">
@@ -43,7 +43,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="createStore();return false;">新增</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="createStore();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -79,7 +79,7 @@
 				return false;
 			}
 			
-			if (!window.confirm("确认新增？")) {
+			if (!window.confirm("确认添加？")) {
 				return false;
 			}
 			

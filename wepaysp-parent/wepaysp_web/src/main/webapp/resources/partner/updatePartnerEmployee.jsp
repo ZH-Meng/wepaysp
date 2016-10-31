@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
-		.bg_tjall th {width: 30%;}
+		.bg_tjall th {width: 40%;}
 	</style>
 </head>
 <body class="bgbj">
@@ -47,7 +47,7 @@
 	                            <tr>
 	                            	<th>状态</th>
 	                                <td>
-	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerEmployeeVO.state"  id="state" headerKey="" headerValue="请选择"/>
+	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerEmployeeVO.state"  id="state" />
 	                                	<span class="tj_bt">*</span>
 	                                </td>
 	                            </tr>	
@@ -61,7 +61,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="updatePartnerEmployee();return false;">修改</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="updatePartnerEmployee();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -78,21 +78,12 @@
 	});	
 
 	function updatePartnerEmployee() {
-		var loginId = $("#loginId").val();
 		var employeeName = $("#employeeName").val();
-		var partnerEmployeeId = $("#partnerEmployeeId").val();
 		var moblieNumber = $("#moblieNumber").val();
 		var state = $("#state").val();
 		var remark = $("#remark").val();
-		if (isBlank(loginId)) {
-			alert("登录名不能为空！");
-			$("#loginId").focus();
-			return false;
-		} else if (isBlank(partnerEmployeeId)) {
-			alert("编号不能为空！");
-			$("#partnerEmployeeId").focus();
-			return false;
-		} else if (isBlank(employeeName)) {
+		
+		 if (isBlank(employeeName)) {
 			alert("姓名不能为空！");
 			$("#employeeName").focus();
 			return false;

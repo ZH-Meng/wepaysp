@@ -73,7 +73,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th>序号</th>
+	                                <th class="six">序号</th>
 	                                <th>商户编号</th>
 	                                <th>登录名</th>
 	                                <th>联系人</th>
@@ -103,7 +103,7 @@
 						  			<td title="<s:property value="#dealerVo.contactor" />">
 						  				<s:property value="#dealerVo.contactor" />
 						  			</td>
-						  			<td style="text-align: left" title="<s:property value="#dealerVo.company" />">
+						  			<td title="<s:property value="#dealerVo.company" />">
 						  				<s:property value="#dealerVo.company" />
 						  			</td>
 						  			<td title="<s:property value="#dealerVo.partnerCompany" />">

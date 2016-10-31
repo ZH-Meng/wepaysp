@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
-		.bg_tjall th {width: 30%;}
+		.bg_tjall th {width: 40%;}
 	</style>
 </head>
 <body class="bgbj">
@@ -25,15 +25,13 @@
 	                    		<tr>
 	                            	<th>登录名</th>
 	                                <td>
-	                                	<s:textfield id="loginId" maxlength="20" name="dealerEmployeeVO.loginId" readonly="true"/>
-		                                <span class="tj_bt">*</span>此项不可修改
+	                                	<s:textfield id="loginId" maxlength="20" name="dealerEmployeeVO.loginId" readonly="true"/><span class="tj_bt">*</span>此项不可修改
 	                                </td>
 	                            </tr>
 	                            <tr>
 	                            	<th>员工编号</th>
 	                                <td>
-	                                	<s:textfield id="dealerEmployeeId" maxlength="20" name="dealerEmployeeVO.dealerEmployeeId" readonly="true"/>
-		                                <span class="tj_bt">*</span>此项不可修改
+	                                	<s:textfield id="dealerEmployeeId" maxlength="20" name="dealerEmployeeVO.dealerEmployeeId" readonly="true"/><span class="tj_bt">*</span>此项不可修改
 	                                </td>
 	                            </tr>
 	                        	<tr>
@@ -68,7 +66,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="updateDealerEmployee();return false;">修改</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="updateDealerEmployee();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -85,22 +83,13 @@
 	});	
 
 	function updateDealerEmployee() {
-		var loginId = $("#loginId").val();
 		var employeeName = $("#employeeName").val();
-		var dealerEmployeeId = $("#dealerEmployeeId").val();
 		var moblieNumber = $("#moblieNumber").val();
 		var storeOid = $("#storeOid").val();
 		var state = $("#state").val();
 		var remark = $("#remark").val();
-		if (isBlank(loginId)) {
-			alert("登录名不能为空！");
-			$("#loginId").focus();
-			return false;
-		} else if (isBlank(dealerEmployeeId)) {
-			alert("编号不能为空！");
-			$("#dealerEmployeeId").focus();
-			return false;
-		} else if (isBlank(employeeName)) {
+	
+		if (isBlank(employeeName)) {
 			alert("姓名不能为空！");
 			$("#employeeName").focus();
 			return false;

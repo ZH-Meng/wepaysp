@@ -24,6 +24,7 @@ import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.service.BaseService;
 import com.zbsp.wepaysp.service.manage.SysLogService;
@@ -69,18 +70,10 @@ public class DealerServiceImpl
         String loginId = MapUtils.getString(paramMap, "loginId");
         String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
         String coreDataFlag = MapUtils.getString(paramMap, "coreDataFlag");
-        String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
-        Validator.checkArgument(StringUtils.isBlank(currentUserOid), "当前用户Oid不能为空！");
+        String partnerOid = MapUtils.getString(paramMap, "partnerOid");
+        String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
+        Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空！");
         
-        
-        // 获取当前用户
-        SysUser currentUser = commonDAO.findObject(SysUser.class, currentUserOid);
-        if (currentUser == null) {
-            throw new IllegalStateException("非法操作：当前用户不存在！");
-        } else if (currentUser.getPartner() == null) {
-            throw new IllegalStateException("非法操作：当前用户不是服务商，不能查看商户列表！");
-        }
-
         StringBuffer sql = new StringBuffer("select distinct(d) from Dealer d, SysUser u where u.dealer=d");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
@@ -100,15 +93,24 @@ public class DealerServiceImpl
             sql.append(" and d.company like :COMPANY");
             sqlMap.put("COMPANY", "%" + company + "%");
         }
+        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
+            sql.append(" and d.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
+            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
+        }
 
-        Partner currentPartner = currentUser.getPartner();
+        // 获取服务商
+        Partner partner = commonDAO.findObject(Partner.class, partnerOid);
+        if (partner == null) {
+            throw new NotExistsException("服务商不存在！");
+        }
+
         // 当前用户为顶级服务商时，查看管辖商户及下级服务商管辖商户...
-        if (currentPartner.getLevel() == 1) {
+        if (partner.getLevel() == 1) {
             sql.append(" and d.partner1Oid = :PARTNER1OID");
-            sqlMap.put("PARTNER1OID", currentPartner.getIwoid());
+            sqlMap.put("PARTNER1OID", partner.getIwoid());
         } else {// 默认为非顶级服务商，该服务商所辖的所有商户
             sql.append(" and d.partner.iwoid = :PARTNEROID");
-            sqlMap.put("PARTNEROID", currentPartner.getIwoid());
+            sqlMap.put("PARTNEROID", partner.getIwoid());
         }
 
         sql.append(" order by d.dealerId desc");
@@ -146,17 +148,10 @@ public class DealerServiceImpl
         String company = MapUtils.getString(paramMap, "company");
         String loginId = MapUtils.getString(paramMap, "loginId");
         String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
-
-        String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
-        Validator.checkArgument(StringUtils.isBlank(currentUserOid), "当前用户Oid不能为空！");
-        // 获取当前用户
-        SysUser currentUser = commonDAO.findObject(SysUser.class, currentUserOid);
-        if (currentUser == null) {
-            throw new IllegalStateException("非法操作：当前用户不存在！");
-        } else if (currentUser.getPartner() == null) {
-            throw new IllegalStateException("非法操作：当前用户不是服务商，不能查看商户列表！");
-        }
-
+        String partnerOid = MapUtils.getString(paramMap, "partnerOid");
+        String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
+        Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空！");
+        
         StringBuffer sql = new StringBuffer("select count(distinct d.iwoid) from Dealer d, SysUser u where u.dealer=d");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
@@ -176,15 +171,24 @@ public class DealerServiceImpl
             sql.append(" and d.company like :COMPANY");
             sqlMap.put("COMPANY", "%" + company + "%");
         }
+        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
+            sql.append(" and d.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
+            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
+        }
 
-        Partner currentPartner = currentUser.getPartner();
+        // 获取服务商
+        Partner partner = commonDAO.findObject(Partner.class, partnerOid);
+        if (partner == null) {
+            throw new NotExistsException("服务商不存在！");
+        }
+
         // 当前用户为顶级服务商时，查看管辖商户及下级服务商管辖商户...
-        if (currentPartner.getLevel() == 1) {
+        if (partner.getLevel() == 1) {
             sql.append(" and d.partner1Oid = :PARTNER1OID");
-            sqlMap.put("PARTNER1OID", currentPartner.getIwoid());
+            sqlMap.put("PARTNER1OID", partner.getIwoid());
         } else {// 默认为非顶级服务商，该服务商所辖的所有商户
             sql.append(" and d.partner.iwoid = :PARTNEROID");
-            sqlMap.put("PARTNEROID", currentPartner.getIwoid());
+            sqlMap.put("PARTNEROID", partner.getIwoid());
         }
 
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
@@ -192,7 +196,7 @@ public class DealerServiceImpl
 
     @Override
     public DealerVO doTransAddDealer(DealerVO dealerVO, String creator, String operatorUserOid, String logFunctionOid)
-        throws AlreadyExistsException, IllegalAccessException {
+        throws AlreadyExistsException, NotExistsException {
         Validator.checkArgument(dealerVO == null, "商户对象不能为空");
         Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
@@ -206,6 +210,8 @@ public class DealerServiceImpl
         // Validator.checkArgument(StringUtils.isBlank(dealerVO.getAddress()), "地址不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getState()), "状态不能为空");
         Validator.checkArgument(dealerVO.getFeeRate() == null, "分润比率不能为空");
+        //Validator.checkArgument(StringUtils.isBlank(dealerVO.getPartnerOid()), "服务商Oid不能为空");
+        Validator.checkArgument(StringUtils.isBlank(dealerVO.getPartnerEmployeeOid()), "业务员Oid不能为空");
 
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
@@ -234,13 +240,16 @@ public class DealerServiceImpl
         dealer.setDealerId(dealerId);// 商户ID
 
         Partner partner = null;
-        SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
-        // 查找所属服务商
-        if (user != null) {
-            partner = user.getPartner();
-        } 
+        PartnerEmployee partnerEmployee = commonDAO.findObject(PartnerEmployee.class, dealerVO.getPartnerEmployeeOid());
+        // 查找所属业务员
+        if (partnerEmployee == null) {
+            throw new NotExistsException("业务员不存在！");
+        }  else {
+            dealer.setPartnerEmployee(partnerEmployee);
+            partner = partnerEmployee.getPartner();
+        }
         if (partner == null) {
-            throw new IllegalAccessException("非法操作：非服务商用户不能添加商户");
+            throw new NotExistsException("服务商不存在");
         }
         dealer.setPartner(partner);// 所属服务商
         try {
@@ -260,7 +269,7 @@ public class DealerServiceImpl
         } catch (NullPointerException e) {
             logger.warn("所属服务商级别错误：所属服务商的上级或者上级的上级不存在");
         }
-
+        
         dealer.setCreator(creator);
         commonDAO.save(dealer, false);
 
@@ -408,7 +417,8 @@ public class DealerServiceImpl
         Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
-        Validator.checkArgument(StringUtils.isBlank(dealerVO.getCompany()), "公司不能为空");
+        // 商户名称不可修改
+        //Validator.checkArgument(StringUtils.isBlank(dealerVO.getCompany()), "公司不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getMoblieNumber()), "手机号不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getEmail()), "邮箱不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getQqNumber()), "QQ号码不能为空");
@@ -424,7 +434,7 @@ public class DealerServiceImpl
 
         String dealerStr = dealer.toString();
 
-        dealer.setCompany(dealerVO.getCompany());
+        //dealer.setCompany(dealerVO.getCompany());
         dealer.setMoblieNumber(dealerVO.getMoblieNumber());
         dealer.setEmail(dealerVO.getEmail());
         dealer.setQqNumber(dealerVO.getQqNumber());

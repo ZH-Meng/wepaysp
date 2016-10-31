@@ -88,6 +88,7 @@ public class StoreAction
             setAlertMessage("角色分配不当：非商户用户不能创建门店");
             return "accessDenied";
         }
+        storeVO = null;
         return "createStore";
     }
 

@@ -8,6 +8,9 @@
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
+	<style>
+		.bg_tjall th {width: 40%;}
+	</style>
 </head>
 <body class="bgbj">
 	<div class="rightbg">
@@ -18,6 +21,19 @@
 	                <li class="bg_tjall">
 	                	<table>
 	                    	<tbody>
+                    			<tr>
+	                            	<th>业务员</th>
+	                                <td>
+	                                	<s:if test="dealerVO != null && dealerVO.partnerEmployeeOid != null">
+			                    			<s:hidden id="partnerEmployeeOid" name="dealerVO.partnerEmployeeOid"/>
+			                    			<s:property value="dealerVO.partnerEmployeeName"/>
+			                    		</s:if>
+			                    		<s:else>
+	                                		<s:select list="partnerEmployeeVoList" listKey="iwoid" listValue="employeeName" name="dealerVO.partnerEmployeeOid"  id="partnerEmployeeOid" headerKey="" headerValue="请选择"/>
+                    					</s:else>
+	                                	<span class="tj_bt">*</span>
+	                                </td>
+	                            	</tr>
 	                        	<tr>
 	                            	<th>登录名</th>
 	                                <td><s:textfield id="loginId" maxlength="20" name="dealerVO.loginId" /><span class="tj_bt">*</span><span>1-20位长度的字母或数字，保存后不能修改！</span></td>
@@ -89,7 +105,7 @@
 	                    </table>
 	                </li>
 	                <li class="bg_button">
-	                    <a href="javascript:void(0);" onclick="createDealer();return false;">新增</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
+	                    <a href="javascript:void(0);" onclick="createDealer();return false;">保存</a><a onclick="returnList()" href="javascript:void(0);">返回列表</a>
 	                </li>
 	            </ul>
 	        </form>
@@ -106,6 +122,7 @@
 		});	
 	
 		function createDealer() {
+			var partnerEmployeeOid = $("#partnerEmployeeOid").val();
 			var loginId = $("#loginId").val();
 			var loginPwd = $("#loginPwd").val();
 			var feeRate = $("#feeRate").val();
@@ -119,7 +136,11 @@
 			var techSupportPhone = $("#techSupportPhone").val();
 			var remark = $("#remark").val();
 			
-			if (isBlank(loginId)) {
+			if (isBlank(partnerEmployeeOid)) {
+				alert("业务员不能为空！");
+				$("#partnerEmployeeOid").focus();
+				return false;
+			} else if (isBlank(loginId)) {
 				alert("登录名不能为空！");
 				$("#loginId").focus();
 				return false;
@@ -185,7 +206,7 @@
 				return false;
 			}
 			
-			if (!window.confirm("确认新增？")) {
+			if (!window.confirm("确认添加？")) {
 				return false;
 			}
 			

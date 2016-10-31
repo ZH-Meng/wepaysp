@@ -164,7 +164,7 @@ public class PartnerEmployeeAction
     		operDesc = "修改代理商员工";
     	}
     	
-    	if ("add".equals(operCode) || "edit".equals(operCode)) {
+    	if ("add".equals(operCode) || "update".equals(operCode)) {
     		if (!isPartner(manageUser)) {
                 logger.warn("角色分配不当：非代理商用户不能" + operDesc);
                 setAlertMessage("角色分配不当：非代理商用户不能" + operDesc);

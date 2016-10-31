@@ -259,6 +259,8 @@ public class DealerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getEmployeeName()), "商户员工姓名不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getMoblieNumber()), "商户员工手机号不能为空");
+        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getStoreOid()), "门店Oid不能为空");
+        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getState()), "商户员工状态不能为空");
         
         Date processBeginTime = new Date();
         // 查找商户
@@ -271,6 +273,10 @@ public class DealerEmployeeServiceImpl
         dealerEmployee.setMoblieNumber(dealerEmployeeVO.getMoblieNumber());
         dealerEmployee.setEmployeeName(dealerEmployeeVO.getEmployeeName());
         dealerEmployee.setState(dealerEmployeeVO.getState());
+        dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
+        // 查找门店
+        Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
+        dealerEmployee.setStore(store);
 
         dealerEmployee.setModifier(modifier);
         commonDAO.update(dealerEmployee);
