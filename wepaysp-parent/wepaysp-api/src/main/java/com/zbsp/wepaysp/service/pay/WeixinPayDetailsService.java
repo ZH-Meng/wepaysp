@@ -17,6 +17,9 @@ public interface WeixinPayDetailsService {
      *      partner1Oid:                       String类型，一级服务商Oid，根据此参数模糊查询
      *      partner2Oid:                       String类型，二级服务商Oid，根据此参数模糊查询
      *      partner3Oid:                       String类型，三级服务商Oid，根据此参数模糊查询
+     *      partnerEmployeeOid:           String类型，业务员Oid，根据此参数模糊查询
+     *      dealerOid:          				 String类型，商户Oid，根据此参数模糊查询
+     *      dealerEmployeeOid:           String类型，收银员Oid，根据此参数模糊查询
      *      partnerEmployeeName:     String类型，业务员姓名，根据此参数模糊查询
      *      dealerName:                     String类型，商家姓名，根据此参数模糊查询
      *      dealerEmployeeName:       String类型，收银员姓名，根据此参数模糊查询
@@ -39,6 +42,9 @@ public interface WeixinPayDetailsService {
      *      partner1Oid:                       String类型，一级服务商Oid，根据此参数模糊查询
      *      partner2Oid:                       String类型，二级服务商Oid，根据此参数模糊查询
      *      partner3Oid:                       String类型，三级服务商Oid，根据此参数模糊查询
+     *      partnerEmployeeOid:           String类型，业务员Oid，根据此参数模糊查询
+     *      dealerOid:          				 String类型，商户Oid，根据此参数模糊查询
+     *      dealerEmployeeOid:           String类型，收银员Oid，根据此参数模糊查询
      *      partnerEmployeeName:     String类型，业务员姓名，根据此参数模糊查询
      *      dealerName:                     String类型，商家姓名，根据此参数模糊查询
      *      dealerEmployeeName:       String类型，收银员姓名，根据此参数模糊查询

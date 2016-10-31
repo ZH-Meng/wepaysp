@@ -42,31 +42,30 @@ public class WeixinPayDetailsAction
             }
 
             boolean flag = false;
-            // 一级服务商、二级服务商
-            // 获取子服务商列表
 
+            /*根据用户的级别设置不同的查询条件*/
             if (manageUser.getUserLevel() == SysUser.UserLevel.partner.getValue()) {// 服务商
                 if (manageUser.getDataPartner() != null) {
                     int partnerLevel = manageUser.getDataPartner().getLevel();
                     if (partnerLevel == 1 || partnerLevel == 2 || partnerLevel == 3) {
-                        if (partnerLevel != 3) {
+                        if (partnerLevel != 3) {// 一级服务商、二级服务商获取子服务商列表
                             paramMap.clear();
                             paramMap.put("parentPartnerOid", manageUser.getDataPartner().getIwoid());
-                            partnerService.doJoinTransQueryPartnerList(paramMap, 0, -1);
+                            partnerVoList = partnerService.doJoinTransQueryPartnerList(paramMap, 0, -1);
                         }
                         paramMap.clear();
                         paramMap.put("partner" + partnerLevel + "Oid", manageUser.getDataPartner().getIwoid());
                         flag = true;
                     }
                 }
+            } else if (manageUser.getUserLevel() == SysUser.UserLevel.salesman.getValue()) {// 业务员
+            	if (manageUser.getDataPartnerEmployee() != null) {
+            		paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
+            		flag = true;
+            	}
             } else if (manageUser.getUserLevel() == SysUser.UserLevel.dealer.getValue()) {// 商户
                 if (manageUser.getDataDealer() != null) {
                     paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
-                    flag = true;
-                }
-            } else if (manageUser.getUserLevel() == SysUser.UserLevel.salesman.getValue()) {// 业务员
-                if (manageUser.getDataPartnerEmployee() != null) {
-                    paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
                     flag = true;
                 }
             } else if (manageUser.getUserLevel() == SysUser.UserLevel.cashier.getValue()) {// 收银员
@@ -81,7 +80,7 @@ public class WeixinPayDetailsAction
                 setAlertMessage("当前用户无权查看交易明细！");
                 return "accessDenied";
             }
-
+            
             weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, start, size);
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
         } catch (Exception e) {
