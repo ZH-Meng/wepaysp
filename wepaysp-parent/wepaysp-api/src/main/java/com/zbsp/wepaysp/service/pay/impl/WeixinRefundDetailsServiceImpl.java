@@ -9,23 +9,23 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.zbsp.wepaysp.po.pay.WeixinRefundDetails;
 import com.zbsp.wepaysp.service.BaseService;
 import com.zbsp.wepaysp.service.manage.SysLogService;
-import com.zbsp.wepaysp.service.pay.WeixinPayDetailsService;
-import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.service.pay.WeixinRefundDetailsService;
+import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 
-public class WeixinPayDetailsServiceImpl
+public class WeixinRefundDetailsServiceImpl
     extends BaseService
-    implements WeixinPayDetailsService {
+    implements WeixinRefundDetailsService {
     
     private SysLogService sysLogService;
 
     @SuppressWarnings("unchecked")
 	@Override
-    public List<WeixinPayDetailsVO> doJoinTransQueryWeixinPayDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult) {
-    	List<WeixinPayDetailsVO> resultList = new ArrayList<WeixinPayDetailsVO>();
+    public List<WeixinRefundDetailsVO> doJoinTransQueryWeixinRefundDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult) {
+    	List<WeixinRefundDetailsVO> resultList = new ArrayList<WeixinRefundDetailsVO>();
  	   
         String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
         String dealerId = MapUtils.getString(paramMap, "dealerId");
@@ -41,7 +41,7 @@ public class WeixinPayDetailsServiceImpl
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
 
-        StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
+        StringBuffer sql = new StringBuffer("select distinct(w) from WeixinRefundDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -86,7 +86,7 @@ public class WeixinPayDetailsServiceImpl
             sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
-        if (beginTime != null ) {
+        /*if (beginTime != null ) {
         	sql.append(" and w.timeEnd >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
@@ -94,31 +94,33 @@ public class WeixinPayDetailsServiceImpl
         	sql.append(" and w.timeEnd <:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
+        sql.append(" order by w.timeEnd desc");*/
 
-        sql.append(" order by w.timeEnd desc");
-        List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
-        if(weixinPayDetailsList != null && weixinPayDetailsList.isEmpty()) {
-        	for (WeixinPayDetails weixinPayDetails : weixinPayDetailsList) {
-        		WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
-        		//BeanCopierUtil.copyProperties(weixinPayDetails, vo);
-        		vo.setOutTradeNo(weixinPayDetails.getOutTradeNo());
-        		vo.setPartnerName(weixinPayDetails.getPartner().getCompany());
+        if(weixinRefundDetailsList != null && weixinRefundDetailsList.isEmpty()) {
+        	for (WeixinRefundDetails weixinRefundDetails : weixinRefundDetailsList) {
+        		WeixinRefundDetailsVO vo = new WeixinRefundDetailsVO();
+        		//BeanCopierUtil.copyProperties(weixinRefundDetails, vo);
+        		vo.setOutTradeNo(weixinRefundDetails.getOutTradeNo());
+        		vo.setPartnerName(weixinRefundDetails.getPartner().getCompany());
         		
-        		vo.setPartnerEmployeeName(weixinPayDetails.getPartnerEmployee().getEmployeeName());
-                vo.setDealerName(weixinPayDetails.getDealer().getCompany());
-                vo.setStoreName(weixinPayDetails.getStore().getStoreName());
-                vo.setDealerEmployeeName(weixinPayDetails.getDealerEmployee().getEmployeeName());
+        		vo.setPartnerEmployeeName(weixinRefundDetails.getPartnerEmployee().getEmployeeName());
+                vo.setDealerName(weixinRefundDetails.getDealer().getCompany());
+                vo.setStoreName(weixinRefundDetails.getStore().getStoreName());
+                vo.setDealerEmployeeName(weixinRefundDetails.getDealerEmployee().getEmployeeName());
                 
-        		vo.setPartnerEmployeeId(weixinPayDetails.getPartnerEmployee().getPartnerEmployeeId());
-        		vo.setDealerId(weixinPayDetails.getDealer().getDealerId());
-        		vo.setStoreId(weixinPayDetails.getStore().getStoreId());
-        		vo.setDealerEmployeeId(weixinPayDetails.getDealerEmployee().getDealerEmployeeId());
-        		vo.setPayType(weixinPayDetails.getPayType());
-        		vo.setTotalFee(weixinPayDetails.getTotalFee());
-        		vo.setResultCode(weixinPayDetails.getResultCode());
-        		vo.setTimeEnd(weixinPayDetails.getTimeEnd());
+        		vo.setPartnerEmployeeId(weixinRefundDetails.getPartnerEmployee().getPartnerEmployeeId());
+        		vo.setDealerId(weixinRefundDetails.getDealer().getDealerId());
+        		vo.setStoreId(weixinRefundDetails.getStore().getStoreId());
+        		vo.setDealerEmployeeId(weixinRefundDetails.getDealerEmployee().getDealerEmployeeId());
+        		vo.setRefundEmployeeName(weixinRefundDetails.getDealerEmployee().getEmployeeName());// 退款人
         		
+        		vo.setTotalFee(weixinRefundDetails.getTotalFee());
+        		vo.setRefundFee(weixinRefundDetails.getRefundFee());
+        		vo.setResultCode(weixinRefundDetails.getResultCode());
+        		//TODO 退款时间
+        		//vo.setTimeEnd(weixinRefundDetails.get);
         		resultList.add(vo);
         	}
         }
@@ -127,7 +129,7 @@ public class WeixinPayDetailsServiceImpl
     }
 
     @Override
-    public int doJoinTransQueryWeixinPayDetailsCount(Map<String, Object> paramMap) {
+    public int doJoinTransQueryWeixinRefundDetailsCount(Map<String, Object> paramMap) {
   	   
         String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
         String dealerId = MapUtils.getString(paramMap, "dealerId");
@@ -143,7 +145,7 @@ public class WeixinPayDetailsServiceImpl
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
 
-        StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
+        StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinRefundDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -188,14 +190,14 @@ public class WeixinPayDetailsServiceImpl
             sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
-        if (beginTime != null ) {
+/*        if (beginTime != null ) {
         	sql.append(" and w.timeEnd >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
         	sql.append(" and w.timeEnd <:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
-        }
+        }*/
         
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }

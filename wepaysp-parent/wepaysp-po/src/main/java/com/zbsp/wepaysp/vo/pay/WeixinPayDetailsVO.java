@@ -27,7 +27,7 @@ public class WeixinPayDetailsVO
 
     private Date beginTime;
     private Date endTime;
-    private String refundEmployeeName;// 退款人
+
     private String partner2Oid;
     private String partner3Oid;
 
@@ -146,14 +146,6 @@ public class WeixinPayDetailsVO
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
-    }
-
-    public String getRefundEmployeeName() {
-        return refundEmployeeName;
-    }
-
-    public void setRefundEmployeeName(String refundEmployeeName) {
-        this.refundEmployeeName = refundEmployeeName;
     }
 
     public String getPartner2Oid() {

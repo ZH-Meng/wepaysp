@@ -3,10 +3,14 @@
  "http://struts.apache.org/dtds/struts-2.1.dtd">
 <struts>
 	<package name="pay" namespace="/resources/pay" extends="wepaysp-manage-default">
-		<!-- 微信交易明细管理 -->
+		<!-- 微信交易明细 -->
 		<action name="weixinpaydetails" class="weixinPayDetailsAction">
 			<result name="weixinPayDetailsList">/resources/pay/weixinPayDetailsList.jsp</result>
-			<result name="weixinPayDetailsListForDealer">/resources/pay/weixinPayDetailsListForDealer.jsp</result>
+		</action>
+		
+		<!-- 微信退款明细 -->
+		<action name="weixinrefunddetails" class="weixinRefundDetailsAction">
+			<result name="weixinRefundDetailsList">/resources/pay/weixinRefundDetailsList.jsp</result>
 		</action>
 	</package>
 </struts>

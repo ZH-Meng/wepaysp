@@ -16,4 +16,9 @@
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService"></property>
 	</bean>
 	
+	<bean id="weixinRefundDetailsAction" class="com.zbsp.wepaysp.manage.web.action.pay.WeixinRefundDetailsAction" scope="prototype">
+		<property name="partnerService" ref="partnerService"></property>
+		<property name="weixinRefundDetailsService" ref="weixinRefundDetailsService"></property>
+	</bean>
+	
 </beans>

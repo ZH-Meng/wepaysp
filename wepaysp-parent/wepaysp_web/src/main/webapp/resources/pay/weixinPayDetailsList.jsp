@@ -22,7 +22,13 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：分润计算&gt;微信交易明细</div>
+		<s:if test="userLevel == 1 && userLevel == 2">
+			<s:set name="navTag" value="分润计算"/>
+		</s:if>
+		<s:elseif test="userLevel == 3 && userLevel == 5">
+			<s:set name="navTag" value="资金结算"/>
+		</s:elseif>
+		<div class="bgposition">您现在的位置：<s:property value="#navTag"/>&gt;微信交易明细</div>
 		<s:form id="queryForm" method="post">
 			<div class="bgtj">
 				<ul class="tj_title">
