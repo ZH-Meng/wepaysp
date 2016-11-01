@@ -306,7 +306,6 @@ public class DealerServiceImpl
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());
         newUser.setUserLevel(SysUser.UserLevel.dealer.getValue());
-        newUser.setPartner(partner);
         newUser.setDealer(dealer);
         newUser.setStore(defaultStore);
         newUser.setCreator(creator);

@@ -205,9 +205,6 @@ public class DealerEmployeeServiceImpl
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());
         newUser.setUserLevel(SysUser.UserLevel.cashier.getValue());
-        newUser.setDealer(dealer);
-        newUser.setPartner(dealer.getPartner());
-        newUser.setStore(store);
         newUser.setDealerEmployee(dealerEmployee);
         newUser.setCreator(creator);
         commonDAO.save(newUser, false);

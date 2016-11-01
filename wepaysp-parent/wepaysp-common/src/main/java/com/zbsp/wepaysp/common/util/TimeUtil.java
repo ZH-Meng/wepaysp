@@ -8,6 +8,7 @@
  */
 package com.zbsp.wepaysp.common.util;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.joda.time.DateTime;
@@ -88,5 +89,25 @@ public final class TimeUtil {
      */
     public static Date plusSeconds(int seconds) {
         return DateTime.now().plusSeconds(seconds).toDate();
+    }
+    
+    /**
+     * 
+     * @param date
+     * @param timeUnit
+     * @return
+     */
+    public static Date getLastTimeUnit(Date date, int timeUnit) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        /* 取得上一个时间单位,即中间表中的前一小时，或前一天，前一月 */
+        if (timeUnit == Calendar.HOUR_OF_DAY) {
+            calendar.add(timeUnit, -1);
+        } else if (timeUnit == Calendar.DAY_OF_MONTH) {
+            calendar.add(timeUnit, -1);
+        } else if (timeUnit == Calendar.MONTH) {
+            calendar.add(timeUnit, -1);
+        }
+        return calendar.getTime();
     }
 }

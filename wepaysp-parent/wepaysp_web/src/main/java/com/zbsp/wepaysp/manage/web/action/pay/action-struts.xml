@@ -6,6 +6,7 @@
 		<!-- 微信交易明细管理 -->
 		<action name="weixinpaydetails" class="weixinPayDetailsAction">
 			<result name="weixinPayDetailsList">/resources/pay/weixinPayDetailsList.jsp</result>
+			<result name="weixinPayDetailsListForDealer">/resources/pay/weixinPayDetailsListForDealer.jsp</result>
 		</action>
 	</package>
 </struts>

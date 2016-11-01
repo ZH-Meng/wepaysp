@@ -24,10 +24,17 @@ public class WeixinPayDetailsVO
     private Integer totalFee;
     private String resultCode;
     private Date timeEnd;
-    
+
     private Date beginTime;
     private Date endTime;
-    private String refundEmployeeName;
+    private String refundEmployeeName;// 退款人
+    private String partner2Oid;
+    private String partner3Oid;
+
+    private String partnerEmployeeId;
+    private String dealerId;
+    private String storeId;
+    private String dealerEmployeeId;
 
     public String getIwoid() {
         return iwoid;
@@ -108,11 +115,11 @@ public class WeixinPayDetailsVO
     public void setTotalFee(Integer totalFee) {
         this.totalFee = totalFee;
     }
-    
+
     public String getResultCode() {
         return resultCode;
     }
-    
+
     public void setResultCode(String resultCode) {
         this.resultCode = resultCode;
     }
@@ -124,11 +131,11 @@ public class WeixinPayDetailsVO
     public void setTimeEnd(Date timeEnd) {
         this.timeEnd = timeEnd;
     }
-    
+
     public Date getBeginTime() {
         return beginTime;
     }
-    
+
     public void setBeginTime(Date beginTime) {
         this.beginTime = beginTime;
     }
@@ -141,12 +148,60 @@ public class WeixinPayDetailsVO
         this.endTime = endTime;
     }
 
-	public String getRefundEmployeeName() {
-		return refundEmployeeName;
-	}
+    public String getRefundEmployeeName() {
+        return refundEmployeeName;
+    }
 
-	public void setRefundEmployeeName(String refundEmployeeName) {
-		this.refundEmployeeName = refundEmployeeName;
-	}
-    
+    public void setRefundEmployeeName(String refundEmployeeName) {
+        this.refundEmployeeName = refundEmployeeName;
+    }
+
+    public String getPartner2Oid() {
+        return partner2Oid;
+    }
+
+    public void setPartner2Oid(String partner2Oid) {
+        this.partner2Oid = partner2Oid;
+    }
+
+    public String getPartner3Oid() {
+        return partner3Oid;
+    }
+
+    public void setPartner3Oid(String partner3Oid) {
+        this.partner3Oid = partner3Oid;
+    }
+
+    public String getPartnerEmployeeId() {
+        return partnerEmployeeId;
+    }
+
+    public void setPartnerEmployeeId(String partnerEmployeeId) {
+        this.partnerEmployeeId = partnerEmployeeId;
+    }
+
+    public String getDealerId() {
+        return dealerId;
+    }
+
+    public void setDealerId(String dealerId) {
+        this.dealerId = dealerId;
+    }
+
+    public String getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getDealerEmployeeId() {
+        return dealerEmployeeId;
+    }
+
+    public void setDealerEmployeeId(String dealerEmployeeId) {
+        this.dealerEmployeeId = dealerEmployeeId;
+    }
+
 }

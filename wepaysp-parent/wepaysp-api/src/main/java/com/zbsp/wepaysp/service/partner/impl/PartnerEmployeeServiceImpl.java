@@ -196,7 +196,6 @@ public class PartnerEmployeeServiceImpl
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());
         newUser.setUserLevel(SysUser.UserLevel.salesman.getValue());
-        newUser.setPartner(partner);
         newUser.setPartnerEmployee(partnerEmployee);
         newUser.setCreator(creator);
         commonDAO.save(newUser, false);

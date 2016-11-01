@@ -20,10 +20,10 @@ public interface WeixinPayDetailsService {
      *      partnerEmployeeOid:           String类型，业务员Oid，根据此参数模糊查询
      *      dealerOid:          				 String类型，商户Oid，根据此参数模糊查询
      *      dealerEmployeeOid:           String类型，收银员Oid，根据此参数模糊查询
-     *      partnerEmployeeName:     String类型，业务员姓名，根据此参数模糊查询
-     *      dealerName:                     String类型，商家姓名，根据此参数模糊查询
-     *      dealerEmployeeName:       String类型，收银员姓名，根据此参数模糊查询
-     *      storeName:                      String类型，门店名称，根据此参数模糊查询
+     *      partnerEmployeeId:     String类型，业务员姓名，根据此参数模糊查询
+     *      dealerId:                     String类型，商家姓名，根据此参数模糊查询
+     *      dealerEmployeeId:       String类型，收银员姓名，根据此参数模糊查询
+     *      storeId:                      String类型，门店名称，根据此参数模糊查询
      *      beginTime:                       Date类型，交易开始时间，根据此参数模糊查询
      *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
      * </pre>
@@ -45,10 +45,10 @@ public interface WeixinPayDetailsService {
      *      partnerEmployeeOid:           String类型，业务员Oid，根据此参数模糊查询
      *      dealerOid:          				 String类型，商户Oid，根据此参数模糊查询
      *      dealerEmployeeOid:           String类型，收银员Oid，根据此参数模糊查询
-     *      partnerEmployeeName:     String类型，业务员姓名，根据此参数模糊查询
-     *      dealerName:                     String类型，商家姓名，根据此参数模糊查询
-     *      dealerEmployeeName:       String类型，收银员姓名，根据此参数模糊查询
-     *      storeName:                      String类型，门店名称，根据此参数模糊查询
+     *      partnerEmployeeId:     String类型，业务员姓名，根据此参数模糊查询
+     *      dealerId:                     String类型，商家姓名，根据此参数模糊查询
+     *      dealerEmployeeId:       String类型，收银员姓名，根据此参数模糊查询
+     *      storeId:                      String类型，门店名称，根据此参数模糊查询
      *      beginTime:                       Date类型，交易开始时间，根据此参数模糊查询
      *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
      * </pre>

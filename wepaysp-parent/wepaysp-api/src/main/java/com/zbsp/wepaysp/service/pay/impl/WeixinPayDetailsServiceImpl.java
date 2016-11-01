@@ -28,10 +28,10 @@ public class WeixinPayDetailsServiceImpl
     public List<WeixinPayDetailsVO> doJoinTransQueryWeixinPayDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult) {
     	List<WeixinPayDetailsVO> resultList = new ArrayList<WeixinPayDetailsVO>();
  	   
-        String partnerEmployeeName = MapUtils.getString(paramMap, "partnerEmployeeName");
-        String dealerName = MapUtils.getString(paramMap, "dealerName");
-        String storeName = MapUtils.getString(paramMap, "storeName");
-        String dealerEmployeeName = MapUtils.getString(paramMap, "dealerEmployeeName");
+        String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
+        String dealerId = MapUtils.getString(paramMap, "dealerId");
+        String storeId = MapUtils.getString(paramMap, "storeId");
+        String dealerEmployeeId = MapUtils.getString(paramMap, "dealerEmployeeId");
         
         String partner1Oid = MapUtils.getString(paramMap, "partner1Oid");
         String partner2Oid = MapUtils.getString(paramMap, "partner2Oid");
@@ -47,44 +47,44 @@ public class WeixinPayDetailsServiceImpl
 
         if (StringUtils.isNotBlank(partner1Oid)) {
         	sql.append(" and w.partner1Oid = :PARTNER1OID");
-        	sqlMap.put("PARTNER1OID", "%" + partner1Oid + "%");
+        	sqlMap.put("PARTNER1OID", partner1Oid);
         }
         if (StringUtils.isNotBlank(partner2Oid)) {
         	sql.append(" and w.partner2Oid = :PARTNER2OID");
-        	sqlMap.put("PARTNER2OID", "%" + partner2Oid + "%");
+        	sqlMap.put("PARTNER2OID", partner2Oid);
         }
         if (StringUtils.isNotBlank(partner3Oid)) {
         	sql.append(" and w.partner3Oid = :PARTNER3OID");
-        	sqlMap.put("PARTNER3OID", "%" + partner3Oid + "%");
+        	sqlMap.put("PARTNER3OID", partner3Oid);
         }
         if (StringUtils.isNotBlank(partnerEmployeeOid)) {
             sql.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
-            sqlMap.put("PARTNEREMPLOYEEOID", "%" + partnerEmployeeOid + "%");
+            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
         }
         if (StringUtils.isNotBlank(dealerOid)) {
             sql.append(" and w.dealer.iwoid = :DEALEROID");
-            sqlMap.put("DEALEROID", "%" + dealerOid + "%");
+            sqlMap.put("DEALEROID", dealerOid);
         }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
             sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
         }
         
-        if (StringUtils.isNotBlank(partnerEmployeeName)) {
-            sql.append(" and w.partnerEmployee.employeeName like :PARTNEREMPLOYEENAME");
-            sqlMap.put("PARTNEREMPLOYEENAME", "%" + partnerEmployeeName + "%");
+        if (StringUtils.isNotBlank(partnerEmployeeId)) {
+            sql.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
+            sqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
         }
-        if (StringUtils.isNotBlank(dealerName)) {
-            sql.append(" and w.dealer.company like :DEALERNAME");
-            sqlMap.put("DEALERNAME", "%" + dealerName + "%");
+        if (StringUtils.isNotBlank(dealerId)) {
+            sql.append(" and w.dealer.dealerId like :DEALERID");
+            sqlMap.put("DEALERID", "%" + dealerId + "%");
         }
-        if (StringUtils.isNotBlank(storeName)) {
-            sql.append(" and w.store.storeName like :STORENAME");
-            sqlMap.put("STORENAME", "%" + storeName + "%");
+        if (StringUtils.isNotBlank(storeId)) {
+            sql.append(" and w.store.storeId like :STOREID");
+            sqlMap.put("STOREID", "%" + storeId + "%");
         }
-        if (StringUtils.isNotBlank(dealerEmployeeName)) {
-            sql.append(" and w.dealerEmployee.employeeName like :DEALEREMPLOYEENAME");
-            sqlMap.put("DEALEREMPLOYEENAME", "%" + dealerEmployeeName + "%");
+        if (StringUtils.isNotBlank(dealerEmployeeId)) {
+            sql.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
+            sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
         if (beginTime != null ) {
@@ -104,10 +104,16 @@ public class WeixinPayDetailsServiceImpl
         		WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
         		BeanCopierUtil.copyProperties(weixinPayDetails, vo);
         		vo.setPartnerName(weixinPayDetails.getPartner().getCompany());
+        		
         		vo.setPartnerEmployeeName(weixinPayDetails.getPartnerEmployee().getEmployeeName());
-        		vo.setDealerName(weixinPayDetails.getDealer().getCompany());
-        		vo.setStoreName(weixinPayDetails.getStore().getStoreName());
-        		vo.setDealerEmployeeName(weixinPayDetails.getDealerEmployee().getEmployeeName());
+                vo.setDealerName(weixinPayDetails.getDealer().getCompany());
+                vo.setStoreName(weixinPayDetails.getStore().getStoreName());
+                vo.setDealerEmployeeName(weixinPayDetails.getDealerEmployee().getEmployeeName());
+                
+        		vo.setPartnerEmployeeId(weixinPayDetails.getPartnerEmployee().getPartnerEmployeeId());
+        		vo.setDealerId(weixinPayDetails.getDealer().getDealerId());
+        		vo.setStoreId(weixinPayDetails.getStore().getStoreId());
+        		vo.setDealerEmployeeId(weixinPayDetails.getDealerEmployee().getDealerEmployeeId());
         		vo.setRefundEmployeeName(weixinPayDetails.getDealerEmployee().getEmployeeName());// 退款人
         		resultList.add(vo);
         	}
@@ -118,12 +124,11 @@ public class WeixinPayDetailsServiceImpl
 
     @Override
     public int doJoinTransQueryWeixinPayDetailsCount(Map<String, Object> paramMap) {
-    	List<WeixinPayDetailsVO> resultList = new ArrayList<WeixinPayDetailsVO>();
   	   
-        String partnerEmployeeName = MapUtils.getString(paramMap, "partnerEmployeeName");
-        String dealerName = MapUtils.getString(paramMap, "dealerName");
-        String storeName = MapUtils.getString(paramMap, "storeName");
-        String dealerEmployeeName = MapUtils.getString(paramMap, "dealerEmployeeName");
+        String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
+        String dealerId = MapUtils.getString(paramMap, "dealerId");
+        String storeId = MapUtils.getString(paramMap, "storeId");
+        String dealerEmployeeId = MapUtils.getString(paramMap, "dealerEmployeeId");
         
         String partner1Oid = MapUtils.getString(paramMap, "partner1Oid");
         String partner2Oid = MapUtils.getString(paramMap, "partner2Oid");
@@ -138,45 +143,45 @@ public class WeixinPayDetailsServiceImpl
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
-        	sql.append(" and w.partner1Oid = :PARTNER1OID");
-        	sqlMap.put("PARTNER1OID", "%" + partner1Oid + "%");
+            sql.append(" and w.partner1Oid = :PARTNER1OID");
+            sqlMap.put("PARTNER1OID", partner1Oid);
         }
         if (StringUtils.isNotBlank(partner2Oid)) {
-        	sql.append(" and w.partner2Oid = :PARTNER2OID");
-        	sqlMap.put("PARTNER2OID", "%" + partner2Oid + "%");
+            sql.append(" and w.partner2Oid = :PARTNER2OID");
+            sqlMap.put("PARTNER2OID", partner2Oid);
         }
         if (StringUtils.isNotBlank(partner3Oid)) {
-        	sql.append(" and w.partner3Oid = :PARTNER3OID");
-        	sqlMap.put("PARTNER3OID", "%" + partner3Oid + "%");
+            sql.append(" and w.partner3Oid = :PARTNER3OID");
+            sqlMap.put("PARTNER3OID", partner3Oid);
         }
         if (StringUtils.isNotBlank(partnerEmployeeOid)) {
             sql.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
-            sqlMap.put("PARTNEREMPLOYEEOID", "%" + partnerEmployeeOid + "%");
+            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
         }
         if (StringUtils.isNotBlank(dealerOid)) {
             sql.append(" and w.dealer.iwoid = :DEALEROID");
-            sqlMap.put("DEALEROID", "%" + dealerOid + "%");
+            sqlMap.put("DEALEROID", dealerOid);
         }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
             sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
         }
         
-        if (StringUtils.isNotBlank(partnerEmployeeName)) {
-            sql.append(" and w.partnerEmployee.employeeName like :PARTNEREMPLOYEENAME");
-            sqlMap.put("PARTNEREMPLOYEENAME", "%" + partnerEmployeeName + "%");
+        if (StringUtils.isNotBlank(partnerEmployeeId)) {
+            sql.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
+            sqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
         }
-        if (StringUtils.isNotBlank(dealerName)) {
-            sql.append(" and w.dealer.company like :DEALERNAME");
-            sqlMap.put("DEALERNAME", "%" + dealerName + "%");
+        if (StringUtils.isNotBlank(dealerId)) {
+            sql.append(" and w.dealer.dealerId like :DEALERID");
+            sqlMap.put("DEALERID", "%" + dealerId + "%");
         }
-        if (StringUtils.isNotBlank(storeName)) {
-            sql.append(" and w.store.storeName like :STORENAME");
-            sqlMap.put("STORENAME", "%" + storeName + "%");
+        if (StringUtils.isNotBlank(storeId)) {
+            sql.append(" and w.store.storeId like :STOREID");
+            sqlMap.put("STOREID", "%" + storeId + "%");
         }
-        if (StringUtils.isNotBlank(dealerEmployeeName)) {
-            sql.append(" and w.dealerEmployee.employeeName like :DEALEREMPLOYEENAME");
-            sqlMap.put("DEALEREMPLOYEENAME", "%" + dealerEmployeeName + "%");
+        if (StringUtils.isNotBlank(dealerEmployeeId)) {
+            sql.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
+            sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
         if (beginTime != null ) {
