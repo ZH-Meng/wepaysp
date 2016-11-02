@@ -26,8 +26,7 @@ public class PartnerEmployeeAction
     extends PageAction
     implements SessionAware {
 
-    private static final long serialVersionUID = -7078956274536886116L;
-
+    private static final long serialVersionUID = 4657328929941526804L;
     private Map<String, Object> session;
     private PartnerEmployeeVO partnerEmployeeVO;
     private List<PartnerEmployeeVO> partnerEmployeeVoList;
@@ -65,7 +64,7 @@ public class PartnerEmployeeAction
      * @return
      */
     public String list() {
-        initPageData(100);
+        initPageData(PageAction.defaultSmallPageSize);
         return goCurrent();
     }
 

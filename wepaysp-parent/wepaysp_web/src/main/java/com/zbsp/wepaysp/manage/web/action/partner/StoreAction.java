@@ -26,8 +26,7 @@ public class StoreAction
     extends PageAction
     implements SessionAware {
 
-    private static final long serialVersionUID = -7078956274536886116L;
-
+    private static final long serialVersionUID = 1469376572233280708L;
     private Map<String, Object> session;
     private StoreVO storeVO;
     private List<StoreVO> storeVoList;
@@ -76,7 +75,7 @@ public class StoreAction
     }
 
     public String list() {
-        initPageData(100);
+        initPageData(PageAction.defaultSmallPageSize);
         return goCurrent();
     }
 

@@ -29,7 +29,7 @@ public class WeixinPayDetailsAction
     extends PageAction
     implements SessionAware {
 
-    private static final long serialVersionUID = -4213656644621035327L;
+    private static final long serialVersionUID = -1628575995917257516L;
     private Map<String, Object> session;
     private WeixinPayDetailsVO weixinPayDetailsVO;
     private String beginTime;
@@ -123,6 +123,7 @@ public class WeixinPayDetailsAction
             if (weixinPayDetailsVO.getEndTime() != null && TimeUtil.timeAfter(weixinPayDetailsVO.getEndTime(), beforeDay)) {
                 logger.warn("最大查询日期不能大于前一天");
                 setAlertMessage("最大查询日期不能大于前一天");
+                return "weixinPayDetailsList";
             }
             weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, start, size);
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
@@ -144,7 +145,7 @@ public class WeixinPayDetailsAction
      * @return
      */
     public String list() {
-        initPageData(100);
+        initPageData(PageAction.defaultLargePageSize);
         listType = "partner";
         return goCurrent();
     }
@@ -154,8 +155,8 @@ public class WeixinPayDetailsAction
      * 
      * @return
      */
-    public String listForDealer() {
-        initPageData(100);
+    public String list4Dealer() {
+        initPageData(PageAction.defaultLargePageSize);
         listType = "dealer";
         return goCurrent();
     }
@@ -164,10 +165,6 @@ public class WeixinPayDetailsAction
         return DateUtil.getDate(dateStr, "yyyy-MM-dd");
     }
 
-    private String convertD2S(Date date) {
-        return DateUtil.getDate(date, "yyyy-MM-dd");
-    }
-    
     @Override
     public void setSession(Map<String, Object> session) {
         this.session = session;

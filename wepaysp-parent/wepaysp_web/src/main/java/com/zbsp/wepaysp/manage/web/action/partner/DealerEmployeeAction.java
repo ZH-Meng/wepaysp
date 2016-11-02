@@ -28,8 +28,7 @@ public class DealerEmployeeAction
     extends PageAction
     implements SessionAware {
 
-    private static final long serialVersionUID = -7078956274536886116L;
-
+    private static final long serialVersionUID = 3725169645580498305L;
     private Map<String, Object> session;
     private DealerEmployeeVO dealerEmployeeVO;
     private List<DealerEmployeeVO> dealerEmployeeVoList;
@@ -71,7 +70,7 @@ public class DealerEmployeeAction
      * @return
      */
     public String list() {
-        initPageData(100);
+        initPageData(PageAction.defaultSmallPageSize);
         return goCurrent();
     }
 

@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>微信交易明细</title>
+	<title>商户门店资金结算</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 	<s:if test="partnerVoListLevel == 2 || partnerVoListLevel==3">
 		<style>
@@ -22,13 +22,7 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<s:if test="userLevel == 1 || userLevel == 2">
-			<s:set name="navTag">分润计算</s:set>
-		</s:if>
-		<s:elseif test="userLevel == 3 || userLevel == 5">
-			<s:set name="navTag">资金结算</s:set>
-		</s:elseif>
-		<div class="bgposition">您现在的位置：<s:property value="#navTag"/>&gt;微信交易明细</div>
+		<div class="bgposition">您现在的位置：资金结算&gt;商户门店资金结算</div>
 		<s:form id="queryForm" method="post">
 			<div class="bgtj">
 				<ul class="tj_title">
@@ -38,70 +32,38 @@
 					<li class="bg_tjall">
 						<table>
 							<tbody>
-								<%-- 服务商、业务员、商户 --%>
 								<tr>
-									<s:if test="userLevel  > 0 && userLevel  <= 3">
-										<s:if test="userLevel  == 1">
-											<s:if test="partnerVoListLevel == 2">
-												<th>服务商</th>
-				                                <td>
-				                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinPayDetailsVO.partner2Oid"  id="partner2Oid" headerKey="" headerValue="全部"/>
-				                                	<s:set name="queryCols"  value="9"/>
-				                                </td>
-											</s:if>
-											<s:elseif test="partnerVoListLevel == 3">
-												<th>服务商</th>
-				                                <td>
-				                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinPayDetailsVO.partner3Oid"  id="partner3Oid" headerKey="" headerValue="全部"/>
-				                                	<span class="tj_bt">*</span>
-				                                	<s:set name="queryCols"  value="9"/>
-				                                </td>
-											</s:elseif>
-											<s:else>
-												<s:set name="queryCols"  value="7"/>
-											</s:else>
-											<th>业务员ID</th>
-											<td><s:textfield name="weixinPayDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="20"/></td>
-										</s:if>
-										<s:if test="userLevel  == 1 || userLevel  == 2">	
-											<th>商家ID</th>
-											<td><s:textfield name="weixinPayDetailsVO.dealerId" id="dealerId" maxlength="20"/></td>
-											<s:if test="#queryCols == null">
-												<s:set name="queryCols"  value="5"/>
-											</s:if>
-										</s:if>
-										<s:if test="#queryCols == null">
-											<s:set name="queryCols"  value="3"/>
-										</s:if>
-										<th>门店ID</th>
-										<td><s:textfield name="weixinPayDetailsVO.storeId" id="storeId" maxlength="20"/></td>
-										<th>收银员ID</th>
-										<td><s:textfield name="weixinPayDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="20"/></td>
-									</s:if>
-									<s:if test="#queryCols == null">
-										<s:set name="queryCols"  value="1"/>
-									</s:if>
-								</tr>
-								<tr>
-									<th>交易开始时间</th>
-									<td colspan="<s:property value='#queryCols' />">
-										<input style="width:185px;" type="text" name="beginTime" id="beginTime" class="Wdate" readonly="readonly" value="<s:property value="beginTime"/>"
-												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})"/>
-									<span>交易截止时间</span>
-										<input style="width:185px;" type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
-													onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'<s:property value="maxQueryTime"/>', minDate:'#F{$dp.$D(\'beginTime\')}'})"/>
+									<th>时间</th>
+									<td>
+										<strong class="timetj">
+	                                        <input class="dxbtn" type="radio" id="queryType1" name="queryType" value="day"/>自定义时段
+	                                        <input onclick="typeChange('1');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
+											name="beginTime" id="beginTime" maxlength="20" value="" />
+	                                        <span>至</span>
+	                                        <input onclick="typeChange('1');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})"
+											name="endTime" id="endTime" maxlength="20" value="" />
+	                                        <span class="tj_bt">*</span>
+	                                    </strong>
+	                                    <strong class="timetj">
+	                                    	<input class="dxbtn" type="radio"  id="queryType2" name="queryType" value="month" />按月查询
+											<input onclick="typeChange('2');" type="text" class="Wdate" runat="server" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM',maxDate:'%y-{%M-1}-%d'})" 
+											name="monthTime" id="monthTime" maxlength="20" value="<s:date name="monthTime" format="yyyy-MM"/>" />	                                    	
+											<span class="tj_bt">*</span>
+	                                    </strong>
 									</td>
+									<th>门店</th>
+	                                <td>
+	                                	<s:select list="storeVoList" listKey="iwoid" listValue="storeName" name="dealerEmployeeVO.storeOid"  id="storeOid" headerKey="" headerValue="请选择"/>
+	                                	<span class="tj_bt">*</span>
+	                                </td>
+									<th>收银员ID</th>
+									<td><s:textfield name="weixinPayDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="20"/></td>
 								</tr>
 							</tbody>
 						</table>
 					</li>
 					<li class="bg_button">
-						<s:if test="userLevel  < 3">
-							<a href="javascript:void(0);" onclick="query('list');">查询</a>
-						</s:if>
-						<s:elseif test="userLevel  >=3 && userLevel <=5">
-							<a href="javascript:void(0);" onclick="query('listForDealer');">查询</a>
-						</s:elseif>
+						<a href="javascript:void(0);" onclick="query('list');">查询</a>
 						<a href="javascript:void(0);" onclick="reset();" >重写</a>
 					</li>
 				</ul>
@@ -113,23 +75,14 @@
 	                        <thead>
 	                            <tr>
 	                                <th class="six">序号</th>
-	                                <th>商户订单号</th>
-	                                <s:if test="userLevel  < 3">
-		                                <th>服务商ID</th>
-		                                <th>服务商名称</th>
-		                                <th>业务员ID</th>
-		                                <th>业务员名称</th>
-		                            </s:if>
 		                            <th>商家ID</th>
 	                                <th>商家名称</th>
 	                                <th>门店ID</th>
 	                                <th>门店名称</th>
 	                                <th>收银员ID</th>
 	                                <th>收银员姓名</th>
-	                                <th>支付类型</th>
-	                                <th>订单金额</th>
-	                                <th>状态</th>
-	                                <th>时间</th>
+	                                <th>总笔数</th>
+	                                <th>总金额</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -208,6 +161,14 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
 	<script type="text/javascript">
+		function typeChange(type){
+			if(type=="1"){
+				$("#queryType1").attr("checked","checked");
+			}else if(type=="2"){
+				$("#queryType2").attr("checked","checked");
+			}
+		}
+		
 		function query(method) {
 			var beginTime = $("#beginTime").val();
 			var endTime = $("#endTime").val();

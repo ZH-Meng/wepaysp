@@ -28,8 +28,7 @@ public class PartnerAction
     extends PageAction
     implements SessionAware {
 
-    private static final long serialVersionUID = -7078956274536886116L;
-
+    private static final long serialVersionUID = 4455040964735514418L;
     private Map<String, Object> session;
     private PartnerVO partnerVO;
     private String contractBegin = "";
@@ -90,7 +89,7 @@ public class PartnerAction
     }
 
     public String list() {
-        initPageData(100);
+        initPageData(PageAction.defaultSmallPageSize);
         return goCurrent();
     }
 

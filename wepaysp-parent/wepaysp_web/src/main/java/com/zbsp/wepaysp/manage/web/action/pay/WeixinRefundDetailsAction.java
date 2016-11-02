@@ -144,7 +144,7 @@ public class WeixinRefundDetailsAction
      * @return
      */
     public String list() {
-        initPageData(100);
+        initPageData(PageAction.defaultLargePageSize);
         listType = "partner";
         return goCurrent();
     }
@@ -154,8 +154,8 @@ public class WeixinRefundDetailsAction
      * 
      * @return
      */
-    public String listForDealer() {
-        initPageData(100);
+    public String list4Dealer() {
+        initPageData(PageAction.defaultLargePageSize);
         listType = "dealer";
         return goCurrent();
     }
@@ -164,10 +164,6 @@ public class WeixinRefundDetailsAction
         return DateUtil.getDate(dateStr, "yyyy-MM-dd");
     }
 
-    private String convertD2S(Date date) {
-        return DateUtil.getDate(date, "yyyy-MM-dd");
-    }
-    
     @Override
     public void setSession(Map<String, Object> session) {
         this.session = session;
