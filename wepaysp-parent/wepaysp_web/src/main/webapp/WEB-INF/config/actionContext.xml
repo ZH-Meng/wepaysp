@@ -18,4 +18,5 @@
 	<import resource="action/logmanage-action-context.xml"/>
 	<import resource="action/partner-action-context.xml"/>
 	<import resource="action/pay-action-context.xml"/>
+	<import resource="action/report-action-context.xml"/>
 </beans>

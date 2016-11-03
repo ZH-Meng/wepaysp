@@ -4,17 +4,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
-import com.zbsp.wepaysp.po.partner.Dealer;
-import com.zbsp.wepaysp.po.partner.DealerEmployee;
-import com.zbsp.wepaysp.po.partner.Partner;
-import com.zbsp.wepaysp.po.partner.PartnerEmployee;
-import com.zbsp.wepaysp.po.partner.Store;
 
 @Entity
 @Table(name = "rpt_dealer_stat_month_t")
@@ -26,11 +17,11 @@ public class RptDealerStatMonth
      */
     private static final long serialVersionUID = 2933095269370279064L;
     private String iwoid;
-    private Dealer dealer;
-    private DealerEmployee dealerEmployee;
-    private Store store;
-    private Partner partner;
-    private PartnerEmployee partnerEmployee;
+    private String dealerOid;
+    private String dealerEmployeeOid;
+    private String storeOid;
+    private String partnerOid;
+    private String partnerEmployeeOid;
     private Timestamp startTime;
     private String dealerId;
     private String dealerName;
@@ -38,8 +29,8 @@ public class RptDealerStatMonth
     private String storeName;
     private String dealerEmployeeId;
     private String dealerEmployeeName;
-    private String partneId;
-    private String partneName;
+    private String partnerId;
+    private String partnerName;
     private Integer partnerLevel;
     private String partner1Oid;
     private String partner2Oid;
@@ -68,54 +59,49 @@ public class RptDealerStatMonth
         this.iwoid = iwoid;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEALER_OID", nullable = false)
-    public Dealer getDealer() {
-        return this.dealer;
+    @Column(name = "DEALER_OID", nullable = false)
+    public String getDealerOid() {
+        return dealerOid;
     }
 
-    public void setDealer(Dealer dealer) {
-        this.dealer = dealer;
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEALER_EMPLOYEE_OID")
-    public DealerEmployee getDealerEmployee() {
-        return this.dealerEmployee;
+    @Column(name = "DEALER_EMPLOYEE_OID", nullable = false)
+    public String getDealerEmployeeOid() {
+        return dealerEmployeeOid;
     }
 
-    public void setDealerEmployee(DealerEmployee dealerEmployee) {
-        this.dealerEmployee = dealerEmployee;
+    public void setDealerEmployeeOid(String dealerEmployeeOid) {
+        this.dealerEmployeeOid = dealerEmployeeOid;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SOTRE_OID")
-    public Store getStore() {
-        return this.store;
+    @Column(name = "STORE_OID", nullable = false)
+    public String getStoreOid() {
+        return storeOid;
     }
 
-    public void setStore(Store store) {
-        this.store = store;
+    public void setStoreOid(String storeOid) {
+        this.storeOid = storeOid;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PARTNER_OID", nullable = false)
-    public Partner getPartner() {
-        return this.partner;
+    @Column(name = "PARTNER_OID", nullable = false)
+    public String getPartnerOid() {
+        return partnerOid;
     }
 
-    public void setPartner(Partner partner) {
-        this.partner = partner;
+    public void setPartnerOid(String partnerOid) {
+        this.partnerOid = partnerOid;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PARTNER_EMPLOYEE_OID")
-    public PartnerEmployee getPartnerEmployee() {
-        return this.partnerEmployee;
+    @Column(name = "PARTNER_EMPLOYEE_OID", nullable = false)
+    public String getPartnerEmployeeOid() {
+        return partnerEmployeeOid;
     }
 
-    public void setPartnerEmployee(PartnerEmployee partnerEmployee) {
-        this.partnerEmployee = partnerEmployee;
+    public void setPartnerEmployeeOid(String partnerEmployeeOid) {
+        this.partnerEmployeeOid = partnerEmployeeOid;
     }
 
     @Column(name = "START_TIME", nullable = false, length = 0)
@@ -181,22 +167,22 @@ public class RptDealerStatMonth
         this.dealerEmployeeName = dealerEmployeeName;
     }
 
-    @Column(name = "PARTNE_ID", length = 32)
-    public String getPartneId() {
-        return this.partneId;
+    @Column(name = "PARTNER_ID", length = 32)
+    public String getPartnerId() {
+        return this.partnerId;
     }
 
-    public void setPartneId(String partneId) {
-        this.partneId = partneId;
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
     }
 
-    @Column(name = "PARTNE_NAME", nullable = false, length = 256)
-    public String getPartneName() {
-        return this.partneName;
+    @Column(name = "PARTNER_NAME", nullable = false, length = 256)
+    public String getPartnerName() {
+        return this.partnerName;
     }
 
-    public void setPartneName(String partneName) {
-        this.partneName = partneName;
+    public void setPartnerName(String partnerName) {
+        this.partnerName = partnerName;
     }
 
     @Column(name = "PARTNER_LEVEL")

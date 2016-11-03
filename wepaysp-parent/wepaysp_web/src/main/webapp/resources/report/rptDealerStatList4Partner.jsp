@@ -6,19 +6,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<s:if test="listType == 'dealer'">
-		<s:set name="title">商户门店资金结算</s:set>
+	<s:if test="listType == 'partner'">
+		<s:set name="title">代理商分润统计</s:set>
 	</s:if>
-	<s:elseif test="listType == 'dealerEmployee'">
-		<s:set name="title">商户员工资金结算</s:set>
+	<s:elseif test="listType == 'partnerEmployee'">
+		<s:set name="title">代理商员工分润统计</s:set>
 	</s:elseif>
 	<title><s:property value="#title"/></title>
-	<title></title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：资金结算&gt;<s:property value="#title"/></div>
+		<div class="bgposition">您现在的位置：分润计算&gt;<s:property value="#title"/></div>
 		<s:form id="queryForm" method="post">
 			<s:hidden name="listType"/>
 			<div class="bgtj">
@@ -29,24 +28,27 @@
 					<li class="bg_tjall">
 						<table>
 							<tbody>
-								<s:set name="queryCols"  value="1"/>
-								<%-- 商户 --%>
-								<s:if test="userLevel == 3">
-									<tr>
-										<th>门店</th>
-		                                <td>
-		                                	<s:select list="storeVoList" listKey="iwoid" listValue="storeName" name="rptDealerStatVO.storeOid"  id="storeOid" headerKey="" headerValue="全部"/>
-		                                </td>
-		                                <s:if test="listType == 'dealerEmployee'">
-		                                	<s:set name="queryCols"  value="3"/>
-											<th>收银员ID</th>
-											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="20"/></td>
+								<%-- 服务商 --%>
+								<s:if test="userLevel == 1">
+										<s:if test="listType == 'partner' && (partnerLevel == 1 ||  partnerLevel == 2)">
+											<s:set name="resetFlag" value="true"/>
+											<tr>
+												<th>代理商ID</th>
+												<td><s:textfield name="rptDealerStatVO.partnerId" id="partnerId" maxlength="20"/></td>
+											</tr>
 		                                </s:if>
-									</tr>
+		                                <s:elseif test="listType == 'partnerEmployee'">
+		                                	<s:set name="resetFlag" value="true"/>
+			                                <tr>
+			                                	<s:set name="queryCols"  value="3"/>
+												<th>业务员ID</th>
+												<td><s:textfield name="rptDealerStatVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="20"/></td>
+											</tr>
+		                                </s:elseif>
 								</s:if>
 								<tr>
 									<th>时间</th>
-									<td colspan="<s:property value ='#queryCols'/>">
+									<td>
 										<strong class="timetj">
 	                                        <input class="dxbtn" type="radio" id="queryType1" name="queryType" value="day"/>自定义时段
 	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})" 
@@ -69,7 +71,7 @@
 					</li>
 					<li class="bg_button">
 						<a href="javascript:void(0);" onclick="query('list');">查询</a>
-						<s:if test="userLevel ==3">
+						<s:if test="resetFlag">
 							<a href="javascript:void(0);" onclick="reset();" >重写</a>
 						</s:if>
 					</li>
@@ -82,20 +84,19 @@
 	                        <thead>
 	                            <tr>
 	                                <th class="six">序号</th>
-		                            <th>商家ID</th>
-	                                <th>商家名称</th>
-	                                <th>门店ID</th>
-	                                <th>门店名称</th>
-	                                <s:if test="listType == 'dealerEmployee'">
-		                                <s:set name="listCols"  value="9"/>
-		                                <th>收银员ID</th>
-		                                <th>收银员姓名</th>
+		                            <th>代理商ID</th>
+	                                <th>代理商名称</th>
+	                                <s:if test="listType == 'partnerEmployee'">
+		                                <s:set name="listCols"  value="8"/>
+		                                <th>业务员ID</th>
+	                                	<th>业务员名称</th>
 	                                </s:if>
 	                                <s:else>
-	                                	<s:set name="listCols"  value="7"/>
+	                                	<s:set name="listCols"  value="6"/>
 	                                </s:else>
 	                                <th>总笔数</th>
 	                                <th>总金额</th>
+	                                <th>分润【费率】</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -108,24 +109,18 @@
 						  			<td title="<s:property value="#rptDealerStatVo.outTradeNo" />">
 						  				<s:property value="#rptDealerStatVo.outTradeNo" />
 						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.dealerId" />">
-						  				<s:property value="#rptDealerStatVo.dealerId" />
+						  			<td title="<s:property value="#rptDealerStatVo.partnerId" />">
+						  				<s:property value="#rptDealerStatVo.partnerId" />
 						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.dealerName" />">
-						  				<s:property value="#rptDealerStatVo.dealerName" />
+						  			<td title="<s:property value="#rptDealerStatVo.partnerName" />">
+						  				<s:property value="#rptDealerStatVo.partnerName" />
 						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.storeName" />">
-						  				<s:property value="#rptDealerStatVo.storeName" />
-						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.storeId" />">
-						  				<s:property value="#rptDealerStatVo.storeId" />
-						  			</td>
-						  			<s:if test="istType == 'dealerEmployee'">
-							  			<td title="<s:property value="#rptDealerStatVo.dealerEmployeeId" />">
-							  				<s:property value="#rptDealerStatVo.dealerEmployeeId" />
+						  			<s:if test="istType == 'partnerEmployee'">
+							  			<td title="<s:property value="#rptDealerStatVo.partnerEmployeeId" />">
+							  				<s:property value="#rptDealerStatVo.partnerEmployeeId" />
 							  			</td>
-							  			<td title="<s:property value="#rptDealerStatVo.dealerEmployeeName" />">
-							  				<s:property value="#rptDealerStatVo.dealerEmployeeName" />
+							  			<td title="<s:property value="#rptDealerStatVo.partnerEmployeeName" />">
+							  				<s:property value="#rptDealerStatVo.partnerEmployeeName" />
 							  			</td>
 						  			</s:if>
 									<td class="bgright"  title="<s:property value="#rptDealerStatVo.totalAmount" />">
@@ -133,6 +128,9 @@
 						  			</td>
 						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###"/>">
 						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###"/>
+						  			</td>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalBouns/100}" pattern="###,###,###,###"/>">
+						  				<fmt:formatNumber value="${rptDealerStatVo.totalBouns/100}" pattern="###,###,###,###"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -178,8 +176,8 @@
 		}
 	
 		function reset() {
-			$("#storeOid").val("");
-			$("#dealerEmployeeId").val("");
+			$("#partnerId").val("");
+			$("#partnerEmployeeId").val("");
 		}
 		
 		function checkParam() {

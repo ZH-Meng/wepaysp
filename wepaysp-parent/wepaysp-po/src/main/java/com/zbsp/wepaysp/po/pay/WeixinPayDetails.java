@@ -69,6 +69,8 @@ public class WeixinPayDetails
     private Integer couponFee;
     private String transactionId;
     private Timestamp timeEnd;
+    private Timestamp transBeginTime;
+    private Timestamp transEndTime;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -109,7 +111,7 @@ public class WeixinPayDetails
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SOTRE_OID")
+    @JoinColumn(name = "STORE_OID")
     public Store getStore() {
         return this.store;
     }
@@ -480,13 +482,31 @@ public class WeixinPayDetails
         this.transactionId = transactionId;
     }
 
-    @Column(name = "TIME_END", nullable = false, length = 0)
+    @Column(name = "TIME_END", length = 0)
     public Timestamp getTimeEnd() {
         return this.timeEnd;
     }
 
     public void setTimeEnd(Timestamp timeEnd) {
         this.timeEnd = timeEnd;
+    }
+    
+    @Column(name = "TRANS_BEGIN_TIME", nullable = false, length = 0)
+    public Timestamp getTransBeginTime() {
+        return this.transBeginTime;
+    }
+
+    public void setTransBeginTime(Timestamp transBeginTime) {
+        this.transBeginTime = transBeginTime;
+    }
+    
+    @Column(name = "TRANS_END_TIME", length = 0)
+    public Timestamp getTransEndTime() {
+        return this.transEndTime;
+    }
+
+    public void setTransEndTime(Timestamp transEndTime) {
+        this.transEndTime = transEndTime;
     }
 
     @Column(name = "CREATOR", nullable = false, length = 32)

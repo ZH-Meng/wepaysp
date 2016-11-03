@@ -63,6 +63,8 @@ public class WeixinRefundDetails
     private String couponRefundBatchId;
     private String couponRefundId;
     private Integer couponRefundFeeSingle;
+    private Timestamp transBeginTime;
+    private Timestamp transEndTime;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -103,7 +105,7 @@ public class WeixinRefundDetails
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SOTRE_OID")
+    @JoinColumn(name = "STORE_OID")
     public Store getStore() {
         return this.store;
     }
@@ -429,6 +431,24 @@ public class WeixinRefundDetails
         this.couponRefundFeeSingle = couponRefundFeeSingle;
     }
 
+    @Column(name = "TRANS_BEGIN_TIME", nullable = false, length = 0)
+    public Timestamp getTransBeginTime() {
+        return this.transBeginTime;
+    }
+
+    public void setTransBeginTime(Timestamp transBeginTime) {
+        this.transBeginTime = transBeginTime;
+    }
+    
+    @Column(name = "TRANS_END_TIME", length = 0)
+    public Timestamp getTransEndTime() {
+        return this.transEndTime;
+    }
+
+    public void setTransEndTime(Timestamp transEndTime) {
+        this.transEndTime = transEndTime;
+    }
+    
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
         return this.creator;

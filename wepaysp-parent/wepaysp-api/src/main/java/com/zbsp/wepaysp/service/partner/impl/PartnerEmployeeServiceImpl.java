@@ -141,7 +141,7 @@ public class PartnerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getEmployeeName()), "业务员姓名不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getMoblieNumber()), "业务员手机号不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getState()), "业务员状态不能为空");
-        
+        Validator.checkArgument(partnerEmployeeVO.getFeeRate() == null, "分润比率不能为空");
         
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
@@ -182,6 +182,7 @@ public class PartnerEmployeeServiceImpl
         partnerEmployee.setState(partnerEmployeeVO.getState());
         partnerEmployee.setRemark(partnerEmployeeVO.getRemark());
         partnerEmployee.setCreator(creator);
+        partnerEmployee.setFeeRate(partnerEmployeeVO.getFeeRate());
         commonDAO.save(partnerEmployee, false);
         
         // 创建用户
@@ -241,12 +242,13 @@ public class PartnerEmployeeServiceImpl
     public PartnerEmployeeVO doTransUpdatePartnerEmployee(PartnerEmployeeVO partnerEmployeeVO, String modifier, String operatorUserOid, String logFunctionOid)
         throws AlreadyExistsException {
     	Validator.checkArgument(partnerEmployeeVO == null, "业务员对象不能为空");
-    	 Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getIwoid()), "业务员Oid不能为空");
+    	Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getIwoid()), "业务员Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getEmployeeName()), "业务员姓名不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getMoblieNumber()), "业务员手机号不能为空");
+        Validator.checkArgument(partnerEmployeeVO.getFeeRate() == null, "分润比率不能为空");
         
         Date processBeginTime = new Date();
         // 查找商户
@@ -260,7 +262,7 @@ public class PartnerEmployeeServiceImpl
         partnerEmployee.setEmployeeName(partnerEmployeeVO.getEmployeeName());
         partnerEmployee.setState(partnerEmployeeVO.getState());
         partnerEmployee.setRemark(partnerEmployeeVO.getRemark());
-        
+        partnerEmployee.setFeeRate(partnerEmployeeVO.getFeeRate());
         partnerEmployee.setModifier(modifier);
         commonDAO.update(partnerEmployee);
 

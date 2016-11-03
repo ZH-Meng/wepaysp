@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib uri="http://java.sun.com/jstl/fmt_rt" prefix="fmt"%>
 <%@ taglib prefix="manage" uri="/permission-tags" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -41,6 +42,7 @@
 								<%-- 服务商、业务员、商户 --%>
 								<tr>
 									<s:if test="userLevel  > 0 && userLevel  <= 3">
+										<s:set name="resetFlag" value="true"/>
 										<s:if test="userLevel  == 1">
 											<s:if test="partnerVoListLevel == 2">
 												<th>服务商</th>
@@ -87,9 +89,11 @@
 									<td colspan="<s:property value='#queryCols' />">
 										<input style="width:185px;" type="text" name="beginTime" id="beginTime" class="Wdate" readonly="readonly" value="<s:property value="beginTime"/>"
 												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})"/>
+									<span class="tj_bt">*</span>
 									<span>交易截止时间</span>
 										<input style="width:185px;" type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
-													onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'<s:property value="maxQueryTime"/>', minDate:'#F{$dp.$D(\'beginTime\')}'})"/>
+													onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})" onchange="endTimeChange();"/>
+									<span class="tj_bt">*</span>
 									</td>
 								</tr>
 							</tbody>
@@ -100,9 +104,11 @@
 							<a href="javascript:void(0);" onclick="query('list');">查询</a>
 						</s:if>
 						<s:elseif test="userLevel  >=3 && userLevel <=5">
-							<a href="javascript:void(0);" onclick="query('listForDealer');">查询</a>
+							<a href="javascript:void(0);" onclick="query('list4Dealer');">查询</a>
 						</s:elseif>
-						<a href="javascript:void(0);" onclick="reset();" >重写</a>
+						<s:if test="resetFlag">
+							<a href="javascript:void(0);" onclick="reset();" >重写</a>
+						</s:if>
 					</li>
 				</ul>
 			</div>
@@ -175,15 +181,23 @@
 						  			<td title="<s:property value="#payTypeStr" />">
 						  				<s:property value="#payTypeStr" />
 						  			</td>
-						  			
-						  			<td title="<s:property value="#weixinPayDetailsVo.totalFee" />">
-						  				<s:property value="#weixinPayDetailsVo.totalFee" />
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###"/>">
+						  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###"/>
 						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.resultCode" />">
-						  				<s:property value="#weixinPayDetailsVo.resultCode" />
+						  			<s:if test="#weixinPayDetailsVo.resultCode == 'SUCCESS'">
+						  				<s:set var="resultCodeStr" value="交易成功" />
+						  			</s:if>
+						  			<s:elseif test="#weixinPayDetailsVo.resultCode == ''FAIL">
+						  				<s:set var="resultCodeStr" value="交易失败" />
+						  			</s:elseif>
+						  			<s:elseif test="#weixinPayDetailsVo.resultCode == NULL || #weixinPayDetailsVo.resultCode == '' ">
+						  				<s:set var="resultCodeStr" value="处理中 " />
+									</s:elseif>
+						  			<td title="<s:property value="resultCodeStr" />">
+						  				<s:property value="#resultCodeStr" />
 						  			</td>
-									<td title="<s:property value="#weixinPayDetailsVo.timeEnd" />">
-						  				<s:property value="#weixinPayDetailsVo.timeEnd" />
+									<td title="<s:property value="#weixinPayDetailsVo.transBeginTime" />">
+						  				<s:property value="#weixinPayDetailsVo.transBeginTime" />
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -205,12 +219,22 @@
 	</div>
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
 	<script type="text/javascript">
 		function query(method) {
 			var beginTime = $("#beginTime").val();
 			var endTime = $("#endTime").val();
+			
+			if(isBlank(beginTime)){
+				alert('交易开始时间不能为空！');
+				return false;
+			}
+			if(isBlank(endTime)){
+				alert('交易截止时间不能为空！');
+				return false;
+			}
 			if (beginTime.substring(0, 7) != endTime.substring(0, 7)) {
 				alert("不能跨月查询");
 				return;
@@ -225,9 +249,17 @@
 			$("#dealerId").val("");
 			$("#storeId").val("");
 			$("#dealerEmployeeId").val("");
-			$("#beginTime").val("");
+			//$("#beginTime").val("");
 			//$("#endTime").val("");
 			//$("#queryForm")[0].reset();
+		}
+		
+		function endTimeChange() {
+			var beginTime = $("#beginTime").val();
+			var endTime = $("#endTime").val();
+			if (endTime < beginTime) {
+				$("#beginTime").val(endTime);
+			}
 		}
 	</script>
 </body>

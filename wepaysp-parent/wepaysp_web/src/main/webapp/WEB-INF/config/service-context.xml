@@ -54,4 +54,7 @@
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	
+	<bean id="rptDealerStatService" class="com.zbsp.wepaysp.service.report.impl.RptDealerStatServiceImpl" parent="baseService" >
+	</bean>
+	
 </beans>

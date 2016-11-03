@@ -22,6 +22,7 @@ public class PartnerEmployeeVO
     private String remark;
     private String loginId;
     private String loginPwd;
+    private Integer feeRate;
     
     public String getIwoid() {
         return iwoid;
@@ -86,5 +87,13 @@ public class PartnerEmployeeVO
 	public void setLoginPwd(String loginPwd) {
 		this.loginPwd = loginPwd;
 	}
+	
+    public Integer getFeeRate() {
+        return feeRate;
+    }
+
+    public void setFeeRate(Integer feeRate) {
+        this.feeRate = feeRate;
+    }
 	
 }

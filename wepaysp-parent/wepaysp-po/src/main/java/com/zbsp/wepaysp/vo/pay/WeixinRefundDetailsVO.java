@@ -18,7 +18,7 @@ public class WeixinRefundDetailsVO
     private Integer totalFee;
     private Integer refundFee;
     private String resultCode;
-    private Date timeEnd;
+    private Date transBeginTime;
 
     private Date beginTime;
     private Date endTime;
@@ -119,12 +119,12 @@ public class WeixinRefundDetailsVO
         this.resultCode = resultCode;
     }
 
-    public Date getTimeEnd() {
-        return timeEnd;
+    public Date getTransBeginTime() {
+        return transBeginTime;
     }
-
-    public void setTimeEnd(Date timeEnd) {
-        this.timeEnd = timeEnd;
+    
+    public void setTransBeginTime(Date transBeginTime) {
+        this.transBeginTime = transBeginTime;
     }
 
     public Date getBeginTime() {

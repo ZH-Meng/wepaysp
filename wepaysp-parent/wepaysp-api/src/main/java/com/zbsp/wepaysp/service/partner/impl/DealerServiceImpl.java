@@ -209,7 +209,6 @@ public class DealerServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getCompany()), "公司不能为空");
         // Validator.checkArgument(StringUtils.isBlank(dealerVO.getAddress()), "地址不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getState()), "状态不能为空");
-        Validator.checkArgument(dealerVO.getFeeRate() == null, "分润比率不能为空");
         //Validator.checkArgument(StringUtils.isBlank(dealerVO.getPartnerOid()), "服务商Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getPartnerEmployeeOid()), "业务员Oid不能为空");
 
@@ -364,7 +363,6 @@ public class DealerServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getCompany()), "公司不能为空");
         // Validator.checkArgument(StringUtils.isBlank(dealerVO.getAddress()), "地址不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerVO.getState()), "状态不能为空");
-        Validator.checkArgument(dealerVO.getFeeRate() == null, "分润比率不能为空");
 
         Date processBeginTime = new Date();
         // 查找商户
@@ -382,7 +380,6 @@ public class DealerServiceImpl
         dealer.setMoblieNumber(dealerVO.getMoblieNumber());
         dealer.setAddress(dealerVO.getAddress());
         dealer.setTelephone(dealerVO.getTelephone());
-        dealer.setFeeRate(dealerVO.getFeeRate());
         dealer.setState(dealerVO.getState());
         dealer.setEmail(dealerVO.getEmail());
         dealer.setQqNumber(dealerVO.getQqNumber());

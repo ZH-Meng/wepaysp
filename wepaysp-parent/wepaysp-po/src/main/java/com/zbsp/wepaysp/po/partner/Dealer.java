@@ -34,7 +34,6 @@ public class Dealer
     private String state;
     private String techSupportPerson;
     private String techSupportPhone;
-    private Integer feeRate;
     private String subAppid;
     private String subMchId;
     private String creator;
@@ -221,14 +220,6 @@ public class Dealer
         this.techSupportPhone = techSupportPhone;
     }
 
-    @Column(name = "FEE_RATE")
-    public Integer getFeeRate() {
-        return this.feeRate;
-    }
-
-    public void setFeeRate(Integer feeRate) {
-        this.feeRate = feeRate;
-    }
 
     @Column(name = "SUB_APPID", length = 32)
     public String getSubAppid() {
@@ -295,7 +286,7 @@ public class Dealer
 
     @Override
     public String toString() {
-        return "Dealer [iwoid=" + iwoid + ", partner=" + partner + ", dealerId=" + dealerId + ", partnerLevel=" + partnerLevel + ", partner1Oid=" + partner1Oid + ", partner2Oid=" + partner2Oid + ", partner3Oid=" + partner3Oid + ", merchant=" + merchant + ", contactor=" + contactor + ", company=" + company + ", address=" + address + ", telephone=" + telephone + ", moblieNumber=" + moblieNumber + ", qqNumber=" + qqNumber + ", email=" + email + ", state=" + state + ", techSupportPerson=" + techSupportPerson + ", techSupportPhone=" + techSupportPhone + ", feeRate=" + feeRate + "]";
+        return "Dealer [iwoid=" + iwoid + ", partner=" + partner + ", dealerId=" + dealerId + ", partnerLevel=" + partnerLevel + ", partner1Oid=" + partner1Oid + ", partner2Oid=" + partner2Oid + ", partner3Oid=" + partner3Oid + ", merchant=" + merchant + ", contactor=" + contactor + ", company=" + company + ", address=" + address + ", telephone=" + telephone + ", moblieNumber=" + moblieNumber + ", qqNumber=" + qqNumber + ", email=" + email + ", state=" + state + ", techSupportPerson=" + techSupportPerson + ", techSupportPhone=" + techSupportPhone + "]";
     }
 
 }

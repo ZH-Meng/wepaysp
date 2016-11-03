@@ -86,15 +86,15 @@ public class WeixinRefundDetailsServiceImpl
             sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
-        /*if (beginTime != null ) {
-        	sql.append(" and w.timeEnd >=:BEGINTIME ");
+        if (beginTime != null ) {
+            sql.append(" and w.transBeginTime >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-        	sql.append(" and w.timeEnd <:ENDTIME ");
+            sql.append(" and w.transBeginTime <:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
-        sql.append(" order by w.timeEnd desc");*/
+        sql.append(" order by w.transBeginTime desc");
 
         List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
@@ -119,8 +119,7 @@ public class WeixinRefundDetailsServiceImpl
         		vo.setTotalFee(weixinRefundDetails.getTotalFee());
         		vo.setRefundFee(weixinRefundDetails.getRefundFee());
         		vo.setResultCode(weixinRefundDetails.getResultCode());
-        		//TODO 退款时间
-        		//vo.setTimeEnd(weixinRefundDetails.get);
+        		vo.setTransBeginTime(weixinRefundDetails.getTransBeginTime());
         		resultList.add(vo);
         	}
         }
@@ -190,14 +189,14 @@ public class WeixinRefundDetailsServiceImpl
             sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
-/*        if (beginTime != null ) {
-        	sql.append(" and w.timeEnd >=:BEGINTIME ");
+        if (beginTime != null ) {
+            sql.append(" and w.transBeginTime >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-        	sql.append(" and w.timeEnd <:ENDTIME ");
+            sql.append(" and w.transBeginTime <:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
-        }*/
+        }
         
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }

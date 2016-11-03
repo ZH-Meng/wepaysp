@@ -87,15 +87,15 @@ public class WeixinPayDetailsServiceImpl
         }
         
         if (beginTime != null ) {
-        	sql.append(" and w.timeEnd >=:BEGINTIME ");
+            sql.append(" and w.transBeginTime >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-        	sql.append(" and w.timeEnd <:ENDTIME ");
+            sql.append(" and w.transBeginTime <:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
 
-        sql.append(" order by w.timeEnd desc");
+        sql.append(" order by w.transBeginTime desc");
         List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
         if(weixinPayDetailsList != null && weixinPayDetailsList.isEmpty()) {
@@ -117,7 +117,7 @@ public class WeixinPayDetailsServiceImpl
         		vo.setPayType(weixinPayDetails.getPayType());
         		vo.setTotalFee(weixinPayDetails.getTotalFee());
         		vo.setResultCode(weixinPayDetails.getResultCode());
-        		vo.setTimeEnd(weixinPayDetails.getTimeEnd());
+        		vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
         		
         		resultList.add(vo);
         	}
@@ -189,11 +189,11 @@ public class WeixinPayDetailsServiceImpl
         }
         
         if (beginTime != null ) {
-        	sql.append(" and w.timeEnd >=:BEGINTIME ");
+        	sql.append(" and w.transBeginTime >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-        	sql.append(" and w.timeEnd <:ENDTIME ");
+        	sql.append(" and w.transBeginTime <:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
         

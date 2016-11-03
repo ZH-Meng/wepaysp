@@ -34,4 +34,5 @@
 	<include file="com/zbsp/wepaysp/manage/web/action/logmanage/action-struts.xml" />
 	<include file="com/zbsp/wepaysp/manage/web/action/partner/action-struts.xml" />
 	<include file="com/zbsp/wepaysp/manage/web/action/pay/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/report/action-struts.xml" />
 </struts>

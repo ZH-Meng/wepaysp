@@ -40,7 +40,7 @@ public class RptDealerStatServiceImpl
         Validator.checkArgument(endTime == null, "结束时间不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空");
         Validator.checkArgument(partnerL == null, "服务商级别不能为空");
-        Validator.checkArgument(StringUtils.isBlank(currentPartnerId), "当前服务商ID不能为空");
+        //Validator.checkArgument(StringUtils.isBlank(currentPartnerId), "当前服务商ID不能为空");
         int partnerLevel = partnerL.intValue();
 
         String poName = null;
@@ -65,9 +65,9 @@ public class RptDealerStatServiceImpl
         } else if (partnerLevel == 1 || partnerLevel == 2) {
             if (StringUtils.isBlank(partnerId)) {
                 resultFlag = "selfAndSub";
-            } else if (StringUtils.isNotBlank(partnerId) && currentPartnerId.equals(partnerId)) {
+            } else if (StringUtils.isNotBlank(partnerId) && partnerId.equals(currentPartnerId)) {
                 resultFlag = "self";
-            } else if (StringUtils.isNotBlank(partnerId) && !currentPartnerId.equals(partnerId)) {
+            } else if (StringUtils.isNotBlank(partnerId) && !partnerId.equals(currentPartnerId)) {
                 resultFlag = "sub";
             }
         } else {
@@ -76,7 +76,7 @@ public class RptDealerStatServiceImpl
 
         int subPartnerLevel = partnerLevel + 1;
         if ("self".equals(resultFlag)) {
-            sql.append("select d.partnerOid, max(d.partnerId), max(d.partneName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)) from " + poName + " d where 1=1");
+            sql.append("select d.partnerOid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)) from " + poName + " d where 1=1");
             sql.append(" and d.partnerLevel =:PARTNERLEVEL");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
@@ -86,15 +86,15 @@ public class RptDealerStatServiceImpl
             sqlMap.put("PARTNEROID", partnerOid);
             sqlMap.put("BEGINTIME", beginTime);
             sqlMap.put("ENDTIME", endTime);
-            statrList = commonDAO.findObjectList(sql.toString(), paramMap, false, startIndex, maxResult);
+            statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if ("sub".equals(resultFlag)) {
             // 校验查询服务商是否是当前服务商的直接下级
-            Partner partner = commonDAO.findObject("from Partner p where p.partnerId=" + partnerId, null, false);
+            Partner partner = commonDAO.findObject("from Partner p where p.partnerId='" + partnerId + "'", null, false);
             if (partner == null || partner.getParentPartner() == null || !partner.getParentPartner().getParentPartner().getIwoid().equals(partnerOid)) {
                 throw new NotExistsException("不存在ID=" + partnerId + "的下级代理商");
             }
 
-            sql.append("select d.partner" + subPartnerLevel + "Oid, max(d.partnerId), max(d.partneName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)) from  " + poName + "  d where 1=1");
+            sql.append("select d.partner" + subPartnerLevel + "Oid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)) from  " + poName + "  d where 1=1");
             sql.append(" and d.partnerLevel > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "Oid =:PARTNERAOID");
             sql.append(" and d.partner" + subPartnerLevel + "Oid =:PARTNERBOID");
@@ -106,18 +106,18 @@ public class RptDealerStatServiceImpl
             sqlMap.put("PARTNERBOID", partner.getIwoid());
             sqlMap.put("BEGINTIME", beginTime);
             sqlMap.put("ENDTIME", endTime);
-            statrList = commonDAO.findObjectList(sql.toString(), paramMap, false, startIndex, maxResult);
+            statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if ("selfAndSub".equals(resultFlag)) {
-            sql.append("select d.partner_Oid as partner_Oid, max(d.partner_Id), max(d.partne_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.total_Bonus)) from " + tableName + " d where 1=1");
+            sql.append("select d.partner_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.total_Bonus)) from " + tableName + " d where 1=1");
             sql.append(" and d.partner_Level =:PARTNERLEVEL");
             sql.append(" and d.partner_Oid =:PARTNEROID");
             sql.append(" and d.start_Time >=:BEGINTIME");
             sql.append(" and d.start_Time <:ENDTIME");
             sql.append(" group by d.partner_Oid");
 
-            sql.append(" Union all");
+            sql.append(" Union all ");
 
-            sql.append("select d.partner" + subPartnerLevel + "_Oid as partner_Oid, max(d.partner_Id), max(d.partne_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.total_Bonus)) from  " + tableName + "  d where 1=1");
+            sql.append("select d.partner" + subPartnerLevel + "_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.total_Bonus)) from  " + tableName + "  d where 1=1");
             sql.append(" and d.partner_Level > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "_Oid =:PARTNERAOID");
             sql.append(" and d.start_Time >=:BEGINTIME");
@@ -130,7 +130,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("ENDTIME", endTime);
 
             sqlMap.put("PARTNERAOID", partnerOid);
-            statrList = commonDAO.findObjectList(sql.toString(), paramMap, true, startIndex, maxResult);
+            statrList = commonDAO.findObjectList(sql.toString(), sqlMap, true, startIndex, maxResult);
         }
 
         if (statrList != null && !statrList.isEmpty()) {
@@ -168,7 +168,7 @@ public class RptDealerStatServiceImpl
         Validator.checkArgument(endTime == null, "结束时间不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空");
         Validator.checkArgument(partnerL == null, "服务商级别不能为空");
-        Validator.checkArgument(StringUtils.isBlank(currentPartnerId), "当前服务商ID不能为空");
+        //Validator.checkArgument(StringUtils.isBlank(currentPartnerId), "当前服务商ID不能为空");
         int partnerLevel = partnerL.intValue();
 
         String poName = null;
@@ -191,9 +191,9 @@ public class RptDealerStatServiceImpl
         } else if (partnerLevel == 1 || partnerLevel == 2) {
             if (StringUtils.isBlank(partnerId)) {
                 resultFlag = "selfAndSub";
-            } else if (StringUtils.isNotBlank(partnerId) && currentPartnerId.equals(partnerId)) {
+            } else if (StringUtils.isNotBlank(partnerId) && partnerId.equals(currentPartnerId)) {
                 resultFlag = "self";
-            } else if (StringUtils.isNotBlank(partnerId) && !currentPartnerId.equals(partnerId)) {
+            } else if (StringUtils.isNotBlank(partnerId) && !partnerId.equals(currentPartnerId)) {
                 resultFlag = "sub";
             }
         } else {
@@ -202,53 +202,53 @@ public class RptDealerStatServiceImpl
 
         int subPartnerLevel = partnerLevel + 1;
         if ("self".equals(resultFlag)) {
-            sql = new StringBuffer("select count(d.iwoid) from " + poName + " d where 1=1");
+            sql = new StringBuffer("select count(distinct d.partnerOid) from " + poName + " d where 1=1");
             sql.append(" and d.partnerLevel =:PARTNERLEVEL");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
-            sql.append(" group by d.partnerOid");
+            //sql.append(" group by d.partnerOid");
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNEROID", partnerOid);
             sqlMap.put("BEGINTIME", beginTime);
             sqlMap.put("ENDTIME", endTime);
-            count = commonDAO.queryObjectCount(sql.toString(), paramMap, false);
+            count = commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
         } else if ("sub".equals(resultFlag)) {
             // 校验查询服务商是否是当前服务商的直接下级
-            Partner partner = commonDAO.findObject("from Partner p where p.partnerId=" + partnerId, null, false);
+            Partner partner = commonDAO.findObject("from Partner p where p.partnerId='" + partnerId + "'", null, false);
             if (partner == null || partner.getParentPartner() == null || !partner.getParentPartner().getParentPartner().getIwoid().equals(partnerOid)) {
                 throw new NotExistsException("不存在ID=" + partnerId + "的下级代理商");
             }
 
-            sql.append("select count(d.iwoid) from  " + poName + "  d where 1=1");
+            sql.append("select count(distinct d.partner" + subPartnerLevel + "Oid) from  " + poName + "  d where 1=1");
             sql.append(" and d.partnerLevel > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "Oid =:PARTNERAOID");
             sql.append(" and d.partner" + subPartnerLevel + "Oid =:PARTNERBOID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
-            sql.append(" group by d.partner" + subPartnerLevel + "Oid");
+            //sql.append(" group by d.partner" + subPartnerLevel + "Oid");
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNERAOID", partnerOid);
             sqlMap.put("PARTNERBOID", partner.getIwoid());
             sqlMap.put("BEGINTIME", beginTime);
             sqlMap.put("ENDTIME", endTime);
-            count = commonDAO.queryObjectCount(sql.toString(), paramMap, false);
+            count = commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
         } else if ("selfAndSub".equals(resultFlag)) {
-            sql.append("select count(d.iwoid)  from " + tableName + " d where 1=1");
+            sql.append("select count(distinct d.partner_Oid)  from " + tableName + " d where 1=1");
             sql.append(" and d.partner_Level =:PARTNERLEVEL");
             sql.append(" and d.partner_Oid =:PARTNEROID");
             sql.append(" and d.start_Time >=:BEGINTIME");
             sql.append(" and d.start_Time <:ENDTIME");
-            sql.append(" group by d.partner_Oid");
+            //sql.append(" group by d.partner_Oid");
 
-            sql.append(" Union all");
+            sql.append(" Union all ");
 
-            sql.append("select count(d.iwoid) from  " + tableName + "  d where 1=1");
+            sql.append("select count(distinct d.partner" + subPartnerLevel + "_Oid) from  " + tableName + "  d where 1=1");
             sql.append(" and d.partner_Level > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "_Oid =:PARTNERAOID");
             sql.append(" and d.start_Time >=:BEGINTIME");
             sql.append(" and d.start_Time <:ENDTIME");
-            sql.append(" group by d.partner" + subPartnerLevel + "_Oid");
+            //sql.append(" group by d.partner" + subPartnerLevel + "_Oid");
 
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNEROID", partnerOid);
@@ -256,7 +256,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("ENDTIME", endTime);
 
             sqlMap.put("PARTNERAOID", partnerOid);
-            count = commonDAO.queryObjectCount(sql.toString(), paramMap, true);
+            count = commonDAO.queryObjectCount(sql.toString(), sqlMap, true);
         }
         return count;
     }
@@ -293,13 +293,13 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
         if (StringUtils.isNotBlank(partnerOid)) {
-            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partneName), sum(d.totalAmout), sum(d.totalMoney), round(sum(d.totalBonus)), d.partnerEmployeeId, max(d.partnerEmployeeName) from " + poName + " d where 1=1");
+            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)), d.partnerEmployeeId, max(d.partnerEmployeeName) from " + poName + " d where 1=1");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
             if (StringUtils.isNotBlank(partnerEmployeeId)) {
                 // 校验查询服务商员工是否是当前服务商的下属
-                PartnerEmployee partnerEmployee = commonDAO.findObject("from PartnerEmployee p where p.partnerEmployeeId=" + partnerEmployeeId, null, false);
+                PartnerEmployee partnerEmployee = commonDAO.findObject("from PartnerEmployee p where p.partnerEmployeeId='" + partnerEmployeeId + "'", null, false);
                 if (partnerEmployee == null || partnerEmployee.getPartner() == null || !partnerEmployee.getPartner().getIwoid().equals(partnerOid)) {
                     throw new NotExistsException("不存在ID=" + partnerEmployeeId + "的员工");
                 }
@@ -310,9 +310,9 @@ public class RptDealerStatServiceImpl
             sqlMap.put("PARTNEROID", partnerOid);
             sqlMap.put("BEGINTIME", beginTime);
             sqlMap.put("ENDTIME", endTime);
-            statrList = commonDAO.findObjectList(sql.toString(), paramMap, false, startIndex, maxResult);
+            statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if (StringUtils.isNotBlank(partnerEmployeeOid)) {
-            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partneName), sum(d.totalAmout), sum(d.totalMoney), round(sum(d.totalBonus)), max(d.partnerEmployeeId), max(d.partnerEmployeeName) from " + poName + " d where 1=1");
+            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)), max(d.partnerEmployeeId), max(d.partnerEmployeeName) from " + poName + " d where 1=1");
             sql.append(" and d.partnerEmployeeOid =:PARTNEREMPLOYEEOID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
@@ -321,7 +321,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
             sqlMap.put("BEGINTIME", beginTime);
             sqlMap.put("ENDTIME", endTime);
-            statrList = commonDAO.findObjectList(sql.toString(), paramMap, false, startIndex, maxResult);
+            statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         }
 
         if (statrList != null && !statrList.isEmpty()) {
@@ -345,7 +345,6 @@ public class RptDealerStatServiceImpl
 
     @Override
     public int doJoinTransQueryRptDealerStatCount4ParnterE(Map<String, Object> paramMap) {
-        int count = 0;
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
         String queryType = MapUtils.getString(paramMap, "queryType");
@@ -372,39 +371,31 @@ public class RptDealerStatServiceImpl
 
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         StringBuffer sql = new StringBuffer();
+        sql.append("select  count(distinct d.partnerEmployeeOid) from " + poName + " d where 1=1");
+        sql.append(" and d.startTime >=:BEGINTIME");
+        sql.append(" and d.startTime <:ENDTIME");
         if (StringUtils.isNotBlank(partnerOid)) {
-            sql.append("select  count(d.iwoid) from " + poName + " d where 1=1");
             sql.append(" and d.partnerOid =:PARTNEROID");
-            sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
             if (StringUtils.isNotBlank(partnerEmployeeId)) {
                 // 校验查询服务商员工是否是当前服务商的下属
-                PartnerEmployee partnerEmployee = commonDAO.findObject("from PartnerEmployee p where p.partnerEmployeeId=" + partnerEmployeeId, null, false);
+                PartnerEmployee partnerEmployee = commonDAO.findObject("from PartnerEmployee p where p.partnerEmployeeId='" + partnerEmployeeId + "'", null, false);
                 if (partnerEmployee == null || partnerEmployee.getPartner() == null || !partnerEmployee.getPartner().getIwoid().equals(partnerOid)) {
                     throw new NotExistsException("不存在ID=" + partnerEmployeeId + "的员工");
                 }
                 sql.append(" and d.partnerEmployeeId =:PARTNEREMPLOYEEID");
                 sqlMap.put("PARTNEREMPLOYEEID", partnerEmployeeId);
             }
-            sql.append(" group by d.partnerEmployeeId");
+            //sql.append(" group by d.partnerEmployeeId");
             sqlMap.put("PARTNEROID", partnerOid);
-            sqlMap.put("BEGINTIME", beginTime);
-            sqlMap.put("ENDTIME", endTime);
-            count = commonDAO.queryObjectCount(sql.toString(), paramMap, false);
         } else if (StringUtils.isNotBlank(partnerEmployeeOid)) {
-            sql.append("select count(d.iwoid) from " + poName + " d where 1=1");
             sql.append(" and d.partnerEmployeeOid =:PARTNEREMPLOYEEOID");
-            sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
-
-            sql.append(" group by d.partnerEmployeeOid");
+           // sql.append(" group by d.partnerEmployeeOid");
             sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
-            sqlMap.put("BEGINTIME", beginTime);
-            sqlMap.put("ENDTIME", endTime);
-            count = commonDAO.queryObjectCount(sql.toString(), paramMap, false);
         }
-
-        return count;
+        sqlMap.put("BEGINTIME", beginTime);
+        sqlMap.put("ENDTIME", endTime);
+        
+        return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 
     @Override
@@ -435,7 +426,7 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
 
-        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), sum(d.totalAmout), sum(d.totalMoney) from " + poName + " d where 1=1");
+        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), sum(d.totalAmount), sum(d.totalMoney) from " + poName + " d where 1=1");
         sql.append(" and d.dealerOid =:DEALEROID");
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
@@ -447,7 +438,7 @@ public class RptDealerStatServiceImpl
         sqlMap.put("DEALEROID", dealerOid);
         sqlMap.put("BEGINTIME", beginTime);
         sqlMap.put("ENDTIME", endTime);
-        statrList = commonDAO.findObjectList(sql.toString(), paramMap, false, startIndex, maxResult);
+        statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (statrList != null && !statrList.isEmpty()) {
             for (Object o : statrList) {
@@ -468,7 +459,6 @@ public class RptDealerStatServiceImpl
 
     @Override
     public int doJoinTransQueryRptDealerStatCount4Dealer(Map<String, Object> paramMap) {
-        int count = 0;
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
         String queryType = MapUtils.getString(paramMap, "queryType");
@@ -492,7 +482,7 @@ public class RptDealerStatServiceImpl
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         StringBuffer sql = new StringBuffer();
 
-        sql.append("select count(d.iwoid) from " + poName + " d where 1=1");
+        sql.append("select count(distinct d.storeOid) from " + poName + " d where 1=1");
         sql.append(" and d.dealerOid =:DEALEROID");
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
@@ -500,13 +490,12 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.storeOid =:STOREOID");
             sqlMap.put("STOREOID", storeOid);
         }
-        sql.append(" group by d.dealerOid, d.storeOid");
+        //sql.append(" group by d.dealerOid, d.storeOid");
         sqlMap.put("DEALEROID", dealerOid);
         sqlMap.put("BEGINTIME", beginTime);
         sqlMap.put("ENDTIME", endTime);
-        count = commonDAO.queryObjectCount(sql.toString(), paramMap, false);
-
-        return count;
+        
+        return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 
     @Override
@@ -542,7 +531,7 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
 
-        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmout), sum(d.totalMoney) from " + poName + " d where 1=1");
+        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmount), sum(d.totalMoney) from " + poName + " d where 1=1");
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
 
@@ -559,7 +548,7 @@ public class RptDealerStatServiceImpl
 
             if (StringUtils.isNotBlank(dealerEmployeeId)) {
                 // 校验查询商户员工是否是当前商户的下属
-                DealerEmployee dealerEmployee = commonDAO.findObject("from DealerEmployee p where p.dealerEmployeeId=" + dealerEmployeeId, null, false);
+                DealerEmployee dealerEmployee = commonDAO.findObject("from DealerEmployee p where p.dealerEmployeeId='" + dealerEmployeeId + "'", null, false);
                 if (dealerEmployee == null || dealerEmployee.getDealer() == null || !dealerEmployee.getDealer().getIwoid().equals(dealerOid)) {
                     throw new NotExistsException("不存在ID=" + dealerEmployeeId + "的员工");
                 }
@@ -573,7 +562,7 @@ public class RptDealerStatServiceImpl
         sqlMap.put("BEGINTIME", beginTime);
         sqlMap.put("ENDTIME", endTime);
 
-        statrList = commonDAO.findObjectList(sql.toString(), paramMap, false, startIndex, maxResult);
+        statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (statrList != null && !statrList.isEmpty()) {
             for (Object o : statrList) {
@@ -596,7 +585,6 @@ public class RptDealerStatServiceImpl
 
     @Override
     public int doJoinTransQueryRptDealerStatCount4DealerE(Map<String, Object> paramMap) {
-        int count = 0;
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
         String queryType = MapUtils.getString(paramMap, "queryType");
@@ -625,7 +613,7 @@ public class RptDealerStatServiceImpl
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         StringBuffer sql = new StringBuffer();
 
-        sql.append("select count(d.iwoid) from " + poName + " d where 1=1");
+        sql.append("select count(distinct d.dealerEmployeeOid) from " + poName + " d where 1=1");
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
 
@@ -642,7 +630,7 @@ public class RptDealerStatServiceImpl
 
             if (StringUtils.isNotBlank(dealerEmployeeId)) {
                 // 校验查询商户员工是否是当前商户的下属
-                DealerEmployee dealerEmployee = commonDAO.findObject("from DealerEmployee p where p.dealerEmployeeId=" + dealerEmployeeId, null, false);
+                DealerEmployee dealerEmployee = commonDAO.findObject("from DealerEmployee p where p.dealerEmployeeId='" + dealerEmployeeId + "'", null, false);
                 if (dealerEmployee == null || dealerEmployee.getDealer() == null || !dealerEmployee.getDealer().getIwoid().equals(dealerOid)) {
                     throw new NotExistsException("不存在ID=" + dealerEmployeeId + "的员工");
                 }
@@ -652,12 +640,11 @@ public class RptDealerStatServiceImpl
 
         }
 
-        sql.append(" group by d.dealerOid, d.storeOid, d.dealerEmployeeOid");
+        //sql.append(" group by d.dealerOid, d.storeOid, d.dealerEmployeeOid");
         sqlMap.put("BEGINTIME", beginTime);
         sqlMap.put("ENDTIME", endTime);
-        count = commonDAO.queryObjectCount(sql.toString(), paramMap, false);
         
-        return count;
+        return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 
 }

@@ -26,7 +26,6 @@ public class DealerVO
     private String state;
     private String techSupportPerson;
     private String techSupportPhone;
-    private Integer feeRate;
     private String subAppid;
     private String subMchId;
     private String remark;
@@ -147,14 +146,6 @@ public class DealerVO
 
     public void setTechSupportPhone(String techSupportPhone) {
         this.techSupportPhone = techSupportPhone;
-    }
-
-    public Integer getFeeRate() {
-        return feeRate;
-    }
-
-    public void setFeeRate(Integer feeRate) {
-        this.feeRate = feeRate;
     }
 
     public String getSubAppid() {

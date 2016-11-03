@@ -29,8 +29,8 @@ public class RptDealerStatDay
     private String storeName;
     private String dealerEmployeeId;
     private String dealerEmployeeName;
-    private String partneId;
-    private String partneName;
+    private String partnerId;
+    private String partnerName;
     private Integer partnerLevel;
     private String partner1Oid;
     private String partner2Oid;
@@ -77,7 +77,7 @@ public class RptDealerStatDay
         this.dealerEmployeeOid = dealerEmployeeOid;
     }
 
-    @Column(name = "SOTRE_OID", nullable = false)
+    @Column(name = "STORE_OID", nullable = false)
     public String getStoreOid() {
         return storeOid;
     }
@@ -167,22 +167,22 @@ public class RptDealerStatDay
         this.dealerEmployeeName = dealerEmployeeName;
     }
 
-    @Column(name = "PARTNE_ID", length = 32)
-    public String getPartneId() {
-        return this.partneId;
+    @Column(name = "PARTNER_ID", length = 32)
+    public String getPartnerId() {
+        return this.partnerId;
     }
 
-    public void setPartneId(String partneId) {
-        this.partneId = partneId;
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
     }
 
-    @Column(name = "PARTNE_NAME", nullable = false, length = 256)
-    public String getPartneName() {
-        return this.partneName;
+    @Column(name = "PARTNER_NAME", nullable = false, length = 256)
+    public String getPartnerName() {
+        return this.partnerName;
     }
 
-    public void setPartneName(String partneName) {
-        this.partneName = partneName;
+    public void setPartnerName(String partnerName) {
+        this.partnerName = partnerName;
     }
 
     @Column(name = "PARTNER_LEVEL")

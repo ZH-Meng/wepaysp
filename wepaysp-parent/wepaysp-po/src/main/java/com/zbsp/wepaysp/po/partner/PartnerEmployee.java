@@ -21,6 +21,7 @@ public class PartnerEmployee
     private String employeeName;
     private String moblieNumber;
     private String state;
+    private Integer feeRate;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -85,6 +86,15 @@ public class PartnerEmployee
     public void setState(String state) {
         this.state = state;
     }
+    
+    @Column(name = "FEE_RATE")
+    public Integer getFeeRate() {
+        return this.feeRate;
+    }
+
+    public void setFeeRate(Integer feeRate) {
+        this.feeRate = feeRate;
+    }
 
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
@@ -131,10 +141,9 @@ public class PartnerEmployee
         this.remark = remark;
     }
 
-	@Override
-	public String toString() {
-		return "PartnerEmployee [iwoid=" + iwoid + ", partnerEmployeeId=" + partnerEmployeeId + ", employeeName="
-				+ employeeName + ", moblieNumber=" + moblieNumber + ", state=" + state + "]";
-	}
+    @Override
+    public String toString() {
+        return "PartnerEmployee [iwoid=" + iwoid + ", partnerEmployeeId=" + partnerEmployeeId + ", employeeName=" + employeeName + ", moblieNumber=" + moblieNumber + ", state=" + state + ", feeRate=" + feeRate + "]";
+    }
 
 }

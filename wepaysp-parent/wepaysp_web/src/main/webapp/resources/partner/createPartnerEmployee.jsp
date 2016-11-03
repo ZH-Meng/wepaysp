@@ -38,6 +38,10 @@
 	                                <td><s:textfield id="moblieNumber" maxlength="32" name="partnerEmployeeVO.moblieNumber" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
+	                                <th>分润比率</th>
+	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerEmployeeVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数，例如：千分之三点八填38  千分之四填40！</span></td>
+	                            </tr>
+	                            <tr>
 	                            	<th>状态</th>
 	                                <td>
 	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="partnerEmployeeVO.state"  id="state" headerKey="" headerValue="请选择"/>
@@ -75,6 +79,7 @@
 			var loginPwd = $("#loginPwd").val();
 			var employeeName = $("#employeeName").val();
 			var moblieNumber = $("#moblieNumber").val();
+			var feeRate = $("#feeRate").val();
 			var state = $("#state").val();
 			var remark = $("#remark").val();
 			if (isBlank(loginId)) {
@@ -104,6 +109,14 @@
 			} else if (!isMobile(moblieNumber)) {
 				alert("手机号码格式不正确！");
 				$("#moblieNumber").focus();
+				return false;
+			} else if (isBlank(feeRate)) {
+				alert("分润费率不能为空！");
+				$("#feeRate").focus();
+				return false;
+			} else if (!isPositiveInteger1(feeRate)) {
+				alert("分润费率只能填正整数！");
+				$("#feeRate").focus();
 				return false;
 			} else if (isBlank(state)) {
 				alert("状态不能为空！");

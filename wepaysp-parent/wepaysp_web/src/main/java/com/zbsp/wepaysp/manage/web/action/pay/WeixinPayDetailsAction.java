@@ -1,12 +1,11 @@
 package com.zbsp.wepaysp.manage.web.action.pay;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -41,18 +40,18 @@ public class WeixinPayDetailsAction
     private int userLevel;
     private int partnerVoListLevel;
     private String listType;
-    private String maxQueryTime;
 
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        Date beforeDay = TimeUtil.getLastTimeUnit(new Date(), Calendar.DAY_OF_MONTH);
         
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (weixinPayDetailsVO == null) {
                 weixinPayDetailsVO = new WeixinPayDetailsVO();
             }
+            // 初始化查询参数默认值
+            initDefaultDatesArgs();
             
             boolean flag = false;
 
@@ -110,27 +109,16 @@ public class WeixinPayDetailsAction
             // 用户级别，页面根据级别动态展示查询条件以及结果列表
             userLevel = manageUser.getUserLevel();
             
-            weixinPayDetailsVO.setBeginTime(convertS2D(beginTime));
-            weixinPayDetailsVO.setEndTime(convertS2D(endTime));
-            paramMap.put("beginTime", weixinPayDetailsVO.getBeginTime());
-            paramMap.put("endTime", weixinPayDetailsVO.getEndTime());
+            paramMap.put("beginTime", convertS2D(beginTime));
+            paramMap.put("endTime", convertS2D(endTime));
             
             paramMap.put("partnerEmployeeId", weixinPayDetailsVO.getPartnerEmployeeId());
             paramMap.put("dealerId", weixinPayDetailsVO.getDealerId());
             paramMap.put("dealerEmployeeId", weixinPayDetailsVO.getDealerEmployeeId());
             paramMap.put("storeId", weixinPayDetailsVO.getStoreId());
             
-            if (weixinPayDetailsVO.getEndTime() != null && TimeUtil.timeAfter(weixinPayDetailsVO.getEndTime(), beforeDay)) {
-                logger.warn("最大查询日期不能大于前一天");
-                setAlertMessage("最大查询日期不能大于前一天");
-                return "weixinPayDetailsList";
-            }
             weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, start, size);
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
-            maxQueryTime = DateUtil.getDate(beforeDay, "yyyy-MM-dd");
-            if (StringUtils.isBlank(endTime)) {
-                endTime = maxQueryTime;
-            }
         } catch (Exception e) {
             logger.error("微信交易明细查询列表错误：" + e.getMessage());
             setAlertMessage("微信交易明细查询列表错误：" + e.getMessage());
@@ -160,7 +148,19 @@ public class WeixinPayDetailsAction
         listType = "dealer";
         return goCurrent();
     }
+    
+    private void initDefaultDatesArgs() {
+        if (StringUtils.isBlank(beginTime) || StringUtils.isBlank(endTime)) {
+            // 默认查询时间为今天
+            beginTime = convertD2S(TimeUtil.getDayStart(new Date()));
+            endTime = convertD2S(TimeUtil.getDayEnd(new Date()));
+        }
+    }
 
+    private String convertD2S(Date date) {
+        return DateUtil.getDate(date, "yyyy-MM-dd");
+    }
+    
     private Date convertS2D(String dateStr) {
         return DateUtil.getDate(dateStr, "yyyy-MM-dd");
     }
@@ -220,10 +220,6 @@ public class WeixinPayDetailsAction
 
     public String getListType() {
         return listType;
-    }
-
-    public String getMaxQueryTime() {
-        return maxQueryTime;
     }
 
 }

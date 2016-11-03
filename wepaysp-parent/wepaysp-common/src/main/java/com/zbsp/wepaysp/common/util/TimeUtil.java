@@ -111,6 +111,59 @@ public final class TimeUtil {
         return calendar.getTime();
     }
     
+
+    public static final Date getDayBeforeMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 将当前时间向历史方向，移动N天
+     * 
+     * @param date
+     * @param n
+     *            正减，负加
+     * @return
+     */
+    public static final Date moveHistoryNDays(Date date, int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_YEAR, -n);
+        return calendar.getTime();
+    }
+
+    /**
+     * 将当前时间向历史方向，移动N秒
+     * 
+     * @param date
+     * @param n
+     *            正减，负加
+     * @return
+     */
+    public static final Date moveHistoryNSeconds(Date date, int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.SECOND, -n);
+        return calendar.getTime();
+    }
+
+    /**
+     * 将当前时间向历史方向，移动N毫秒
+     * 
+     * @param date
+     * @param n
+     *            正减，负加
+     * @return
+     */
+    public static final Date moveHistoryNMilliseconds(Date date, int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MILLISECOND, -n);
+        return calendar.getTime();
+    }
+    
     /**
      * 是否是本月的最后一天
      * 
@@ -291,6 +344,33 @@ public final class TimeUtil {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.add(Calendar.MONTH, -1);
+        return calendar.getTime();
+    }
+    
+    /**
+     * 获取前一天的开始时间
+     * @return
+     */
+    public static Date getBeforeDayStart() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取前一天的结束时间
+     * @return
+     */
+    public static Date getBeforeDayEnd() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, -1);
         return calendar.getTime();
     }
     
