@@ -37,7 +37,7 @@
 	                            </tr>
 	                            <tr>
 	                                <th>分润比率</th>
-	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数！</span></td>
+	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数，例如：千分之三点八填38  千分之四填40！</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>余额</th>
@@ -133,8 +133,8 @@
 				alert("分润费率不能为空！");
 				$("#feeRate").focus();
 				return false;
-			} else if (!isPositiveInteger1(feeRate)) {
-				alert("分润费率只能填正整数！");
+			 } else if (!isPositiveInteger1(feeRate) || feeRate >= 1000) {
+				alert("分润费率只能填小于1000的正整数！");
 				$("#feeRate").focus();
 				return false;
 			} else if (isBlank(balance)) {

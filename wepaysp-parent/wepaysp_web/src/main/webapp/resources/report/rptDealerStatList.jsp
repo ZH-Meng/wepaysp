@@ -105,9 +105,6 @@
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.outTradeNo" />">
-						  				<s:property value="#rptDealerStatVo.outTradeNo" />
-						  			</td>
 						  			<td title="<s:property value="#rptDealerStatVo.dealerId" />">
 						  				<s:property value="#rptDealerStatVo.dealerId" />
 						  			</td>
@@ -120,7 +117,7 @@
 						  			<td title="<s:property value="#rptDealerStatVo.storeId" />">
 						  				<s:property value="#rptDealerStatVo.storeId" />
 						  			</td>
-						  			<s:if test="istType == 'dealerEmployee'">
+						  			<s:if test="listType == 'dealerEmployee'">
 							  			<td title="<s:property value="#rptDealerStatVo.dealerEmployeeId" />">
 							  				<s:property value="#rptDealerStatVo.dealerEmployeeId" />
 							  			</td>
@@ -131,8 +128,8 @@
 									<td class="bgright"  title="<s:property value="#rptDealerStatVo.totalAmount" />">
 						  				<s:property value="#rptDealerStatVo.totalAmount" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###"/>">
-						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>">
+						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -146,7 +143,7 @@
 	            </ul>
 	            <ul>
 	            	<li class="t-center">
-	                	<s:include value="/resources/include/page.jsp"></s:include>
+	                	<s:include value="/resources/include/noPage.jsp"></s:include>
 	                </li>
 	            </ul>
 	    	</div>

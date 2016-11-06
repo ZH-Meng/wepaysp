@@ -49,11 +49,11 @@ public class PartnerEmployeeAction
             
             paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
             
-            partnerEmployeeVoList = partnerEmployeeService.doJoinTransQueryPartnerEmployeeList(paramMap, start, size);
-            rowCount = partnerEmployeeService.doJoinTransQueryPartnerEmployeeCount(paramMap);
+            //rowCount = partnerEmployeeService.doJoinTransQueryPartnerEmployeeCount(paramMap);
+            partnerEmployeeVoList = partnerEmployeeService.doJoinTransQueryPartnerEmployeeList(paramMap, 0, -1);
         } catch (Exception e) {
             logger.error("代理商员工查询列表错误：" + e.getMessage());
-            setAlertMessage("代理商员工查询列表错误：" + e.getMessage());
+            setAlertMessage("代理商员工查询列表错误！");
         }
         return "partnerEmployeeList";
     }
@@ -101,7 +101,7 @@ public class PartnerEmployeeAction
             return "createPartnerEmployee";
         } catch (Exception e) {
             logger.error("代理商员工添加错误：" + e.getMessage());
-            setAlertMessage("代理商员工添加错误：" + e.getMessage());
+            setAlertMessage("代理商员工添加错误！");
             return "error";
         }
         return list();
@@ -147,7 +147,7 @@ public class PartnerEmployeeAction
             return list();
         } catch (Exception e) {
             logger.error("代理商员工添加错误：" + e.getMessage());
-            setAlertMessage("代理商员工添加错误：" + e.getMessage());
+            setAlertMessage("代理商员工添加错误！");
             return "error";
         }
         return "updatePartnerEmployee";

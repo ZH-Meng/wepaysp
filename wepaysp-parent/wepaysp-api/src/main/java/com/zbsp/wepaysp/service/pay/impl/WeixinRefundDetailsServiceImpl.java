@@ -98,7 +98,7 @@ public class WeixinRefundDetailsServiceImpl
 
         List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
-        if(weixinRefundDetailsList != null && weixinRefundDetailsList.isEmpty()) {
+        if(weixinRefundDetailsList != null && !weixinRefundDetailsList.isEmpty()) {
         	for (WeixinRefundDetails weixinRefundDetails : weixinRefundDetailsList) {
         		WeixinRefundDetailsVO vo = new WeixinRefundDetailsVO();
         		//BeanCopierUtil.copyProperties(weixinRefundDetails, vo);
@@ -110,6 +110,7 @@ public class WeixinRefundDetailsServiceImpl
                 vo.setStoreName(weixinRefundDetails.getStore().getStoreName());
                 vo.setDealerEmployeeName(weixinRefundDetails.getDealerEmployee().getEmployeeName());
                 
+                vo.setPartnerId(weixinRefundDetails.getPartner().getPartnerId());
         		vo.setPartnerEmployeeId(weixinRefundDetails.getPartnerEmployee().getPartnerEmployeeId());
         		vo.setDealerId(weixinRefundDetails.getDealer().getDealerId());
         		vo.setStoreId(weixinRefundDetails.getStore().getStoreId());

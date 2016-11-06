@@ -106,16 +106,13 @@
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.outTradeNo" />">
-						  				<s:property value="#rptDealerStatVo.outTradeNo" />
-						  			</td>
 						  			<td title="<s:property value="#rptDealerStatVo.partnerId" />">
 						  				<s:property value="#rptDealerStatVo.partnerId" />
 						  			</td>
 						  			<td title="<s:property value="#rptDealerStatVo.partnerName" />">
 						  				<s:property value="#rptDealerStatVo.partnerName" />
 						  			</td>
-						  			<s:if test="istType == 'partnerEmployee'">
+						  			<s:if test="listType == 'partnerEmployee'">
 							  			<td title="<s:property value="#rptDealerStatVo.partnerEmployeeId" />">
 							  				<s:property value="#rptDealerStatVo.partnerEmployeeId" />
 							  			</td>
@@ -126,11 +123,12 @@
 									<td class="bgright"  title="<s:property value="#rptDealerStatVo.totalAmount" />">
 						  				<s:property value="#rptDealerStatVo.totalAmount" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###"/>">
-						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>">
+						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalBouns/100}" pattern="###,###,###,###"/>">
-						  				<fmt:formatNumber value="${rptDealerStatVo.totalBouns/100}" pattern="###,###,###,###"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalBonus/100}" pattern="###,###,###,###.0000"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/1000}" pattern="0.000"/>】">
+						  				<fmt:formatNumber value="${rptDealerStatVo.totalBonus/100}" pattern="###,###,###,###.0000"/>
+						  				【<fmt:formatNumber value="${rptDealerStatVo.feeRate/1000}" pattern="0.000"/>】
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -144,7 +142,7 @@
 	            </ul>
 	            <ul>
 	            	<li class="t-center">
-	                	<s:include value="/resources/include/page.jsp"></s:include>
+	                	<s:include value="/resources/include/noPage.jsp"></s:include>
 	                </li>
 	            </ul>
 	    	</div>

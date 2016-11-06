@@ -114,8 +114,8 @@
 				alert("分润费率不能为空！");
 				$("#feeRate").focus();
 				return false;
-			} else if (!isPositiveInteger1(feeRate)) {
-				alert("分润费率只能填正整数！");
+			} else if (!isPositiveInteger1(feeRate) || feeRate >= 1000) {
+				alert("分润费率只能填小于1000的正整数！");
 				$("#feeRate").focus();
 				return false;
 			} else if (isBlank(state)) {

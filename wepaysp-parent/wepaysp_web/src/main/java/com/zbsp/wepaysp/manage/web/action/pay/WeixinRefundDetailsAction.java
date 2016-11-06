@@ -109,19 +109,21 @@ public class WeixinRefundDetailsAction
             // 用户级别，页面根据级别动态展示查询条件以及结果列表
             userLevel = manageUser.getUserLevel();
             
-            paramMap.put("beginTime", convertS2D(beginTime));
-            paramMap.put("endTime", convertS2D(endTime));
+            paramMap.put("beginTime", TimeUtil.getDayStart(convertS2D(beginTime)));
+            paramMap.put("endTime", TimeUtil.getDayEnd(convertS2D(endTime)));
             
             paramMap.put("partnerEmployeeId", weixinRefundDetailsVO.getPartnerEmployeeId());
             paramMap.put("dealerId", weixinRefundDetailsVO.getDealerId());
             paramMap.put("dealerEmployeeId", weixinRefundDetailsVO.getDealerEmployeeId());
             paramMap.put("storeId", weixinRefundDetailsVO.getStoreId());
             
-            weixinRefundDetailsVoList = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsList(paramMap, start, size);
             rowCount = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsCount(paramMap);
+            if (rowCount > 0) {
+            	weixinRefundDetailsVoList = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsList(paramMap, start, size);
+            }
         } catch (Exception e) {
             logger.error("微信交易明细查询列表错误：" + e.getMessage());
-            setAlertMessage("微信交易明细查询列表错误：" + e.getMessage());
+            setAlertMessage("微信交易明细查询列表错误！");
         }
         
         return "weixinRefundDetailsList";

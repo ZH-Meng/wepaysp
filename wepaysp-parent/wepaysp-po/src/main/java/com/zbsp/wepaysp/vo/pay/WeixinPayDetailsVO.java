@@ -35,6 +35,7 @@ public class WeixinPayDetailsVO
     private String dealerId;
     private String storeId;
     private String dealerEmployeeId;
+    private String partnerId;
 
     public String getIwoid() {
         return iwoid;
@@ -195,5 +196,13 @@ public class WeixinPayDetailsVO
     public void setDealerEmployeeId(String dealerEmployeeId) {
         this.dealerEmployeeId = dealerEmployeeId;
     }
+
+	public String getPartnerId() {
+		return partnerId;
+	}
+
+	public void setPartnerId(String partnerId) {
+		this.partnerId = partnerId;
+	}
 
 }

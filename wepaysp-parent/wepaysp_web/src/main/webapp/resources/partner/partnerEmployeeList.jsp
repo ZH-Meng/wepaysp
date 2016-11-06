@@ -112,7 +112,7 @@
 	            </ul>
 	            <ul>
 	            	<li class="t-center">
-	                	<s:include value="/resources/include/page.jsp"></s:include>
+	                	<s:include value="/resources/include/noPage.jsp"></s:include>
 	                </li>
 	            </ul>
 	    	</div>

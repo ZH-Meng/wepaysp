@@ -55,6 +55,9 @@ public class DealerServiceImpl
                 // partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
             }
             // dealerVO.setPartnerCompany(dealer.getPartner().getCompany());
+            dealerVO.setPartnerOid(dealer.getPartner().getIwoid());
+            dealerVO.setPartnerEmployeeOid(dealer.getPartnerEmployee().getIwoid());
+            dealerVO.setPartnerEmployeeName(dealer.getPartnerEmployee().getEmployeeName());
         }
         return dealerVO;
     }
@@ -72,7 +75,7 @@ public class DealerServiceImpl
         String coreDataFlag = MapUtils.getString(paramMap, "coreDataFlag");
         String partnerOid = MapUtils.getString(paramMap, "partnerOid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
-        Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空！");
+        //Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空！");
         
         StringBuffer sql = new StringBuffer("select distinct(d) from Dealer d, SysUser u where u.dealer=d");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
@@ -97,20 +100,16 @@ public class DealerServiceImpl
             sql.append(" and d.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
             sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
         }
-
-        // 获取服务商
-        Partner partner = commonDAO.findObject(Partner.class, partnerOid);
-        if (partner == null) {
-            throw new NotExistsException("服务商不存在！");
-        }
-
-        // 当前用户为顶级服务商时，查看管辖商户及下级服务商管辖商户...
-        if (partner.getLevel() == 1) {
-            sql.append(" and d.partner1Oid = :PARTNER1OID");
-            sqlMap.put("PARTNER1OID", partner.getIwoid());
-        } else {// 默认为非顶级服务商，该服务商所辖的所有商户
-            sql.append(" and d.partner.iwoid = :PARTNEROID");
-            sqlMap.put("PARTNEROID", partner.getIwoid());
+        
+        if (StringUtils.isNotBlank(partnerOid)) {
+        	if ("on".equals(coreDataFlag)) {
+        		 // 当前用户为顶级服务商时，查看管辖商户及下级服务商管辖商户...
+        		sql.append(" and d.partner1Oid = :PARTNER1OID");
+                sqlMap.put("PARTNER1OID", partnerOid);
+        	} else {// 默认为非顶级服务商，该服务商所辖的所有商户
+        		 sql.append(" and d.partner.iwoid = :PARTNEROID");
+                 sqlMap.put("PARTNEROID", partnerOid);
+        	}
         }
 
         sql.append(" order by d.dealerId desc");
@@ -375,6 +374,15 @@ public class DealerServiceImpl
 
         String dealerStr = dealer.toString();
 
+        if (StringUtils.isNotBlank(dealerVO.getPartnerEmployeeOid())) {// 代理商修改商户的所属业务员
+            PartnerEmployee partnerEmployee = commonDAO.findObject(PartnerEmployee.class, dealerVO.getPartnerEmployeeOid());
+            // 查找所属业务员
+            if (partnerEmployee == null) {
+                throw new NotExistsException("业务员不存在！");
+            }  else {
+                dealer.setPartnerEmployee(partnerEmployee);
+            }
+        }
         dealer.setContactor(dealerVO.getContactor());
         dealer.setCompany(dealerVO.getCompany());
         dealer.setMoblieNumber(dealerVO.getMoblieNumber());

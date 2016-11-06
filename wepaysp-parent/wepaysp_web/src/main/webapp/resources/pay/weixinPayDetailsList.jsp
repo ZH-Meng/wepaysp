@@ -149,55 +149,70 @@
 						  				<s:property value="#weixinPayDetailsVo.outTradeNo" />
 						  			</td>
 						  			<s:if test="userLevel  < 3">
+						  				<td title="<s:property value="#weixinPayDetailsVo.partnerId" />">
+							  				<s:property value="#weixinPayDetailsVo.partnerId" />
+							  			</td>
 							  			<td title="<s:property value="#weixinPayDetailsVo.partnerName" />">
 							  				<s:property value="#weixinPayDetailsVo.partnerName" />
+							  			</td>
+							  			<td title="<s:property value="#weixinPayDetailsVo.partnerEmployeeId" />">
+							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeId" />
 							  			</td>
 							  			<td title="<s:property value="#weixinPayDetailsVo.partnerEmployeeName" />">
 							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeName" />
 							  			</td>
 							  		</s:if>
+							  		<td title="<s:property value="#weixinPayDetailsVo.dealerId" />">
+						  				<s:property value="#weixinPayDetailsVo.dealerId" />
+						  			</td>
 						  			<td title="<s:property value="#weixinPayDetailsVo.dealerName" />">
 						  				<s:property value="#weixinPayDetailsVo.dealerName" />
 						  			</td>
+						  			<td title="<s:property value="#weixinPayDetailsVo.storeId" />">
+						  				<s:property value="#weixinPayDetailsVo.storeId" />
+						  			</td>
 						  			<td title="<s:property value="#weixinPayDetailsVo.storeName" />">
 						  				<s:property value="#weixinPayDetailsVo.storeName" />
+						  			</td>
+						  			<td title="<s:property value="#weixinPayDetailsVo.dealerEmployeeId" />">
+						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeId" />
 						  			</td>
 						  			<td title="<s:property value="#weixinPayDetailsVo.dealerEmployeeName" />">
 						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeName" />
 						  			</td>
 						  			
 						  			<s:if test="#weixinPayDetailsVo.payType == 1">
-						  				<s:set var="payTypeStr" value="刷卡支付" />
+						  				<s:set var="payTypeStr">刷卡支付</s:set>
 						  			</s:if>
 						  			<s:elseif test="#weixinPayDetailsVo.payType == 2">
-						  				<s:set var="payTypeStr" value="公众号支付" />
+						  				<s:set var="payTypeStr">公众号支付</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinPayDetailsVo.payType == 3">
-						  				<s:set var="payTypeStr" value="扫码支付 " />
+						  				<s:set var="payTypeStr">扫码支付</s:set>
 									</s:elseif>
 									<s:elseif test="#weixinPayDetailsVo.payType == 4">
-						  				<s:set var="payTypeStr" value="微信买单 " />
+										<s:set var="payTypeStr">微信买单</s:set>
 									</s:elseif>
 						  			<td title="<s:property value="#payTypeStr" />">
 						  				<s:property value="#payTypeStr" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###"/>">
-						  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>">
+						  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>
 						  			</td>
 						  			<s:if test="#weixinPayDetailsVo.resultCode == 'SUCCESS'">
-						  				<s:set var="resultCodeStr" value="交易成功" />
+						  				<s:set var="resultCodeStr">交易成功</s:set>
 						  			</s:if>
 						  			<s:elseif test="#weixinPayDetailsVo.resultCode == ''FAIL">
-						  				<s:set var="resultCodeStr" value="交易失败" />
+						  				<s:set var="resultCodeStr">交易失败</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinPayDetailsVo.resultCode == NULL || #weixinPayDetailsVo.resultCode == '' ">
-						  				<s:set var="resultCodeStr" value="处理中 " />
+						  				<s:set var="resultCodeStr">处理中</s:set>
 									</s:elseif>
 						  			<td title="<s:property value="resultCodeStr" />">
 						  				<s:property value="#resultCodeStr" />
 						  			</td>
-									<td title="<s:property value="#weixinPayDetailsVo.transBeginTime" />">
-						  				<s:property value="#weixinPayDetailsVo.transBeginTime" />
+									<td title="<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
+						  				<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

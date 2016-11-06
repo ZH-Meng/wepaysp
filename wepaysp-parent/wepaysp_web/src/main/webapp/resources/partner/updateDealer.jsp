@@ -23,6 +23,18 @@
 	                <li class="bg_tjall">
 	                	<table>
 	                    	<tbody>
+	                    		<tr>
+	                            	<th>业务员</th>
+	                                <td>
+	                                	<s:if test="partnerEmployeeVoList == null">
+			                    			<s:property value="dealerVO.partnerEmployeeName"/>
+			                    		</s:if>
+			                    		<s:else>
+	                                		<s:select list="partnerEmployeeVoList" listKey="iwoid" listValue="employeeName" name="dealerVO.partnerEmployeeOid"  id="partnerEmployeeOid" headerKey="" headerValue="请选择"/>
+		                                	<span class="tj_bt">*</span>
+                    					</s:else>
+	                                </td>
+	                            </tr>
 	                        	<tr>
 	                            	<th>登录名</th>
 	                                <td>

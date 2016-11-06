@@ -55,11 +55,11 @@ public class DealerEmployeeAction
             
             paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
             
-            dealerEmployeeVoList = dealerEmployeeService.doJoinTransQueryDealerEmployeeList(paramMap, start, size);
-            rowCount = dealerEmployeeService.doJoinTransQueryDealerEmployeeCount(paramMap);
+            //rowCount = dealerEmployeeService.doJoinTransQueryDealerEmployeeCount(paramMap);
+            dealerEmployeeVoList = dealerEmployeeService.doJoinTransQueryDealerEmployeeList(paramMap, 0, -1);
         } catch (Exception e) {
             logger.error("商户员工查询列表错误：" + e.getMessage());
-            setAlertMessage("商户员工查询列表错误：" + e.getMessage());
+            setAlertMessage("商户员工查询列表错误！");
         }
         return "dealerEmployeeList";
     }
@@ -111,7 +111,7 @@ public class DealerEmployeeAction
             return "createDealerEmployee";
         } catch (Exception e) {
             logger.error("商户员工添加错误：" + e.getMessage());
-            setAlertMessage("商户员工添加错误：" + e.getMessage());
+            setAlertMessage("商户员工添加错误！");
             return "error";
         }
         return list();
@@ -161,7 +161,7 @@ public class DealerEmployeeAction
             return list();
         } catch (Exception e) {
             logger.error("商户员工添加错误：" + e.getMessage());
-            setAlertMessage("商户员工添加错误：" + e.getMessage());
+            setAlertMessage("商户员工添加错误！");
             return "error";
         }
         return list();
@@ -214,7 +214,7 @@ public class DealerEmployeeAction
              return list();
          } catch (Exception e) {
              logger.error("重置商户员工退款权限密码错误：" + e.getMessage());
-             setAlertMessage("重置商户员工退款权限密码错误：" + e.getMessage());
+             setAlertMessage("重置商户员工退款权限密码错误！");
              return "error";
          }
          return list();
@@ -255,7 +255,7 @@ public class DealerEmployeeAction
             return list();
         } catch (Exception e) {
             logger.error("修改商户员工退款权限密码错误：" + e.getMessage());
-            setAlertMessage("修改商户员工退款权限密码错误：" + e.getMessage());
+            setAlertMessage("修改商户员工退款权限密码错误！");
             return "error";
         }
         return "modifyRefundPwd";

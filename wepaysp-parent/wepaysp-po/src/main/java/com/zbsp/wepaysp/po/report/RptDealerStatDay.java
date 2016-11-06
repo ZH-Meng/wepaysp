@@ -38,8 +38,8 @@ public class RptDealerStatDay
     private String partnerEmployeeId;
     private String partnerEmployeeName;
     private Long totalAmount;
-    private BigDecimal totalMoney;
-    private Double totalBonus;
+    private Long totalMoney;
+    private BigDecimal totalBonus;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -249,20 +249,20 @@ public class RptDealerStatDay
     }
 
     @Column(name = "TOTAL_MONEY", precision = 20, scale = 0)
-    public BigDecimal getTotalMoney() {
+    public Long getTotalMoney() {
         return this.totalMoney;
     }
 
-    public void setTotalMoney(BigDecimal totalMoney) {
+    public void setTotalMoney(Long totalMoney) {
         this.totalMoney = totalMoney;
     }
 
     @Column(name = "TOTAL_BONUS", precision = 20, scale = 4)
-    public Double getTotalBonus() {
+    public BigDecimal getTotalBonus() {
         return this.totalBonus;
     }
 
-    public void setTotalBonus(Double totalBonus) {
+    public void setTotalBonus(BigDecimal totalBonus) {
         this.totalBonus = totalBonus;
     }
 

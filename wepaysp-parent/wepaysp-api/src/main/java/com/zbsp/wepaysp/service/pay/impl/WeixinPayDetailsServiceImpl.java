@@ -98,7 +98,7 @@ public class WeixinPayDetailsServiceImpl
         sql.append(" order by w.transBeginTime desc");
         List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
-        if(weixinPayDetailsList != null && weixinPayDetailsList.isEmpty()) {
+        if(weixinPayDetailsList != null && !weixinPayDetailsList.isEmpty()) {
         	for (WeixinPayDetails weixinPayDetails : weixinPayDetailsList) {
         		WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
         		//BeanCopierUtil.copyProperties(weixinPayDetails, vo);
@@ -110,6 +110,7 @@ public class WeixinPayDetailsServiceImpl
                 vo.setStoreName(weixinPayDetails.getStore().getStoreName());
                 vo.setDealerEmployeeName(weixinPayDetails.getDealerEmployee().getEmployeeName());
                 
+                vo.setPartnerId(weixinPayDetails.getPartner().getPartnerId());
         		vo.setPartnerEmployeeId(weixinPayDetails.getPartnerEmployee().getPartnerEmployeeId());
         		vo.setDealerId(weixinPayDetails.getDealer().getDealerId());
         		vo.setStoreId(weixinPayDetails.getStore().getStoreId());

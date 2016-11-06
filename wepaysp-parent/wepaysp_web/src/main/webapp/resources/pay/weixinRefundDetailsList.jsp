@@ -150,18 +150,33 @@
 						  				<s:property value="#weixinRefundDetailsVo.outTradeNo" />
 						  			</td>
 						  			<s:if test="userLevel  < 3">
+						  				<td title="<s:property value="#weixinRefundDetailsVo.partnerId" />">
+							  				<s:property value="#weixinRefundDetailsVo.partnerId" />
+							  			</td>
 							  			<td title="<s:property value="#weixinRefundDetailsVo.partnerName" />">
 							  				<s:property value="#weixinRefundDetailsVo.partnerName" />
+							  			</td>
+							  			<td title="<s:property value="#weixinRefundDetailsVo.partnerEmployeeId" />">
+							  				<s:property value="#weixinRefundDetailsVo.partnerEmployeeId" />
 							  			</td>
 							  			<td title="<s:property value="#weixinRefundDetailsVo.partnerEmployeeName" />">
 							  				<s:property value="#weixinRefundDetailsVo.partnerEmployeeName" />
 							  			</td>
 							  		</s:if>
+						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerId" />">
+						  				<s:property value="#weixinRefundDetailsVo.dealerId" />
+						  			</td>
 						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerName" />">
 						  				<s:property value="#weixinRefundDetailsVo.dealerName" />
 						  			</td>
+						  			<td title="<s:property value="#weixinRefundDetailsVo.storeId" />">
+						  				<s:property value="#weixinRefundDetailsVo.storeId" />
+						  			</td>
 						  			<td title="<s:property value="#weixinRefundDetailsVo.storeName" />">
 						  				<s:property value="#weixinRefundDetailsVo.storeName" />
+						  			</td>
+						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerEmployeeId" />">
+						  				<s:property value="#weixinRefundDetailsVo.dealerEmployeeId" />
 						  			</td>
 						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerEmployeeName" />">
 						  				<s:property value="#weixinRefundDetailsVo.dealerEmployeeName" />
@@ -169,26 +184,26 @@
 						  			<td title="<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />">
 						  				<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,###"/>">
-						  				<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,###"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>">
+						  				<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,###"/>">
-						  				<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,###"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,###.00"/>">
+						  				<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,###.00"/>
 						  			</td>
 						  			<s:if test="#weixinRefundDetailsVo.resultCode == 'SUCCESS'">
-						  				<s:set var="resultCodeStr" value="交易成功" />
+						  				<s:set var="resultCodeStr">交易成功</s:set>
 						  			</s:if>
 						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == ''FAIL">
-						  				<s:set var="resultCodeStr" value="交易失败" />
+						  				<s:set var="resultCodeStr">交易失败</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == NULL || #weixinRefundDetailsVo.resultCode == '' ">
-						  				<s:set var="resultCodeStr" value="处理中 " />
+						  				<s:set var="resultCodeStr">处理中</s:set>
 									</s:elseif>
 						  			<td title="<s:property value="resultCodeStr" />">
 						  				<s:property value="#resultCodeStr" />
 						  			</td>
-									<td title="<s:property value="#weixinRefundDetailsVo.transBeginTime" />">
-						  				<s:property value="#weixinRefundDetailsVo.transBeginTime" />
+						  			<td title="<s:date name="#weixinRefundDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
+						  				<s:date name="#weixinRefundDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

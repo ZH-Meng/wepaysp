@@ -65,11 +65,11 @@ public class StoreAction
                 }
             }
             paramMap.put("dealerOid", dealerOid);
-            storeVoList = storeService.doJoinTransQueryStoreList(paramMap, start, size);
-            rowCount = storeService.doJoinTransQueryStoreCount(paramMap);
+            storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
+            //rowCount = storeService.doJoinTransQueryStoreCount(paramMap);
         } catch (Exception e) {
             logger.error("门店查询列表错误：" + e.getMessage());
-            setAlertMessage("门店查询列表错误：" + e.getMessage());
+            setAlertMessage("门店查询列表错误！");
         }
         return "storeList";
     }
@@ -116,7 +116,7 @@ public class StoreAction
             return "createStore";
         } catch (Exception e) {
             logger.error("门店添加错误：" + e.getMessage());
-            setAlertMessage("门店添加错误：" + e.getMessage());
+            setAlertMessage("门店添加错误！");
             return "error";
         }
         return list();
@@ -165,7 +165,7 @@ public class StoreAction
             return list();
         } catch (Exception e) {
             logger.error("门店添加错误：" + e.getMessage());
-            setAlertMessage("门店添加错误：" + e.getMessage());
+            setAlertMessage("门店添加错误！");
             return "error";
         }
         return "updateStore";

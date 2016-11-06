@@ -109,19 +109,21 @@ public class WeixinPayDetailsAction
             // 用户级别，页面根据级别动态展示查询条件以及结果列表
             userLevel = manageUser.getUserLevel();
             
-            paramMap.put("beginTime", convertS2D(beginTime));
-            paramMap.put("endTime", convertS2D(endTime));
+            paramMap.put("beginTime", TimeUtil.getDayStart(convertS2D(beginTime)));
+            paramMap.put("endTime", TimeUtil.getDayEnd(convertS2D(endTime)));
             
             paramMap.put("partnerEmployeeId", weixinPayDetailsVO.getPartnerEmployeeId());
             paramMap.put("dealerId", weixinPayDetailsVO.getDealerId());
             paramMap.put("dealerEmployeeId", weixinPayDetailsVO.getDealerEmployeeId());
             paramMap.put("storeId", weixinPayDetailsVO.getStoreId());
             
-            weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, start, size);
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
+            if (rowCount > 0) {
+            	weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, start, size);
+            }
         } catch (Exception e) {
             logger.error("微信交易明细查询列表错误：" + e.getMessage());
-            setAlertMessage("微信交易明细查询列表错误：" + e.getMessage());
+            setAlertMessage("微信交易明细查询列表错误！");
         }
         
         return "weixinPayDetailsList";

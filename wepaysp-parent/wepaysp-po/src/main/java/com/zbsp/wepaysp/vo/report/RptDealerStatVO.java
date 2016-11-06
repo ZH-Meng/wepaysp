@@ -1,6 +1,7 @@
 package com.zbsp.wepaysp.vo.report;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class RptDealerStatVO
@@ -19,11 +20,12 @@ public class RptDealerStatVO
     private String dealerEmployeeName;
     private Long totalAmount;
     private Long totalMoney;
-    private Double totalBonus;
+    private BigDecimal totalBonus;
 
     private Date beginTime;
     private Date endTime;
     private String storeOid;
+    private Integer feeRate;
 
     public String getPartnerId() {
         return partnerId;
@@ -121,11 +123,11 @@ public class RptDealerStatVO
         this.totalMoney = totalMoney;
     }
 
-    public Double getTotalBonus() {
+    public BigDecimal getTotalBonus() {
         return totalBonus;
     }
 
-    public void setTotalBonus(Double totalBonus) {
+    public void setTotalBonus(BigDecimal totalBonus) {
         this.totalBonus = totalBonus;
     }
 
@@ -152,5 +154,13 @@ public class RptDealerStatVO
     public void setStoreOid(String storeOid) {
         this.storeOid = storeOid;
     }
+
+	public Integer getFeeRate() {
+		return feeRate;
+	}
+
+	public void setFeeRate(Integer feeRate) {
+		this.feeRate = feeRate;
+	}
 
 }

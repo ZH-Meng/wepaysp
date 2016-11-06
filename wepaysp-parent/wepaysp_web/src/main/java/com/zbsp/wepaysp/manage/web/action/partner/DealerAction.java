@@ -46,35 +46,36 @@ public class DealerAction
                 dealerVO = new DealerVO();
             }
             if ("on".equals(dealerVO.getCoreDataFlag())) {
-                if (!isTopPartner(manageUser)) {
-                    logger.warn("角色分配不当：非顶级服务商（代理商）不能管理商户交易核心数据");
-                    setAlertMessage("角色分配不当：非服务商（代理商）不能管理商户交易核心数据");
-                    return "accessDenied";
+                if (isTopPartner(manageUser)) {
+                	 paramMap.put("coreDataFlag", dealerVO.getCoreDataFlag());
+                	 paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+                } else {
+                	logger.warn("角色分配不当：非顶级服务商（代理商）不能管理商户交易核心数据");
+                	setAlertMessage("角色分配不当：非服务商（代理商）不能管理商户交易核心数据");
+                	return "accessDenied";
                 }
             } else {
                 if (isPartnerEmployee(manageUser)) {
                     paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
-                } else if (!isPartner(manageUser)) {
-                    logger.warn("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
-                    setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
-                    return "accessDenied";
+                } else if (isPartner(manageUser)) {
+                	paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+                } else {
+                	logger.warn("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
+                	setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
+                	return "accessDenied";
                 }
-                
             }
-            paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
 
             paramMap.put("state", dealerVO.getState());
             paramMap.put("moblieNumber", dealerVO.getMoblieNumber());
             paramMap.put("loginId", dealerVO.getLoginId());
             paramMap.put("company", dealerVO.getCompany());
 
-            paramMap.put("coreDataFlag", dealerVO.getCoreDataFlag());
-
-            dealerVoList = dealerService.doJoinTransQueryDealerList(paramMap, start, size);
-            rowCount = dealerService.doJoinTransQueryDealerCount(paramMap);
+            // rowCount = dealerService.doJoinTransQueryDealerCount(paramMap);
+            dealerVoList = dealerService.doJoinTransQueryDealerList(paramMap, 0, -1);
         } catch (Exception e) {
             logger.error("商户查询列表错误：" + e.getMessage());
-            setAlertMessage("商户查询列表错误：" + e.getMessage());
+            setAlertMessage("商户查询列表错误！");
         }
 
         return "dealerList";
@@ -124,7 +125,7 @@ public class DealerAction
             
         } catch (Exception e) {
             logger.error("商户添加错误：" + e.getMessage());
-            setAlertMessage("商户添加错误：" + e.getMessage());
+            setAlertMessage("商户添加错误！");
             return list();
         }
         return "createDealer";
@@ -155,7 +156,7 @@ public class DealerAction
             return "createDealer";
         } catch (Exception e) {
             logger.error("商户添加错误：" + e.getMessage());
-            setAlertMessage("商户添加错误：" + e.getMessage());
+            setAlertMessage("商户添加错误！");
             return "createDealer";
         }
         return list();
@@ -181,6 +182,7 @@ public class DealerAction
                     }
                 } else {
                     logger.info("跳转修改商户页面.");
+                    
                     if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
                         logger.warn("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
                         setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
@@ -189,9 +191,31 @@ public class DealerAction
                 }
                 
                 dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerVO.getIwoid());
-                //TODO 校验被修改商户与当前用户的关系
-                
+                if (dealerVO == null) {
+                	logger.warn("修改商户失败：dealerVO 未空");
+                    setAlertMessage("商户不存在！");
+                    return list();
+                }
                 dealerVO.setCoreDataFlag(coreDataFlag);
+                
+                // 校验被修改商户与当前用户的关系
+                if (isPartner(manageUser) && !"on".equals(dealerVO.getCoreDataFlag())) {
+                	if (!manageUser.getDataPartner().getIwoid().equals(dealerVO.getPartnerOid())) {
+                    	logger.warn("非法操作：只能修改本代理发展的商户信息");
+                        setAlertMessage("非法操作：只能修改本代理发展的商户信息");
+                        return list();
+                	}
+                	Map<String, Object> paramMap = new HashMap<String, Object>();
+                	paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+                	partnerEmployeeVoList = partnerEmployeeService.doJoinTransQueryPartnerEmployeeList(paramMap, 0, -1);
+                } else if (isPartnerEmployee(manageUser)) {
+                	if (!manageUser.getDataPartnerEmployee().getIwoid().equals(dealerVO.getPartnerEmployeeOid())) {
+                    	logger.warn("非法操作：只能修改自己发展的商户信息");
+                        setAlertMessage("非法操作：只能修改自己发展的商户信息");
+                        return list();
+                	}
+                } 
+                
                 if (!"on".equals(coreDataFlag)) {
                     dealerVO.setSubAppid(null);
                     dealerVO.setSubMchId(null);                    
@@ -203,7 +227,8 @@ public class DealerAction
             }
         } catch (Exception e) {
             logger.error("修改商户失败：" + e.getMessage());
-            setAlertMessage("修改商户失败：" + e.getMessage());
+            setAlertMessage("修改商户失败！");
+            dealerVO = null;
             return list();
         }
         return "updateDealer";
@@ -248,7 +273,7 @@ public class DealerAction
             dealerVO = temp;
         } catch (Exception e) {
             logger.error("修改商户基本信息错误：" + e.getMessage());
-            setAlertMessage("修改商户基本信息错误：" + e.getMessage());
+            setAlertMessage("修改商户基本信息错误！");
             return "error";
         }
 
@@ -278,7 +303,7 @@ public class DealerAction
             return "error";
         } catch (Exception e) {
             logger.error("商户基本信息修改错误：" + e.getMessage());
-            setAlertMessage("商户基本信息修改错误：" + e.getMessage());
+            setAlertMessage("商户基本信息修改错误！");
             return "error";
         }
         return "updateDealerBase";
@@ -318,7 +343,7 @@ public class DealerAction
             return list();
         } catch (Exception e) {
             logger.error("商户修改错误：" + e.getMessage());
-            setAlertMessage("商户修改错误：" + e.getMessage());
+            setAlertMessage("商户修改错误！");
             return "updateDealer";
         }
         return "updateDealer";

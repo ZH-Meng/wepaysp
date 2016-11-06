@@ -79,11 +79,11 @@ public class PartnerAction
                 partnerVO.setParentPartnerOid(parentPartner.getIwoid());
             }
 
-            partnerVoList = partnerService.doJoinTransQueryPartnerList(paramMap, start, size);
-            rowCount = partnerService.doJoinTransQueryPartnerCount(paramMap);
+            //rowCount = partnerService.doJoinTransQueryPartnerCount(paramMap);
+            partnerVoList = partnerService.doJoinTransQueryPartnerList(paramMap, 0, -1);
         } catch (Exception e) {
             logger.error("代理商查询列表错误：" + e.getMessage());
-            setAlertMessage("代理商查询列表错误：" + e.getMessage());
+            setAlertMessage("代理商查询列表错误！");
         }
         return "partnerList";
     }
@@ -126,7 +126,7 @@ public class PartnerAction
             return "createPartner";
         } catch (Exception e) {
             logger.error("代理商添加错误：" + e.getMessage());
-            setAlertMessage("代理商添加错误：" + e.getMessage());
+            setAlertMessage("代理商添加错误！");
             return "createPartner";
         }
         return list();
@@ -168,7 +168,7 @@ public class PartnerAction
             return list();
         } catch (Exception e) {
             logger.error("代理商修改错误：" + e.getMessage());
-            setAlertMessage("代理商修改错误：" + e.getMessage());
+            setAlertMessage("代理商修改错误！");
             return "updatePartner";
         }
         return "updatePartner";
