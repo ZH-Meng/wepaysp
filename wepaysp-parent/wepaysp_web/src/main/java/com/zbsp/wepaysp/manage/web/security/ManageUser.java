@@ -14,8 +14,10 @@ import java.util.Date;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import com.zbsp.wepaysp.po.dic.SysCity;
-import com.zbsp.wepaysp.po.dic.SysProvince;
+import com.zbsp.wepaysp.po.partner.Dealer;
+import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 
 
 /**
@@ -33,11 +35,17 @@ public class ManageUser extends User {
 
     private String loginToken;
     
-    private Integer dataPermissionType;
+    private Integer userLevel;
     
-    private SysProvince dataPermisionProvince;
+    private Integer dataPermissionType;    
     
-    private SysCity dataPermisionCity;
+    private Partner dataPartner;
+    
+    private Dealer dataDealer;
+    
+    private PartnerEmployee dataPartnerEmployee;
+    
+    private DealerEmployee dataDealerEmployee;    
     
     private String lastLoginIp;
     
@@ -45,16 +53,19 @@ public class ManageUser extends User {
     
     private String roleIndex;
 
-    public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer dataPermissionType,
-            SysProvince sysProvince, SysCity sysCity, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
+    public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer userLevel,Integer dataPermissionType, Partner dataPartner,
+    		Dealer dataDealer, PartnerEmployee dataPartnerEmployee, DealerEmployee dataDealerEmployee, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.iwoid = iwoid;
         this.userId = userId;
         this.loginToken = loginToken;
+        this.userLevel = userLevel;
         this.dataPermissionType = dataPermissionType;
-        this.dataPermisionProvince = sysProvince;
-        this.dataPermisionCity = sysCity;
+        this.dataPartner = dataPartner;
+        this.dataDealer = dataDealer;
+        this.dataPartnerEmployee = dataPartnerEmployee;
+        this.dataDealerEmployee = dataDealerEmployee;
         this.lastLoginIp = lastLoginIp;
         this.lastLoginTime = lastLoginTime;
         this.roleIndex = roleIndex;
@@ -68,6 +79,14 @@ public class ManageUser extends User {
         this.loginToken = loginToken;
     }
 
+    public Integer getUserLevel() {
+        return userLevel;
+    }
+    
+    public void setUserLevel(Integer userLevel) {
+        this.userLevel = userLevel;
+    }
+
     public Integer getDataPermissionType() {
         return dataPermissionType;
     }
@@ -76,23 +95,39 @@ public class ManageUser extends User {
         this.dataPermissionType = dataPermissionType;
     }
     
-    public SysProvince getDataPermisionProvince() {
-        return dataPermisionProvince;
+    public Partner getDataPartner() {
+        return dataPartner;
     }
     
-    public void setDataPermisionProvince(SysProvince dataPermisionProvince) {
-        this.dataPermisionProvince = dataPermisionProvince;
+    public void setDataPartner(Partner dataPartner) {
+        this.dataPartner = dataPartner;
     }
 
-    public SysCity getDataPermisionCity() {
-        return dataPermisionCity;
-    }
-    
-    public void setDataPermisionCity(SysCity dataPermisionCity) {
-        this.dataPermisionCity = dataPermisionCity;
-    }
-    
-    public String getLastLoginIp() {
+    public Dealer getDataDealer() {
+		return dataDealer;
+	}
+
+	public void setDataDealer(Dealer dataDealer) {
+		this.dataDealer = dataDealer;
+	}
+	
+	public PartnerEmployee getDataPartnerEmployee() {
+		return dataPartnerEmployee;
+	}
+
+	public void setDataPartnerEmployee(PartnerEmployee dataPartnerEmployee) {
+		this.dataPartnerEmployee = dataPartnerEmployee;
+	}
+
+	public DealerEmployee getDataDealerEmployee() {
+		return dataDealerEmployee;
+	}
+
+	public void setDataDealerEmployee(DealerEmployee dataDealerEmployee) {
+		this.dataDealerEmployee = dataDealerEmployee;
+	}
+
+	public String getLastLoginIp() {
         return lastLoginIp;
     }
 

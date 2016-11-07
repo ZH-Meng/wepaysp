@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+ "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<package name="partner" namespace="/resources/partner" extends="wepaysp-manage-default">
+		<!-- 代理商管理 -->
+		<action name="partnermanage" class="partnerAction">
+			<result name="partnerList">/resources/partner/partnerList.jsp</result>
+			<result name="createPartner">/resources/partner/createPartner.jsp</result>
+			<result name="updatePartner">/resources/partner/updatePartner.jsp</result>
+		</action>
+		<!-- 商户管理 -->
+		<action name="dealermanage" class="dealerAction">
+			<result name="dealerList">/resources/partner/dealerList.jsp</result>
+			<result name="createDealer">/resources/partner/createDealer.jsp</result>
+			<result name="updateDealer">/resources/partner/updateDealer.jsp</result>
+			<result name="updateDealerBase">/resources/partner/updateDealerBase.jsp</result>
+		</action>
+		<!-- 门店管理 -->
+		<action name="storemanage" class="storeAction">
+			<result name="storeList">/resources/partner/storeList.jsp</result>
+			<result name="createStore">/resources/partner/createStore.jsp</result>
+			<result name="updateStore">/resources/partner/updateStore.jsp</result>
+		</action>
+		<!-- 服务商员工管理 -->
+		<action name="partneremployeemanage" class="partnerEmployeeAction">
+			<result name="partnerEmployeeList">/resources/partner/partnerEmployeeList.jsp</result>
+			<result name="createPartnerEmployee">/resources/partner/createPartnerEmployee.jsp</result>
+			<result name="updatePartnerEmployee">/resources/partner/updatePartnerEmployee.jsp</result>
+		</action>
+		<!-- 商户员工管理 -->
+		<action name="dealeremployeemanage" class="dealerEmployeeAction">
+			<result name="dealerEmployeeList">/resources/partner/dealerEmployeeList.jsp</result>
+			<result name="createDealerEmployee">/resources/partner/createDealerEmployee.jsp</result>
+			<result name="updateDealerEmployee">/resources/partner/updateDealerEmployee.jsp</result>
+			<result name="resetRefundPwd">/resources/partner/resetRefundPwd.jsp</result>
+			<result name="modifyRefundPwd">/resources/partner/modifyRefundPwd.jsp</result>
+		</action>
+	</package>
+</struts>

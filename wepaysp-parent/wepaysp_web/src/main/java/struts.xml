@@ -20,6 +20,7 @@
     	<global-results>
 			<result name="login">/index.jsp</result>
 			<result name="error">/resources/include/error.jsp</result>
+			<result name="accessDenied">/resources/include/accessDenied.jsp</result>
 		</global-results>
 		<global-exception-mappings>
             <exception-mapping exception="java.lang.Exception" result="error"/>
@@ -31,4 +32,7 @@
 	<include file="com/zbsp/wepaysp/manage/web/action/usermanage/action-struts.xml" />
 	<include file="com/zbsp/wepaysp/manage/web/action/user/action-struts.xml" />
 	<include file="com/zbsp/wepaysp/manage/web/action/logmanage/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/partner/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/pay/action-struts.xml" />
+	<include file="com/zbsp/wepaysp/manage/web/action/report/action-struts.xml" />
 </struts>

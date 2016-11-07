@@ -8,7 +8,10 @@ package com.zbsp.wepaysp.manage.web.action;
 public abstract class PageAction extends BaseAction {
 
     private static final long serialVersionUID = -6900242847620137144L;
-
+    
+    protected static int defaultSmallPageSize = 20;
+    protected static int defaultMiddlePageSize = 50;
+    protected static int defaultLargePageSize = 100;
     protected int rowCount = 0; // 总记录数
     protected int pageCount = 0; // 总页数
     protected int currPage = 1; // 当前页

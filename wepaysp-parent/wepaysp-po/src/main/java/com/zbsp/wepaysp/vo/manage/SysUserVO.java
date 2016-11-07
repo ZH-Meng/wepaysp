@@ -12,8 +12,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.zbsp.wepaysp.po.dic.SysCity;
-import com.zbsp.wepaysp.po.dic.SysProvince;
 import com.zbsp.wepaysp.po.manage.SysRole;
 
 /**
@@ -39,8 +37,6 @@ public class SysUserVO implements Serializable {
     private Date lastLoginTime;
     private Integer state;
     private Integer dataPermisionType;
-    private SysProvince dataPermisionProvince;
-    private SysCity dataPermisionCity;
     private String creator;
     private Date createTime;
     private String modifier;
@@ -212,22 +208,6 @@ public class SysUserVO implements Serializable {
 
 	public void setDataPermisionType(Integer dataPermisionType) {
 		this.dataPermisionType = dataPermisionType;
-	}
-
-	public SysProvince getDataPermisionProvince() {
-		return dataPermisionProvince;
-	}
-
-	public void setDataPermisionProvince(SysProvince dataPermisionProvince) {
-		this.dataPermisionProvince = dataPermisionProvince;
-	}
-
-	public SysCity getDataPermisionCity() {
-		return dataPermisionCity;
-	}
-
-	public void setDataPermisionCity(SysCity dataPermisionCity) {
-		this.dataPermisionCity = dataPermisionCity;
 	}
 
 	public String getGenderName() {

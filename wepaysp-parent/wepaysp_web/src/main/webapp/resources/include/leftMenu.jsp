@@ -45,8 +45,8 @@
 					pos:".leftmenuone",
 					reqHead :reqHead,
 					//显示到几级菜单
-					limit:"3",
-					jumpTo:"<%= manageUser.getRoleIndex() %>"
+					limit:"2"
+					<%-- ,jumpTo:"<%= manageUser.getRoleIndex() %>" --%>
 				}
 				stc.tree.init(defaultSet);
 			});

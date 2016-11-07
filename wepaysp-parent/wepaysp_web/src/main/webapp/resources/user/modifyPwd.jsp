@@ -14,12 +14,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>密码修改</title>
+	<title>登录密码修改</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
+	<style>
+		.bg_tjall th {width: 40%;}
+	</style>
 </head>
 <body class="bgbj" onkeydown="formkeydown();">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：修改密码</div>
+		<div class="bgposition">您现在的位置：修改登录密码</div>
 		<div class="bgtj">
 			<form id="modifyForm" action="<%=request.getContextPath()%>/resources/user/modifyPwd.action" method="post">
 				<ul class="tj_title">
@@ -51,7 +54,7 @@
 						</table>
 					</li>
 					<li class="bg_button">
-						<a id="submitForm" href="javascript:void(0);" onclick="modify();" style="width: 100px;">确定</a>
+						<a id="submitForm" href="javascript:void(0);" onclick="modify();" style="width: 100px;">保存</a>
 						<a class="mgl-20" onclick="reset();" href="javascript:void(0);" style="width: 100px;">重写</a>
 					</li>
 				</ul>
@@ -65,7 +68,7 @@
 		function modify() {
 			var mess = checkPwd();
 			if (mess == "SUCC") {
-				if (confirm("确认修改密码？")) {
+				if (confirm("确认修改登录密码？")) {
 					$("#modifyForm").submit();
 				}
 			} else {
@@ -110,7 +113,7 @@
 		}
 		
 		function reset() {
-			$("#modifyForm").reset();
+			$("#modifyForm")[0].reset();
 		}
 
 		function formkeydown() {

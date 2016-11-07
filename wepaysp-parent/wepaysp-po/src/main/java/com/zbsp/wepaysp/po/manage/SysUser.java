@@ -13,8 +13,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.zbsp.wepaysp.po.dic.SysCity;
-import com.zbsp.wepaysp.po.dic.SysProvince;
+import com.zbsp.wepaysp.po.partner.Dealer;
+import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
+import com.zbsp.wepaysp.po.partner.Store;
 
 @Entity
 @Table(name = "sys_user_t")
@@ -36,13 +39,35 @@ public class SysUser implements Serializable {
     private String lastLoginIp;
     private Integer state;
     private Integer dataPermisionType;
-    private SysProvince dataPermisionProvince;
-    private SysCity dataPermisionCity;
+    private Integer userLevel;
+    private Dealer dealer;
+    private Store store;
+    private DealerEmployee dealerEmployee;
+    private Partner partner;
+    private PartnerEmployee partnerEmployee;
     private String creator;
     private Date createTime;
     private String modifier;
     private Date modifyTime;
     private String remark;
+    
+    public static enum UserLevel {
+        /** 服务商、一级代理商、二级代理商...  */     partner(1),
+        /** 业务员 */                                           salesman(2),
+        /** 商户老板 */                                      dealer(3),
+        /** 店长 */                                           shopManager(4),
+        /** 收银员 */                                       cashier(5);
+        
+        private int value;
+
+        public int getValue() {
+            return value;
+        }
+
+        private UserLevel(int value) {
+            this.value = value;
+        }
+    }
 
     public static enum Gender {
         /** 性别:男 */        male(0),
@@ -91,10 +116,10 @@ public class SysUser implements Serializable {
     }
     
     public static enum DataPermisionType {
-        /** 数据权限范围:无 */        none(0),
-        /** 数据权限范围:全国 */     country(1),
-        /** 数据权限范围:省 */        province(2),
-        /** 数据权限范围:地市 */     city(3);
+        /** 数据权限范围:无 */                 none(0),
+        /** 数据权限范围:1级服务商 */     partner1(1),
+        /** 数据权限范围:2级服务商 */     partner2(2),
+        /** 数据权限范围:3级服务商 */    partner3(3);
 
         private int value;
 
@@ -242,7 +267,7 @@ public class SysUser implements Serializable {
         this.state = state;
     }
     
-    @Column(name = "data_permision_type", nullable = false)
+    @Column(name = "data_permision_type")
     public Integer getDataPermisionType() {
         return this.dataPermisionType;
     }
@@ -251,24 +276,63 @@ public class SysUser implements Serializable {
         this.dataPermisionType = dataPermisionType;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sys_province_oid")
-    public SysProvince getDataPermisionProvince() {
-        return dataPermisionProvince;
+    @Column(name = "user_level")
+    public Integer getUserLevel() {
+        return this.userLevel;
+    }
+
+    public void setUserLevel(Integer userLevel) {
+        this.userLevel = userLevel;
     }
     
-    public void setDataPermisionProvince(SysProvince dataPermisionProvince) {
-        this.dataPermisionProvince = dataPermisionProvince;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEALER_OID")
+    public Dealer getDealer() {
+        return this.dealer;
+    }
+
+    public void setDealer(Dealer dealer) {
+        this.dealer = dealer;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sys_city_oid")
-    public SysCity getDataPermisionCity() {
-        return dataPermisionCity;
+    @JoinColumn(name = "STORE_OID")
+    public Store getStore() {
+        return this.store;
     }
 
-    public void setDataPermisionCity(SysCity dataPermisionCity) {
-        this.dataPermisionCity = dataPermisionCity;
+    public void setStore(Store store) {
+        this.store = store;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEALER_EMPLOYEE_OID")
+    public DealerEmployee getDealerEmployee() {
+        return this.dealerEmployee;
+    }
+
+    public void setDealerEmployee(DealerEmployee dealerEmployee) {
+        this.dealerEmployee = dealerEmployee;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARTNER_OID")
+    public Partner getPartner() {
+        return this.partner;
+    }
+
+    public void setPartner(Partner partner) {
+        this.partner = partner;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARTNER_EMPLOYEE_OID")
+    public PartnerEmployee getPartnerEmployee() {
+        return this.partnerEmployee;
+    }
+
+    public void setPartnerEmployee(PartnerEmployee partnerEmployee) {
+        this.partnerEmployee = partnerEmployee;
     }
 
     @Column(name = "creator", nullable = false, length = 32)
@@ -366,12 +430,12 @@ public class SysUser implements Serializable {
         if (dataPermisionType != null) {
             if (dataPermisionType == DataPermisionType.none.getValue()) {
                 builder.append("无");
-            } else if (dataPermisionType == DataPermisionType.country.getValue()) {
-                builder.append("全国");
-            } else if (dataPermisionType == DataPermisionType.province.getValue()) {
-                builder.append("省市");
-            } else if (dataPermisionType == DataPermisionType.city.getValue()) {
-                builder.append("地市");
+            } else if (dataPermisionType == DataPermisionType.partner1.getValue()) {
+                builder.append("1级服务商");
+            } else if (dataPermisionType == DataPermisionType.partner2.getValue()) {
+                builder.append("2级服务商");
+            } else if (dataPermisionType == DataPermisionType.partner3.getValue()) {
+                builder.append("3级服务商");
             }
         }
         

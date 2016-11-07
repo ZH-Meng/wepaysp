@@ -81,7 +81,6 @@
 									<th>性别</th>
  									<th>年龄</th>
 									<th>角色</th>
-									<th>组织机构</th>
  									<th>部门</th>
 									<th>职务</th>
  									<th>联系电话</th>
@@ -126,20 +125,6 @@
 											</s:iterator>
 											<td title="<s:property value="#roleNameStr" />"><s:property value="#roleNameStr" escape="false"/></td>
 											
-											<s:set var="dataPermision" value=""/>
-											<s:if test="#sysUserVO.dataPermisionType ==0 ">
-												<s:set var="dataPermision">无</s:set>
-											</s:if>
-											<s:elseif test="#sysUserVO.dataPermisionType ==1 ">
-												<s:set var="dataPermision">全国</s:set>
-											</s:elseif>
-											<s:elseif test="#sysUserVO.dataPermisionType ==2 ">
-												<s:set var="dataPermision"><s:property value="#sysUserVO.dataPermisionProvince.provinceName" /></s:set>
-											</s:elseif>
-											<s:elseif test="#sysUserVO.dataPermisionType ==3 ">
-												<s:set var="dataPermision"><s:property value="#sysUserVO.dataPermisionProvince.provinceName" /> <s:property value="#sysUserVO.dataPermisionCity.cityName" /></s:set>
-											</s:elseif>
-											<td title="<s:property value="#dataPermision" />"><s:property value="#dataPermision" /></td>
 											<td title="<s:property value="#sysUserVO.department" />"><s:property value="#sysUserVO.department" /></td>
 											<td title="<s:property value="#sysUserVO.position" />"><s:property value="#sysUserVO.position" /></td>
 											<td title="<s:property value="#sysUserVO.lineTel" />"><s:property value="#sysUserVO.lineTel" /></td>
@@ -171,7 +156,7 @@
 								</s:if>
 								<s:if test="sysUserVOList!=null && sysUserVOList.size()==0">
 									<tr>
-										<td colspan="16">无符合条件的查询结果！</td>
+										<td colspan="15">无符合条件的查询结果！</td>
 									</tr>
 								</s:if>
 							</tbody>

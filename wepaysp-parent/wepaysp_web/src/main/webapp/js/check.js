@@ -20,6 +20,8 @@ var idCardNoPattern = /^\d{17}(\d|x|X)$/; //身份证号码为15位或者18位�
 var digital10Pattern = /^[0-9]{10}$/;//10位数字或-
 var digital8Pattern = /^[0-9]{8}$/;//8位数字或-
 var macPattern = /[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}/; 
+var qqPattern = /^[1-9][0-9]{4,9}$/;
+var digital6Pattern = /^\d{6}$/;//6位数字
 
 var piRegExp = new RegExp(positiveIntegerPattern);
 var piRegExp1 = new RegExp(positiveIntegerPattern1);
@@ -36,6 +38,8 @@ var idCardNoExp = new RegExp(idCardNoPattern);
 var digital10Exp = new RegExp(digital10Pattern);
 var digital8Exp = new RegExp(digital8Pattern);
 var macExp = new RegExp(macPattern);
+var qqExp = new RegExp(qqPattern);
+var digital6Exp = new RegExp(digital6Pattern);
 
 //MAC地址校验
 function isMac(str){
@@ -172,6 +176,22 @@ function islineTel5_18(str){
 	
 	return false;
 }
+
+function isQQ(str) {  
+    if(qqExp.test(str)){
+		return true;
+	}
+   return false;  
+}  
+
+//6位数字
+function isDigital6Exp(str){
+	if(digital6Exp.test(str)){
+		return true;
+	}
+	return false;
+}
+
 
 var saveListBackgroundColor = null;
 

@@ -25,7 +25,35 @@
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	<bean id="sysLogService" class="com.zbsp.wepaysp.service.manage.impl.SysLogServiceImpl" parent="baseService" />
-
-	<bean id="zoneService" class="com.zbsp.wepaysp.service.dic.impl.ZoneServiceImpl" parent="baseService" />
+	
+	<bean id="partnerService" class="com.zbsp.wepaysp.service.partner.impl.PartnerServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="dealerService" class="com.zbsp.wepaysp.service.partner.impl.DealerServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="storeService" class="com.zbsp.wepaysp.service.partner.impl.StoreServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="partnerEmployeeService" class="com.zbsp.wepaysp.service.partner.impl.PartnerEmployeeServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="dealerEmployeeService" class="com.zbsp.wepaysp.service.partner.impl.DealerEmployeeServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
     
+	<bean id="weixinRefundDetailsService" class="com.zbsp.wepaysp.service.pay.impl.WeixinRefundDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="rptDealerStatService" class="com.zbsp.wepaysp.service.report.impl.RptDealerStatServiceImpl" parent="baseService" >
+	</bean>
 </beans>

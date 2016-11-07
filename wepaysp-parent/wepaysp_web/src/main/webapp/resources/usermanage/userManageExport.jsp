@@ -66,7 +66,6 @@
                             <td nowrap="nowrap">性别</td>
                             <td nowrap="nowrap">年龄</td>
                             <td nowrap="nowrap">角色</td>
-                            <td nowrap="nowrap">组织机构</td>
                             <td nowrap="nowrap">部门</td>
                             <td nowrap="nowrap">职务</td>
                             <td nowrap="nowrap">联系电话</td>
@@ -93,12 +92,6 @@
 					  					<s:if test="userRoleList.size() != (roleRow.index+1)">，</s:if>
 					  				</s:iterator>
 								</td>
-								<td style="mso-number-format: '\@';">
-									<s:if test="#sysUserVO.dataPermisionType ==0 ">无</s:if>
-									<s:if test="#sysUserVO.dataPermisionType ==1 ">全国</s:if>
-									<s:if test="#sysUserVO.dataPermisionType ==2 "><s:property value="#sysUserVO.dataPermisionProvince.provinceName" /></s:if>
-									<s:if test="#sysUserVO.dataPermisionType ==3 "><s:property value="#sysUserVO.dataPermisionProvince.provinceName" /> <s:property value="#sysUserVO.dataPermisionCity.cityName" /></s:if>
-								</td>
 					  			<td style="mso-number-format: '\@';"><s:property value="#sysUserVO.department" /></td>
 					  			<td style="mso-number-format: '\@';"><s:property value="#sysUserVO.position" /></td>
 					  			<td style="mso-number-format: '\@';"><s:property value="#sysUserVO.lineTel" /></td>
@@ -115,7 +108,7 @@
 					  		</s:iterator>
 		  				</s:if>
 				  		<s:else>
-				  			<tr><td colspan="14">没有查询到数据</td></tr>
+				  			<tr><td colspan="13">没有查询到数据</td></tr>
 				  		</s:else>
 					</table>
 				</td>

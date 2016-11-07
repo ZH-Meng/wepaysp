@@ -15,7 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.manage.web.util.DateUtil;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.manage.web.util.ExcelUtil;
 import com.zbsp.wepaysp.manage.web.vo.TreeNode;
 import com.zbsp.wepaysp.po.manage.SysFunction;
@@ -111,16 +111,6 @@ public class UserSearchAction
                     } else if (1 == sysUser.getGender()) {
                         sysUser.setGenderName("女");
                     }
-                }
-
-                if (sysUser.getDataPermisionType() == 0) {
-                    sysUser.setDataPermisionTypeName("无");
-                } else if (sysUser.getDataPermisionType() == 1) {
-                    sysUser.setDataPermisionTypeName("全国");
-                } else if (sysUser.getDataPermisionType() == 2) {
-                    sysUser.setDataPermisionTypeName(sysUser.getDataPermisionProvince().getProvinceName());
-                } else if (sysUser.getDataPermisionType() == 3) {
-                    sysUser.setDataPermisionTypeName(sysUser.getDataPermisionProvince().getProvinceName());
                 }
 
                 if (sysUser.getState() == 0) {

@@ -8,6 +8,7 @@
  */
 package com.zbsp.wepaysp.common.util;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.joda.time.DateTime;
@@ -89,4 +90,288 @@ public final class TimeUtil {
     public static Date plusSeconds(int seconds) {
         return DateTime.now().plusSeconds(seconds).toDate();
     }
+    
+    /**
+     * 
+     * @param date
+     * @param timeUnit
+     * @return
+     */
+    public static Date getLastTimeUnit(Date date, int timeUnit) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        /* 取得上一个时间单位,即中间表中的前一小时，或前一天，前一月 */
+        if (timeUnit == Calendar.HOUR_OF_DAY) {
+            calendar.add(timeUnit, -1);
+        } else if (timeUnit == Calendar.DAY_OF_MONTH) {
+            calendar.add(timeUnit, -1);
+        } else if (timeUnit == Calendar.MONTH) {
+            calendar.add(timeUnit, -1);
+        }
+        return calendar.getTime();
+    }
+    
+
+    public static final Date getDayBeforeMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 将当前时间向历史方向，移动N天
+     * 
+     * @param date
+     * @param n
+     *            正减，负加
+     * @return
+     */
+    public static final Date moveHistoryNDays(Date date, int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_YEAR, -n);
+        return calendar.getTime();
+    }
+
+    /**
+     * 将当前时间向历史方向，移动N秒
+     * 
+     * @param date
+     * @param n
+     *            正减，负加
+     * @return
+     */
+    public static final Date moveHistoryNSeconds(Date date, int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.SECOND, -n);
+        return calendar.getTime();
+    }
+
+    /**
+     * 将当前时间向历史方向，移动N毫秒
+     * 
+     * @param date
+     * @param n
+     *            正减，负加
+     * @return
+     */
+    public static final Date moveHistoryNMilliseconds(Date date, int n) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MILLISECOND, -n);
+        return calendar.getTime();
+    }
+    
+    /**
+     * 是否是本月的最后一天
+     * 
+     * @param date
+     * @return
+     */
+    public static boolean isMonthEnd(Date date) {
+        
+        Date date1 = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date1);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        
+        return day == 1;
+         
+    }
+
+    /**
+     * 是否是本月的第一天
+     * 
+     * @param date
+     * @return
+     */
+    public static boolean isFirstDayOfMonth(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.DAY_OF_MONTH) == 1;
+    }
+
+    /**
+     * 得到day的起始时间点。
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getDayStart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到day的终止时间点.
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getDayEnd(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.MILLISECOND, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到month的起始时间点
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getMonthStart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到month的终止时间点.
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getMonthEnd(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.MILLISECOND, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到hour的起始时间点
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getHourStart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到hour的终止时间点.
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getHourEnd(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        calendar.add(Calendar.MILLISECOND, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到前一个hour的起始时间点
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getLastHourStart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.HOUR_OF_DAY, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到前一个day的起始时间点
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getLastDayStart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        return calendar.getTime();
+    }
+
+    /**
+     * 得到前一个month的起始时间点
+     * 
+     * @param date
+     * @return
+     */
+    public static Date getLastMonthStart(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.add(Calendar.MONTH, -1);
+        return calendar.getTime();
+    }
+    
+    /**
+     * 获取前一天的开始时间
+     * @return
+     */
+    public static Date getBeforeDayStart() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    /**
+     * 获取前一天的结束时间
+     * @return
+     */
+    public static Date getBeforeDayEnd() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, -1);
+        return calendar.getTime();
+    }
+    
 }

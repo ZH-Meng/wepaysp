@@ -86,36 +86,6 @@
 									</td>
 								</tr>
 								<tr>
-									<th>组织机构</th>
-									<td>
-										<select name="sysUserVo.dataPermisionProvince.iwoid" title="选择省份" id="provinceTag">
-											<option value="">请选择</option>
-											<option value="AllCountry">全国</option>
-											<c:forEach var="bean" items="${sysProvinceList}" varStatus="status">
-												<option value="${bean.iwoid }">${bean.provinceName }</option>
-											</c:forEach>
-										</select><span class="tj_bt">*</span>
-										&nbsp;&nbsp;&nbsp;
-										<s:if test="sysCityList.size > 0">
-										<select name="sysUserVo.dataPermisionCity.iwoid" title="选择城市" id="cityTag" class="slcone">
-										    <option value="">请选择</option>
-										    <c:forEach var="bean" items="${sysCityList}" varStatus="status">
-												<option value="${bean.iwoid }">${bean.cityName }</option>
-											</c:forEach>
-										</select>
-										</s:if>
-										<s:else>
-											<select name="sysUserVo.dataPermisionCity.iwoid" title="选择城市" id="cityTag" class="slcone" style="display:none;">
-										    <option value="">请选择</option>
-										    <c:forEach var="bean" items="${sysCityList}" varStatus="status">
-												<option value="${bean.iwoid }">${bean.cityName }</option>
-											</c:forEach>
-										</select>
-										</s:else>
-									</td>
-									<th></th><td></td>
-								</tr>
-								<tr>
 									<th>备注</th>
 									<td><s:textarea cols="50" rows="4" name="sysUserVo.remark" /></td>
 									<th></th>
@@ -216,11 +186,6 @@
 				$("textarea[name='sysUserVo.remark']").focus();
 				return false;
 			}
-			//组织机构必填
-			if($("#provinceTag").val()==null || $("#provinceTag").val()==""){
-				alert("请选组织机构！");
-				return false;
-			}
 			return true;
 		}
 		$(function(){
@@ -244,61 +209,6 @@
 			formObj.action = prefix + "!goCurrent.action";
 			formObj.submit();
 		}
-		function init(){
-			
-			var type="${sysUserVo.dataPermisionType}";
-			if(type=="0"){
-				$("#provinceTag :first-child").attr("selected",true);
-			}else if(type=="1"){
-				$("#provinceTag :nth-child(2)").attr("selected",true);
-			}
-			else if(type=="2"){
-				var str="${sysUserVo.dataPermisionProvince.iwoid}";
-				$("#provinceTag").children("[value='${sysUserVo.dataPermisionProvince.iwoid}']").attr("selected",true);
-			}
-			else if(type=="3"){
-				var str="${sysUserVo.dataPermisionCity.sysProvince.iwoid}";
-				var str2="${sysUserVo.dataPermisionCity.iwoid}";
-				$("#provinceTag").children("[value='${sysUserVo.dataPermisionProvince.iwoid}']").attr("selected",true);
-				$("#cityTag").children("[value='${sysUserVo.dataPermisionCity.iwoid}']").attr("selected",true);
-			}
-			
-			
-			
-			$("#provinceTag").change(function(){
-// 				alert($(this).children('option:selected').val());
-				if($(this).children('option:selected').val()=="AllCountry"){//全国分支
-					$("#cityTag :first-child").siblings().remove();
-					$("#cityTag").hide();
-				}else if($(this).children('option:selected').val()==""){//请选择分支
-					$("#cityTag :first-child").siblings().remove();
-					$("#cityTag").hide();
-				}else{
-					//选择具体的一个省份的情况
-					$.ajax({     
-			            //方法所在页面和方法名
-                		async : false,
-			            url: "<%=request.getContextPath()%>/resources/usermanage/usermanage!getSysCityListByAjax.action?provinceIwoid="
-			            		+$(this).children('option:selected').val(),     
-			            contentType: "application/json; charset=utf-8",     
-			            dataType: "json",     
-			            success: function(data) {     
-			                //返回的数据用data.d获取内容 
-			                $("#cityTag :first-child").siblings().remove();
-			                $.each(data, function(i, json){
-								$("#cityTag").append("<option value='"+json.iwoid+"'>"+json.cityName+"</option>");
-			                });
-			            },
-			            error: function(err) {     
-			                alert(err);     
-			            }     
-			        });//ajax
-					$("#cityTag").show();
-				}
-				
-
-			});//change
-		}//init
 	</script>
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 </body>
