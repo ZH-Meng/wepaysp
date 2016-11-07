@@ -78,7 +78,8 @@
 	                                <th>登录名</th>
 	                                <th>联系人</th>
 	                                <th>公司名称</th>
-	                                <th>所属代理商</th>	                                
+	                                <th>所属代理商</th>
+	                                <th>关联业务员</th>
 	                                <th>固定电话</th>
 	                                <th>手机</th>
 	                                <th>状态</th>
@@ -108,6 +109,9 @@
 						  			</td>
 						  			<td title="<s:property value="#dealerVo.partnerCompany" />">
 						  				<s:property value="#dealerVo.partnerCompany" />
+						  			</td>
+						  			<td title="<s:property value="#dealerVo.partnerEmployeeName" />">
+						  				<s:property value="#dealerVo.partnerEmployeeName" />
 						  			</td>
 						  			<td title="<s:property value="#dealerVo.telephone" />">
 						  				<s:property value="#dealerVo.telephone" />
@@ -146,7 +150,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="12">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="13">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>

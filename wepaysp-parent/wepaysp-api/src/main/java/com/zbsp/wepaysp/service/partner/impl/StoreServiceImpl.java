@@ -17,7 +17,6 @@ import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
-import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.service.BaseService;
@@ -135,17 +134,14 @@ public class StoreServiceImpl
         Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(storeVO.getStoreName()), "门店名称不能为空");
         // Validator.checkArgument(StringUtils.isBlank(storeVO.getStoreTel()), "门店联系电话不能为空");
-
+        Validator.checkArgument(StringUtils.isBlank(storeVO.getDealerOid()), "商户Oid不能为空");
+        
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
-        SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
         // 查找所属商户
-        Dealer dealer = null;
-        if (user != null) {
-            dealer = user.getDealer();
-        }
-        if (dealer == null || user.getUserLevel() == null || user.getUserLevel().intValue() != SysUser.UserLevel.dealer.getValue()) {
-            throw new IllegalAccessException("非法操作：非商户用户不能添加门店");
+        Dealer dealer = commonDAO.findObject(Dealer.class, storeVO.getDealerOid());
+        if (dealer == null) {
+            throw new NotExistsException("未找到商户信息！");
         }
 
         // 创建门店

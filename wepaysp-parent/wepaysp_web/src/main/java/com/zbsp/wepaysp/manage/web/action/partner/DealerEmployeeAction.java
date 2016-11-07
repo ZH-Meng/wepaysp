@@ -101,6 +101,7 @@ public class DealerEmployeeAction
                 setAlertMessage("添加商户员工失败！");
             }
 
+            dealerEmployeeVO.setDealerOid(manageUser.getDataDealer().getIwoid());
             dealerEmployeeService.doTransAddDealerEmployee(dealerEmployeeVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             logger.info("商户员工" + dealerEmployeeVO.getEmployeeName() + "添加成功");
             setAlertMessage("商户员工" + dealerEmployeeVO.getEmployeeName() + "添加成功");
@@ -277,40 +278,25 @@ public class DealerEmployeeAction
     	
     	if ("add".equals(operCode) || "update".equals(operCode) || "reset".equals(operCode)) {
     		if (!isDealer(manageUser)) {
-                logger.warn("角色分配不当：非商户用户不能" + operDesc);
-                setAlertMessage("角色分配不当：非商户用户不能" + operDesc);
+                logger.warn("非商户用户不能" + operDesc);
+                setAlertMessage("非商户用户不能" + operDesc);
                 return false;
     		}
     	} else if("query".equals(operCode)) {
     		if (!isDealer(manageUser) && !isDealerEmployee(manageUser)) {
-                logger.warn("角色分配不当：非商户或商户员工用户不能" + operDesc);
-                setAlertMessage("角色分配不当：非商户或商户员工用户不能" + operDesc);
+                logger.warn("非商户或商户员工用户不能" + operDesc);
+                setAlertMessage("非商户或商户员工用户不能" + operDesc);
                 return false;
     		}
     	} else if("modifyRefundPwd".equals(operCode)) {
     		if (!isDealerEmployee(manageUser)) {
-                logger.warn("角色分配不当：非商户员工用户不能" + operDesc);
-                setAlertMessage("角色分配不当：非商户员工用户不能" + operDesc);
+                logger.warn("非商户员工用户不能" + operDesc);
+                setAlertMessage("非商户员工用户不能" + operDesc);
                 return false;
     		}
     	} else {
     		return false;
     	}
-    	
-    	if("modifyRefundPwd".equals(operCode)) {
-    		if (manageUser.getDataDealerEmployee() == null) {
-    			logger.warn(operDesc + "失败：当前用户没有关联商户员工信息");
-    			setAlertMessage(operDesc + "失败：当前用户没有关联商户员工信息");
-    			return false;
-    		}
-    	} else {
-    		if (manageUser.getDataDealer() == null) {
-    			logger.warn(operDesc + "失败：当前用户没有关联商户信息");
-    			setAlertMessage(operDesc + "失败：当前用户没有关联商户信息");
-    			return false;
-    		}
-    	}
-    	
     	return true;
     }
 
@@ -325,7 +311,7 @@ public class DealerEmployeeAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.dealer.getValue()) {// 非商户
+            if (level != SysUser.UserLevel.dealer.getValue() || manageUser.getDataDealer() == null) {// 非商户
                 return false;
             }
         }
@@ -343,7 +329,7 @@ public class DealerEmployeeAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.cashier.getValue()) {
+            if (level != SysUser.UserLevel.cashier.getValue() || manageUser.getDataDealerEmployee() == null) {
                 return false;
             }
         }

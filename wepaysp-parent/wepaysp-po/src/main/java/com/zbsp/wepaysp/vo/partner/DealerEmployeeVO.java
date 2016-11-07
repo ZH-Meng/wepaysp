@@ -27,6 +27,7 @@ public class DealerEmployeeVO
     private String loginPwd;
     private String storeOid;
     private String oldRefundPassword;
+    private String dealerOid;
     
     public String getIwoid() {
         return iwoid;
@@ -131,5 +132,13 @@ public class DealerEmployeeVO
 	public void setOldRefundPassword(String oldRefundPassword) {
 		this.oldRefundPassword = oldRefundPassword;
 	}
+    
+    public String getDealerOid() {
+        return dealerOid;
+    }
+    
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
+    }
 	
 }

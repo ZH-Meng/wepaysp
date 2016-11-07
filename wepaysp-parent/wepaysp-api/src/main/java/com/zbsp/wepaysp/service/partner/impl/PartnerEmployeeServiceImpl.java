@@ -142,6 +142,7 @@ public class PartnerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getMoblieNumber()), "业务员手机号不能为空");
         Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getState()), "业务员状态不能为空");
         Validator.checkArgument(partnerEmployeeVO.getFeeRate() == null, "分润比率不能为空");
+        Validator.checkArgument(StringUtils.isBlank(partnerEmployeeVO.getPartnerOid()), "代理商Oid不能为空");
         
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
@@ -157,14 +158,11 @@ public class PartnerEmployeeServiceImpl
         // 创建代理商员工（业务员）
         PartnerEmployee partnerEmployee = new PartnerEmployee();
         partnerEmployee.setIwoid(Generator.generateIwoid());
-        // 查找所属代理商        
-        SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
-        Partner partner = null;
-        if (user != null) {
-            partner = user.getPartner();
-        }
-        if (partner == null || user.getUserLevel() == null || user.getUserLevel().intValue() != SysUser.UserLevel.partner.getValue()) {
-            throw new IllegalAccessException("非法操作：非代理商用户不能创建代理商员工");
+        
+        // 查找所属代理商
+        Partner partner = commonDAO.findObject(Partner.class, partnerEmployeeVO.getPartnerOid());
+        if (partner == null) {
+            throw new NotExistsException("未找到代理商！");
         }
         partnerEmployee.setPartner(partner);
         
@@ -234,6 +232,8 @@ public class PartnerEmployeeServiceImpl
 
         // 增加业务员日志
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建业务员[业务员ID=" + partnerEmployee.getPartnerEmployeeId() + ", 业务员姓名=" + partnerEmployee.getEmployeeName() + "，业务员手机号：" + partnerEmployee.getMoblieNumber() + ", 代理商=" + partnerEmployee.getPartner().getCompany() + "]", processTime, processTime, null, partnerEmployee.toString(), SysLog.State.success.getValue(), partnerEmployee.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        // 添加用户日志logFunctionOid 存 业务员添加按钮oid
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime, null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
 
         return partnerEmployeeVO;
     }

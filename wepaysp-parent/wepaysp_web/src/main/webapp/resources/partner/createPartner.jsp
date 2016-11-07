@@ -33,7 +33,7 @@
 	                            </tr>
 	                            <tr>
 	                                <th>分润比率</th>
-	                                <td><s:textfield id="feeRate" maxlength="20" name="partnerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数，例如：千分之三点八填38  千分之四填40！</span></td>
+	                                <td><s:textfield id="feeRate" maxlength="4" name="partnerVO.feeRate" /><span class="tj_bt">*</span><span>分润费率只能填正整数，例如：千分之三点八填38  千分之四填40！</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>余额</th>
@@ -72,19 +72,19 @@
 	                            </tr>	
 	                            <tr>
 	                            	<th>公司名称</th>
-	                                <td><s:textfield id="company" maxlength="32" name="partnerVO.company" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="company" maxlength="50" name="partnerVO.company" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>地址</th>
-	                                <td><s:textfield id="address" maxlength="32" name="partnerVO.address" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="address" maxlength="256" name="partnerVO.address" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>版权</th>
-	                                <td><s:textfield id="copyright" maxlength="32" name="partnerVO.copyright" /><span>例如: © 2013-2020 ******有限公司</span></td>
+	                                <td><s:textfield id="copyright" maxlength="256" name="partnerVO.copyright" /><span>例如: © 2013-2020 ******有限公司</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>版权URL</th>
-	                                <td><s:textfield id="copyrightUrl" maxlength="32" name="partnerVO.copyrightUrl" /><span>例如: http://www.****.com</span></td>
+	                                <td><s:textfield id="copyrightUrl" maxlength="256" name="partnerVO.copyrightUrl" /><span>例如: http://www.****.com</span></td>
 	                            </tr>
 	                            <tr>
 	                                <th>备注</th>
@@ -148,7 +148,7 @@
 				alert("分润费率不能为空！");
 				$("#feeRate").focus();
 				return false;
-			} else if (!isPositiveInteger1(feeRate) || feeRate >= 1000) {
+			} else if (!isPositiveInteger1(feeRate) || feeRate >= 10000) {
 				alert("分润费率只能填小于1000的正整数！");
 				$("#feeRate").focus();
 				return false;

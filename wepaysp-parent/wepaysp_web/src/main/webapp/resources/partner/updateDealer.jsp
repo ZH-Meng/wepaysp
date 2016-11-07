@@ -53,7 +53,7 @@
 	                            </tr>
 	                            <tr>
 	                            	<th>公司名称(商户名称)</th>
-	                                <td><s:textfield id="company" maxlength="32" name="dealerVO.company" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="company" maxlength="50" name="dealerVO.company" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>手机</th>
@@ -69,7 +69,7 @@
 	                            </tr>
 	                           	<tr>
 	                            	<th>邮箱</th>
-	                                <td><s:textfield id="email" maxlength="16" name="dealerVO.email" /></td>
+	                                <td><s:textfield id="email" maxlength="100" name="dealerVO.email" /></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>状态</th>
@@ -80,7 +80,7 @@
 	                            </tr>
 	                             <tr>
 	                            	<th>地址</th>
-	                                <td><s:textfield id="address" maxlength="32" name="dealerVO.address" /></td>
+	                                <td><s:textfield id="address" maxlength="256" name="dealerVO.address" /></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>技术联系人</th>

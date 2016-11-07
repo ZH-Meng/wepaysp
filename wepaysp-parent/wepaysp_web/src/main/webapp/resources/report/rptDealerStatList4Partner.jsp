@@ -34,7 +34,9 @@
 											<s:set name="resetFlag" value="true"/>
 											<tr>
 												<th>代理商ID</th>
-												<td><s:textfield name="rptDealerStatVO.partnerId" id="partnerId" maxlength="20"/></td>
+												<td><s:textfield name="rptDealerStatVO.partnerId" id="partnerId" maxlength="8"/>
+													<span>输入代理商ID精确搜索</span>
+												</td>
 											</tr>
 		                                </s:if>
 		                                <s:elseif test="listType == 'partnerEmployee'">
@@ -42,7 +44,9 @@
 			                                <tr>
 			                                	<s:set name="queryCols"  value="3"/>
 												<th>业务员ID</th>
-												<td><s:textfield name="rptDealerStatVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="20"/></td>
+												<td><s:textfield name="rptDealerStatVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
+												<span>输入业务员ID精确搜索</span>
+												</td>
 											</tr>
 		                                </s:elseif>
 								</s:if>
@@ -126,9 +130,9 @@
 						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>">
 						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalBonus/100}" pattern="###,###,###,###.0000"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/1000}" pattern="0.000"/>】">
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalBonus/100}" pattern="###,###,###,###.0000"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/1000}" pattern="0.0000"/>】">
 						  				<fmt:formatNumber value="${rptDealerStatVo.totalBonus/100}" pattern="###,###,###,###.0000"/>
-						  				【<fmt:formatNumber value="${rptDealerStatVo.feeRate/1000}" pattern="0.000"/>】
+						  				【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10000}" pattern="0.0000"/>】
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

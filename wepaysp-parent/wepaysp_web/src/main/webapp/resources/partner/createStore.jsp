@@ -23,7 +23,7 @@
 	                    	<tbody>
 	                        	<tr>
 	                            	<th>门店名称</th>
-	                                <td><s:textfield id="storeName" maxlength="32" name="storeVO.storeName" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="storeName" maxlength="50" name="storeVO.storeName" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                            <tr>
 	                            	<th>联系电话</th>
@@ -31,7 +31,7 @@
 	                            </tr>
 	                            <tr>
 	                            	<th>地址</th>
-	                                <td><s:textfield id="storeAddress" maxlength="32" name="storeVO.storeAddress" /></td>
+	                                <td><s:textfield id="storeAddress" maxlength="256" name="storeVO.storeAddress" /></td>
 	                            </tr>
 	                            <tr>
 	                                <th>备注</th>

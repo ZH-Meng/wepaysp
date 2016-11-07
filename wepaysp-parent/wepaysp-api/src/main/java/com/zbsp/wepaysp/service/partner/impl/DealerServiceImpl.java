@@ -55,9 +55,9 @@ public class DealerServiceImpl
                 // partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
             }
             // dealerVO.setPartnerCompany(dealer.getPartner().getCompany());
-            dealerVO.setPartnerOid(dealer.getPartner().getIwoid());
-            dealerVO.setPartnerEmployeeOid(dealer.getPartnerEmployee().getIwoid());
-            dealerVO.setPartnerEmployeeName(dealer.getPartnerEmployee().getEmployeeName());
+            dealerVO.setPartnerOid(dealer.getPartner() != null ? dealer.getPartner().getIwoid() : null);
+            dealerVO.setPartnerEmployeeOid(dealer.getPartnerEmployee() !=null ? dealer.getPartnerEmployee().getIwoid() : null);
+            dealerVO.setPartnerEmployeeName(dealer.getPartnerEmployee() !=null ? dealer.getPartnerEmployee().getEmployeeName() : null);
         }
         return dealerVO;
     }
@@ -128,7 +128,9 @@ public class DealerServiceImpl
                     vo.setLoginId(userList.get(0).getUserId());// 商户登陆名
                 }
                 // 所属代理商
-                vo.setPartnerCompany(dealer.getPartner().getCompany());
+                vo.setPartnerCompany(dealer.getPartner() != null ? dealer.getPartner().getCompany() : null);
+                // 关联业务员
+                vo.setPartnerEmployeeName(dealer.getPartnerEmployee() != null ? dealer.getPartnerEmployee().getEmployeeName() : null);
                 resultList.add(vo);
                 if (!"on".equals(coreDataFlag)) {// 屏蔽掉公众号ID、微信支付商户号
                     vo.setSubAppid(null);
@@ -241,13 +243,13 @@ public class DealerServiceImpl
         PartnerEmployee partnerEmployee = commonDAO.findObject(PartnerEmployee.class, dealerVO.getPartnerEmployeeOid());
         // 查找所属业务员
         if (partnerEmployee == null) {
-            throw new NotExistsException("业务员不存在！");
+            throw new NotExistsException("未找到业务员！");
         }  else {
             dealer.setPartnerEmployee(partnerEmployee);
             partner = partnerEmployee.getPartner();
         }
         if (partner == null) {
-            throw new NotExistsException("服务商不存在");
+            throw new NotExistsException("未找到服务商！");
         }
         dealer.setPartner(partner);// 所属服务商
         try {

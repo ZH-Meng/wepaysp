@@ -23,6 +23,7 @@ public class PartnerEmployeeVO
     private String loginId;
     private String loginPwd;
     private Integer feeRate;
+    private String partnerOid;
     
     public String getIwoid() {
         return iwoid;
@@ -95,5 +96,13 @@ public class PartnerEmployeeVO
     public void setFeeRate(Integer feeRate) {
         this.feeRate = feeRate;
     }
-	
+
+    public String getPartnerOid() {
+        return partnerOid;
+    }
+    
+    public void setPartnerOid(String partnerOid) {
+        this.partnerOid = partnerOid;
+    }
+    
 }

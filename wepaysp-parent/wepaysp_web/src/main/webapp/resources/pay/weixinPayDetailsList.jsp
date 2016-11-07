@@ -63,11 +63,11 @@
 												<s:set name="queryCols"  value="7"/>
 											</s:else>
 											<th>业务员ID</th>
-											<td><s:textfield name="weixinPayDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="20"/></td>
+											<td><s:textfield name="weixinPayDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/></td>
 										</s:if>
 										<s:if test="userLevel  == 1 || userLevel  == 2">	
 											<th>商家ID</th>
-											<td><s:textfield name="weixinPayDetailsVO.dealerId" id="dealerId" maxlength="20"/></td>
+											<td><s:textfield name="weixinPayDetailsVO.dealerId" id="dealerId" maxlength="9"/></td>
 											<s:if test="#queryCols == null">
 												<s:set name="queryCols"  value="5"/>
 											</s:if>
@@ -76,9 +76,9 @@
 											<s:set name="queryCols"  value="3"/>
 										</s:if>
 										<th>门店ID</th>
-										<td><s:textfield name="weixinPayDetailsVO.storeId" id="storeId" maxlength="20"/></td>
+										<td><s:textfield name="weixinPayDetailsVO.storeId" id="storeId" maxlength="9"/></td>
 										<th>收银员ID</th>
-										<td><s:textfield name="weixinPayDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="20"/></td>
+										<td><s:textfield name="weixinPayDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/></td>
 									</s:if>
 									<s:if test="#queryCols == null">
 										<s:set name="queryCols"  value="1"/>

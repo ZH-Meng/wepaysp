@@ -40,7 +40,8 @@
 		                                <s:if test="listType == 'dealerEmployee'">
 		                                	<s:set name="queryCols"  value="3"/>
 											<th>收银员ID</th>
-											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="20"/></td>
+											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/></td>
+											<span>输入收银员ID精确搜索</span>
 		                                </s:if>
 									</tr>
 								</s:if>

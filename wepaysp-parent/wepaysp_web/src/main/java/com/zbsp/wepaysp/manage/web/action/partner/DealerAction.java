@@ -50,8 +50,8 @@ public class DealerAction
                 	 paramMap.put("coreDataFlag", dealerVO.getCoreDataFlag());
                 	 paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
                 } else {
-                	logger.warn("角色分配不当：非顶级服务商（代理商）不能管理商户交易核心数据");
-                	setAlertMessage("角色分配不当：非服务商（代理商）不能管理商户交易核心数据");
+                	logger.warn("非顶级服务商（代理商）不能管理商户交易核心数据");
+                	setAlertMessage("非服务商（代理商）不能管理商户交易核心数据");
                 	return "accessDenied";
                 }
             } else {
@@ -60,8 +60,8 @@ public class DealerAction
                 } else if (isPartner(manageUser)) {
                 	paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
                 } else {
-                	logger.warn("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
-                	setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能管理商户信息");
+                	logger.warn("非服务商（代理商）、业务员不能管理商户信息");
+                	setAlertMessage("非服务商（代理商）、业务员不能管理商户信息");
                 	return "accessDenied";
                 }
             }
@@ -118,8 +118,8 @@ public class DealerAction
                     setAlertMessage("请先添加代理商员工（业务员）");
                 }
             } else {
-                logger.warn("角色分配不当：非服务商（代理商）、业务员不能添加商户信息");
-                setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能添加商户信息");
+                logger.warn("非服务商（代理商）、业务员不能添加商户信息");
+                setAlertMessage("非服务商（代理商）、业务员不能添加商户信息");
                 return "accessDenied";
             }
             
@@ -176,16 +176,16 @@ public class DealerAction
                 	coreDataFlag = "on";
                     logger.info("跳转修改商户页面-含交易核心数据.");
                     if (!isTopPartner(manageUser)) {
-                        logger.warn("角色分配不当：非顶级服务商（代理商）不能修改商户交易核心数据");
-                        setAlertMessage("角色分配不当：非服务商（代理商）不能修改商户交易核心数据");
+                        logger.warn("非顶级服务商（代理商）不能修改商户交易核心数据");
+                        setAlertMessage("非服务商（代理商）不能修改商户交易核心数据");
                         return "accessDenied";
                     }
                 } else {
                     logger.info("跳转修改商户页面.");
                     
                     if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
-                        logger.warn("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
-                        setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
+                        logger.warn("非服务商（代理商）、业务员不能修改商户信息");
+                        setAlertMessage("非服务商（代理商）、业务员不能修改商户信息");
                         return "accessDenied";
                     }
                 }
@@ -258,8 +258,8 @@ public class DealerAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!isDealer(manageUser)) {
-                logger.warn("角色分配不当：非商户用户不能维护商户基本信息");
-                setAlertMessage("角色分配不当：非商户用户不能维护商户基本信息");
+                logger.warn("非商户用户不能维护商户基本信息");
+                setAlertMessage("非商户用户不能维护商户基本信息");
                 return "accessDenied";
             }
             dealerVO = dealerService.doJoinTransQueryDealerByOid(manageUser.getDataDealer().getIwoid());
@@ -285,8 +285,8 @@ public class DealerAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!isDealer(manageUser)) {
-                logger.warn("角色分配不当：非商户用户不能维护商户基本信息");
-                setAlertMessage("角色分配不当：非商户用户不能维护商户基本信息");
+                logger.warn("非商户用户不能维护商户基本信息");
+                setAlertMessage("非商户用户不能维护商户基本信息");
                 return "accessDenied";
             }
             if (dealerVO != null && StringUtils.isNotBlank(dealerVO.getIwoid())) {
@@ -317,14 +317,14 @@ public class DealerAction
             if (dealerVO != null && StringUtils.isNotBlank(dealerVO.getIwoid())) {
                 if ("on".equals(dealerVO.getCoreDataFlag())) {// 顶级服务商权限
                     if (!isTopPartner(manageUser)) {
-                        logger.warn("角色分配不当：非顶级服务商（代理商）不能修改商户交易核心数据");
-                        setAlertMessage("角色分配不当：非服务商（代理商）不能修改商户交易核心数据");
+                        logger.warn("非顶级服务商（代理商）不能修改商户交易核心数据");
+                        setAlertMessage("非服务商（代理商）不能修改商户交易核心数据");
                         return "accessDenied";
                     }
                 } else {
                     if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
-                        logger.warn("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
-                        setAlertMessage("角色分配不当：非服务商（代理商）、业务员不能修改商户信息");
+                        logger.warn("非服务商（代理商）、业务员不能修改商户信息");
+                        setAlertMessage("非服务商（代理商）、业务员不能修改商户信息");
                         return "accessDenied";
                     }
                     //TODO 校验商户当前用户的关系

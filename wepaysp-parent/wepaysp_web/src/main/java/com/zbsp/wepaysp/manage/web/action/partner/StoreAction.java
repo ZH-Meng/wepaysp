@@ -44,8 +44,8 @@ public class StoreAction
             // 所属商户
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (manageUser.getUserLevel() == null || manageUser.getUserLevel().intValue() > SysUser.UserLevel.dealer.getValue()) {// 系统用户或者商户级别以下的应用用户
-                logger.warn("角色分配不当：商户级别以下用户不能查看门店列表");
-                setAlertMessage("角色分配不当：商户级别以下用户不能查看门店列表");
+                logger.warn("商户级别以下用户不能查看门店列表");
+                setAlertMessage("商户级别以下用户不能查看门店列表");
                 return "accessDenied";
             }
             String dealerOid = storeVO.getDealerOid();
@@ -83,8 +83,8 @@ public class StoreAction
         logger.info("跳转创建门店页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!isDealer(manageUser)) {
-            logger.warn("角色分配不当：非商户用户不能创建门店");
-            setAlertMessage("角色分配不当：非商户用户不能创建门店");
+            logger.warn("非商户用户不能创建门店");
+            setAlertMessage("非商户用户不能创建门店");
             return "accessDenied";
         }
         storeVO = null;
@@ -96,8 +96,8 @@ public class StoreAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (!isDealer(manageUser)) {
-                logger.warn("角色分配不当：非商户用户不能创建门店");
-                setAlertMessage("角色分配不当：非商户用户不能创建门店");
+                logger.warn("非商户用户不能创建门店");
+                setAlertMessage("非商户用户不能创建门店");
                 return "accessDenied";
             }
 
@@ -105,7 +105,7 @@ public class StoreAction
                 logger.warn("创建门店失败，参数" + storeVO + "为空！");
                 setAlertMessage("创建门店失败！");
             }
-
+            storeVO.setDealerOid(manageUser.getDataDealer().getIwoid());
             storeService.doTransAddStore(storeVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             logger.info("门店" + storeVO.getStoreName() + "添加成功");
             setAlertMessage("门店" + storeVO.getStoreName() + "添加成功");
@@ -126,8 +126,8 @@ public class StoreAction
         logger.info("跳转修改门店页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!isDealer(manageUser)) {
-            logger.warn("角色分配不当：非商户用户不能修改门店");
-            setAlertMessage("角色分配不当：非商户用户不能修改门店");
+            logger.warn("非商户用户不能修改门店");
+            setAlertMessage("非商户用户不能修改门店");
             return "accessDenied";
         }
         if (storeVO != null && StringUtils.isNotBlank(storeVO.getIwoid())) {
@@ -146,8 +146,8 @@ public class StoreAction
             if (storeVO != null && StringUtils.isNotBlank(storeVO.getIwoid())) {
                 ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 if (!isDealer(manageUser)) {
-                    logger.warn("角色分配不当：非商户用户不能修改门店");
-                    setAlertMessage("角色分配不当：非商户用户不能修改门店");
+                    logger.warn("非商户用户不能修改门店");
+                    setAlertMessage("非商户用户不能修改门店");
                     return "accessDenied";
                 }
 

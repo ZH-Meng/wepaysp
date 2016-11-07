@@ -9,7 +9,7 @@
 */
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -38,7 +38,7 @@
 	    	<p class="welimg"><img src="<%=request.getContextPath()%>/images/forbid.gif" class="img" /><span class="clock_txt">您无权访问此功能，请<a href="javascript:history.go(-1);">返回上一步</a></span></p>
 	    </div>
 	    <div class="welbottom">版权所有：深圳市有卡科技有限公司  Copyright &copy; 2016-2026,All Rights Reserved</div>
-	</div> 
-	<s:property value="#request.messageBean.alertMessage" escape="false" />
+	</div>
+	<c:out value="${requestScope.messageBean.alertMessage }"  escapeXml="false" />
 </body>
 </html>

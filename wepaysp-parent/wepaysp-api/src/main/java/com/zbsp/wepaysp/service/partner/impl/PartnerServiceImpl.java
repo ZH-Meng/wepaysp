@@ -72,7 +72,8 @@ public class PartnerServiceImpl
         String company = MapUtils.getString(paramMap, "company");
 
         String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
-        String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
+        //String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
+        Validator.checkArgument(StringUtils.isBlank(parentPartnerOid), "父级服务商Oid不能为空");
 
         StringBuffer sql = new StringBuffer("select distinct(p) from Partner p, SysUser u where u.partner=p");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
@@ -93,16 +94,8 @@ public class PartnerServiceImpl
             sql.append(" and p.company like :COMPANY");
             sqlMap.put("COMPANY", "%" + company + "%");
         }
-
+        
         sql.append(" and p.parentPartner.iwoid = :PARENTPARTNEROID");
-        // 如果没有限制父级服务商oid，需要将当前用户的服务商oid作为限制
-        if (StringUtils.isBlank(parentPartnerOid)) {
-            SysUser user = commonDAO.findObject(SysUser.class, currentUserOid);
-            // 查找父服务商
-            if (user != null && user.getPartner() != null) {
-                parentPartnerOid = user.getPartner().getIwoid();
-            }
-        }
         sqlMap.put("PARENTPARTNEROID", parentPartnerOid);
 
         sql.append(" order by p.createTime desc");
@@ -120,7 +113,7 @@ public class PartnerServiceImpl
                 if (userList != null && !userList.isEmpty()) {
                     vo.setLoginId(userList.get(0).getUserId());
                 }
-                vo.setParentCompany(partner.getParentPartner().getCompany());
+                vo.setParentCompany(partner.getParentPartner() != null ? partner.getParentPartner().getCompany() : null);
                 resultList.add(vo);
             }
         }
@@ -189,7 +182,7 @@ public class PartnerServiceImpl
         Validator.checkArgument(partnerVO.getBalance() == null, "余额不能为空");
         Validator.checkArgument(partnerVO.getContractBegin() == null, "期限开始日期不能为空");
         Validator.checkArgument(partnerVO.getContractEnd() == null, "期限截止日期不能为空");
-
+        
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -218,14 +211,9 @@ public class PartnerServiceImpl
         String partnerId = Generator.generateSequenceNum((Integer) seqObj, SysSequenceMultiple.PARTNER);
         partner.setPartnerId(partnerId);
         
-        // 查找父服务商
-        Partner parentPartner = null;
-        SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
-        if (user != null && user.getPartner() != null) {
-            // parentPartner = commonDAO.findObject(Partner.class, user.getPartner().getIwoid());
-            parentPartner = user.getPartner();
-        }
-        if (parentPartner != null) {
+        if (StringUtils.isNotBlank(partnerVO.getParentPartnerOid())) {
+            // 查找父服务商
+            Partner parentPartner = commonDAO.findObject(Partner.class, partnerVO.getParentPartnerOid());
             partner.setParentPartner(parentPartner);
             partner.setLevel(parentPartner.getLevel() + 1);
         } else {

@@ -146,6 +146,7 @@ public class DealerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getState()), "商户员工状态不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getStoreOid()), "门店Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getRefundPassword()), "退款权限密码不能为空");
+        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getDealerOid()), "商户Oid不能为空");
         
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
@@ -161,14 +162,11 @@ public class DealerEmployeeServiceImpl
         // 创建商户员工
         DealerEmployee dealerEmployee = new DealerEmployee();
         dealerEmployee.setIwoid(Generator.generateIwoid());
+        
         // 查找所属商户      
-        SysUser user = commonDAO.findObject(SysUser.class, operatorUserOid);
-        Dealer dealer = null;
-        if (user != null) {
-        	dealer = user.getDealer();
-        }
-        if (dealer == null || user.getUserLevel() == null || user.getUserLevel().intValue() != SysUser.UserLevel.dealer.getValue()) {
-            throw new IllegalAccessException("非法操作：非服务商用户不能创建服务商员工");
+        Dealer dealer = commonDAO.findObject(Dealer.class, dealerEmployeeVO.getDealerOid());
+        if (dealer == null) {
+            throw new NotExistsException("未找到商户信息！");
         }
         dealerEmployee.setDealer(dealer);
         
@@ -242,7 +240,8 @@ public class DealerEmployeeServiceImpl
 
         // 增加商户员工日志
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建商户员工[商户员工ID=" + dealerEmployee.getDealerEmployeeId() + ", 商户员工姓名=" + dealerEmployee.getEmployeeName() + "，商户员工手机号：" + dealerEmployee.getMoblieNumber() + ", 商户=" + dealerEmployee.getDealer().getCompany() + "]", processTime, processTime, null, dealerEmployee.toString(), SysLog.State.success.getValue(), dealerEmployee.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
-
+        // 添加用户日志logFunctionOid 存 商户员工添加按钮oid
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime, null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
         return dealerEmployeeVO;
     }
 

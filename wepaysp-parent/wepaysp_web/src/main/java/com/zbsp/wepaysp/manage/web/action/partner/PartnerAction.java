@@ -15,6 +15,7 @@ import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.common.util.DateUtil;
+import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
@@ -45,6 +46,12 @@ public class PartnerAction
         Map<String, Object> paramMap = new HashMap<String, Object>();
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!isPartner(manageUser)) {
+                logger.warn("非代理商用户不能查看代理商信息列表");
+                setAlertMessage("非代理商用户不能查看代理商信息列表");
+                return "accessDenied";
+            }
+           
             if (partnerVO == null) {
                 partnerVO = new PartnerVO();
             }
@@ -63,6 +70,7 @@ public class PartnerAction
             String parentPOid = MapUtils.getString(paramMap, "parentPartnerOid");
             if (StringUtils.isBlank(parentPOid)) {// 初始页面
                 isChildPage = "1";
+                paramMap.put("parentPartnerOid", manageUser.getDataPartner().getIwoid());
             } else {
                 PartnerVO parentPartner = partnerService.doJoinTransQueryPartnerByOid(parentPOid);
                 Partner userPartner = manageUser.getDataPartner();
@@ -94,8 +102,14 @@ public class PartnerAction
     }
 
     public String goToCreatePartner() {
-        logger.info("跳转创建代理商页面.");
+        logger.info("跳转添加代理商页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!isPartner(manageUser)) {
+            logger.warn("非代理商用户不能添加代理商信息");
+            setAlertMessage("非代理商用户不能添加代理商信息");
+            return "accessDenied";
+        }
+        
         if (partnerVO == null) {
             partnerVO = new PartnerVO();
         }
@@ -106,16 +120,23 @@ public class PartnerAction
     }
 
     public String createPartner() {
-        logger.info("开始创建代理商.");
+        logger.info("开始添加代理商.");
         try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (partnerVO == null) {
-                logger.warn("创建代理商失败，参数" + partnerVO + "为空！");
-                setAlertMessage("创建代理商失败！");
+                logger.warn("添加代理商失败，参数" + partnerVO + "为空！");
+                setAlertMessage("添加代理商失败！");
             }
             partnerVO.setContractBegin(convertS2D(contractBegin));
             partnerVO.setContractEnd(convertS2D(contractEnd));
+            if (isPartner(manageUser)) {// 添加子代理商
+                partnerVO.setParentPartnerOid(manageUser.getDataPartner().getIwoid());
+            } else {
+                logger.warn("非代理商用户不能添加代理商信息");
+                setAlertMessage("非代理商用户不能添加代理商信息");
+                return "accessDenied";
+            }
 
-            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             partnerService.doTransAddPartner(partnerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             logger.info("代理商" + partnerVO.getCompany() + "添加成功");
             setAlertMessage("代理商" + partnerVO.getCompany() + "添加成功");
@@ -134,6 +155,12 @@ public class PartnerAction
 
     public String goToUpdatePartner() {
         logger.info("跳转修改代理商页面.");
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!isPartner(manageUser)) {
+            logger.warn("非代理商用户不能修改代理商信息");
+            setAlertMessage("非代理商用户不能添加代理商信息");
+            return "accessDenied";
+        }
         if (partnerVO != null && StringUtils.isNotBlank(partnerVO.getIwoid())) {
             partnerVO = partnerService.doJoinTransQueryPartnerByOid(partnerVO.getIwoid());
             contractBegin = convertD2S(partnerVO.getContractBegin());
@@ -149,11 +176,16 @@ public class PartnerAction
     public String updatePartner() {
         logger.info("开始修改代理商.");
         try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!isPartner(manageUser)) {
+                logger.warn("非代理商用户不能修改代理商信息");
+                setAlertMessage("非代理商用户不能添加代理商信息");
+                return "accessDenied";
+            }
             if (partnerVO != null && StringUtils.isNotBlank(partnerVO.getIwoid())) {
                 partnerVO.setContractBegin(convertS2D(contractBegin));
                 partnerVO.setContractEnd(convertS2D(contractEnd));
                 
-                ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 partnerService.doTransUpdatePartner(partnerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 logger.info("代理商" + partnerVO.getCompany() + "修改成功");
                 setAlertMessage("代理商" + partnerVO.getCompany() + "修改成功");
@@ -173,7 +205,25 @@ public class PartnerAction
         }
         return "updatePartner";
     }
-
+    
+    /**
+     * 是否是服务商
+     * 
+     * @return
+     */
+    private boolean isPartner(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private Date convertS2D(String dateStr) {
         return DateUtil.getDate(dateStr, "yyyy-MM-dd");
     }

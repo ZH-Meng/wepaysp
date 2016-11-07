@@ -90,7 +90,7 @@ public class PartnerEmployeeAction
                 logger.warn("添加代理商员工失败，参数" + partnerEmployeeVO + "为空！");
                 setAlertMessage("添加代理商员工失败！");
             }
-
+            partnerEmployeeVO.setPartnerOid(manageUser.getDataPartner().getIwoid());
             partnerEmployeeService.doTransAddPartnerEmployee(partnerEmployeeVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             logger.info("代理商员工" + partnerEmployeeVO.getEmployeeName() + "添加成功");
             setAlertMessage("代理商员工" + partnerEmployeeVO.getEmployeeName() + "添加成功");
@@ -165,25 +165,19 @@ public class PartnerEmployeeAction
     	
     	if ("add".equals(operCode) || "update".equals(operCode)) {
     		if (!isPartner(manageUser)) {
-                logger.warn("角色分配不当：非代理商用户不能" + operDesc);
-                setAlertMessage("角色分配不当：非代理商用户不能" + operDesc);
+                logger.warn("非代理商用户不能" + operDesc);
+                setAlertMessage("非代理商用户不能" + operDesc);
                 return false;
     		}     
     	} else if("query".equals(operCode)) {
     		if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
-                logger.warn("角色分配不当：非代理商或代理商员工用户不能" + operDesc);
-                setAlertMessage("角色分配不当：非代理商或代理商员工用户不能" + operDesc);
+                logger.warn("非代理商或代理商员工用户不能" + operDesc);
+                setAlertMessage("非代理商或代理商员工用户不能" + operDesc);
                 return false;
     		}
     	} else {
     		return false;
     	}
-    	
-        if (manageUser.getDataPartner() == null) {
-        	logger.warn(operDesc + "失败：当前用户没有关联代理商信息");
-            setAlertMessage(operDesc + "失败：当前用户没有关联代理商信息");
-            return false;
-        }
     	return true;
     }
 
@@ -198,7 +192,7 @@ public class PartnerEmployeeAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.partner.getValue()) {// 非代理商
+            if (level != SysUser.UserLevel.partner.getValue() || manageUser.getDataPartner() == null) {// 非代理商
                 return false;
             }
         }
@@ -216,7 +210,7 @@ public class PartnerEmployeeAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.salesman.getValue()) {
+            if (level != SysUser.UserLevel.salesman.getValue() || manageUser.getDataPartnerEmployee() == null) {
                 return false;
             }
         }

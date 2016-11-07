@@ -24,7 +24,7 @@
 	                    	<tbody>
 	                            <tr>
 	                            	<th>商户名称</th>
-	                                <td><s:textfield id="company" maxlength="32" name="dealerVO.company" readonly="true"/><span class="tj_bt">*</span>此项不可修改</td>
+	                                <td><s:textfield id="company" name="dealerVO.company" readonly="true"/><span class="tj_bt">*</span>此项不可修改</td>
 	                            </tr>
 	                            <tr>
 	                            	<th>手机号码</th>
@@ -36,7 +36,7 @@
 	                            </tr>
 	                           	<tr>
 	                            	<th>常用email</th>
-	                                <td><s:textfield id="email" maxlength="16" name="dealerVO.email" /><span class="tj_bt">*</span></td>
+	                                <td><s:textfield id="email" maxlength="100" name="dealerVO.email" /><span class="tj_bt">*</span></td>
 	                            </tr>
 	                        </tbody>
 	                    </table>
