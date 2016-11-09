@@ -104,7 +104,9 @@ public class DealerAction
         logger.info("跳转创建商户页面.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            dealerVO = new DealerVO();
+            if (dealerVO == null) {
+                dealerVO = new DealerVO();
+            }
             
             if (isPartnerEmployee(manageUser)) {
                 dealerVO.setPartnerEmployeeOid(manageUser.getDataPartnerEmployee().getIwoid());
@@ -153,11 +155,11 @@ public class DealerAction
         } catch (AlreadyExistsException e) {
             logger.error("商户添加失败：" + e.getMessage());
             setAlertMessage("商户添加失败：" + e.getMessage());
-            return "createDealer";
+            return "goToCreateDealer";
         } catch (Exception e) {
             logger.error("商户添加错误：" + e.getMessage());
             setAlertMessage("商户添加错误！");
-            return "createDealer";
+            return "goToCreateDealer";
         }
         return list();
     }

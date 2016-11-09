@@ -47,7 +47,11 @@ public class PartnerEmployeeAction
 				return "accessDenied";
             }
             
-            paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+            if (isPartner(manageUser)) {
+                paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+            } else if (isPartnerEmployee(manageUser)) {
+                paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
+            }
             
             //rowCount = partnerEmployeeService.doJoinTransQueryPartnerEmployeeCount(paramMap);
             partnerEmployeeVoList = partnerEmployeeService.doJoinTransQueryPartnerEmployeeList(paramMap, 0, -1);

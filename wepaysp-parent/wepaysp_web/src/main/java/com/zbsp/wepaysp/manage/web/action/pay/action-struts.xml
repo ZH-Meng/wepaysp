@@ -12,5 +12,10 @@
 		<action name="weixinrefunddetails" class="weixinRefundDetailsAction">
 			<result name="weixinRefundDetailsList">/resources/pay/weixinRefundDetailsList.jsp</result>
 		</action>
+		
+		<!-- 收款 -->
+		<action name="payment" class="paymentAction">
+			<result name="cashierDesk">/resources/pay/cashierDesk.jsp</result>
+		</action>
 	</package>
 </struts>

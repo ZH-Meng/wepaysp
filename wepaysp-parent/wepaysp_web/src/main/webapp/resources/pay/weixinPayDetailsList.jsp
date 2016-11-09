@@ -55,7 +55,6 @@
 												<th>服务商</th>
 				                                <td>
 				                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinPayDetailsVO.partner3Oid"  id="partner3Oid" headerKey="" headerValue="全部"/>
-				                                	<span class="tj_bt">*</span>
 				                                	<s:set name="queryCols"  value="9"/>
 				                                </td>
 											</s:elseif>

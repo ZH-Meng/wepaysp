@@ -24,6 +24,7 @@ public interface PartnerEmployeeService {
      * 查询参数Map中key的取值如下：
      * <pre>
      *		partnerOid:			 String类型，代理商Oid，根据此参数精确查询
+     *      partnerEmployeeOid String类型，代理商员工Oid，根据此参数精确查询，与partnerOid互斥
      *      employeeName:     String类型，代理商员工姓名，根据此参数模糊查询
      *      moblieNumber:         String类型，代理商员工手机号，根据此参数模糊查询
      * </pre>

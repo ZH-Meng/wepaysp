@@ -24,6 +24,7 @@ public interface DealerEmployeeService {
      * 查询参数Map中key的取值如下：
      * <pre>
      *		dealerOid:			 		String类型，商户Oid，根据此参数精确查询
+     *      dealerEmployeeOid   String类型，商户员工Oid，根据此参数精确查询，与dealerOid互斥
      *      employeeName:    	 String类型，商户员工姓名，根据此参数模糊查询
      *      moblieNumber:         String类型，商户员工手机号，根据此参数模糊查询
      * </pre>

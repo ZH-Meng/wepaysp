@@ -15,6 +15,12 @@
 			<result name="createDealer">/resources/partner/createDealer.jsp</result>
 			<result name="updateDealer">/resources/partner/updateDealer.jsp</result>
 			<result name="updateDealerBase">/resources/partner/updateDealerBase.jsp</result>
+			<!-- <result type="redirectAction" name="goToCreateDealer">/resources/partner/dealermanage!goToCreateDealer</result> -->
+			<result type="chain" name="goToCreateDealer">
+				<param name="actionName">dealermanage</param>
+				<param name="namespace">/resources/partner</param>
+				<param name="method">goToCreateDealer</param>
+			</result>
 		</action>
 		<!-- 门店管理 -->
 		<action name="storemanage" class="storeAction">

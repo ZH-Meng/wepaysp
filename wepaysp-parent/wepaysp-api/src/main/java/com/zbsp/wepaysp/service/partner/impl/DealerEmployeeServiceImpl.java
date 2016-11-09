@@ -68,7 +68,9 @@ public class DealerEmployeeServiceImpl
         String employeeName = MapUtils.getString(paramMap, "employeeName");
         String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
-        Validator.checkArgument(StringUtils.isBlank(dealerOid), "服务商Oid不能为空！");
+        String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
+        
+        Validator.checkArgument(StringUtils.isBlank(dealerOid) && StringUtils.isBlank(dealerEmployeeOid), "商户Oid或商户员工Oid至少一个不能为空！");
 
         StringBuffer sql = new StringBuffer("select distinct(de) from DealerEmployee de, Dealer d where de.dealer=d");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
@@ -82,6 +84,11 @@ public class DealerEmployeeServiceImpl
             sqlMap.put("MOBLIENUMBER", "%" + moblieNumber + "%");
         }
 
+        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+            DealerEmployee de = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
+            dealerOid = de.getDealer().getIwoid();
+        }
+        
         sql.append(" and de.dealer.iwoid = :DEALEROID");
         sqlMap.put("DEALEROID", dealerOid);
         sql.append(" order by de.dealerEmployeeId desc");

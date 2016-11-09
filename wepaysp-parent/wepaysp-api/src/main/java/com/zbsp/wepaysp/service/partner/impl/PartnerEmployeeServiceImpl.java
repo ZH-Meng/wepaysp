@@ -66,8 +66,9 @@ public class PartnerEmployeeServiceImpl
         String employeeName = MapUtils.getString(paramMap, "employeeName");
         String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
         String partnerOid = MapUtils.getString(paramMap, "partnerOid");
-        Validator.checkArgument(StringUtils.isBlank(partnerOid), "代理商Oid不能为空！");
-
+        String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
+        Validator.checkArgument(StringUtils.isBlank(partnerOid) && StringUtils.isBlank(partnerEmployeeOid), "代理商Oid或代理商员工Oid至少一个不能为空！");
+        
         StringBuffer sql = new StringBuffer("select distinct(pe) from PartnerEmployee pe, Partner p where pe.partner=p");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
@@ -80,6 +81,11 @@ public class PartnerEmployeeServiceImpl
             sqlMap.put("MOBLIENUMBER", "%" + moblieNumber + "%");
         }
 
+        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
+            PartnerEmployee pe = commonDAO.findObject(PartnerEmployee.class, partnerEmployeeOid);
+            partnerOid = pe.getPartner().getIwoid();
+        }
+        
         sql.append(" and pe.partner.iwoid = :PARTNEROID");
         sqlMap.put("PARTNEROID", partnerOid);
         sql.append(" order by pe.partnerEmployeeId desc");

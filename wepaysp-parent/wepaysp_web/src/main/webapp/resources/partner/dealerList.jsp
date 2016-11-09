@@ -144,7 +144,6 @@
 						  				<s:elseif test="#hasUpdatePermission eq 'yes' && #dealerVo.state != 3">
 						  					<a href="javascript:void(0);" onclick="toUpdateDealer('<s:property value="#dealerVo.iwoid" />')">修改</a>
 						  				</s:elseif>
-						  				<s:else><strong>修改</strong></s:else>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

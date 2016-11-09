@@ -40,8 +40,9 @@
 		                                <s:if test="listType == 'dealerEmployee'">
 		                                	<s:set name="queryCols"  value="3"/>
 											<th>收银员ID</th>
-											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/></td>
-											<span>输入收银员ID精确搜索</span>
+											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
+												<span>输入收银员ID精确搜索</span>
+											</td>
 		                                </s:if>
 									</tr>
 								</s:if>
@@ -54,13 +55,13 @@
 											name="beginTime" id="beginTime" maxlength="20" value="<s:property value="beginTime"/>" />
 	                                        <span>至</span>
 	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})"
-											name="endTime" id="endTime" maxlength="20" value="<s:property value="endTime"/>" />
+											name="endTime" id="endTime" maxlength="20" value="<s:property value="endTime"/>" onchange="endTimeChange();" />
 	                                        <span class="tj_bt">*</span>
 	                                    </strong>
 	                                    <strong class="timetj">
 	                                    	<input class="dxbtn" type="radio"  id="queryType2" name="queryType" value="month" />按月查询
 											<input onclick="typeChange('month');" type="text" class="Wdate" runat="server" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM',maxDate:'%y-{%M-1}-%d'})" 
-											name="monthTime" id="monthTime" maxlength="20" value="<s:property value="monthTime"/>" onchange="endTimeChange();"/>	                                    	
+											name="monthTime" id="monthTime" maxlength="20" value="<s:property value="monthTime"/>" />	                                    	
 											<span class="tj_bt">*</span>
 	                                    </strong>
 									</td>

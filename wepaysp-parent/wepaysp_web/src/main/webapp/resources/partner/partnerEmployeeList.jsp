@@ -98,7 +98,6 @@
 	  									<s:if test="#hasUpdatePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="toUpdatePartnerEmployee('<s:property value="#partnerEmployeeVo.iwoid" />')">修改</a>
 						  				</s:if>
-						  				<s:else><strong>修改</strong></s:else>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

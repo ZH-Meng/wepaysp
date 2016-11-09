@@ -52,8 +52,11 @@ public class DealerEmployeeAction
 			if (!checkUser(manageUser, "yes".equals(resetFlag) ? "reset" :"query")) {
 				return "accessDenied";
             }
-            
-            paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+            if (isDealer(manageUser)) {
+                paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+            } else if (isDealerEmployee(manageUser)) {
+                paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
+            }
             
             //rowCount = dealerEmployeeService.doJoinTransQueryDealerEmployeeCount(paramMap);
             dealerEmployeeVoList = dealerEmployeeService.doJoinTransQueryDealerEmployeeList(paramMap, 0, -1);

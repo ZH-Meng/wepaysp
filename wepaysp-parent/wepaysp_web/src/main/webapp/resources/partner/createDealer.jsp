@@ -24,13 +24,13 @@
                     			<tr>
 	                            	<th>业务员</th>
 	                                <td>
-	                                	<s:if test="dealerVO != null && dealerVO.partnerEmployeeOid != null">
+			                    		<s:if test="partnerEmployeeVoList != null">
+	                                		<s:select list="partnerEmployeeVoList" listKey="iwoid" listValue="employeeName" name="dealerVO.partnerEmployeeOid"  id="partnerEmployeeOid" headerKey="" headerValue="请选择"/>
+                    					</s:if>
+	                                	<s:else>
 			                    			<s:hidden id="partnerEmployeeOid" name="dealerVO.partnerEmployeeOid"/>
 			                    			<s:property value="dealerVO.partnerEmployeeName"/>
-			                    		</s:if>
-			                    		<s:else>
-	                                		<s:select list="partnerEmployeeVoList" listKey="iwoid" listValue="employeeName" name="dealerVO.partnerEmployeeOid"  id="partnerEmployeeOid" headerKey="" headerValue="请选择"/>
-                    					</s:else>
+			                    		</s:else>
 	                                	<span class="tj_bt">*</span>
 	                                </td>
 	                            	</tr>

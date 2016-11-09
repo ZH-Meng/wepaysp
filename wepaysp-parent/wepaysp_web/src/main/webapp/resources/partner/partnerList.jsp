@@ -158,7 +158,6 @@
 						  				<s:if test="#hasUpdatePermission eq 'yes' && #partnerVo.state != 3 && isChildPage==1">
 						  					<a href="javascript:void(0);" onclick="toUpdatePartner('<s:property value="#partnerVo.iwoid" />')">修改</a>
 						  				</s:if>
-						  				<s:else><strong>修改</strong></s:else>
 						  				<s:if test="#partnerVo.level < 3">
 						  					<a href="javascript:void(0);" onclick="findChildPartners('<s:property value="#partnerVo.iwoid" />')">查看下级代理商</a>
 						  				</s:if>
