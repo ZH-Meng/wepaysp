@@ -13,9 +13,16 @@
 			<result name="weixinRefundDetailsList">/resources/pay/weixinRefundDetailsList.jsp</result>
 		</action>
 		
-		<!-- 收款 -->
+		<!-- 收银台收款 -->
 		<action name="payment" class="paymentAction">
 			<result name="cashierDesk">/resources/pay/cashierDesk.jsp</result>
 		</action>
+		
+		<!-- 公众号支付 -->
+		<action name="appidpay" class="appIDPayAction">
+			<result name="createOrder">/resources/pay/createOrder.jsp</result>
+		</action>
+		
+		
 	</package>
 </struts>

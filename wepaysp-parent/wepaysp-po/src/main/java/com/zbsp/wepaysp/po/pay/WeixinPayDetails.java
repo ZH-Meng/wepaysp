@@ -1,6 +1,6 @@
 package com.zbsp.wepaysp.po.pay;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -68,15 +68,34 @@ public class WeixinPayDetails
     private Integer settlementTotalFee;
     private Integer couponFee;
     private String transactionId;
-    private Timestamp timeEnd;
-    private Timestamp transBeginTime;
-    private Timestamp transEndTime;
+    private Date timeEnd;
+    private Date transBeginTime;
+    private Date transEndTime;
     private String creator;
-    private Timestamp createTime;
+    private Date createTime;
     private String modifier;
-    private Timestamp modifyTime;
+    private Date modifyTime;
     private String remark;
 
+    /**
+     * 交易类型 
+     */
+    public static enum PayType {
+        /** 1：刷卡支付 */        MICROPAY("1"),
+        /** 2：公众号支付 */     JSAPI("2"),
+        /** 3：扫码支付 */        NATIVE("3"),
+        /** 4：微信买单 */        WEIXINPAY("4");
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        private PayType(String value) {
+            this.value = value;
+        }
+    }
+    
     public WeixinPayDetails() {
     }
 
@@ -483,29 +502,29 @@ public class WeixinPayDetails
     }
 
     @Column(name = "TIME_END", length = 0)
-    public Timestamp getTimeEnd() {
+    public Date getTimeEnd() {
         return this.timeEnd;
     }
 
-    public void setTimeEnd(Timestamp timeEnd) {
+    public void setTimeEnd(Date timeEnd) {
         this.timeEnd = timeEnd;
     }
     
     @Column(name = "TRANS_BEGIN_TIME", nullable = false, length = 0)
-    public Timestamp getTransBeginTime() {
+    public Date getTransBeginTime() {
         return this.transBeginTime;
     }
 
-    public void setTransBeginTime(Timestamp transBeginTime) {
+    public void setTransBeginTime(Date transBeginTime) {
         this.transBeginTime = transBeginTime;
     }
     
     @Column(name = "TRANS_END_TIME", length = 0)
-    public Timestamp getTransEndTime() {
+    public Date getTransEndTime() {
         return this.transEndTime;
     }
 
-    public void setTransEndTime(Timestamp transEndTime) {
+    public void setTransEndTime(Date transEndTime) {
         this.transEndTime = transEndTime;
     }
 
@@ -519,11 +538,11 @@ public class WeixinPayDetails
     }
 
     @Column(name = "CREATE_TIME", nullable = false, length = 0)
-    public Timestamp getCreateTime() {
+    public Date getCreateTime() {
         return this.createTime;
     }
 
-    public void setCreateTime(Timestamp createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
@@ -537,11 +556,11 @@ public class WeixinPayDetails
     }
 
     @Column(name = "MODIFY_TIME", length = 0)
-    public Timestamp getModifyTime() {
+    public Date getModifyTime() {
         return this.modifyTime;
     }
 
-    public void setModifyTime(Timestamp modifyTime) {
+    public void setModifyTime(Date modifyTime) {
         this.modifyTime = modifyTime;
     }
 

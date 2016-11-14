@@ -21,6 +21,7 @@ import java.util.UUID;
 public final class Generator {
     public static void main(String[] args) {
         System.out.println(generateSequenceNum(1, 100000));
+        System.out.println(generateRandomNumber(32));
     }
     
     /**

@@ -37,6 +37,30 @@ public class WeixinPayDetailsVO
     private String dealerEmployeeId;
     private String partnerId;
 
+    private String dealerOid;
+    private String storeOid;
+    private String notifyUrl;// 接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
+    private String apiKey;// 微信商户平台(pay.weixin.qq.com)-->账户设置-->API安全-->密钥设置
+
+    private String appid;
+    private String subAppid;
+    private String mchId;
+    private String subMchId;
+    private String deviceInfo;
+    private String nonceStr;
+    private String sign;
+    private String body;
+    private String detail;
+    private String attach;
+    private String feeType;
+    private String spbillCreateIp;
+    private String goodsTag;
+    private String limitPay;
+    private String authCode;
+    private String openid;
+    private String subOpenid;
+    private String tradeType;
+
     public String getIwoid() {
         return iwoid;
     }
@@ -128,7 +152,7 @@ public class WeixinPayDetailsVO
     public Date getTransBeginTime() {
         return transBeginTime;
     }
-    
+
     public void setTransBeginTime(Date transBeginTime) {
         this.transBeginTime = transBeginTime;
     }
@@ -197,12 +221,188 @@ public class WeixinPayDetailsVO
         this.dealerEmployeeId = dealerEmployeeId;
     }
 
-	public String getPartnerId() {
-		return partnerId;
-	}
+    public String getPartnerId() {
+        return partnerId;
+    }
 
-	public void setPartnerId(String partnerId) {
-		this.partnerId = partnerId;
-	}
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
+    }
+
+    public String getDealerOid() {
+        return dealerOid;
+    }
+
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
+    }
+
+    public String getStoreOid() {
+        return storeOid;
+    }
+
+    public void setStoreOid(String storeOid) {
+        this.storeOid = storeOid;
+    }
+
+    public String getNotifyUrl() {
+        return notifyUrl;
+    }
+
+    public void setNotifyUrl(String notifyUrl) {
+        this.notifyUrl = notifyUrl;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
+    }
+
+    public String getSubAppid() {
+        return subAppid;
+    }
+
+    public void setSubAppid(String subAppid) {
+        this.subAppid = subAppid;
+    }
+
+    public String getMchId() {
+        return mchId;
+    }
+
+    public void setMchId(String mchId) {
+        this.mchId = mchId;
+    }
+
+    public String getSubMchId() {
+        return subMchId;
+    }
+
+    public void setSubMchId(String subMchId) {
+        this.subMchId = subMchId;
+    }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
+
+    public String getNonceStr() {
+        return nonceStr;
+    }
+
+    public void setNonceStr(String nonceStr) {
+        this.nonceStr = nonceStr;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+
+    public String getAttach() {
+        return attach;
+    }
+
+    public void setAttach(String attach) {
+        this.attach = attach;
+    }
+
+    public String getFeeType() {
+        return feeType;
+    }
+
+    public void setFeeType(String feeType) {
+        this.feeType = feeType;
+    }
+
+    public String getSpbillCreateIp() {
+        return spbillCreateIp;
+    }
+
+    public void setSpbillCreateIp(String spbillCreateIp) {
+        this.spbillCreateIp = spbillCreateIp;
+    }
+
+    public String getGoodsTag() {
+        return goodsTag;
+    }
+
+    public void setGoodsTag(String goodsTag) {
+        this.goodsTag = goodsTag;
+    }
+
+    public String getLimitPay() {
+        return limitPay;
+    }
+
+    public void setLimitPay(String limitPay) {
+        this.limitPay = limitPay;
+    }
+
+    public String getAuthCode() {
+        return authCode;
+    }
+
+    public void setAuthCode(String authCode) {
+        this.authCode = authCode;
+    }
+
+    public String getOpenid() {
+        return openid;
+    }
+
+    public void setOpenid(String openid) {
+        this.openid = openid;
+    }
+
+    public String getSubOpenid() {
+        return subOpenid;
+    }
+
+    public void setSubOpenid(String subOpenid) {
+        this.subOpenid = subOpenid;
+    }
+
+    public String getTradeType() {
+        return tradeType;
+    }
+
+    public void setTradeType(String tradeType) {
+        this.tradeType = tradeType;
+    }
 
 }

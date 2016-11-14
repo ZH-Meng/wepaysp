@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.service.pay;
 import java.util.List;
 import java.util.Map;
 
+import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -57,5 +58,16 @@ public interface WeixinPayDetailsService {
      * @return 符合条件的信息总数
      */
     public int doJoinTransQueryWeixinPayDetailsCount(Map<String, Object> paramMap);
+
+    /**
+     * 创建支付明细（交易订单）
+     * @param weixinPayDetailsVO 要保存的支付明细对象 
+     * @param creator 创建人名称
+     * @param operatorUserOid 操作用户Oid
+     * @param logFunctionOid 日志记录项Oid
+     * @return 保存成功返回保存后的支付明细VO
+     * @throws AlreadyExistsException 如果支付明细已存在
+     */
+    public WeixinPayDetailsVO doTransCreatePayDetails(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
     
 }
