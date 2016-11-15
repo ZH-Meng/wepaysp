@@ -1,23 +1,20 @@
 package com.zbsp.wepaysp.service.pay.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.exception.NotExistsException;
-import com.zbsp.wepaysp.common.security.DigestHelper;
+import com.zbsp.wepaysp.common.security.SignHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.Store;
@@ -228,6 +225,9 @@ public class WeixinPayDetailsServiceImpl
         Validator.checkArgument(weixinPayDetailsVO.getTotalFee() == null, "订单金额不能为空");
         Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getNotifyUrl()), "通知地址不能为空");
         Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getApiKey()), "APIkey不能为空");
+        if (WeixinPayDetails.PayType.JSAPI.getValue().equals(weixinPayDetailsVO.getPayType())) {// 公众号支付
+            Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getOpenid()), "openId不能为空");
+        }
 
         // 查找商户
         Dealer dealer = commonDAO.findObject(Dealer.class, weixinPayDetailsVO.getDealerOid());
@@ -283,7 +283,8 @@ public class WeixinPayDetailsServiceImpl
         newPayOrder.setPayType(weixinPayDetailsVO.getPayType());
 
         // 用户标识、用户子标识
-
+        newPayOrder.setOpenid(weixinPayDetailsVO.getOpenid());
+        
         // 签名，签名类型为MD5
         Map<String, String> signMap = new HashMap<String, String>();
 
@@ -310,37 +311,15 @@ public class WeixinPayDetailsServiceImpl
         signMap.put("openid", newPayOrder.getOpenid());
         // signMap.put("sub_openid", newPayOrder.getSubOpenid());
 
-        String signTemp = formatMap(signMap) + "&key=" + weixinPayDetailsVO.getApiKey();
-        String sign = DigestHelper.md5Hex(signTemp).toUpperCase();
-
-        // TODO urlencode
-        newPayOrder.setSign(sign);
+        newPayOrder.setSign(SignHelper.sign4WxPay(signMap, weixinPayDetailsVO.getApiKey()));
 
         commonDAO.save(newPayOrder, true);
+        Date processTime = new Date();
+        // 新增交易明细日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "新增交易明细[微信支付系统订单ID=" + newPayOrder.getOutTradeNo()+ ", 商户ID=" + dealer.getDealerId() + ", 商户姓名=" + dealer.getCompany() + "，消费金额：" + newPayOrder.getTotalFee() + ", 商品详情=" + newPayOrder.getBody() + "]", processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        
         BeanCopierUtil.copyProperties(newPayOrder, weixinPayDetailsVO);
         return weixinPayDetailsVO;
-    }
-
-    /**
-     * 参数名ASCII码从小到大排序（字典序）
-     * 
-     * @param signMap
-     * @return
-     */
-    private String formatMap(Map<String, String> signMap) {
-        ArrayList<String> keyList = new ArrayList<String>(signMap.keySet());
-        Collections.sort(keyList);
-        StringBuffer sb = new StringBuffer();
-        for (Entry<String, String> entry : signMap.entrySet()) {
-            sb.append(entry.getKey());
-            sb.append("=");
-            sb.append(entry.getValue());
-            sb.append("&");
-        }
-        if (sb.length() > 0) {
-            sb.deleteCharAt(sb.lastIndexOf("&"));
-        }
-        return sb.toString();
     }
     
 }

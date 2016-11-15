@@ -99,6 +99,14 @@
 	<script type="text/javascript">
 		$(function(){
 			$("#money").focus();
+			
+			// 校验微信版本
+			var wechatInfo = navigator.userAgent.match(/MicroMessenger\/([\d\.]+)/i) ;
+			if( !wechatInfo ) {
+			    alert("订单支付仅支持微信") ;
+			} else if ( wechatInfo[1] < "5.0" ) {
+			    alert("订单支付仅支持微信5.0以上版本") ;
+			}
 		});
 		function submitOrder() {
 			var money = $.trim($("#money").val());

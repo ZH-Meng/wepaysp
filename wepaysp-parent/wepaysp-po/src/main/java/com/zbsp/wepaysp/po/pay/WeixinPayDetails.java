@@ -573,4 +573,9 @@ public class WeixinPayDetails
         this.remark = remark;
     }
 
+    @Override
+    public String toString() {
+        return "WeixinPayDetails [iwoid=" + iwoid + ", dealer=" + dealer + ", dealerEmployee=" + dealerEmployee + ", store=" + store + ", partner=" + partner + ", partnerEmployee=" + partnerEmployee + ", payType=" + payType + ", deviceInfo=" + deviceInfo + ", nonceStr=" + nonceStr + ", sign=" + sign + ", body=" + body + ", detail=" + detail + ", attach=" + attach + ", outTradeNo=" + outTradeNo + ", totalFee=" + totalFee + ", feeType=" + feeType + ", spbillCreateIp=" + spbillCreateIp + ", goodsTag=" + goodsTag + ", tradeType=" + tradeType + ", bankType=" + bankType + ", cashFeeType=" + cashFeeType + ", cashFee=" + cashFee + ", transBeginTime=" + transBeginTime + "]";
+    }
+
 }
