@@ -69,5 +69,14 @@ public interface WeixinPayDetailsService {
      * @throws AlreadyExistsException 如果支付明细已存在
      */
     public WeixinPayDetailsVO doTransCreatePayDetails(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
-    
+
+    /**
+     * 更新支付结果
+     * 
+     * @param returnCode 业务结果 SUCCESS/FAIL，FAIL时错误信息详见errCode
+     * @param errCode 业务错误码
+     * @param payResultVO 封装的支付结果VO
+     */
+    public void doTransUpdatePayResult(String resultCode, String errCode, WeixinPayDetailsVO payResultVO);
+
 }

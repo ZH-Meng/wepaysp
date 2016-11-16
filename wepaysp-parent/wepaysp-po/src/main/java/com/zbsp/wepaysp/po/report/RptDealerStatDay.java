@@ -39,6 +39,8 @@ public class RptDealerStatDay
     private String partnerEmployeeName;
     private Long totalAmount;
     private Long totalMoney;
+    private BigDecimal partnerBonus;
+    private BigDecimal partnerEmployeeBonus;
     private BigDecimal totalBonus;
     private String creator;
     private Timestamp createTime;
@@ -255,6 +257,24 @@ public class RptDealerStatDay
 
     public void setTotalMoney(Long totalMoney) {
         this.totalMoney = totalMoney;
+    }
+
+    @Column(name = "partner_bonus", precision = 20, scale = 4)
+    public BigDecimal getPartnerBonus() {
+        return partnerBonus;
+    }
+
+    public void setPartnerBonus(BigDecimal partnerBonus) {
+        this.partnerBonus = partnerBonus;
+    }
+    
+    @Column(name = "partner_employee_bonus", precision = 20, scale = 4)
+    public BigDecimal getPartnerEmployeeBonus() {
+        return partnerEmployeeBonus;
+    }
+
+    public void setPartnerEmployeeBonus(BigDecimal partnerEmployeeBonus) {
+        this.partnerEmployeeBonus = partnerEmployeeBonus;
     }
 
     @Column(name = "TOTAL_BONUS", precision = 20, scale = 4)

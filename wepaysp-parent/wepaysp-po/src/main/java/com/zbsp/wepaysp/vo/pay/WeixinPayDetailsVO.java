@@ -59,7 +59,17 @@ public class WeixinPayDetailsVO
     private String authCode;
     private String openid;
     private String subOpenid;
+    private String isSubscribe;
     private String tradeType;
+    private String bankType;
+    private Integer couponFee;
+    private String transactionId;
+    private Date timeEnd;
+
+    private String returnCode;
+    private String returnMsg;
+    private String errCode;
+    private String errCodeDes;
 
     public String getIwoid() {
         return iwoid;
@@ -403,6 +413,78 @@ public class WeixinPayDetailsVO
 
     public void setTradeType(String tradeType) {
         this.tradeType = tradeType;
+    }
+
+    public String getReturnCode() {
+        return returnCode;
+    }
+
+    public void setReturnCode(String returnCode) {
+        this.returnCode = returnCode;
+    }
+
+    public String getReturnMsg() {
+        return returnMsg;
+    }
+
+    public void setReturnMsg(String returnMsg) {
+        this.returnMsg = returnMsg;
+    }
+
+    public String getErrCode() {
+        return errCode;
+    }
+
+    public void setErrCode(String errCode) {
+        this.errCode = errCode;
+    }
+
+    public String getErrCodeDes() {
+        return errCodeDes;
+    }
+
+    public void setErrCodeDes(String errCodeDes) {
+        this.errCodeDes = errCodeDes;
+    }
+
+    public String getIsSubscribe() {
+        return isSubscribe;
+    }
+
+    public void setIsSubscribe(String isSubscribe) {
+        this.isSubscribe = isSubscribe;
+    }
+
+    public String getBankType() {
+        return bankType;
+    }
+
+    public void setBankType(String bankType) {
+        this.bankType = bankType;
+    }
+
+    public Integer getCouponFee() {
+        return couponFee;
+    }
+
+    public void setCouponFee(Integer couponFee) {
+        this.couponFee = couponFee;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public Date getTimeEnd() {
+        return timeEnd;
+    }
+
+    public void setTimeEnd(Date timeEnd) {
+        this.timeEnd = timeEnd;
     }
 
 }

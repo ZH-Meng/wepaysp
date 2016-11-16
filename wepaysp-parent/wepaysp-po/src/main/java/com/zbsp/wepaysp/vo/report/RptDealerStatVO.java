@@ -26,6 +26,8 @@ public class RptDealerStatVO
     private Date endTime;
     private String storeOid;
     private Integer feeRate;
+    private BigDecimal partnerBonus;
+    private BigDecimal partnerEmployeeBonus;
 
     public String getPartnerId() {
         return partnerId;
@@ -162,5 +164,21 @@ public class RptDealerStatVO
 	public void setFeeRate(Integer feeRate) {
 		this.feeRate = feeRate;
 	}
+    
+    public BigDecimal getPartnerBonus() {
+        return partnerBonus;
+    }
+
+    public void setPartnerBonus(BigDecimal partnerBonus) {
+        this.partnerBonus = partnerBonus;
+    }
+    
+    public BigDecimal getPartnerEmployeeBonus() {
+        return partnerEmployeeBonus;
+    }
+    
+    public void setPartnerEmployeeBonus(BigDecimal partnerEmployeeBonus) {
+        this.partnerEmployeeBonus = partnerEmployeeBonus;
+    }
 
 }

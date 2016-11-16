@@ -77,7 +77,7 @@ public class RptDealerStatServiceImpl
 
         int subPartnerLevel = partnerLevel + 1;
         if ("self".equals(resultFlag)) {
-            sql.append("select d.partnerOid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)), max(p.feeRate) from " + poName + " d, Partner p where d.partnerOid = p.iwoid");
+            sql.append("select d.partnerOid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerBonus)), max(p.feeRate) from " + poName + " d, Partner p where d.partnerOid = p.iwoid");
             sql.append(" and d.partnerLevel =:PARTNERLEVEL");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
@@ -95,7 +95,7 @@ public class RptDealerStatServiceImpl
                 throw new NotExistsException("不存在ID=" + partnerId + "的下级代理商");
             }
 
-            sql.append("select d.partner" + subPartnerLevel + "Oid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)), max(p.feeRate) from  " + poName + "  d, Partner p where d.partner" + subPartnerLevel + "Oid = p.iwoid");
+            sql.append("select d.partner" + subPartnerLevel + "Oid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerBonus)), max(p.feeRate) from  " + poName + "  d, Partner p where d.partner" + subPartnerLevel + "Oid = p.iwoid");
             sql.append(" and d.partnerLevel > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "Oid =:PARTNERAOID");
             sql.append(" and d.partner" + subPartnerLevel + "Oid =:PARTNERBOID");
@@ -109,7 +109,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("ENDTIME", endTime);
             statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if ("selfAndSub".equals(resultFlag)) {
-            sql.append("select d.partner_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.total_Bonus)), max(p.fee_rate) from " + tableName + " d, Partner_t  p where d.partner_Oid = p.iwoid");
+            sql.append("select d.partner_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.partner_bonus)), max(p.fee_rate) from " + tableName + " d, Partner_t  p where d.partner_Oid = p.iwoid");
             sql.append(" and d.partner_Level =:PARTNERLEVEL");
             sql.append(" and d.partner_Oid =:PARTNEROID");
             sql.append(" and d.start_Time >=:BEGINTIME");
@@ -118,7 +118,7 @@ public class RptDealerStatServiceImpl
 
             sql.append(" Union all ");
 
-            sql.append("select d.partner" + subPartnerLevel + "_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.total_Bonus)), max(p.fee_rate) from  " + tableName + "  d, Partner_t  p  where d.partner" + subPartnerLevel + "_Oid = p.iwoid");
+            sql.append("select d.partner" + subPartnerLevel + "_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.partner_bonus)), max(p.fee_rate) from  " + tableName + "  d, Partner_t  p  where d.partner" + subPartnerLevel + "_Oid = p.iwoid");
             sql.append(" and d.partner_Level > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "_Oid =:PARTNERAOID");
             sql.append(" and d.start_Time >=:BEGINTIME");
@@ -148,7 +148,7 @@ public class RptDealerStatServiceImpl
                 	vo.setTotalAmount((Long) oArr[3]);
                     vo.setTotalMoney((Long) oArr[4]);
                 }
-                vo.setTotalBonus((BigDecimal) oArr[5]);
+                vo.setPartnerBonus((BigDecimal) oArr[5]);
                 vo.setFeeRate((Integer) oArr[6]);
                 resultList.add(vo);
             }
@@ -300,7 +300,7 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
         if (StringUtils.isNotBlank(partnerOid)) {
-            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)), d.partnerEmployeeId, max(d.partnerEmployeeName), max(pe.feeRate) from " + poName + " d, PartnerEmployee pe  where d.partnerEmployeeOid = pe.iwoid");
+            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerEmployeeBonus)), d.partnerEmployeeId, max(d.partnerEmployeeName), max(pe.feeRate) from " + poName + " d, PartnerEmployee pe  where d.partnerEmployeeOid = pe.iwoid");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
@@ -319,7 +319,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("ENDTIME", endTime);
             statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if (StringUtils.isNotBlank(partnerEmployeeOid)) {
-            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.totalBonus)), max(d.partnerEmployeeId), max(d.partnerEmployeeName), max(pe.feeRate) from " + poName + " d, PartnerEmployee pe where d.partnerEmployeeOid = pe.iwoid");
+            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerEmployeeBonus)), max(d.partnerEmployeeId), max(d.partnerEmployeeName), max(pe.feeRate) from " + poName + " d, PartnerEmployee pe where d.partnerEmployeeOid = pe.iwoid");
             sql.append(" and d.partnerEmployeeOid =:PARTNEREMPLOYEEOID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
@@ -340,7 +340,7 @@ public class RptDealerStatServiceImpl
                 vo.setPartnerName((String) oArr[2]);
                 vo.setTotalAmount((Long) oArr[3]);
                 vo.setTotalMoney((Long) oArr[4]);
-                vo.setTotalBonus((BigDecimal) oArr[5]);
+                vo.setPartnerEmployeeBonus((BigDecimal) oArr[5]);
                 vo.setPartnerEmployeeId((String) oArr[6]);
                 vo.setPartnerEmployeeName((String) oArr[7]);
                 vo.setFeeRate((Integer) oArr[8]);

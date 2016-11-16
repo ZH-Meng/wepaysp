@@ -321,5 +321,11 @@ public class WeixinPayDetailsServiceImpl
         BeanCopierUtil.copyProperties(newPayOrder, weixinPayDetailsVO);
         return weixinPayDetailsVO;
     }
+
+    @Override
+    public void doTransUpdatePayResult(String resultCode, String errCode, WeixinPayDetailsVO payResultVO) {
+        // TODO Auto-generated method stub
+        
+    }
     
 }
