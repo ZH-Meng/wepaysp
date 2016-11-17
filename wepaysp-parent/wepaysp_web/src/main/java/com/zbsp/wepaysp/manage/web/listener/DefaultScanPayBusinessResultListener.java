@@ -1,16 +1,13 @@
 package com.zbsp.wepaysp.manage.web.listener;
 
-import org.apache.commons.lang3.StringUtils;
 
 import com.tencent.business.ScanPayBusiness;
 import com.tencent.protocol.pay_protocol.ScanPayResData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryResData;
 import com.tencent.protocol.reverse_protocol.ReverseResData;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
-import com.zbsp.wepaysp.common.util.DateUtil;
+import com.zbsp.wepaysp.common.util.WeixinPackConverter;
 import com.zbsp.wepaysp.service.pay.WeixinPayDetailsService;
-import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 
 /**
@@ -144,45 +141,8 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      */
     private void updatePayResult(ScanPayResData scanPayResData) {
         if (ReturnCode.SUCCESS.toString().equals(scanPayResData.getReturn_code())) {
-            weixinPayDetailsService.doTransUpdatePayResult(scanPayResData.getResult_code(), scanPayResData.getErr_code(), convert2WeixinPayDetailsVO(scanPayResData));
+            weixinPayDetailsService.doTransUpdatePayResult(scanPayResData.getResult_code(), scanPayResData.getErr_code(), WeixinPackConverter.scanPayRes2WeixinPayDetailsVO(scanPayResData));
         }
-    }
-    
-    private WeixinPayDetailsVO convert2WeixinPayDetailsVO(ScanPayResData scanPayResData) {
-        WeixinPayDetailsVO  vo = new WeixinPayDetailsVO();
-        //协议层
-        vo.setReturnCode(scanPayResData.getReturn_code());
-        vo.setReturnMsg(scanPayResData.getReturn_msg());
-        
-        //协议返回的具体数据（以下字段在return_code 为SUCCESS 的时候有返回）
-        if (ReturnCode.SUCCESS.toString().equals(scanPayResData.getReturn_code())) {
-            vo.setAppid(scanPayResData.getAppid());
-            vo.setMchId(scanPayResData.getMch_id());
-            vo.setNonceStr(scanPayResData.getNonce_str());
-            vo.setSign(scanPayResData.getSign());
-            vo.setResultCode(scanPayResData.getResult_code());
-            vo.setErrCode(scanPayResData.getErr_code());
-            vo.setErrCodeDes(scanPayResData.getErr_code_des());
-            
-            //业务返回的具体数据（以下字段在return_code 和result_code 都为SUCCESS 的时候有返回）
-            if (ResultCode.SUCCESS.toString().equals(scanPayResData.getResult_code())) {
-                vo.setDeviceInfo(scanPayResData.getDevice_info());
-                vo.setOpenid(scanPayResData.getOpenid());
-                vo.setIsSubscribe(scanPayResData.getIs_subscribe());
-                vo.setTradeType(scanPayResData.getTrade_type());
-                vo.setBankType(scanPayResData.getBank_type());
-                vo.setTotalFee(StringUtils.isNotBlank(scanPayResData.getTotal_fee()) ? Integer.parseInt(scanPayResData.getTotal_fee()) : null);
-                vo.setCouponFee(StringUtils.isNotBlank(scanPayResData.getCoupon_fee()) ? Integer.parseInt(scanPayResData.getCoupon_fee()) : null);
-                vo.setFeeType(scanPayResData.getFee_type());
-                vo.setTransactionId(scanPayResData.getTransaction_id());
-                vo.setOutTradeNo(scanPayResData.getOut_trade_no());
-                vo.setAttach(scanPayResData.getAttach());
-                vo.setTimeEnd(StringUtils.isNotBlank(scanPayResData.getTime_end()) ? DateUtil.getDate(scanPayResData.getTime_end(), "yyyyMMddHHmmss") : null);
-            }
-        }
-        
-        // TODO 兼容统一下单
-        return vo;
     }
     
 }

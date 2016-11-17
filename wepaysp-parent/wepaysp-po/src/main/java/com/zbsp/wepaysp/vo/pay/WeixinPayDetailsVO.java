@@ -37,10 +37,11 @@ public class WeixinPayDetailsVO
     private String dealerEmployeeId;
     private String partnerId;
 
+    private String dealerEmployeeOid;
+    
     private String dealerOid;
     private String storeOid;
     private String notifyUrl;// 接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
-    private String apiKey;// 微信商户平台(pay.weixin.qq.com)-->账户设置-->API安全-->密钥设置
 
     private String appid;
     private String subAppid;
@@ -62,6 +63,9 @@ public class WeixinPayDetailsVO
     private String isSubscribe;
     private String tradeType;
     private String bankType;
+    private String cashFeeType;
+    private Long cashFee;
+    private Integer settlementTotalFee;
     private Integer couponFee;
     private String transactionId;
     private Date timeEnd;
@@ -70,6 +74,9 @@ public class WeixinPayDetailsVO
     private String returnMsg;
     private String errCode;
     private String errCodeDes;
+    private String timeStart;
+    private String timeExpire;
+    
 
     public String getIwoid() {
         return iwoid;
@@ -238,6 +245,14 @@ public class WeixinPayDetailsVO
     public void setPartnerId(String partnerId) {
         this.partnerId = partnerId;
     }
+    
+    public String getDealerEmployeeOid() {
+        return dealerEmployeeOid;
+    }
+    
+    public void setDealerEmployeeOid(String dealerEmployeeOid) {
+        this.dealerEmployeeOid = dealerEmployeeOid;
+    }
 
     public String getDealerOid() {
         return dealerOid;
@@ -261,14 +276,6 @@ public class WeixinPayDetailsVO
 
     public void setNotifyUrl(String notifyUrl) {
         this.notifyUrl = notifyUrl;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
     }
 
     public String getAppid() {
@@ -463,6 +470,30 @@ public class WeixinPayDetailsVO
         this.bankType = bankType;
     }
 
+    public String getCashFeeType() {
+        return cashFeeType;
+    }
+
+    public void setCashFeeType(String cashFeeType) {
+        this.cashFeeType = cashFeeType;
+    }
+
+    public Long getCashFee() {
+        return cashFee;
+    }
+
+    public void setCashFee(Long cashFee) {
+        this.cashFee = cashFee;
+    }
+
+    public Integer getSettlementTotalFee() {
+        return settlementTotalFee;
+    }
+
+    public void setSettlementTotalFee(Integer settlementTotalFee) {
+        this.settlementTotalFee = settlementTotalFee;
+    }
+
     public Integer getCouponFee() {
         return couponFee;
     }
@@ -485,6 +516,22 @@ public class WeixinPayDetailsVO
 
     public void setTimeEnd(Date timeEnd) {
         this.timeEnd = timeEnd;
+    }
+    
+    public String getTimeStart() {
+        return timeStart;
+    }
+    
+    public void setTimeStart(String timeStart) {
+        this.timeStart = timeStart;
+    }
+    
+    public String getTimeExpire() {
+        return timeExpire;
+    }
+
+    public void setTimeExpire(String timeExpire) {
+        this.timeExpire = timeExpire;
     }
 
 }

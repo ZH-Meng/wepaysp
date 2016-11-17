@@ -110,7 +110,7 @@ public class WeixinPayDetails
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DEALER_OID", nullable = false)
+    @JoinColumn(name = "DEALER_OID")
     public Dealer getDealer() {
         return this.dealer;
     }
@@ -140,7 +140,7 @@ public class WeixinPayDetails
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PARTNER_OID", nullable = false)
+    @JoinColumn(name = "PARTNER_OID")
     public Partner getPartner() {
         return this.partner;
     }
@@ -204,7 +204,7 @@ public class WeixinPayDetails
         this.partner3Oid = partner3Oid;
     }
 
-    @Column(name = "APPID", nullable = false, length = 32)
+    @Column(name = "APPID", length = 32)
     public String getAppid() {
         return this.appid;
     }
@@ -222,7 +222,7 @@ public class WeixinPayDetails
         this.subAppid = subAppid;
     }
 
-    @Column(name = "MCH_ID", nullable = false, length = 32)
+    @Column(name = "MCH_ID", length = 32)
     public String getMchId() {
         return this.mchId;
     }
@@ -231,7 +231,7 @@ public class WeixinPayDetails
         this.mchId = mchId;
     }
 
-    @Column(name = "SUB_MCH_ID", nullable = false, length = 32)
+    @Column(name = "SUB_MCH_ID", length = 32)
     public String getSubMchId() {
         return this.subMchId;
     }
@@ -249,7 +249,7 @@ public class WeixinPayDetails
         this.deviceInfo = deviceInfo;
     }
 
-    @Column(name = "NONCE_STR", nullable = false, length = 32)
+    @Column(name = "NONCE_STR", length = 32)
     public String getNonceStr() {
         return this.nonceStr;
     }
@@ -258,7 +258,7 @@ public class WeixinPayDetails
         this.nonceStr = nonceStr;
     }
 
-    @Column(name = "SIGN", nullable = false, length = 32)
+    @Column(name = "SIGN", length = 32)
     public String getSign() {
         return this.sign;
     }
@@ -267,7 +267,7 @@ public class WeixinPayDetails
         this.sign = sign;
     }
 
-    @Column(name = "BODY", nullable = false, length = 128)
+    @Column(name = "BODY", length = 128)
     public String getBody() {
         return this.body;
     }
@@ -294,7 +294,7 @@ public class WeixinPayDetails
         this.attach = attach;
     }
 
-    @Column(name = "OUT_TRADE_NO", nullable = false, length = 32)
+    @Column(name = "OUT_TRADE_NO", length = 32)
     public String getOutTradeNo() {
         return this.outTradeNo;
     }
@@ -303,7 +303,7 @@ public class WeixinPayDetails
         this.outTradeNo = outTradeNo;
     }
 
-    @Column(name = "TOTAL_FEE", nullable = false)
+    @Column(name = "TOTAL_FEE")
     public Integer getTotalFee() {
         return this.totalFee;
     }
@@ -321,7 +321,7 @@ public class WeixinPayDetails
         this.feeType = feeType;
     }
 
-    @Column(name = "SPBILL_CREATE_IP", nullable = false, length = 16)
+    @Column(name = "SPBILL_CREATE_IP", length = 16)
     public String getSpbillCreateIp() {
         return this.spbillCreateIp;
     }
@@ -348,7 +348,7 @@ public class WeixinPayDetails
         this.limitPay = limitPay;
     }
 
-    @Column(name = "AUTH_CODE", nullable = false, length = 128)
+    @Column(name = "AUTH_CODE", length = 128)
     public String getAuthCode() {
         return this.authCode;
     }
@@ -357,7 +357,7 @@ public class WeixinPayDetails
         this.authCode = authCode;
     }
 
-    @Column(name = "RETURN_CODE", nullable = false, length = 16)
+    @Column(name = "RETURN_CODE", length = 16)
     public String getReturnCode() {
         return this.returnCode;
     }
@@ -375,7 +375,7 @@ public class WeixinPayDetails
         this.returnMsg = returnMsg;
     }
 
-    @Column(name = "RESULT_CODE", nullable = false, length = 16)
+    @Column(name = "RESULT_CODE", length = 16)
     public String getResultCode() {
         return this.resultCode;
     }
@@ -402,7 +402,7 @@ public class WeixinPayDetails
         this.errCodeDes = errCodeDes;
     }
 
-    @Column(name = "OPENID", nullable = false, length = 128)
+    @Column(name = "OPENID", length = 128)
     public String getOpenid() {
         return this.openid;
     }
@@ -411,7 +411,7 @@ public class WeixinPayDetails
         this.openid = openid;
     }
 
-    @Column(name = "IS_SUBSCRIBE", nullable = false, length = 1)
+    @Column(name = "IS_SUBSCRIBE", length = 1)
     public String getIsSubscribe() {
         return this.isSubscribe;
     }
@@ -429,7 +429,7 @@ public class WeixinPayDetails
         this.subOpenid = subOpenid;
     }
 
-    @Column(name = "SUB_IS_SUBSCRIBE", nullable = false, length = 1)
+    @Column(name = "SUB_IS_SUBSCRIBE", length = 1)
     public String getSubIsSubscribe() {
         return this.subIsSubscribe;
     }
@@ -438,7 +438,7 @@ public class WeixinPayDetails
         this.subIsSubscribe = subIsSubscribe;
     }
 
-    @Column(name = "TRADE_TYPE", nullable = false, length = 16)
+    @Column(name = "TRADE_TYPE", length = 16)
     public String getTradeType() {
         return this.tradeType;
     }
@@ -447,7 +447,7 @@ public class WeixinPayDetails
         this.tradeType = tradeType;
     }
 
-    @Column(name = "BANK_TYPE", nullable = false, length = 16)
+    @Column(name = "BANK_TYPE", length = 16)
     public String getBankType() {
         return this.bankType;
     }
@@ -465,7 +465,7 @@ public class WeixinPayDetails
         this.cashFeeType = cashFeeType;
     }
 
-    @Column(name = "CASH_FEE", nullable = false)
+    @Column(name = "CASH_FEE")
     public Long getCashFee() {
         return this.cashFee;
     }
@@ -510,7 +510,7 @@ public class WeixinPayDetails
         this.timeEnd = timeEnd;
     }
     
-    @Column(name = "TRANS_BEGIN_TIME", nullable = false, length = 0)
+    @Column(name = "TRANS_BEGIN_TIME", length = 0)
     public Date getTransBeginTime() {
         return this.transBeginTime;
     }
@@ -528,7 +528,7 @@ public class WeixinPayDetails
         this.transEndTime = transEndTime;
     }
 
-    @Column(name = "CREATOR", nullable = false, length = 32)
+    @Column(name = "CREATOR", length = 32)
     public String getCreator() {
         return this.creator;
     }
@@ -537,7 +537,7 @@ public class WeixinPayDetails
         this.creator = creator;
     }
 
-    @Column(name = "CREATE_TIME", nullable = false, length = 0)
+    @Column(name = "CREATE_TIME", length = 0)
     public Date getCreateTime() {
         return this.createTime;
     }

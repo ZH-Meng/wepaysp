@@ -78,7 +78,6 @@
 		<div class="cashier-wrapper">
 			<div class="cashier-container">
 				<form id="cashierForm" method="post" action="<%=request.getContextPath()%>/resources/pay/payment!cashier.action" >
-					<s:hidden name="dealerEmployeeOid" />
 					<h1 align="center">收银台</h1>
 					<div class="cashier-item" style="padding-left: 14px;">
 						<span class="cashier-item-icon" >￥</span>

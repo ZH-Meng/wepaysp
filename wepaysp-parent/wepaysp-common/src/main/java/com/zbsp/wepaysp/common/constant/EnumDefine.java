@@ -23,6 +23,17 @@ public class EnumDefine {
     }
     
     /**
+     * 微信支付交易类型
+     */
+    public static enum TradeType {
+        /** 统一下单接口trade_type -- 公众号支付*/           JSAPI,
+        /** 统一下单接口trade_type -- 原生扫码支付*/       NATIVE,
+        /** 统一下单接口trade_type -- app支付*/             APP, 
+
+        /** 刷卡支付支付接口 --刷卡支付*/                       MICROPAY;
+    }
+    
+    /**
      * 支付交易状态 
      */
     public static enum TradeState {
