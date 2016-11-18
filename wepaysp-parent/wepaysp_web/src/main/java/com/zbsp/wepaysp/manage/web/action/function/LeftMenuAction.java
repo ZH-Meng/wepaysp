@@ -20,7 +20,7 @@ import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.vo.TreeNode;
 import com.zbsp.wepaysp.po.manage.SysFunction;
-import com.zbsp.wepaysp.service.manage.SysPermissionService;
+import com.zbsp.wepaysp.api.service.manage.SysPermissionService;
 
 /**
  * 获取左侧菜单

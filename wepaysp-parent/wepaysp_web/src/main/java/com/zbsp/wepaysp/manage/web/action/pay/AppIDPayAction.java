@@ -19,7 +19,7 @@ import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.util.WxPayResultSimulator;
 import com.zbsp.wepaysp.manage.web.vo.wxauth.AccessTokenResultVO;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.service.pay.WeixinPayDetailsService;
+import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**

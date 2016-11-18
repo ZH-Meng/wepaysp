@@ -47,4 +47,81 @@ public class EnumDefine {
         /** 支付失败(其他原因，如银行返回失败) */        PAYERROR;
     }
     
+    /**
+     * 微信支付结果
+     */
+    public static enum WxPayResult {
+        ERROR("error", "支付错误", null, null),
+        SUCCESS("success", "支付成功", null, null),
+        FAIL("fail", "支付失败", null, null),
+        SYSTEMERROR("systemerror", "接口返回错误", "支付结果未知", "系统超时"),
+        PARAM_ERROR("param_error", "参数错误", "支付确认失败", "请求参数未按指引进行填写"),
+        ORDERPAID("orderpaid", "订单已支付", "支付确认失败", "订单号重复 "),
+        NOAUTH("noauth", "商户无权限", "支付确认失败", "商户没有开通被扫支付权限 "),
+        AUTHCODEEXPIRE("authcodeexpire", "二维码已过期，请用户在微信上刷新后再试", "支付确认失败", "用户的条码已经过期"),
+        NOTENOUGH("notenough", "余额不足", "支付确认失败", "用户的零钱余额不足"),
+        NOTSUPORTCARD("notsuportcard", "不支持卡类型", " 支付确认失败 ", "用户使用卡种不支持当前支付形式"),
+        ORDERCLOSED ("orderclosed", "订单已关闭", "支付确认失败", "该订单已关"),
+        ORDERREVERSED("orderreversed", "订单已撤销", "支付确认失败", "当前订单已经被撤销"),
+        BANKERROR("bankerror", "银行系统异常", "支付结果未知", "银行端超时"),
+        USERPAYING("userpaying", "用户支付中，需要输入密码", "支付结果未知", "该笔交易因为业务规则要求，需要用户输入支付密码。"),
+        AUTH_CODE_ERROR("auth_code_error", "授权码参数错误", "支付确认失败", "请求参数未按指引进行填写"),
+        AUTH_CODE_INVALID("auth_code_invalid", "授权码检验错误", "支付确认失败", "收银员扫描的不是微信支付的条码"),        
+        XML_FORMAT_ERROR("xml_format_error", "XML格式错误", "支付确认失败", "XML格式错误"),
+        REQUIRE_POST_METHOD("require_post_method", "请使用post方法", "支付确认失败", "未使用post传递参数"),
+        SIGNERROR("signerror", "签名错误", "支付确认失败", "参数签名结果不正确"),
+        LACK_PARAMS("lack_params", "缺少参数", "支付确认失败", "缺少必要的请求参数"),
+        NOT_UTF8("not_utf8", "编码格式错误", "支付确认失败", "未使用指定编码格式"),
+        BUYER_MISMATCH("buyer_mismatch", "支付帐号错误", "支付确认失败", "暂不支持同一笔订单更换支付方"),
+        APPID_NOT_EXIST("appid_not_exist", "APPID不存在", "支付确认失败", "参数中缺少APPID"),
+        MCHID_NOT_EXIST("mchid_not_exist", "MCHID不存在", "支付确认失败", "参数中缺少MCHID"),
+        OUT_TRADE_NO_USED("out_trade_no_used", "商户订单号重复", "支付确认失败", "同一笔交易不能多次提交"),
+        APPID_MCHID_NOT_MATCH("appid_mchid_not_match", "appid和mch_id不匹配", "支付确认失败", "appid和mch_id不匹配");
+       
+        private String code;
+        private String desc;
+        private String state;
+        private String cause;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String getCause() {
+            return cause;
+        }
+
+        public void setCause(String cause) {
+            this.cause = cause;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+
+        private WxPayResult(String code, String desc, String state, String cause) {
+            this.code = code;
+            this.desc = desc;
+            this.state = state;
+            this.cause = cause;
+        }
+
+    }
+    
 }

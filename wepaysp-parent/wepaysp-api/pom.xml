@@ -80,6 +80,22 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.6.8</version>
 		</dependency>
+		
+		<!-- 对wxpay-scanpay-java-sdk mvn install，将其安装到本地仓库再引用；或者直接使用系统绝对路径引用jar -->
+		<dependency>
+		    <groupId>com.tencent</groupId>
+		    <artifactId>wxpay-scanpay-java-sdk</artifactId>
+		    <version>1.0.1</version>
+		</dependency>		
+<!-- 		
+		<dependency>
+		    <groupId>com.tencent</groupId>
+		    <artifactId>wxpay-scanpay-java-sdk</artifactId>
+		    <version>1.0.1</version>
+		    <scope>system</scope>
+			<systemPath>D:/iwt-workspaces/git-repo/wepaysp/wepaysp-parent/wepaysp-api/lib/wxpay-scanpay-java-sdk-1.0.1.jar</systemPath>
+		</dependency>
+-->
 
 	</dependencies>
 </project>

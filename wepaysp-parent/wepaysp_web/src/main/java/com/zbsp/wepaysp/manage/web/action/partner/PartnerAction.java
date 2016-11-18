@@ -17,7 +17,7 @@ import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Partner;
-import com.zbsp.wepaysp.service.partner.PartnerService;
+import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 
 /**

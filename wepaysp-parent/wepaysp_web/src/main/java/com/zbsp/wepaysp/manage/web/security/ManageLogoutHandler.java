@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import com.zbsp.wepaysp.service.manage.SysUserService;
+import com.zbsp.wepaysp.api.service.manage.SysUserService;
 
 /**
  * 用户退出处理器

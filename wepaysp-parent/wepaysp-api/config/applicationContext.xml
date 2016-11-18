@@ -42,6 +42,7 @@
 		</property>
 		<property name="jpaProperties">
 			<props>
+				<prop key="hibernate.dialect">com.zbsp.wepaysp.api.hibernate.dialect.WepayDialect</prop>
 				<prop key="hibernate.format_sql">false</prop>
 				<prop key="hibernate.jdbc.fetch_size">100</prop>
 				<prop key="hibernate.jdbc.batch_size">30</prop>
@@ -58,7 +59,7 @@
 	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
 
 	<aop:config>
-		<aop:pointcut id="serviceMethod" expression="execution(* com.zbsp.wepaysp.service.*.impl.*.*(..))" />
+		<aop:pointcut id="serviceMethod" expression="execution(* com.zbsp.wepaysp.api.service.*.impl.*.*(..))" />
 		<aop:advisor pointcut-ref="serviceMethod" advice-ref="txtAdvice" />
 	</aop:config>
 	<tx:advice id="txtAdvice" transaction-manager="transactionManager">
@@ -70,16 +71,16 @@
 		</tx:attributes>
 	</tx:advice>
 
-	<bean id="commonORMDAO" class="com.zbsp.wepaysp.dao.impl.CommonDAOJPAImpl">
+	<bean id="commonORMDAO" class="com.zbsp.wepaysp.api.dao.impl.CommonDAOJPAImpl">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
   	</bean>
   	
-  	<bean id="baseService" class="com.zbsp.wepaysp.service.BaseService">
+  	<bean id="baseService" class="com.zbsp.wepaysp.api.service.BaseService">
 		<property name="commonDAO" ref="commonORMDAO" />
 		<property name="transactionManager" ref="transactionManager" />
   	</bean>
   	
-  	<bean id="springContextUtil" class="com.zbsp.wepaysp.manage.web.util.SpringContextUtil" />
+  	<!-- <bean id="springContextUtil" class="com.zbsp.wepaysp.manage.web.util.SpringContextUtil" /> -->
   	
 	<import resource="service-context.xml" />
 </beans>

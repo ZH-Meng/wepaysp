@@ -25,8 +25,8 @@ import org.springframework.security.web.access.intercept.FilterInvocationSecurit
 
 import com.zbsp.wepaysp.po.manage.SysFunction;
 import com.zbsp.wepaysp.po.manage.SysRole;
-import com.zbsp.wepaysp.service.manage.SysFunctionService;
-import com.zbsp.wepaysp.service.manage.SysPermissionService;
+import com.zbsp.wepaysp.api.service.manage.SysFunctionService;
+import com.zbsp.wepaysp.api.service.manage.SysPermissionService;
 
 /**
  * 资源权限定义数据源.

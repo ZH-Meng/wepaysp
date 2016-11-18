@@ -26,9 +26,9 @@ import com.zbsp.wepaysp.manage.web.vo.TreeNode;
 import com.zbsp.wepaysp.po.manage.SysFunction;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.manage.SysFunctionService;
-import com.zbsp.wepaysp.service.manage.SysPermissionService;
-import com.zbsp.wepaysp.service.manage.SysRoleService;
+import com.zbsp.wepaysp.api.service.manage.SysFunctionService;
+import com.zbsp.wepaysp.api.service.manage.SysPermissionService;
+import com.zbsp.wepaysp.api.service.manage.SysRoleService;
 
 /**
  * 角色权限管理Action

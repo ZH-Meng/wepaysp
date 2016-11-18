@@ -3,12 +3,15 @@ package com.zbsp.wepaysp.manage.web.action.user;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.service.manage.SysUserService;
+import com.zbsp.wepaysp.api.service.manage.SysUserService;
+import com.zbsp.wepaysp.api.service.pay.impl.WeixinPayDetailsServiceImpl;
 
 public class ModifyPwdAction
     extends BaseAction {
@@ -47,7 +50,7 @@ public class ModifyPwdAction
         setAlertMessage(message);
         return SUCCESS;
     }
-
+    
     public String getOldPwd() {
         return oldPwd;
     }

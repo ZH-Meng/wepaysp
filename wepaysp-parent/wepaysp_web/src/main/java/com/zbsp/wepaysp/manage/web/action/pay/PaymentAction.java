@@ -5,20 +5,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.tencent.WXPay;
+import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.util.TimeUtil;
-import com.zbsp.wepaysp.common.util.WeixinPackConverter;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
-import com.zbsp.wepaysp.manage.web.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.service.pay.WeixinPayDetailsService;
+import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -100,24 +99,22 @@ public class PaymentAction
         payDetailsVO.setDealerEmployeeOid(manageUser.getDataDealerEmployee().getIwoid());
         payDetailsVO.setTotalFee(money1.multiply(new BigDecimal(100)).intValue());// 元转化为分
         payDetailsVO.setAuthCode(authCode);
-
-        weixinPayDetailsService.doTransCreatePayDetails(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
-        logger.info("微信支付明细保存成功！");
-
-        // 提交微信下单并刷卡支付
-        logger.info("开始微信刷卡支付！");
+        
         try {
-            // 组包、调用刷卡API
-            WXPay.doScanPayBusiness(WeixinPackConverter.weixinPayDetailsVO2ScanPayReq(payDetailsVO), new DefaultScanPayBusinessResultListener());
-            //TODO 各种事件响应回调处理
+            Map<String, Object> resultMap = weixinPayDetailsService.createPayAndInvokeWxPay(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            String resCode = MapUtils.getString(resultMap, "resultCode");
+            String resDesc = MapUtils.getString(resultMap, "resultDesc");
+            payDetailsVO = (WeixinPayDetailsVO) MapUtils.getObject(resultMap, "wexinPayDetailsVO");
             
-            
-            logger.info("微信刷卡支付成功！");
-            setAlertMessage("支付成功！");
+            if (!StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), resCode)) {// 支付失败
+                logger.warn("微信刷卡支付失败，错误码：" + resCode + "，错误描述：" + resDesc);
+                setAlertMessage(resDesc);
+            } else {
+                logger.info("微信刷卡支付成功！");
+                //setAlertMessage("支付成功！");
+            }
         } catch (Exception e) {
-            logger.error("支付失败，" + e.getMessage());
-            e.printStackTrace();
-            setAlertMessage("支付失败，请重试！");
+            logger.error("");
         }
 
         Map<String, Object> paramMap = new HashMap<String, Object>();

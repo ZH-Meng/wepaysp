@@ -22,8 +22,8 @@ import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.manage.SysRoleService;
-import com.zbsp.wepaysp.service.manage.SysUserService;
+import com.zbsp.wepaysp.api.service.manage.SysRoleService;
+import com.zbsp.wepaysp.api.service.manage.SysUserService;
 import com.zbsp.wepaysp.vo.manage.SysUserVO;
 
 /**

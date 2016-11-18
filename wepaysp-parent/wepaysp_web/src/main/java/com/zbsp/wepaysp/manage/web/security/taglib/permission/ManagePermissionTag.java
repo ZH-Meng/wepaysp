@@ -25,8 +25,8 @@ import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SpringContextUtil;
 import com.zbsp.wepaysp.po.manage.SysFunction;
 import com.zbsp.wepaysp.po.manage.SysRole;
-import com.zbsp.wepaysp.service.manage.SysFunctionService;
-import com.zbsp.wepaysp.service.manage.SysPermissionService;
+import com.zbsp.wepaysp.api.service.manage.SysFunctionService;
+import com.zbsp.wepaysp.api.service.manage.SysPermissionService;
 
 /**
  * 权限控制验证标签.

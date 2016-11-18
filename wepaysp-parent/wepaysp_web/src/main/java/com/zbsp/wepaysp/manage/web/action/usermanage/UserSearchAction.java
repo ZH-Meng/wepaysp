@@ -21,9 +21,9 @@ import com.zbsp.wepaysp.manage.web.vo.TreeNode;
 import com.zbsp.wepaysp.po.manage.SysFunction;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.manage.SysPermissionService;
-import com.zbsp.wepaysp.service.manage.SysRoleService;
-import com.zbsp.wepaysp.service.manage.SysUserService;
+import com.zbsp.wepaysp.api.service.manage.SysPermissionService;
+import com.zbsp.wepaysp.api.service.manage.SysRoleService;
+import com.zbsp.wepaysp.api.service.manage.SysUserService;
 import com.zbsp.wepaysp.vo.manage.SysUserVO;
 
 public class UserSearchAction

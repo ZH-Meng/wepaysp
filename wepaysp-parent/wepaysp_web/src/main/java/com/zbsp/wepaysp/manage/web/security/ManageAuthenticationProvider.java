@@ -25,8 +25,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.manage.SysAuthorityService;
-import com.zbsp.wepaysp.service.manage.SysUserService;
+import com.zbsp.wepaysp.api.service.manage.SysAuthorityService;
+import com.zbsp.wepaysp.api.service.manage.SysUserService;
 
 /**
  * 用户认证（登录）.

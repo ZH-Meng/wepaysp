@@ -13,8 +13,8 @@ import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.partner.DealerService;
-import com.zbsp.wepaysp.service.partner.PartnerEmployeeService;
+import com.zbsp.wepaysp.api.service.partner.DealerService;
+import com.zbsp.wepaysp.api.service.partner.PartnerEmployeeService;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
 import com.zbsp.wepaysp.vo.partner.PartnerEmployeeVO;
 

@@ -15,8 +15,8 @@ import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.service.partner.StoreService;
-import com.zbsp.wepaysp.service.report.RptDealerStatService;
+import com.zbsp.wepaysp.api.service.partner.StoreService;
+import com.zbsp.wepaysp.api.service.report.RptDealerStatService;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
 import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 
