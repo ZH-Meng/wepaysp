@@ -74,7 +74,7 @@ public interface WeixinPayDetailsService {
      * @return 保存成功返回保存后的支付明细VO
      * @throws AlreadyExistsException 如果支付明细已存在
      */
-    public Map<String, Object> createPayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
+    public Map<String, Object> doTransCreatePayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
 
     
     /**

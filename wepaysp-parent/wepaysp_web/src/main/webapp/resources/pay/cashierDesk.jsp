@@ -84,7 +84,7 @@
 						<s:textfield name="money" id="money" cssClass="input-cashier"/>
 					</div>
 					<div class="cashier-item">
-						<s:textfield name="code" id="code" cssClass="input-cashier cashier-code" value="请输入收款码" onfocus="codeFocus();" onblur="codeBlur();"/>
+						<s:textfield name="authCode" id="code" cssClass="input-cashier cashier-code" value="请输入收款码" onfocus="codeFocus();" onblur="codeBlur();"/>
 					</div>
 					<div class="cashier-item">
 						<a href="javascript:void(0);" onclick="submit();" id="submitForm" class="cashier-button">输入金额按回车键完成</a>

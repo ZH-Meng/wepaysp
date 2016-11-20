@@ -60,6 +60,7 @@ public class WeixinPackConverter {
             vo.setErrCode(scanPayResData.getErr_code());
             vo.setErrCodeDes(scanPayResData.getErr_code_des());
             
+            vo.setOutTradeNo(scanPayResData.getOut_trade_no());
             //业务返回的具体数据（以下字段在return_code 和result_code 都为SUCCESS 的时候有返回）
             if (ResultCode.SUCCESS.toString().equals(scanPayResData.getResult_code())) {
                 vo.setDeviceInfo(scanPayResData.getDevice_info());
@@ -71,7 +72,6 @@ public class WeixinPackConverter {
                 vo.setCouponFee(StringUtils.isNotBlank(scanPayResData.getCoupon_fee()) ? Integer.parseInt(scanPayResData.getCoupon_fee()) : null);
                 vo.setFeeType(scanPayResData.getFee_type());
                 vo.setTransactionId(scanPayResData.getTransaction_id());
-                vo.setOutTradeNo(scanPayResData.getOut_trade_no());
                 vo.setAttach(scanPayResData.getAttach());
                 vo.setTimeEnd(StringUtils.isNotBlank(scanPayResData.getTime_end()) ? DateUtil.getDate(scanPayResData.getTime_end(), "yyyyMMddHHmmss") : null);
             }

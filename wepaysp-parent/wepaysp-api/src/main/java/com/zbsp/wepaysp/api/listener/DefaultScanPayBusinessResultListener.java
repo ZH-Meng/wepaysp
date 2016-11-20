@@ -37,7 +37,10 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
     private String result = "";
     private String transcationID = "";
     
-    private WeixinPayDetailsService weixinPayDetailsService; 
+    private WeixinPayDetailsService weixinPayDetailsService;
+    public DefaultScanPayBusinessResultListener(WeixinPayDetailsService weixinPayDetailsService) {
+    	this.weixinPayDetailsService = weixinPayDetailsService;
+	}
 
     @Override
     /**
@@ -135,6 +138,14 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
         this.transcationID = transcationID;
     }
     
+	public WeixinPayDetailsService getWeixinPayDetailsService() {
+		return weixinPayDetailsService;
+	}
+
+	public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
+		this.weixinPayDetailsService = weixinPayDetailsService;
+	}
+	
     /**
      * 调用service更新交易明细
      * @param scanPayResData

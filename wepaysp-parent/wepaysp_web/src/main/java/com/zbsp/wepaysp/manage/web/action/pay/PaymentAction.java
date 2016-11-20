@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.manage.web.action.pay;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
@@ -12,6 +13,7 @@ import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
@@ -34,7 +36,8 @@ public class PaymentAction
     
     private String money;// 收银台输入金额，单位为元
     private String authCode;// 扫码支付授权码，设备读取用户微信中的条码或者二维码信息
-
+    
+    private List<WeixinPayDetailsVO> weixinPayDetailsVoList;
     private WeixinPayDetailsService weixinPayDetailsService;
 
     /**
@@ -56,7 +59,7 @@ public class PaymentAction
         paramMap.put("beginTime", TimeUtil.getDayStart(today));
         paramMap.put("endTime", TimeUtil.getDayEnd(today));
         paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
-        weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
+        weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
 
         return "cashierDesk";
     }
@@ -101,7 +104,7 @@ public class PaymentAction
         payDetailsVO.setAuthCode(authCode);
         
         try {
-            Map<String, Object> resultMap = weixinPayDetailsService.createPayAndInvokeWxPay(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            Map<String, Object> resultMap = weixinPayDetailsService.doTransCreatePayAndInvokeWxPay(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             String resCode = MapUtils.getString(resultMap, "resultCode");
             String resDesc = MapUtils.getString(resultMap, "resultDesc");
             payDetailsVO = (WeixinPayDetailsVO) MapUtils.getObject(resultMap, "wexinPayDetailsVO");
@@ -113,8 +116,15 @@ public class PaymentAction
                 logger.info("微信刷卡支付成功！");
                 //setAlertMessage("支付成功！");
             }
+        } catch (IllegalArgumentException e) {
+	       	 logger.warn(e.getMessage());
+	       	 setAlertMessage("支付失败！");
+        } catch (NotExistsException e) {
+        	 logger.warn(e.getMessage());
+        	 setAlertMessage("支付失败！");
         } catch (Exception e) {
-            logger.error("");
+            logger.error(e.getMessage(), e);
+            setAlertMessage("支付失败！");
         }
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -123,7 +133,7 @@ public class PaymentAction
         paramMap.put("beginTime", TimeUtil.getDayStart(today));
         paramMap.put("endTime", TimeUtil.getDayEnd(today));
         paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
-        weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
+        weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
 
         return "cashierDesk";
     }
@@ -159,7 +169,11 @@ public class PaymentAction
         this.authCode = authCode;
     }
 
-    public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
+    public List<WeixinPayDetailsVO> getWeixinPayDetailsVoList() {
+		return weixinPayDetailsVoList;
+	}
+
+	public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
         this.weixinPayDetailsService = weixinPayDetailsService;
     }
 

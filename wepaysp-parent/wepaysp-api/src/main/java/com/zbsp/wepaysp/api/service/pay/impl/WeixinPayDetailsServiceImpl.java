@@ -35,6 +35,23 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 public class WeixinPayDetailsServiceImpl
     extends BaseService
     implements WeixinPayDetailsService {
+	
+	static {// FIXME 暂调试
+		WXPay.initSDKConfiguration(
+                //签名算法需要用到的秘钥
+                "402881c6014672d801014672ef300001",
+                //公众账号ID，成功申请公众账号后获得
+                "wx8a60a03a3b75acf7",
+                //商户ID，成功申请微信支付功能之后通过官方发出的邮件获得
+                "1337800201",
+                //子商户ID，受理模式下必填；
+                "1411727102",
+                //HTTP证书在服务器中的路径，用来加载证书用
+                "D:/60.Key/cert/apiclient_cert.p12",
+                //HTTP证书的密码，默认等于MCHID
+                "1337800201"
+        );
+	}
     
     private SysLogService sysLogService;
 
@@ -328,11 +345,15 @@ public class WeixinPayDetailsServiceImpl
             newPayOrder.setDeviceInfo(store != null ? store.getStoreId() : null);// 非必传 终端设备号(门店号或收银设备ID)
         }
 
-        commonDAO.save(newPayOrder, true);
+        commonDAO.save(newPayOrder, false);
         Date processTime = new Date();
         
         // 记录日志-创建微信支付交易明细
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "新增微信支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo()+ ", 商户ID=" + dealer.getDealerId() + ", 商户姓名=" + dealer.getCompany() + "，消费金额：" + newPayOrder.getTotalFee() + ", 商品详情=" + newPayOrder.getBody() + "]", processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        try {
+        	sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "新增微信支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo()+ ", 商户ID=" + dealer.getDealerId() + ", 商户姓名=" + dealer.getCompany() + "，消费金额：" + newPayOrder.getTotalFee() + ", 商品详情=" + newPayOrder.getBody() + "]", processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        } catch (Exception e) {
+        	logger.warn("记录日志-创建微信支付交易明细失败：" + e.getMessage());
+		}
         
         BeanCopierUtil.copyProperties(newPayOrder, weixinPayDetailsVO);
         return weixinPayDetailsVO;
@@ -368,7 +389,7 @@ public class WeixinPayDetailsServiceImpl
             payDetails.setCashFeeType(StringUtils.isNotBlank(payResultVO.getCashFeeType()) ? payResultVO.getCashFeeType() : "CNY");
             payDetails.setCashFee(payResultVO.getCashFee());
             payDetails.setTimeEnd(payResultVO.getTimeEnd());// 支付完成时间
-            logDescTemp += "支付结果：交易成功" + "，微信支付订单号：" + payDetails.getTransactionId() + "，支付金额：" + payDetails.getCashFee();
+            logDescTemp += "支付结果：交易成功" + "，微信支付订单号：" + payDetails.getTransactionId() + "，支付金额：" + payDetails.getTotalFee();
         } else {
             payDetails.setResultCode(ResultCode.FAIL.toString());
             // errCode
@@ -387,7 +408,7 @@ public class WeixinPayDetailsServiceImpl
     }
 
     @Override
-    public Map<String, Object> createPayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid) {
+    public Map<String, Object> doTransCreatePayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         String resCode = WxPayResult.ERROR.getCode();
         String resDesc = WxPayResult.ERROR.getDesc();
@@ -408,12 +429,13 @@ public class WeixinPayDetailsServiceImpl
         if (StringUtils.equals(PayType.MICROPAY.getValue(), payType)) {// 刷卡支付
             logger.info("开始微信刷卡支付！");
             try {
-                DefaultScanPayBusinessResultListener scanPayListener = new DefaultScanPayBusinessResultListener();// 刷卡支付监听器
+                DefaultScanPayBusinessResultListener scanPayListener = new DefaultScanPayBusinessResultListener(this);// 刷卡支付监听器
                 
                 // 组包、调用刷卡API
                 WXPay.doScanPayBusiness(WeixinPackConverter.weixinPayDetailsVO2ScanPayReq(weixinPayDetailsVO), scanPayListener);
                 
                 String listenerResult = scanPayListener.getResult();
+                transactionId = weixinPayDetailsVO.getTransactionId();// 正常情况业务结果为成功时返回
                 if (StringUtils.equalsIgnoreCase(listenerResult, DefaultScanPayBusinessResultListener.ON_FAIL_BY_RETURN_CODE_ERROR)) {
                     
                 } else if (StringUtils.equalsIgnoreCase(listenerResult, DefaultScanPayBusinessResultListener.ON_FAIL_BY_RETURN_CODE_FAIL)) {
@@ -439,7 +461,7 @@ public class WeixinPayDetailsServiceImpl
                     
                     if (StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), resCode)) {
                         resDesc = WxPayResult.SUCCESS.getDesc();
-                        logger.info("系统订单ID" + outTradeNo + "微信刷卡支付成功，微信支付订单ID=" + payDetails.getTransactionId());
+                        logger.info("系统订单ID=" + outTradeNo + "微信刷卡支付成功，微信支付订单ID=" + payDetails.getTransactionId());
                     } else if (StringUtils.equalsIgnoreCase(WxPayResult.FAIL.getCode(), resCode)) {// 支付失败
                         resCode = StringUtils.isNotBlank(payDetails.getErrCode()) ? payDetails.getErrCode() : WxPayResult.FAIL.getCode();// 错误码
                         resDesc = payDetails.getErrCodeDes();
