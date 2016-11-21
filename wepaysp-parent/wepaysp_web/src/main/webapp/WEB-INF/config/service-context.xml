@@ -61,4 +61,9 @@
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
 	</bean>
 	
+	<bean id="weixinRefundDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainServiceImpl" parent="baseService" >
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="weixinRefundDetailsService" ref="weixinRefundDetailsService" />
+	</bean>
+	
 </beans>

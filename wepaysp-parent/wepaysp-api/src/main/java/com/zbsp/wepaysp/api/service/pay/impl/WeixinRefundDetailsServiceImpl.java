@@ -14,6 +14,7 @@ import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinRefundDetails;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
@@ -224,5 +225,12 @@ public class WeixinRefundDetailsServiceImpl
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }
+
+	@Override
+	public WeixinRefundDetailsVO doTransCreateRefundDetails(WeixinPayDetails weixinPayDetails, String creator,
+			String operatorUserOid, String logFunctionOid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }

@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.api.service.pay;
 import java.util.List;
 import java.util.Map;
 
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 /**
@@ -57,5 +58,16 @@ public interface WeixinRefundDetailsService {
      * @return 符合条件的信息总数
      */
     public int doJoinTransQueryWeixinRefundDetailsCount(Map<String, Object> paramMap);
+    
+    /**
+     * 创建退款明细
+     * @param weixinPayDetails 要退款的支付订单
+     * @param creator 操作名称
+     * @param operatorUserOid 操作用户Oid
+     * @param logFunctionOid 日志记录项Oid
+     * @return 保存成功返回保存后的退款明细VO
+     */
+    public WeixinRefundDetailsVO doTransCreateRefundDetails(WeixinPayDetails weixinPayDetails, String creator, String operatorUserOid, String logFunctionOid);
+
     
 }

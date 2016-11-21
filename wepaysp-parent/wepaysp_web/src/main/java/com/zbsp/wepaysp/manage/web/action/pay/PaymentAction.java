@@ -21,6 +21,7 @@ import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
+import com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -42,7 +43,9 @@ public class PaymentAction
     private List<WeixinPayDetailsVO> weixinPayDetailsVoList;
     private WeixinPayDetailsService weixinPayDetailsService;
     private WeixinPayDetailsMainService weixinPayDetailsMainService;
-
+    
+    private WeixinRefundDetailsMainService weixinRefundDetailsMainService;
+    private String payDetailsOid;
     /**
      * 访问收银台-限定收银员用户
      */
@@ -55,14 +58,7 @@ public class PaymentAction
             setAlertMessage("非收银员不能收银！");
             return "accessDenied";
         }
-        Map<String, Object> paramMap = new HashMap<String, Object>();
-        
-        // 当前收银员当天的收款记录
-        Date today = new Date();
-        paramMap.put("beginTime", TimeUtil.getDayStart(today));
-        paramMap.put("endTime", TimeUtil.getDayEnd(today));
-        paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
-        weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
+        weixinPayDetailsVoList = listTodayPayDetails(manageUser.getDataDealerEmployee().getIwoid());
 
         return "cashierDesk";
     }
@@ -102,7 +98,7 @@ public class PaymentAction
         // 保存交易明细
         WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
         payDetailsVO.setPayType(WeixinPayDetails.PayType.MICROPAY.getValue());// 刷卡支付
-        payDetailsVO.setDealerEmployeeOid(manageUser.getDataDealerEmployee().getIwoid());
+        payDetailsVO.setDealerEmployeeOid(dealerEmployeeOid);
         payDetailsVO.setTotalFee(money1.multiply(new BigDecimal(100)).intValue());// 元转化为分
         payDetailsVO.setAuthCode(authCode);
         
@@ -134,17 +130,56 @@ public class PaymentAction
             setAlertMessage("支付失败！");
         }
 
-        Map<String, Object> paramMap = new HashMap<String, Object>();
+        weixinPayDetailsVoList = listTodayPayDetails(dealerEmployeeOid);
+
+        return "cashierDesk";
+    }
+
+    /**
+     * 收银员点击退款方法执行动作：
+     * 
+     * <pre>
+     *      校验权限；
+     *      保存保存退款明细；
+     *      微信撤销支付（组装刷卡API请求包、调用API）；
+     *      查询当日收银记录
+     * </pre>
+     */
+    public String refund() {
+    	logger.info("开始收银台退款.");
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!isDealerEmployee(manageUser)) {
+            logger.warn("非收银员不能收银！");
+            setAlertMessage("非收银员不能收银！");
+            return "accessDenied";
+        }
+    	if (StringUtils.isBlank(payDetailsOid)) {
+            logger.warn("支付明细Oid为空！");
+            setAlertMessage("非法操作，必须选择一个支付明细进行退款！");
+            return "cashierDesk";
+        }
+    	
+    	String dealerEmployeeOid = manageUser.getDataDealerEmployee().getIwoid();
+    	WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
+    	payDetailsVO.setDealerEmployeeOid(dealerEmployeeOid);
+    	payDetailsVO.setIwoid(payDetailsOid);
+    	
+    	weixinRefundDetailsMainService.cashierDeskRefund(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+    	
+    	weixinPayDetailsVoList = listTodayPayDetails(manageUser.getDataDealerEmployee().getIwoid());
+    	return "cashierDesk";
+    }
+    
+    private List<WeixinPayDetailsVO> listTodayPayDetails(String dealerEmployeeOid) {
+    	Map<String, Object> paramMap = new HashMap<String, Object>();
         // 当前收银员当天的收款记录
         Date today = new Date();
         paramMap.put("beginTime", TimeUtil.getDayStart(today));
         paramMap.put("endTime", TimeUtil.getDayEnd(today));
         paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
-        weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
-
-        return "cashierDesk";
+        return weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
     }
-
+    
     /**
      * 是否是商户员工
      * 
@@ -187,5 +222,13 @@ public class PaymentAction
     public void setWeixinPayDetailsMainService(WeixinPayDetailsMainService weixinPayDetailsMainService) {
         this.weixinPayDetailsMainService = weixinPayDetailsMainService;
     }
+
+	public void setPayDetailsOid(String payDetailsOid) {
+		this.payDetailsOid = payDetailsOid;
+	}
+
+	public void setWeixinRefundDetailsMainService(WeixinRefundDetailsMainService weixinRefundDetailsMainService) {
+		this.weixinRefundDetailsMainService = weixinRefundDetailsMainService;
+	}
 
 }
