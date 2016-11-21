@@ -5,7 +5,6 @@ import com.tencent.business.ScanPayBusiness;
 import com.tencent.protocol.pay_protocol.ScanPayResData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryResData;
 import com.tencent.protocol.reverse_protocol.ReverseResData;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.api.util.WeixinPackConverter;
 
@@ -47,6 +46,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      * 遇到这个问题一般是程序没按照API规范去正确地传递参数导致，请仔细阅读API文档里面的字段说明
      */
     public void onFailByReturnCodeError(ScanPayResData scanPayResData) {
+        updatePayResult(scanPayResData);
         result = ON_FAIL_BY_RETURN_CODE_ERROR;
     }
 
@@ -55,6 +55,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      * 同上，遇到这个问题一般是程序没按照API规范去正确地传递参数导致，请仔细阅读API文档里面的字段说明
      */
     public void onFailByReturnCodeFail(ScanPayResData scanPayResData) {
+        updatePayResult(scanPayResData);
         result = ON_FAIL_BY_RETURN_CODE_FAIL;
     }
 
@@ -63,6 +64,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      * 支付请求API返回的数据签名验证失败，有可能数据被篡改了。遇到这种错误建议商户直接告警，做好安全措施
      */
     public void onFailBySignInvalid(ScanPayResData scanPayResData) {
+        updatePayResult(scanPayResData);
         result = ON_FAIL_BY_SIGN_INVALID;
     }
 
@@ -151,9 +153,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      * @param scanPayResData
      */
     private void updatePayResult(ScanPayResData scanPayResData) {
-        if (ReturnCode.SUCCESS.toString().equals(scanPayResData.getReturn_code())) {
-            weixinPayDetailsService.doTransUpdatePayResult(scanPayResData.getResult_code(), scanPayResData.getErr_code(), WeixinPackConverter.scanPayRes2WeixinPayDetailsVO(scanPayResData));
-        }
+        weixinPayDetailsService.doTransUpdatePayResult(scanPayResData.getReturn_code(), scanPayResData.getResult_code(), WeixinPackConverter.scanPayRes2WeixinPayDetailsVO(scanPayResData));
     }
     
 }

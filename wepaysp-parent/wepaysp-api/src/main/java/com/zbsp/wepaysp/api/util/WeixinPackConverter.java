@@ -34,7 +34,12 @@ public class WeixinPackConverter {
             weixinPayDetailsVO.getSpbillCreateIp(),
             weixinPayDetailsVO.getTimeStart(), 
             weixinPayDetailsVO.getTimeExpire(), 
-            weixinPayDetailsVO.getGoodsTag());
+            weixinPayDetailsVO.getGoodsTag(),
+            weixinPayDetailsVO.getKeyPartner(),
+            weixinPayDetailsVO.getAppid(),
+            weixinPayDetailsVO.getMchId(),
+            weixinPayDetailsVO.getSubMchId()
+            );
         return scanPayReq;
     }
     

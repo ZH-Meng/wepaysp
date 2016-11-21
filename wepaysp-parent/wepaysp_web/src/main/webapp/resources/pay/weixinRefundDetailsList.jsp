@@ -183,16 +183,16 @@
 						  			<td title="<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />">
 						  				<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>">
-						  				<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,###.00"/>">
-						  				<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,###.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 						  			<s:if test="#weixinRefundDetailsVo.resultCode == 'SUCCESS'">
 						  				<s:set var="resultCodeStr">交易成功</s:set>
 						  			</s:if>
-						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == ''FAIL">
+						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == 'FAIL'">
 						  				<s:set var="resultCodeStr">交易失败</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == NULL || #weixinRefundDetailsVo.resultCode == '' ">

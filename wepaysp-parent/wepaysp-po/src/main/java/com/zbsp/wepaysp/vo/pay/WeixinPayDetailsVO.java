@@ -37,12 +37,18 @@ public class WeixinPayDetailsVO
     private String dealerEmployeeId;
     private String partnerId;
 
+    private Integer refundFee;
+    private String refundFlag;
+
     private String dealerEmployeeOid;
-    
+
     private String dealerOid;
     private String storeOid;
     private String notifyUrl;// 接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
 
+    private String certLocalPath;
+    private String certPassword;
+    private String keyPartner;
     private String appid;
     private String subAppid;
     private String mchId;
@@ -76,7 +82,6 @@ public class WeixinPayDetailsVO
     private String errCodeDes;
     private String timeStart;
     private String timeExpire;
-    
 
     public String getIwoid() {
         return iwoid;
@@ -245,11 +250,11 @@ public class WeixinPayDetailsVO
     public void setPartnerId(String partnerId) {
         this.partnerId = partnerId;
     }
-    
+
     public String getDealerEmployeeOid() {
         return dealerEmployeeOid;
     }
-    
+
     public void setDealerEmployeeOid(String dealerEmployeeOid) {
         this.dealerEmployeeOid = dealerEmployeeOid;
     }
@@ -517,21 +522,61 @@ public class WeixinPayDetailsVO
     public void setTimeEnd(Date timeEnd) {
         this.timeEnd = timeEnd;
     }
-    
+
     public String getTimeStart() {
         return timeStart;
     }
-    
+
     public void setTimeStart(String timeStart) {
         this.timeStart = timeStart;
     }
-    
+
     public String getTimeExpire() {
         return timeExpire;
     }
 
     public void setTimeExpire(String timeExpire) {
         this.timeExpire = timeExpire;
+    }
+
+    public String getCertLocalPath() {
+        return certLocalPath;
+    }
+
+    public void setCertLocalPath(String certLocalPath) {
+        this.certLocalPath = certLocalPath;
+    }
+
+    public String getCertPassword() {
+        return certPassword;
+    }
+
+    public void setCertPassword(String certPassword) {
+        this.certPassword = certPassword;
+    }
+
+    public String getKeyPartner() {
+        return keyPartner;
+    }
+
+    public void setKeyPartner(String keyPartner) {
+        this.keyPartner = keyPartner;
+    }
+
+    public Integer getRefundFee() {
+        return refundFee;
+    }
+
+    public void setRefundFee(Integer refundFee) {
+        this.refundFee = refundFee;
+    }
+
+    public String getRefundFlag() {
+        return refundFlag;
+    }
+
+    public void setRefundFlag(String refundFlag) {
+        this.refundFlag = refundFlag;
     }
 
 }

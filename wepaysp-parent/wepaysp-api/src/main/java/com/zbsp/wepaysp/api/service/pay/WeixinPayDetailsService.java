@@ -58,24 +58,6 @@ public interface WeixinPayDetailsService {
      * @return 符合条件的信息总数
      */
     public int doJoinTransQueryWeixinPayDetailsCount(Map<String, Object> paramMap);
-
-    /**
-     * 执行过程：
-     * <pre>
-     *      创建支付明细（交易订单）；
-     *      调用WxPay API；
-     *      更新支付结果到db；
-     *      响应支付结果；
-     * <pre>
-     * @param weixinPayDetailsVO 要保存的支付明细对象 
-     * @param creator 创建人名称
-     * @param operatorUserOid 操作用户Oid
-     * @param logFunctionOid 日志记录项Oid
-     * @return 保存成功返回保存后的支付明细VO
-     * @throws AlreadyExistsException 如果支付明细已存在
-     */
-    public Map<String, Object> doTransCreatePayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
-
     
     /**
      * 创建支付明细（交易订单）

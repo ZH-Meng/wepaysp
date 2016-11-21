@@ -13,12 +13,14 @@ import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -39,6 +41,7 @@ public class PaymentAction
     
     private List<WeixinPayDetailsVO> weixinPayDetailsVoList;
     private WeixinPayDetailsService weixinPayDetailsService;
+    private WeixinPayDetailsMainService weixinPayDetailsMainService;
 
     /**
      * 访问收银台-限定收银员用户
@@ -104,7 +107,7 @@ public class PaymentAction
         payDetailsVO.setAuthCode(authCode);
         
         try {
-            Map<String, Object> resultMap = weixinPayDetailsService.doTransCreatePayAndInvokeWxPay(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            Map<String, Object> resultMap = weixinPayDetailsMainService.createPayAndInvokeWxPay(payDetailsVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             String resCode = MapUtils.getString(resultMap, "resultCode");
             String resDesc = MapUtils.getString(resultMap, "resultDesc");
             payDetailsVO = (WeixinPayDetailsVO) MapUtils.getObject(resultMap, "wexinPayDetailsVO");
@@ -116,12 +119,16 @@ public class PaymentAction
                 logger.info("微信刷卡支付成功！");
                 //setAlertMessage("支付成功！");
             }
+            
+        } catch (InvalidValueException e) {
+            logger.warn(e.getMessage());
+            setAlertMessage("支付失败！");
         } catch (IllegalArgumentException e) {
-	       	 logger.warn(e.getMessage());
-	       	 setAlertMessage("支付失败！");
+            logger.warn(e.getMessage());
+            setAlertMessage("支付失败！");
         } catch (NotExistsException e) {
-        	 logger.warn(e.getMessage());
-        	 setAlertMessage("支付失败！");
+            logger.warn(e.getMessage());
+            setAlertMessage("支付失败！");
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             setAlertMessage("支付失败！");
@@ -175,6 +182,10 @@ public class PaymentAction
 
 	public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
         this.weixinPayDetailsService = weixinPayDetailsService;
+    }
+    
+    public void setWeixinPayDetailsMainService(WeixinPayDetailsMainService weixinPayDetailsMainService) {
+        this.weixinPayDetailsMainService = weixinPayDetailsMainService;
     }
 
 }

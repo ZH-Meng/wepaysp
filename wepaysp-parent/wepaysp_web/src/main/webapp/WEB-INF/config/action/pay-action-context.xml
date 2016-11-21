@@ -22,6 +22,7 @@
 	</bean>
 	
 	<bean id="paymentAction" class="com.zbsp.wepaysp.manage.web.action.pay.PaymentAction" scope="prototype">
-		<property name="weixinPayDetailsService" ref="weixinPayDetailsService"></property>
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="weixinPayDetailsMainService" ref="weixinPayDetailsMainService" />
 	</bean>
 </beans>

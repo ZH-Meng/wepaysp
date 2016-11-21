@@ -130,8 +130,8 @@
 									<td class="bgright"  title="<s:property value="#rptDealerStatVo.totalAmount" />">
 						  				<s:property value="#rptDealerStatVo.totalAmount" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>">
-						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,###.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

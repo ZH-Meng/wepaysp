@@ -124,4 +124,11 @@ public class EnumDefine {
 
     }
     
+    /**
+     * 是否可以退款标识
+     */
+    public static enum RefundFlag {
+        YES,NO;
+    }
+    
 }

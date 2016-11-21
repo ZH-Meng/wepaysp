@@ -118,7 +118,7 @@
 		  					<s:iterator value="weixinPayDetailsVoList" var="weixinPayDetailsVo" status="rowStatus">
 					  		<tr>
 					  			<td>
-					  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
+					  				<s:property value="#rowStatus.index + 1" />
 					  			</td>
 					  			<td title="<s:property value="#weixinPayDetailsVo.outTradeNo" />">
 					  				<s:property value="#weixinPayDetailsVo.outTradeNo" />
@@ -145,20 +145,36 @@
 					  			<td title="<s:property value="#weixinPayDetailsVo.bankType" />">
 					  				<s:property value="#weixinPayDetailsVo.bankType" />
 					  			</td>
-					  			<td title="<s:property value="#weixinPayDetailsVo.resultCode" />">
-					  				<s:property value="#weixinPayDetailsVo.resultCode" />
+					  			<s:if test="#weixinPayDetailsVo.resultCode == 'SUCCESS'">
+					  				<s:set var="resultCodeStr">支付成功</s:set>
+					  			</s:if>
+					  			<s:elseif test="#weixinPayDetailsVo.resultCode == 'FAIL'">
+					  				<s:set var="resultCodeStr">支付失败</s:set>
+					  			</s:elseif>
+					  			<s:elseif test="#weixinPayDetailsVo.resultCode == NULL || #weixinPayDetailsVo.resultCode == '' ">
+					  				<s:set var="resultCodeStr">处理中</s:set>
+								</s:elseif>
+					  			<td title="<s:property value="resultCodeStr" />">
+					  				<s:property value="#resultCodeStr" />
 					  			</td>
-					  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>">
-					  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,###.00"/>
+					  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
+					  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
 					  			</td>
 					  			<td title="<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
 					  				<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 					  			</td>
-					  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.refundFee/100}" pattern="###,###,###,###.00"/>">
-						  				<fmt:formatNumber value="${weixinPayDetailsVo.refundFee/100}" pattern="###,###,###,###.00"/>
+					  			<s:if test="#weixinPayDetailsVo.refundFlag == 'yes' || #weixinPayDetailsVo.refundFlag == 'YES'">
+					  				<td>
+					  					<a href="javascript:void(0);" onclick="refund('<s:property value="#weixinPayDetailsVo.iwoid" />')">退款</a>
+					  				</td>
+					  			</s:if>
+					  			<s:else>
+						  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${weixinPayDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-					  			<td title="<s:property value="#weixinPayDetailsVo.printFlag" />">
-					  				<s:property value="#weixinPayDetailsVo.printFlag" />
+					  			</s:else>
+					  			<td>
+					  				<a href="javascript:void(0);" onclick="print('<s:property value="#weixinPayDetailsVo.iwoid" />')">打印</a>
 					  			</td>
 					  		</tr>
 					  		</s:iterator>
@@ -215,6 +231,10 @@
 				return;
 			}
 			$("#cashierForm").submit();
+		}
+		
+		function printPayDetails() {
+			
 		}
 		
 		function formkeydown(){

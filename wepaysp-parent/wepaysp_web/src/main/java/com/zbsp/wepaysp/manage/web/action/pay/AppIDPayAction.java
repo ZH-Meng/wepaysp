@@ -130,13 +130,13 @@ public class AppIDPayAction
         if ("SUCCESS".equals(returnCode)) {// 下单请求通信成功
             // 校验签名
             String sign = MapUtils.getString(resultMap, "sign");
-            String checkSign = Signature.getSign(resultMap);
+            /*String checkSign = Signature.getSign(resultMap);
             if (sign.equals(checkSign)) {// 签名成功
                 // 更新交易明细
             } else {
                 logger.warn("微信下单回包签名校验失败！");
                 return ERROR;
-            }
+            }*/
         } else {
             logger.error("微信下单通信失败：" + resultMap.get("return_msg"));
             return ERROR;
