@@ -37,7 +37,7 @@
 	    <div class="welcome">
 	    	<p class="welimg"><img src="<%=request.getContextPath()%>/images/forbid.gif" class="img" /><span class="clock_txt">您无权访问此功能，请<a href="javascript:history.go(-1);">返回上一步</a></span></p>
 	    </div>
-	    <div class="welbottom">版权所有：深圳市有卡科技有限公司  Copyright &copy; 2016-2026,All Rights Reserved</div>
+	    <div class="welbottom">版权所有：Copyright &copy; 淄博微盘信息科技有限公司</div>
 	</div>
 	<c:out value="${requestScope.messageBean.alertMessage }"  escapeXml="false" />
 </body>

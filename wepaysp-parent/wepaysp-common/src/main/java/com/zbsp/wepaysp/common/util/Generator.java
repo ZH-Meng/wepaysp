@@ -29,7 +29,7 @@ public final class Generator {
      * 
      * @return 
      */
-    public static String generateSequenceYYYYMMddNum(int nextval, long multiple) {
+    public static String generateSequenceYYYYMMddNum(long nextval, long multiple) {
         String seqPrefix = DateUtil.getDate(new Date(), "YYYYMMdd");
         return (new BigDecimal(Long.valueOf(seqPrefix)).multiply(new BigDecimal(multiple)).add(new BigDecimal(nextval))).toString();
     }

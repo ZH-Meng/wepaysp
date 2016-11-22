@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.zbsp.wepaysp.common.config.SysSequenceCode;
+import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.EnumDefine.RefundFlag;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
@@ -288,8 +290,8 @@ public class WeixinPayDetailsServiceImpl
         if (StringUtils.isNotBlank(weixinPayDetailsVO.getStoreOid())) {
             store = commonDAO.findObject(Store.class, weixinPayDetailsVO.getStoreOid());
         }
-
-        // 查找服务商
+        
+        // FIXME 查找服务商，先从内存再到数据库查询，如果都没有则报错
         Partner partner = commonDAO.findObject(Partner.class, dealer.getPartner1Oid());
         if (partner == null) {
             throw new NotExistsException("服务商不存在！");
@@ -299,6 +301,15 @@ public class WeixinPayDetailsServiceImpl
         
         // 创建订单
         WeixinPayDetails newPayOrder = new WeixinPayDetails();
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        // 获取 服务商员工ID下一个序列值
+        String sql = "select nextval('" + SysSequenceCode.PAY_ORDER + "') as sequence_value";
+        Object seqObj = commonDAO.findObject(sql, sqlMap, true);
+        if (seqObj == null) {
+            throw new IllegalArgumentException("支付订单Id对应序列记录不存在");
+        }
+        newPayOrder.setOutTradeNo(Generator.generateSequenceYYYYMMddNum((Integer)seqObj, SysSequenceMultiple.PAY_ORDER));// 商户订单号
+        
         newPayOrder.setIwoid(Generator.generateIwoid());
         /*--------系统服务商、业务员、商户、门店、收银员-------*/
         newPayOrder.setPartner(dealer.getPartner());
@@ -335,7 +346,6 @@ public class WeixinPayDetailsServiceImpl
         newPayOrder.setSubMchId(dealer.getSubMchId());// 子商户号
         // newPayOrder.setNonceStr(Generator.generateRandomString(32));//FIXME 随机字符串，sdk会自动生成
         newPayOrder.setBody(dealer.getCompany() + (store == null ? "" : "-" + store.getStoreName()));// 商品描述 线下门店——门店品牌名-城市分店名-实际商品名称
-        newPayOrder.setOutTradeNo(Generator.generateIwoid());// 商户订单号
         
         // TODO APP和网页支付提交用户端ip，Native支付填调用微信支付API的机器IP，刷卡支付：调用微信支付API的机器IP
         newPayOrder.setSpbillCreateIp(weixinPayDetailsVO.getSpbillCreateIp());// 终端IP

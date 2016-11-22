@@ -1,13 +1,3 @@
-<%--
-/*
-* 
-* 创建者：杨帆
-* 创建日期：2015年6月9日
-*
-* 版权所有(C) 2011-2014。英泰伟业科技(北京)有限公司。
-* 保留所有权利。
-*/
---%>
 <%@page import="org.springframework.security.core.context.SecurityContextHolder"%>
 <%@page import="com.zbsp.wepaysp.manage.web.security.ManageUser"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -16,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>省级积分后台管理系统</title>
+	<title>微盘支付后台管理系统</title>
 </head>
 <%
 	ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

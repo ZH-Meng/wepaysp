@@ -1,20 +1,10 @@
-<%--
-/*
-* 
-* 创建者：杨帆
-* 创建日期：2015年6月9日
-*
-* 版权所有(C) 2011-2014。英泰伟业科技(北京)有限公司。
-* 保留所有权利。
-*/
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>省级积分服务管理后台</title>
+	<title>微盘支付后台管理系统</title>
 	<link href="<%=request.getContextPath()%>/css/zxstyle.css" rel="stylesheet" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
@@ -62,7 +52,7 @@
 				</li>
 			</ul>
 		</div>
-		<div class="bottom">版权所有：Copyright &copy; 2016 英泰伟业科技（北京）有限公司</div>
+		<div class="bottom">版权所有：Copyright &copy; 淄博微盘信息科技有限公司</div>
 	</div>
 	<script type="text/javascript">
 		if (window != top){     
