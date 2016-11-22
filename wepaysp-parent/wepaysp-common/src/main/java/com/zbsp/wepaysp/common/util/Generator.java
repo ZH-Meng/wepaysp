@@ -20,8 +20,18 @@ import java.util.UUID;
  */
 public final class Generator {
     public static void main(String[] args) {
-        System.out.println(generateSequenceNum(1, 100000));
+        System.out.println(generateSequenceYYYYMMddNum(1, 10000000000L));
         System.out.println(generateRandomNumber(32));
+    }
+    
+    /**
+     * 生成YYMMdd+五位数序列值，例如：2016102700001.
+     * 
+     * @return 
+     */
+    public static String generateSequenceYYYYMMddNum(int nextval, long multiple) {
+        String seqPrefix = DateUtil.getDate(new Date(), "YYYYMMdd");
+        return (new BigDecimal(Long.valueOf(seqPrefix)).multiply(new BigDecimal(multiple)).add(new BigDecimal(nextval))).toString();
     }
     
     /**

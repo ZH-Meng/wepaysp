@@ -21,5 +21,11 @@ public class SysSequenceMultiple {
 
     /** 商户员工（收银员） 序列名中1的整数倍数 -> dealer_employee表 dealerEmployeeId */
     public static int DEALER_EMPLOYEE = 100000;
+    
+    /** 支付订单ID 序列名中1的整数倍数 -> weixin_pay_details表 outTradeNo */
+    public static long PAY_ORDER = 10000000000L;
+    
+    /** 退款订单ID 序列名中1的整数倍数  -> weixin_refund_details表 outTradeNo */
+    public static long REFUND_ORDER = 10000000000L;
 
 }

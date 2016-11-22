@@ -105,12 +105,16 @@
                                 <th>订单号</th>
 	                            <th>设备号</th>
                                 <th>支付方式</th>
+                                <%--
                                 <th>交易银行</th>
+                                --%>
                                 <th>订单状态</th>
                                 <th>订单金额</th>
                                 <th>时间</th>
+                                <%-- 
                                 <th>退款</th>
                                 <th>打印</th>
+                                --%>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,9 +146,11 @@
 					  			<td title="<s:property value="#payTypeStr" />">
 					  				<s:property value="#payTypeStr" />
 					  			</td>
+					  			<%--
 					  			<td title="<s:property value="#weixinPayDetailsVo.bankType" />">
 					  				<s:property value="#weixinPayDetailsVo.bankType" />
 					  			</td>
+					  			--%>
 					  			<s:if test="#weixinPayDetailsVo.resultCode == 'SUCCESS'">
 					  				<s:set var="resultCodeStr">支付成功</s:set>
 					  			</s:if>
@@ -163,6 +169,7 @@
 					  			<td title="<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
 					  				<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 					  			</td>
+					  			<%--
 					  			<s:if test="#weixinPayDetailsVo.refundFlag == 'yes' || #weixinPayDetailsVo.refundFlag == 'YES'">
 					  				<td>
 					  					<a href="javascript:void(0);" onclick="refund('<s:property value="#weixinPayDetailsVo.iwoid" />')">退款</a>
@@ -173,9 +180,12 @@
 						  				<fmt:formatNumber value="${weixinPayDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 					  			</s:else>
+					  			--%>
+					  			<%--
 					  			<td>
 					  				<a href="javascript:void(0);" onclick="print('<s:property value="#weixinPayDetailsVo.iwoid" />')">打印</a>
 					  			</td>
+					  			 --%>
 					  		</tr>
 					  		</s:iterator>
 		  				</s:if>

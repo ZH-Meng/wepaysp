@@ -21,5 +21,11 @@ public class SysSequenceCode {
 
     /** 商户员工（收银员） 序列名 -> dealer_employee表 dealerEmployeeId */
     public static String DEALER_EMPLOYEE = "sequence_dealer_employee";
+    
+    /** 支付订单ID 序列名 -> weixin_pay_details表 outTradeNo */
+    public static String PAY_ORDER = "sequence_pay_order";
+    
+    /** 退款订单ID 序列名 -> weixin_refund_details表 outTradeNo */
+    public static String REFUND_ORDER = "sequence_refund_order";
 
 }
