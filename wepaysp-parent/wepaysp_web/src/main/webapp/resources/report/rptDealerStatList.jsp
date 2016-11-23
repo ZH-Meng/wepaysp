@@ -113,11 +113,11 @@
 						  			<td title="<s:property value="#rptDealerStatVo.dealerName" />">
 						  				<s:property value="#rptDealerStatVo.dealerName" />
 						  			</td>
-						  			<td title="<s:property value="#rptDealerStatVo.storeName" />">
-						  				<s:property value="#rptDealerStatVo.storeName" />
-						  			</td>
 						  			<td title="<s:property value="#rptDealerStatVo.storeId" />">
 						  				<s:property value="#rptDealerStatVo.storeId" />
+						  			</td>
+						  			<td title="<s:property value="#rptDealerStatVo.storeName" />">
+						  				<s:property value="#rptDealerStatVo.storeName" />
 						  			</td>
 						  			<s:if test="listType == 'dealerEmployee'">
 							  			<td title="<s:property value="#rptDealerStatVo.dealerEmployeeId" />">

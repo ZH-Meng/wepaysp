@@ -16,7 +16,10 @@
 		<security:intercept-url pattern="/tools/**/*" filters="none" />
 		<security:intercept-url pattern="/adImages/**/*" filters="none" />
 		<security:intercept-url pattern="/index.jsp" filters="none" />
+		<!-- <security:intercept-url pattern="/noAuthResources/pay/appidpay.action*" filters="none" /> -->
 		
+		<!-- <security:intercept-url pattern="/noAuthResources/*/*" access="IS_AUTHENTICATED_ANONYMOUSLY" /> -->
+		<security:intercept-url pattern="/noAuthResources/pay/appidpay!wxCallBack.action*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<!-- 所有需要登录后访问的页面存放在/resources/目录下 -->
 		<security:intercept-url pattern="/resources/*/*" access="IS_AUTHENTICATED_FULLY" />
 

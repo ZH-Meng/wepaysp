@@ -18,11 +18,13 @@
 			<result name="cashierDesk">/resources/pay/cashierDesk.jsp</result>
 		</action>
 		
+	</package>
+	
+	<package name="jspay" namespace="/noAuthResources/pay" extends="wepaysp-manage-default">
 		<!-- 公众号支付 -->
-		<action name="appidpay" class="appIDPayAction">
-			<result name="createOrder">/resources/pay/createOrder.jsp</result>
+		<action name="appidpay" class="appidPayAction">
+			<result name="wxCallBack">/noAuthResources/pay/createOrder.jsp</result>
+			<result name="JSPAY">/noAuthResources/pay/JSPay.jsp</result>
 		</action>
-		
-		
 	</package>
 </struts>

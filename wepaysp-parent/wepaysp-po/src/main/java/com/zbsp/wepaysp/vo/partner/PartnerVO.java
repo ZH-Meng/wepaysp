@@ -34,6 +34,8 @@ public class PartnerVO
     private String loginPwd;
     private String parentCompany;
     private String partnerId;
+    private String appid;
+    private String appsecret;
 
     public String getIwoid() {
         return iwoid;
@@ -219,13 +221,13 @@ public class PartnerVO
         this.loginPwd = loginPwd;
     }
 
-	public String getParentCompany() {
-		return parentCompany;
-	}
+    public String getParentCompany() {
+        return parentCompany;
+    }
 
-	public void setParentCompany(String parentCompany) {
-		this.parentCompany = parentCompany;
-	}
+    public void setParentCompany(String parentCompany) {
+        this.parentCompany = parentCompany;
+    }
 
     public String getPartnerId() {
         return partnerId;
@@ -233,6 +235,22 @@ public class PartnerVO
 
     public void setPartnerId(String partnerId) {
         this.partnerId = partnerId;
+    }
+
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
+    }
+
+    public String getAppsecret() {
+        return appsecret;
+    }
+
+    public void setAppsecret(String appsecret) {
+        this.appsecret = appsecret;
     }
 
 }

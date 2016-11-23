@@ -540,6 +540,7 @@ public class RptDealerStatServiceImpl
         List statrList = null;
 
         sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmount), sum(d.totalMoney) from " + poName + " d where 1=1");
+        sql.append(" and d.dealerEmployeeOid is not null and d.dealerEmployeeOid <>'' ");// 排除收银员为空
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
 
@@ -622,6 +623,7 @@ public class RptDealerStatServiceImpl
         StringBuffer sql = new StringBuffer();
 
         sql.append("select count(distinct d.dealerEmployeeOid) from " + poName + " d where 1=1");
+        sql.append(" and d.dealerEmployeeOid is not null and d.dealerEmployeeOid <>'' ");// 排除收银员为空
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
 

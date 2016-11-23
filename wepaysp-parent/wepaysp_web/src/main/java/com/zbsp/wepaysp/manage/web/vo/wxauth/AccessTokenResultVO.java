@@ -6,6 +6,9 @@ public class AccessTokenResultVO
     implements Serializable {
 
     private static final long serialVersionUID = -3987495109135961662L;
+    private String errcode;
+    private String errmsg;
+    
     private String access_token;
     private Long expires_in;
     private String refresh_token;
@@ -59,6 +62,27 @@ public class AccessTokenResultVO
 
     public void setUnionid(String unionid) {
         this.unionid = unionid;
+    }
+    
+    public String getErrcode() {
+        return errcode;
+    }
+    
+    public void setErrcode(String errcode) {
+        this.errcode = errcode;
+    }
+    
+    public String getErrmsg() {
+        return errmsg;
+    }
+    
+    public void setErrmsg(String errmsg) {
+        this.errmsg = errmsg;
+    }
+
+    @Override
+    public String toString() {
+        return "AccessTokenResultVO [errcode=" + errcode + ", errmsg=" + errmsg + ", access_token=" + access_token + ", expires_in=" + expires_in + ", refresh_token=" + refresh_token + ", openid=" + openid + ", scope=" + scope + ", unionid=" + unionid + "]";
     }
 
 }
