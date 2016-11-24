@@ -112,11 +112,11 @@
             <artifactId>httpclient-cache</artifactId>
             <version>${httpcomponents.version}</version>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
             <version>${httpcomponents.version}</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
