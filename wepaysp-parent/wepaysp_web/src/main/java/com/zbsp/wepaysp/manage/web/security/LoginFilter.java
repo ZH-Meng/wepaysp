@@ -55,7 +55,7 @@ public class LoginFilter implements Filter {
                 httpRequest.getRequestDispatcher("/index.jsp").forward(httpRequest, httpResponse);
                 return;
             }                
-        } else if (httpRequest.getRequestURI().indexOf("/noAuthResources/pay/appidpay") != -1) {//FIXE 公众号支付
+        } else if (httpRequest.getRequestURI().indexOf("/nostate/") != -1) {//所有不需要登录拦截的请求
             
         } else {
         	if (session == null || session.getAttribute("loginState") == null) {

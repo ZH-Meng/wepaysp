@@ -15,6 +15,7 @@
 		<hibernate.version>3.6.7.Final</hibernate.version>
 		<struts.version>2.3.15.1</struts.version>
 		<log4j.version>2.5</log4j.version>
+		<httpcomponents.version>4.4.1</httpcomponents.version>
 	</properties>
 
 	<dependencies>

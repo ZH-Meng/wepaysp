@@ -1,14 +1,20 @@
 package com.zbsp.wepaysp.manage.web.action.pay;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.struts2.interceptor.SessionAware;
+import org.apache.struts2.ServletActionContext;
 
 import com.zbsp.wepaysp.common.constant.WxApiUrl;
+import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -19,8 +25,9 @@ import com.zbsp.wepaysp.common.http.httpclient.HttpClientUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.vo.wxauth.AccessTokenResultVO;
-import com.zbsp.wepaysp.manage.web.vo.wxauth.JSPayReqData;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.tencent.protocol.unified_order_protocol.JSPayReqData;
+import com.tencent.protocol.unified_order_protocol.WxPayNotifyResultData;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
@@ -34,11 +41,10 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
  * @author 孟郑宏
  */
 public class AppIDPayAction
-    extends BaseAction
-    implements SessionAware {
+    extends BaseAction {
+    
 
     private static final long serialVersionUID = -7528241554406736862L;
-    private Map<String, Object> session;
 
     private String partnerOid;
     private String dealerOid;
@@ -47,12 +53,13 @@ public class AppIDPayAction
     private String money;
 
     /**
-     * code作为换取access_token和openid的票据，每次用户授权带上的code将不一样，code只能使用一次，5分钟未被使用自动过期。<br>
+     * code作为换取access_token和openid的票据，每次用户授权带上的code将不一样，code只能使用一次，（5分钟未被使用自动过期，不确定）<br>
      * 若用户禁止授权，则重定向后不会带上code参数
      */
     private String code;
     /** 用户在公众号的标识 */
     private String openid;
+    private String state;
     private String wxPayNotifyURL;
     /** JS支付 请求包 */
     private JSPayReqData jsPayReqData;
@@ -79,8 +86,8 @@ public class AppIDPayAction
             return ERROR;
         }
         // FIXME 通过PartnerVO获取
-        String appid = "wx8a60a03a3b75acf7";
-        String appsecret = "0f7dbf1be06f76af581f5a17058d09d6";
+        String appid = DevParam.APPID.getValue();
+        String appsecret = DevParam.APPSECRET.getValue();
         String getAccessTokenURL = WxApiUrl.JSAPI_GET_ACCESS_TOKEN.replace("APPID", appid).replace("SECRET", appsecret).replace("CODE", code);
         // String refreshAccessTokenURL = WxApiUrl.JSAPI_REFRESH_ACCESS_TOKEN.replace("APPID", "").replace("REFRESH_TOKEN", "");// 刷新access_token的URL设置方式
 
@@ -144,14 +151,15 @@ public class AppIDPayAction
         payDetailsVO.setTotalFee(orderMoney.multiply(new BigDecimal(100)).intValue());// 元转化为分
 
         try {
-            Map<String, Object> resultMap = weixinPayDetailsMainService.createPayAndInvokeWxPay(payDetailsVO, null, null, null);
+            Map<String, Object> resultMap = weixinPayDetailsMainService.createPayAndInvokeWxPay(payDetailsVO, openid, null, null);
             String resCode = MapUtils.getString(resultMap, "resultCode");
             String resDesc = MapUtils.getString(resultMap, "resultDesc");
-            jsPayReqData = (JSPayReqData) MapUtils.getObject(resultMap, "jsPayRequestData");// JS支付接口请求参数包
+            jsPayReqData = (JSPayReqData) MapUtils.getObject(resultMap, "jsPayReqData");// JS支付接口请求参数包
 
             if (!StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), resCode)) {// 公众号下单失败
                 logger.warn("公众号下单失败，错误码：" + resCode + "，错误描述：" + resDesc);
                 setAlertMessage(resDesc);
+                return "wxCallBack";
             } else {
                 logger.info("公众号下单成功，跳转支付页面！");
             }
@@ -172,6 +180,27 @@ public class AppIDPayAction
 
         return "JSPAY";
     }
+    
+    public void wxPayNotify() {// FIXME 迁移至restFul 接口
+        // 校验签名
+        HttpServletRequest request = ServletActionContext.getRequest();
+        HttpServletResponse response = ServletActionContext.getResponse();
+        StringBuffer xmlStr = new StringBuffer();
+        try {
+            BufferedReader reader = request.getReader();
+
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                xmlStr.append(line);
+            }
+            logger.debug("支付回调通知：" + xmlStr.toString());
+            
+            WxPayNotifyResultData result = weixinPayDetailsMainService.handleWxPayNotify(xmlStr.toString());
+            response.getWriter().write(result.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 检查微信网页授权回调的系统URL中参数是否完整和正确
@@ -185,7 +214,7 @@ public class AppIDPayAction
             return false;
         }
         // 校验商户等参数
-        if (StringUtils.isBlank(partnerOid) && StringUtils.isBlank(dealerOid)) {
+        if (StringUtils.isBlank(partnerOid) || StringUtils.isBlank(dealerOid)) {
             logger.warn("授权链接有误或者回调错误，导致参数缺失，partnerOid：" + partnerOid + ",dealerOid：" + dealerOid);
             return false;
         }
@@ -243,11 +272,6 @@ public class AppIDPayAction
         this.money = money;
     }
 
-    @Override
-    public void setSession(Map<String, Object> session) {
-        this.session = session;
-    }
-
     public String getOpenid() {
         return openid;
     }
@@ -272,6 +296,14 @@ public class AppIDPayAction
         this.dealerName = dealerName;
     }
     
+    public void setCode(String code) {
+        this.code = code;
+    }
+    
+    public void setState(String state) {
+        this.state = state;
+    }
+
     public void setWxPayNotifyURL(String wxPayNotifyURL) {
         this.wxPayNotifyURL = wxPayNotifyURL;
     }

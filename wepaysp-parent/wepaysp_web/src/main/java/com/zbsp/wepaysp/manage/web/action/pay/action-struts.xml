@@ -20,11 +20,11 @@
 		
 	</package>
 	
-	<package name="jspay" namespace="/noAuthResources/pay" extends="wepaysp-manage-default">
+	<package name="appidpay" namespace="/nostate/pay" extends="global-default">
 		<!-- 公众号支付 -->
 		<action name="appidpay" class="appidPayAction">
-			<result name="wxCallBack">/noAuthResources/pay/createOrder.jsp</result>
-			<result name="JSPAY">/noAuthResources/pay/JSPay.jsp</result>
+			<result name="wxCallBack">/resources/pay/wxCallBack.jsp</result>
+			<result name="JSPAY">/resources/pay/JSPay.jsp</result>
 		</action>
 	</package>
 </struts>

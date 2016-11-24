@@ -31,6 +31,6 @@
 		<property name="dealerService" ref="dealerService" />
 		<property name="partnerService" ref="partnerService" />
 		<property name="weixinPayDetailsMainService" ref="weixinPayDetailsMainService" />
-		<property name="wxPayNotifyURL" value="testURL" />
+		<property name="wxPayNotifyURL" value="https://api.payqianyan.com/nostate/pay/appidpay!wxPayNotify.action" />
 	</bean>
 </beans>

@@ -8,7 +8,18 @@
 	<constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
 	<constant name="struts.multipart.maxSize" value="50000000"/>
 	
-	<package name="wepaysp-manage-default" extends="struts-default">
+	<package name="global-default" extends="struts-default">
+		<global-results>
+			<result name="login">/index.jsp</result>
+			<result name="error">/resources/include/error.jsp</result>
+			<result name="accessDenied">/resources/include/accessDenied.jsp</result>
+		</global-results>
+		<global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error"/>
+        </global-exception-mappings>
+	</package>
+	
+	<package name="wepaysp-manage-default" extends="global-default">
 		<interceptors>
 	        <interceptor name="loginAuthentication" class="com.zbsp.wepaysp.manage.web.security.ManageLoginInterceptor"/>
 	        <interceptor-stack name="manageStack">
@@ -17,14 +28,6 @@
 	        </interceptor-stack>
     	</interceptors>
     	<default-interceptor-ref name="manageStack"></default-interceptor-ref>
-    	<global-results>
-			<result name="login">/index.jsp</result>
-			<result name="error">/resources/include/error.jsp</result>
-			<result name="accessDenied">/resources/include/accessDenied.jsp</result>
-		</global-results>
-		<global-exception-mappings>
-            <exception-mapping exception="java.lang.Exception" result="error"/>
-        </global-exception-mappings>
 	</package>
 	
 	<include file="com/zbsp/wepaysp/manage/web/action/common/action-struts.xml" />

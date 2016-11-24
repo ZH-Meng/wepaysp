@@ -46,7 +46,6 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      * 遇到这个问题一般是程序没按照API规范去正确地传递参数导致，请仔细阅读API文档里面的字段说明
      */
     public void onFailByReturnCodeError(ScanPayResData scanPayResData) {
-        updatePayResult(scanPayResData);
         result = ON_FAIL_BY_RETURN_CODE_ERROR;
     }
 

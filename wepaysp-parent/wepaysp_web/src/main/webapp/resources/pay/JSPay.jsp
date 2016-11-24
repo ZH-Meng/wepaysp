@@ -12,18 +12,19 @@
 		function onBridgeReady() {
 		    WeixinJSBridge.invoke(
 		       'getBrandWCPayRequest', {
-		           "appId" : "wx2421b1c4370ec43b",     //公众号名称，由商户传入     
-		           "timeStamp" : "1395712654",         //时间戳，自1970年以来的秒数     
-		           "nonceStr" : "e61463f8efa94090b1f366cccfbbb444", //随机串     
-		           "package" : "prepay_id=u802345jgfjsdfgsdg888",     
+		           "appId" : "${jsPayReqData.appId}",     //公众号名称，由商户传入     
+		           "timeStamp" : "${jsPayReqData.timeStamp}",         //时间戳，自1970年以来的秒数     
+		           "nonceStr" : "${jsPayReqData.nonceStr}", //随机串     
+		           "package" : "${jsPayReqData.dataPackage}",     
 		           "signType" : "MD5",         //微信签名方式：     
-		           "paySign" : "70EA570631E4BB79628FBCA90534C63FF7FADD89" //微信签名 
+		           "paySign" : "${jsPayReqData.paySign}" //微信签名 
 		        },
 		       
 		        function(res){     
 		            if (res.err_msg == "get_brand_wcpay_request:ok" ) {// 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-	        		alert("支付成功");
-	                window.location.href="/student/student_booking";
+		           		//TODO 请求系统，根据真实返回结果来响应
+	        			alert("支付成功");
+	                	window.location.href="/student/student_booking";
 		            } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
 			           	alert("支付过程中用户取消");
 			           	window.location.href="student_pay.jsp";

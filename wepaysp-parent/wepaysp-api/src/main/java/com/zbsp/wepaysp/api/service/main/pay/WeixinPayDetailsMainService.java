@@ -2,6 +2,7 @@ package com.zbsp.wepaysp.api.service.main.pay;
 
 import java.util.Map;
 
+import com.tencent.protocol.unified_order_protocol.WxPayNotifyResultData;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -26,5 +27,13 @@ public interface WeixinPayDetailsMainService {
      * @throws AlreadyExistsException 如果支付明细已存在
      */
     public Map<String, Object> createPayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
+
+    /**
+     * 处理微信支付结果通知
+     * 
+     * @param respXmlString 结果通知XML 字符串
+     * @return 系统处理结果
+     */
+    public WxPayNotifyResultData handleWxPayNotify(String respXmlString);
 
 }

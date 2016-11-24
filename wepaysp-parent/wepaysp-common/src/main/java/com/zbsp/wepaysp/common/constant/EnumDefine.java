@@ -131,4 +131,30 @@ public class EnumDefine {
         YES,NO;
     }
     
+    /**
+     * 开发过程使用参数
+     */
+    public static enum DevParam {
+        APPID("wx8a60a03a3b75acf7"),
+        APPSECRET("0f7dbf1be06f76af581f5a17058d09d6"),
+        MCHID("1337800201"),
+        KEY("402881c6014672d801014672ef300001"),
+        CERT_LOCAL_PATH ("C:/apiclient_cert.p12"),
+        CERT_PASSWORD ("1337800201");
+        
+        private String value;
+        
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        private DevParam(String value) {
+            this.value = value;
+        }
+    }
+    
 }

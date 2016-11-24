@@ -74,9 +74,18 @@ public interface WeixinPayDetailsService {
      * 更新支付结果
      * 
      * @param returnCode 业务结果 SUCCESS/FAIL，FAIL时错误信息详见errCode
+     * @param resultCode 业务结果码
+     * @param payResultVO 封装的支付结果VO
+     */
+    public void doTransUpdatePayResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO);
+
+    /**
+     * 更新统一下单结果
+     * 
+     * @param returnCode 业务结果 SUCCESS/FAIL，FAIL时错误信息详见errCode
      * @param errCode 业务错误码
      * @param payResultVO 封装的支付结果VO
      */
-    public void doTransUpdatePayResult(String resultCode, String errCode, WeixinPayDetailsVO payResultVO);
+    public void doTransUpdateOrderResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO);
 
 }

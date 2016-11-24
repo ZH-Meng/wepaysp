@@ -79,7 +79,7 @@
 </head>
 <body>
 	<div class="m-app-wrapper">
-		<form name="orderForm" action="<%=request.getContextPath()%>/resources/pay/appidpay!createOrder.action"  method="post">
+		<form id="orderForm" action="<%=request.getContextPath()%>/nostate/pay/appidpay!createOrder.action"  method="post">
 			<%-- <s:hidden name="partnerOid"/> --%>
 			<s:hidden name="dealerOid"/>
 			<s:hidden name="storeOid"/>

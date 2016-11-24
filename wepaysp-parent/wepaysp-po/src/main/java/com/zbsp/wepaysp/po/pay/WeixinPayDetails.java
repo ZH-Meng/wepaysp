@@ -71,6 +71,8 @@ public class WeixinPayDetails
     private Date timeEnd;
     private Date transBeginTime;
     private Date transEndTime;
+    private Integer refundFee;
+    private Integer tradeStatus;
     private String creator;
     private Date createTime;
     private String modifier;
@@ -92,6 +94,26 @@ public class WeixinPayDetails
         }
 
         private PayType(String value) {
+            this.value = value;
+        }
+    }
+    
+    /**
+     * 交易状态
+     */
+    public static enum TradeStatus {
+        /** 0：交易中 */        TRADEING(0),
+        /** 1：交易成功 */     TRADE_SUCCESS(1),
+        /** 2：交易失败 */     TRADE_FAIL(2),
+        /** 3：交易撤销 */     TRADE_REVERSED(3),
+        /** 3：交易关闭 */     TRADE_CLOSED(4);
+        private int value;
+
+        public int getValue() {
+            return value;
+        }
+
+        private TradeStatus(int value) {
             this.value = value;
         }
     }
@@ -526,6 +548,24 @@ public class WeixinPayDetails
 
     public void setTransEndTime(Date transEndTime) {
         this.transEndTime = transEndTime;
+    }
+    
+    @Column(name = "REFUND_FEE")
+    public Integer getRefundFee() {
+        return refundFee;
+    }
+    
+    public void setRefundFee(Integer refundFee) {
+        this.refundFee = refundFee;
+    }
+    
+    @Column(name = "TRADE_STATUS")
+    public Integer getTradeStatus() {
+        return tradeStatus;
+    }
+    
+    public void setTradeStatus(Integer tradeStatus) {
+        this.tradeStatus = tradeStatus;
     }
 
     @Column(name = "CREATOR", length = 32)
