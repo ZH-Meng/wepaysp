@@ -128,11 +128,8 @@ public class WeixinPayDetailsServiceImpl
         		vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
         		vo.setDeviceInfo(weixinPayDetails.getDeviceInfo());
         		vo.setOutTradeNo(weixinPayDetails.getOutTradeNo());
-        		// TODO 对款标志
-        		vo.setRefundFlag(RefundFlag.YES.toString());
-/*        		if (weixinPayDetails.getRefundFee() != null) {
-        		    vo.setRefundFlag(RefundFlag.YES.toString());
-        		}*/
+        		vo.setTradeStatus(weixinPayDetails.getTradeStatus());
+        		vo.setRefundFee(weixinPayDetails.getRefundFee());
         		
                 DealerEmployee de = weixinPayDetails.getDealerEmployee();
                 vo.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
@@ -549,6 +546,35 @@ public class WeixinPayDetailsServiceImpl
         
         // 记录日志-修改微信支付结果
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[" + logDescTemp + "]", processBeginTime, processEndTime, null, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+    }
+
+    @Override
+    public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetailsByOid(String weixinPayDetailOid) {
+        Validator.checkArgument(StringUtils.isBlank(weixinPayDetailOid), "weixinPayDetailOid不能为空");
+        WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
+        WeixinPayDetails payDetail = commonDAO.findObject(WeixinPayDetails.class, weixinPayDetailOid);
+        if (payDetail == null) {
+            throw new NotExistsException("系统支付订单不存在");
+        }
+        BeanCopierUtil.copyProperties(payDetail, vo);
+        vo.setDealerName(payDetail.getDealer() != null ? payDetail.getDealer().getCompany() : "");
+        vo.setStoreName(payDetail.getStore() != null ? payDetail.getStore().getStoreName() : "");
+        return vo;
+    }
+
+    @Override
+    public void doTransCancelPay(String weixinPayDetailOid) {
+        Validator.checkArgument(StringUtils.isBlank(weixinPayDetailOid), "weixinPayDetailOid不能为空");
+        WeixinPayDetails payDetail = commonDAO.findObject(WeixinPayDetails.class, weixinPayDetailOid);
+        if (payDetail == null) {
+            throw new NotExistsException("系统支付订单不存在");
+        }
+        // TODO 处理中取消才有意义
+        payDetail.setTradeStatus(TradeStatus.TRADE_CLOSED.getValue());
+        commonDAO.update(payDetail);
+        Date processBeginTime = new Date();
+        // 记录日志-修改微信支付结果
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "取消支付关闭订单[tradeStatus=" + 4 + "]", processBeginTime, processBeginTime, null, payDetail.toString(), SysLog.State.success.getValue(), weixinPayDetailOid, null, SysLog.ActionType.modify.getValue());
     }
 
 }

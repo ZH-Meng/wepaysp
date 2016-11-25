@@ -1,13 +1,9 @@
 package com.zbsp.wepaysp.api.service.main.pay;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
 
 import com.tencent.WXPay;
 import com.tencent.common.Signature;
@@ -15,6 +11,9 @@ import com.tencent.common.Util;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyResultData;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -24,6 +23,7 @@ import com.zbsp.wepaysp.api.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails.PayType;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
@@ -128,7 +128,7 @@ public class WeixinPayDetailsMainServiceImpl
         resultMap.put("resultCode", resCode);
         resultMap.put("resultDesc", resDesc);
         resultMap.put("outTradeNo", outTradeNo);
-        //resultMap.put("wexinPayDetailsVO", weixinPayDetailsVO);
+        resultMap.put("wexinPayDetailsVO", weixinPayDetailsVO);
         
         return resultMap;
     }
@@ -138,8 +138,9 @@ public class WeixinPayDetailsMainServiceImpl
     }
 
     @Override
-    public WxPayNotifyResultData handleWxPayNotify(String respXmlString) {
+    public String handleWxPayNotify(String respXmlString) {
         Validator.checkArgument(StringUtils.isBlank(respXmlString), "支付结果通知字串不能为空");
+        logger.info("公众号支付结果通知处理API开始处理.");
         WxPayNotifyResultData result=null;
         String appid = null;
         WxPayNotifyData wxNotify = (WxPayNotifyData) Util.getObjectFromXML(respXmlString, WxPayNotifyData.class);
@@ -181,7 +182,37 @@ public class WeixinPayDetailsMainServiceImpl
                 result.setReturn_msg("签名失败");
             }
         }
-        return result;
+        XStream xStreamForResponsetData = new XStream(new DomDriver("UTF-8", new XmlFriendlyNameCoder("-_", "_")));
+
+        //将要提交给微信支付结果通知处理结果对象转换成XML格式数据
+        String resultXML = xStreamForResponsetData.toXML(result);
+        logger.info("处理结束，返回结果：" + resultXML);
+        return resultXML;
+    }
+
+    @Override
+    public Map<String, Object> checkPayResult(String payResult, String weixinPayDetailOid) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Integer tradeStatus = null;
+        WeixinPayDetailsVO payDetails = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+        if ("ok".equalsIgnoreCase(payResult)) {
+            tradeStatus = payDetails.getTradeStatus();
+            if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {
+                logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + payDetails.getTradeStatus().intValue());
+            }
+            if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {
+                // FIXME 结果通知未响应
+            }
+        } else if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
+            weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
+            tradeStatus = TradeStatus.TRADE_CLOSED.getValue();
+        } else {
+            tradeStatus = TradeStatus.TRADE_FAIL.getValue();
+        }
+        resultMap.put("tradeStatus", tradeStatus);
+        resultMap.put("weixinPayDetailsVO", payDetails);
+        
+        return resultMap;
     }
     
 }

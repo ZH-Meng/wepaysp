@@ -27,7 +27,6 @@ import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.vo.wxauth.AccessTokenResultVO;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
-import com.tencent.protocol.unified_order_protocol.WxPayNotifyResultData;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
@@ -67,7 +66,10 @@ public class AppIDPayAction
     private DealerService dealerService;
     private PartnerService partnerService;
     private WeixinPayDetailsMainService weixinPayDetailsMainService;
-
+    private String weixinPayDetailOid;
+    private String payResult;
+    private WeixinPayDetailsVO weixinPayDetailsVO;
+    private String tradeStatus;
     /**
      * 微信浏览器授权后回调，目前使用公众号支付不需要access_token，只是下单时需要access_token<br>
      * 其他：微信公众平台开发（其中有一个支付接口）会用access_token（有时效性，调用API有限），需要考虑 access_token缓存或刷新方案
@@ -154,6 +156,8 @@ public class AppIDPayAction
             Map<String, Object> resultMap = weixinPayDetailsMainService.createPayAndInvokeWxPay(payDetailsVO, openid, null, null);
             String resCode = MapUtils.getString(resultMap, "resultCode");
             String resDesc = MapUtils.getString(resultMap, "resultDesc");
+            payDetailsVO = (WeixinPayDetailsVO) MapUtils.getObject(resultMap, "wexinPayDetailsVO");
+            weixinPayDetailOid = payDetailsVO != null ? payDetailsVO.getIwoid() : "";
             jsPayReqData = (JSPayReqData) MapUtils.getObject(resultMap, "jsPayReqData");// JS支付接口请求参数包
 
             if (!StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), resCode)) {// 公众号下单失败
@@ -193,13 +197,30 @@ public class AppIDPayAction
             while ((line = reader.readLine()) != null) {
                 xmlStr.append(line);
             }
-            logger.debug("支付回调通知：" + xmlStr.toString());
+            logger.info("微信支付结果通知内容：" + xmlStr.toString());
             
-            WxPayNotifyResultData result = weixinPayDetailsMainService.handleWxPayNotify(xmlStr.toString());
-            response.getWriter().write(result.toString());
+            String resultXML = weixinPayDetailsMainService.handleWxPayNotify(xmlStr.toString());
+            response.getWriter().write(resultXML);
+            logger.info("系统处理支付结果通知：" + resultXML);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * H5支付结果返回后检查真实交易状态
+     * @return
+     */
+    public String jsPayResult() {
+        // 根据 weixinPayDetailOid 查询系统真实结果
+        try {
+            Map<String, Object> resultMap = weixinPayDetailsMainService.checkPayResult(payResult, weixinPayDetailOid);
+            tradeStatus = MapUtils.getString(resultMap, "tradeStatus");
+            weixinPayDetailsVO = (WeixinPayDetailsVO) MapUtils.getObject(resultMap, "weixinPayDetailsVO");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return "jsPayResult";
     }
 
     /**
@@ -307,9 +328,37 @@ public class AppIDPayAction
     public void setWxPayNotifyURL(String wxPayNotifyURL) {
         this.wxPayNotifyURL = wxPayNotifyURL;
     }
+    
+    public String getWeixinPayDetailOid() {
+        return weixinPayDetailOid;
+    }
+    
+    public void setWeixinPayDetailOid(String weixinPayDetailOid) {
+        this.weixinPayDetailOid = weixinPayDetailOid;
+    }
 
     public JSPayReqData getJsPayReqData() {
         return jsPayReqData;
+    }
+    
+    public String getPayResult() {
+        return payResult;
+    }
+    
+    public void setPayResult(String payResult) {
+        this.payResult = payResult;
+    }
+    
+    public String getTradeStatus() {
+        return tradeStatus;
+    }
+    
+    public void setTradeStatus(String tradeStatus) {
+        this.tradeStatus = tradeStatus;
+    }
+
+    public WeixinPayDetailsVO getWeixinPayDetailsVO() {
+        return weixinPayDetailsVO;
     }
 
     public void setDealerService(DealerService dealerService) {

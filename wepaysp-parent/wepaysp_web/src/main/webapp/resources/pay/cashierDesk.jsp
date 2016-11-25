@@ -81,13 +81,14 @@
 					<h1 align="center">收银台</h1>
 					<div class="cashier-item" style="padding-left: 14px;">
 						<span class="cashier-item-icon" >￥</span>
-						<s:textfield name="money" id="money" cssClass="input-cashier"/>
+						<s:textfield name="money" id="money" cssClass="input-cashier"  placeholder="输入金额" />
 					</div>
 					<div class="cashier-item">
-						<s:textfield name="authCode" id="code" cssClass="input-cashier cashier-code" value="请输入收款码" onfocus="codeFocus();" onblur="codeBlur();"/>
+						<%-- <s:textfield name="authCode" id="code" cssClass="input-cashier cashier-code" value="请输入收款码" onfocus="codeFocus();" onblur="codeBlur();"/> --%>
+						<s:textfield name="authCode" id="code" cssClass="input-cashier cashier-code" placeholder="收款码" />
 					</div>
 					<div class="cashier-item">
-						<a href="javascript:void(0);" onclick="submit();" id="submitForm" class="cashier-button">输入金额按回车键完成</a>
+						<a href="javascript:void(0);" onclick="submit();" id="submitForm" class="cashier-button">扫码后按回车键完成</a>
 					</div>
 				</form>
 			</div>
@@ -151,17 +152,23 @@
 					  				<s:property value="#weixinPayDetailsVo.bankType" />
 					  			</td>
 					  			--%>
-					  			<s:if test="#weixinPayDetailsVo.resultCode == 'SUCCESS'">
-					  				<s:set var="resultCodeStr">支付成功</s:set>
+					  			<s:if test="#weixinPayDetailsVo.tradeStatus == 0">
+					  				<s:set var="tradeStatusStr">交易中</s:set>
 					  			</s:if>
-					  			<s:elseif test="#weixinPayDetailsVo.resultCode == 'FAIL'">
-					  				<s:set var="resultCodeStr">支付失败</s:set>
+					  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 1">
+					  				<s:set var="tradeStatusStr">交易成功</s:set>
 					  			</s:elseif>
-					  			<s:elseif test="#weixinPayDetailsVo.resultCode == NULL || #weixinPayDetailsVo.resultCode == '' ">
-					  				<s:set var="resultCodeStr">处理中</s:set>
+					  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 2">
+					  				<s:set var="tradeStatusStr">交易失败</s:set>
+					  			</s:elseif>
+					  			<s:elseif test="#weixinPayDetailsVo.resultCode == 3">
+					  				<s:set var="tradeStatusStr">交易撤销</s:set>
+					  			</s:elseif>
+					  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 4">
+					  				<s:set var="tradeStatusStr">交易关闭</s:set>
 								</s:elseif>
-					  			<td title="<s:property value="resultCodeStr" />">
-					  				<s:property value="#resultCodeStr" />
+					  			<td title="<s:property value="tradeStatusStr" />">
+					  				<s:property value="#tradeStatusStr" />
 					  			</td>
 					  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
 					  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
@@ -170,7 +177,7 @@
 					  				<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 					  			</td>
 					  			<%--
-					  			<s:if test="#weixinPayDetailsVo.refundFlag == 'yes' || #weixinPayDetailsVo.refundFlag == 'YES'">
+					  			<s:if test="#weixinPayDetailsVo.tradeStatus == 0 || #weixinPayDetailsVo.refundFlag == 1">
 					  				<td>
 					  					<a href="javascript:void(0);" onclick="refund('<s:property value="#weixinPayDetailsVo.iwoid" />')">退款</a>
 					  				</td>
@@ -208,7 +215,7 @@
 		$(function(){
 			$("#money").focus();
 		});
-		function codeFocus() {
+		/* function codeFocus() {
 			var val = $("#code").val();
 			if ("请输入收款码" == val) {
 				$("#code").val("");
@@ -223,21 +230,26 @@
 				$("#code").addClass("cashier-code");
 				$("#code").val("请输入收款码");
 			}
-		}
+		} */
 		
 		function submit() {
 			var money = $.trim($("#money").val());
-			var code = $("#code").val();
+			var code = $.trim($("#code").val());
 			var numReg = /^(0|([1-9]\d*))(\.\d+)?$/;
 			if (isBlank(money)) {
-				alert('请输入金额！');
+				$("#money").val("");
+				$("#money").focus();
+				//alert('请输入金额！');
 				return;
 			} else if (!numReg.test(money)) {
 				alert("金额必须大于0！");
 				$("#money").focus();
 				return;
-			} else if (isBlank(code) || "请输入收款码" == code) {
-				alert('请输入收款码！');
+			//} else if (isBlank(code) || "请输入收款码" == code) {
+			} else if (isBlank(code)) {	
+				$("#code").val("");
+				$("#money").focus();
+				//alert('请输入收款码！');
 				return;
 			}
 			$("#cashierForm").submit();

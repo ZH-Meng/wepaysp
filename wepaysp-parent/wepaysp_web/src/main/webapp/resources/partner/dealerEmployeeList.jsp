@@ -5,12 +5,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>商户员工管理</title>
+	<s:if test="resetFlag == 'yes'">
+		<s:set name="title">重置退款权限密码</s:set>
+		<s:set name="navTag">重置退款权限密码</s:set>
+	</s:if>
+	<s:else>
+		<s:set name="title">商户员工管理</s:set>
+		<s:set name="navTag">商户员工管理&gt;员工管理</s:set>
+	</s:else>
+	<title>${title }</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：商户员工管理&gt;员工管理</div>
+		<div class="bgposition">您现在的位置：${navTag }</div>
 		<s:form method="post">
 			<s:hidden id="iwoid" name="dealerEmployeeVO.iwoid"/>
 			<s:hidden id="resetFlag" name="resetFlag"/>

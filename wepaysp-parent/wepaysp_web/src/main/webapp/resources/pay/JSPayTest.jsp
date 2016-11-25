@@ -24,13 +24,12 @@
 		            if (res.err_msg == "get_brand_wcpay_request:ok" ) {// 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
 		           		//TODO 请求系统，根据真实返回结果来响应
 	        			//alert("支付成功");
-	                	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid=${weixinPayDetailOid}&payResult=ok";
 		            } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
 			           	//alert("支付过程中用户取消");
-			           	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid=${weixinPayDetailOid}&payResult=cancel";
+			           	window.location.href="<%=request.getContextPath()%>/nostate/paytest/appidpay!jsPayResult.action?weixinPayDetailOid=${weixinPayDetailOid}&payResult=cancel";
 		            } else {
-		            	alert('支付失败');
-			           	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid=${weixinPayDetailOid}&payResult=error";
+		                alert('支付失败');
+			           	window.location.href="<%=request.getContextPath()%>/nostate/paytest/appidpay!jsPayResult.action?weixinPayDetailOid=${weixinPayDetailOid}&payResult=error";
 		            }
 		        }
 		   ); 

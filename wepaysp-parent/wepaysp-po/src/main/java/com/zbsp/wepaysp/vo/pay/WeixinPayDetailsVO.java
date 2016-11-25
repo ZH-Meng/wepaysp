@@ -38,7 +38,7 @@ public class WeixinPayDetailsVO
     private String partnerId;
 
     private Integer refundFee;
-    private String refundFlag;
+    private Integer tradeStatus;
 
     private String dealerEmployeeOid;
 
@@ -574,12 +574,12 @@ public class WeixinPayDetailsVO
         this.refundFee = refundFee;
     }
 
-    public String getRefundFlag() {
-        return refundFlag;
+    public Integer getTradeStatus() {
+        return tradeStatus;
     }
 
-    public void setRefundFlag(String refundFlag) {
-        this.refundFlag = refundFlag;
+    public void setTradeStatus(Integer tradeStatus) {
+        this.tradeStatus = tradeStatus;
     }
 
     public String getPrepayId() {

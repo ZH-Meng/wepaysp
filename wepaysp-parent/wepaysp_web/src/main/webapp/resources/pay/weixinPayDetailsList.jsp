@@ -198,19 +198,25 @@
 						  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
 						  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-						  			<s:if test="#weixinPayDetailsVo.resultCode == 'SUCCESS'">
-						  				<s:set var="resultCodeStr">交易成功</s:set>
+							  							  			<s:if test="#weixinPayDetailsVo.tradeStatus == 0">
+					  				<s:set var="tradeStatusStr">交易中</s:set>
 						  			</s:if>
-						  			<s:elseif test="#weixinPayDetailsVo.resultCode == 'FAIL'">
-						  				<s:set var="resultCodeStr">交易失败</s:set>
+						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 1">
+						  				<s:set var="tradeStatusStr">交易成功</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinPayDetailsVo.resultCode == NULL || #weixinPayDetailsVo.resultCode == '' ">
-						  				<s:set var="resultCodeStr">处理中</s:set>
+						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 2">
+						  				<s:set var="tradeStatusStr">交易失败</s:set>
+						  			</s:elseif>
+						  			<s:elseif test="#weixinPayDetailsVo.resultCode == 3">
+						  				<s:set var="tradeStatusStr">交易撤销</s:set>
+						  			</s:elseif>
+						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 4">
+						  				<s:set var="tradeStatusStr">交易关闭</s:set>
 									</s:elseif>
-						  			<td title="<s:property value="resultCodeStr" />">
-						  				<s:property value="#resultCodeStr" />
+						  			<td title="<s:property value="tradeStatusStr" />">
+						  				<s:property value="#tradeStatusStr" />
 						  			</td>
-									<td title="<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
+						  			<td title="<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
 						  				<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 						  			</td>
 						  		</tr>

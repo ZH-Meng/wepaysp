@@ -25,6 +25,16 @@
 		<action name="appidpay" class="appidPayAction">
 			<result name="wxCallBack">/resources/pay/wxCallBack.jsp</result>
 			<result name="JSPAY">/resources/pay/JSPay.jsp</result>
+			<result name="jsPayResult">/resources/pay/JSPayResult.jsp</result>
+		</action>
+	</package>
+	
+	<package name="appidpaytest" namespace="/nostate/paytest" extends="global-default">
+		<!-- 公众号支付测试 -->
+		<action name="appidpay" class="appidPayAction">
+			<result name="wxCallBack">/resources/pay/wxCallBack.jsp</result>
+			<result name="JSPAY">/resources/pay/JSPayTest.jsp</result>
+			<result name="jsPayResult">/resources/pay/JSPayResult.jsp</result>
 		</action>
 	</package>
 </struts>

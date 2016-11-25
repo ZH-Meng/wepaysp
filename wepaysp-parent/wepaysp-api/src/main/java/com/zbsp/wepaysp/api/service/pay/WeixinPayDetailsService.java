@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -87,5 +88,18 @@ public interface WeixinPayDetailsService {
      * @param payResultVO 封装的支付结果VO
      */
     public void doTransUpdateOrderResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO);
+
+    /**
+     * 根据Oid 查找支付明细
+     * @param weixinPayDetailOid
+     * @return WeixinPayDetailsVO
+     */
+    public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetailsByOid(String weixinPayDetailOid);
+
+    /**
+     * 根据Oid 取消支付
+     * @param weixinPayDetailOid
+     */
+    public void doTransCancelPay(String weixinPayDetailOid);
 
 }
