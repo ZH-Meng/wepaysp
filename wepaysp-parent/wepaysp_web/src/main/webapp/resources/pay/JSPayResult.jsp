@@ -3,25 +3,61 @@
 <%@ taglib uri="http://java.sun.com/jstl/fmt_rt" prefix="fmt"%>
 <!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>微信安全支付</title>
-<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
-</head>
-<body>
-	<s:if test="tradeStatus == 1">
-		支付成功<br/>
-		商户：${weixinPayDetailsVO.dealerName }<br/>
-		支付金额：<fmt:formatNumber value="${weixinPayDetailsVO.totalFee/100}" pattern="###,###,###,##0.00"/>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>支付结果</title>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/weui.min.css"/>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/font/iconfont.css"/>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/main.css"/>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
+	</head>
+	<body>
+		
+ <s:if test="tradeStatus == 1">
+		<p class="succ-title">
+			<i class="weui_icon_msg weui_icon_success"></i>恭喜你支付成功
+		</p>
 	</s:if>
 	<s:elseif test="tradeStatus == 0">
-		订单处理中
+		<p class="succ-title">
+			<i class="weui_icon_msg weui_icon_success"></i>订单处理中
+		</p>		
 	</s:elseif>
 	<s:elseif test="tradeStatus == 4">
-		订单已取消
+		<p class="succ-title">
+			<i class="weui_icon_msg weui_icon_success"></i>订单已取消
+		</p>	
+		
 	</s:elseif>
 	<s:elseif test="tradeStatus == 2">
-		支付失败，请重试！
+		<p class="succ-title">
+			<i class="weui_icon_msg weui_icon_success"></i>支付失败请重试
+		</p>			
 	</s:elseif>
-</body>
+
+
+		
+		<div class="succ-info">
+			<p class="info1">${weixinPayDetailsVO.dealerName }</p>
+			<p class="info2">&yen;<fmt:formatNumber value="${weixinPayDetailsVO.totalFee/100}" pattern="###,###,###,##0.00"/></p>
+			<div class="break-line"></div>
+			<div class="succ-item">
+				门店<span class="fr">${weixinPayDetailsVO.storeName }</span>
+			</div>
+			<div class="succ-item">
+				交易单号<span class="fr">${weixinPayDetailsVO.outTradeNo }</span>
+			</div>
+			<div class="succ-item">
+				交易时间<span class="fr"><s:date name="weixinPayDetailsVO.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/></span>
+			</div>
+		<div class="pay-method">
+			<i class="icon iconfont icon-weixinzhifu"></i>微信支付
+		</div>
+		
+	</body>
 </html>
+
+
