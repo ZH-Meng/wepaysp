@@ -41,10 +41,29 @@ MODIFY COLUMN `SIGN`  varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NUL
 MODIFY COLUMN `TOTAL_FEE`  int(11) NULL COMMENT '订单总金额  单位为分  只能为整数' AFTER `COUPON_REFUND_TYPE`,
 MODIFY COLUMN `REFUND_FEE`  int(11) NULL COMMENT '申请退款金额' AFTER `TOTAL_FEE`,
 MODIFY COLUMN `RETURN_CODE`  varchar(16) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'SUCCESS/FAIL此字段是通信标识' AFTER `REFUND_ACCOUNT`,
-MODIFY COLUMN `RESULT_CODE`  varchar(16) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '业务结果' AFTER `RETURN_MSG`;
-ADD COLUMN `END_TIME`  TIMESTAMP  COMMENT '退款完成时间' AFTER `trans_end_time`;
-ADD COLUMN `trade_status`  int(11)   COMMENT '退款状态 0：交易中  1：退款成功 2：退款失败 ' AFTER `END_TIME`  ;
-ADD COLUMN `COUPON_REFUND_TYPE`  int(11) NULL COMMENT '1：撤销  2：退款' AFTER `TRANSACTION_ID`;
+MODIFY COLUMN `RESULT_CODE`  varchar(16) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '业务结果' AFTER `RETURN_MSG`,
+ADD COLUMN `END_TIME`  TIMESTAMP  COMMENT '退款完成时间' AFTER `trans_end_time`,
+ADD COLUMN `trade_status`  int(11)   COMMENT '退款状态 0：交易中  1：退款成功 2：退款失败 ' AFTER `END_TIME`  ,
+ADD COLUMN `COUPON_REFUND_TYPE`  int(11) NULL COMMENT '1：撤销  2：退款' AFTER `TRANSACTION_ID`,
 ADD COLUMN `WEIXIN_PAY_DETAILS_OID`  CHAR(32)  COMMENT '支付明细OID' AFTER `IWOID`;
 
 
+
+2016-12-04 23:00 add
+
+
+ALTER TABLE `dealer_t`
+ADD COLUMN `qr_code_path`	varchar(256) COMMENT '二维码存放路径' AFTER `sub_mch_id`;	 
+
+ALTER TABLE `dealer_employee_t`
+ADD COLUMN `qr_code_path`	varchar(256) COMMENT '二维码存放路径' AFTER `state`;	 
+
+ALTER TABLE `store_t`
+ADD COLUMN `qr_code_path`	varchar(256) COMMENT '二维码存放路径' AFTER `qr_code`;	 
+
+通过上述更改实现  一商户一码、一门店一码、一收银员一码 三种模式的融合。
+
+ALTER TABLE `dealer_employee_t`
+ADD COLUMN `employee_type`	INT(11) COMMENT '员工类型  1：收银员  2：分店店长' AFTER `dealer_employee_id`;	 
+
+通过上述更改实现门店店长的创建。（增加一个店长的角色，功能同收银员一致，增加“商户门店资金结算”“商户员工资金结算”）
