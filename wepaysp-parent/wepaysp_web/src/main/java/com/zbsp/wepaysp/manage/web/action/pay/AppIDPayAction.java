@@ -146,7 +146,7 @@ public class AppIDPayAction
         payDetailsVO.setPayType(WeixinPayDetails.PayType.JSAPI.getValue());// 交易类型公众号
         payDetailsVO.setDealerOid(dealerOid);
         payDetailsVO.setOpenid(openid);
-        payDetailsVO.setStoreId(storeOid);
+        payDetailsVO.setStoreOid(storeOid);
         payDetailsVO.setNotifyUrl(wxPayNotifyURL);// 通知地址
 
         BigDecimal orderMoney = new BigDecimal(money);// 订单金额

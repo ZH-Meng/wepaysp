@@ -1,0 +1,66 @@
+body {background-color: #efeff5;}
+.fr {float: right;}
+.clearfix {clear: both;}
+
+.weui-panel {padding: 15px 15px;}
+
+.company-info .title1 {color: #010101;font-size: 20px;text-align: center;}
+.company-info .title2 {color: #8c8c8c;text-align: center;font-size: 14px;}
+
+.input-box {border:1px solid #d2d6db; background-color: #fff;padding: 15px;margin: 15px 0 22px;}
+.input-box .input-title {font-size: 14px; color: #59595a;margin-bottom: 10px;}
+.input-box .input-amt {position: relative;color: #010101;}
+.input-box .fuhao {background-color: #fff;position: absolute;top: 0;left: 0;font-size: 32px;display: inline-block;height: 52px;line-height: 52px;width: 35px;}
+.input-box input[type="number"] {-webkit-appearance: none;text-indent: 35px;padding: 0;line-height: 50px;height: 50px;font-size: 50px;display: inline-block;width: 100%;border: 1px solid #fff;}
+.input-box input[type="number"]:focus {outline: none;}
+.break-line {width: 100%;height: 1px;background-color: #d2d6db;margin: 10px 0;}
+.input-box .input-explain {font-size: 14px;color: #8c8c8c;}
+
+.weui_btn {font-size: 18px;}
+.weui_btn_primary:disabled {color: #dbeedc;background-color: #a3dfa3;}
+
+.space-bar {width: 100%;height: 206px;}
+
+.succ-title {padding: 15px;color: #238c23;font-size: 16px;}
+.succ-title i:before {font-size: 22px;margin-right: 5px;position: relative;bottom: 2px;}
+
+.succ-info {padding: 15px 15px; background-color: #fff;line-height: 1.8;}
+.succ-info .info1 {text-align: center;font-size: 16px;color: #303030;}
+.succ-info .info2 {text-align: center;font-size: 40px;font-weight: 600;color: #343434;line-height: 1.4;}
+
+.succ-item {font-size: 14px;color: #999;}
+
+.succ-bottom {font-size: 16px;margin-top: 20px;margin-bottom: 5px;}
+.succ-bottom .yzf-img {width: 60px;position: relative;top: 2px;margin-right: 10px;}
+
+.error-title {padding: 15px;color: #FF3030;font-size: 16px;}
+.error-title i:before {font-size: 22px;margin-right: 5px;position: relative;bottom: 2px;}
+.error-info {padding: 15px 15px; background-color: #fff;line-height: 1.8;}
+.error-item {font-size: 14px;color: #999; text-align: center;}
+.error-bottom {font-size: 16px;margin-top: 20px;margin-bottom: 5px;text-align: center;}
+.error-bottom .yzf-img {width: 110px;position: relative;top: 2px;margin-right: 10px;}
+
+.check-section {color: #999;}
+.checkbox-wrapper {bottom: 10px;right: 15px;display: inline-block;position: relative;}
+.checkbox-wrapper input[type=checkbox] {filter: alpha(opacity=0);opacity: 0;}
+.checkbox-wrapper .icons{display:block;cursor:pointer;}
+.checkbox-wrapper .icons .icon-checked {filter: alpha(opacity=0);opacity: 0;}
+.checkbox-wrapper .icon-unchecked {position:absolute;top:-2px;left:-2px;}
+.checkbox-wrapper .icon-checked {position:absolute;top:-1px;left:0;}
+.checkbox-wrapper .icon-unchecked:before,
+.checkbox-wrapper .icon-checked:before {font-family:"iconfont" !important;display: block;}
+.checkbox-wrapper .icon-unchecked:before {content: "\e631";color: #999;font-size: 30px;}
+.checkbox-wrapper .icon-checked:before {content: "\e608";color:#4cad09;font-size: 26px;}
+.checkbox-wrapper input[type=checkbox]:checked+.icons .icon-checked {filter: alpha(opacity=100);opacity: 1;}
+
+.pay-method {line-height: 1;position: absolute;bottom: 15px;left: 0;text-align: center;width: 100%;color:#999;font-size: 16px;}
+.pay-method i {font-size: 18px; margin-right: 8px;}
+.pay-method i:before {color: #b3b3b3;}
+
+
+/*@media (max-width:400px) {
+	.company-info .title1 {font-size: 18px;}
+	#__w_l_h_v_c_z_e_r_o_divid {height: 150px !important;}
+	#table_0909099 {height: 150px !important;}
+	.space-bar {height: 150px;}
+}*/

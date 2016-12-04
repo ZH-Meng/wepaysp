@@ -366,7 +366,7 @@ public class WeixinPayDetailsServiceImpl
             // 用户标识、用户子标识 二选一必传，如果传sub_openid，还需传sub_appid
             newPayOrder.setOpenid(weixinPayDetailsVO.getOpenid());
             newPayOrder.setDeviceInfo("WEB");// 非必传
-            newPayOrder.setLimitPay("no_credit");// 非必传，指定不能使用信用卡支付
+//            newPayOrder.setLimitPay("no_credit");// 非必传，指定不能使用信用卡支付
 
             if (jsapiPay) {// 公众号支付
                 newPayOrder.setTradeType(TradeType.JSAPI.toString());// 交易类型
