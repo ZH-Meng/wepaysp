@@ -19,9 +19,11 @@ public class DealerEmployee
     private Dealer dealer;
     private Store store;
     private String dealerEmployeeId;
+    private Integer employeeType;
     private String employeeName;
     private String moblieNumber;
     private String state;
+    private String qrCodePath;
     private String refundPassword;
     private String creator;
     private Timestamp createTime;
@@ -32,6 +34,23 @@ public class DealerEmployee
     public DealerEmployee() {
     }
 
+    /**
+     * 1：收银员  2：分店店长 
+     */
+    public static enum EmployeeType {
+        /**1 收银员 */        cashier(1),
+        /**2 分店店长 */     storeManager(2);
+        private int value;
+        
+        public int getValue() {
+            return value;
+        }
+        
+        private EmployeeType(int value) {
+            this.value = value;
+        }
+    }
+    
     @Id
     @Column(name = "IWOID", unique = true, nullable = false, length = 32)
     public String getIwoid() {
@@ -70,6 +89,15 @@ public class DealerEmployee
     public void setDealerEmployeeId(String dealerEmployeeId) {
         this.dealerEmployeeId = dealerEmployeeId;
     }
+    
+    @Column(name = "employee_type")
+    public Integer getEmployeeType() {
+        return this.employeeType;
+    }
+
+    public void setEmployeeType(Integer employeeType) {
+        this.employeeType = employeeType;
+    }
 
     @Column(name = "EMPLOYEE_NAME", length = 64)
     public String getEmployeeName() {
@@ -96,6 +124,15 @@ public class DealerEmployee
 
     public void setState(String state) {
         this.state = state;
+    }
+    
+    @Column(name = "qr_code_path", length = 256)
+    public String getQrCodePath() {
+        return qrCodePath;
+    }
+    
+    public void setQrCodePath(String qrCodePath) {
+        this.qrCodePath = qrCodePath;
     }
 
     @Column(name = "REFUND_PASSWORD", length = 32)

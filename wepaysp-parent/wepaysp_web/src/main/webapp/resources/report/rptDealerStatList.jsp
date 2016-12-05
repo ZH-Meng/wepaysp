@@ -89,14 +89,17 @@
 	                                <th>门店ID</th>
 	                                <th>门店名称</th>
 	                                <s:if test="listType == 'dealerEmployee'">
-		                                <s:set name="listCols"  value="9"/>
+		                                <s:set name="listCols"  value="12"/>
 		                                <th>收银员ID</th>
 		                                <th>收银员姓名</th>
 	                                </s:if>
 	                                <s:else>
-	                                	<s:set name="listCols"  value="7"/>
+	                                	<s:set name="listCols"  value="10"/>
 	                                </s:else>
-	                                <th>总笔数</th>
+	                                <th>退款总笔数</th>
+	                                <th>退款总金额</th>
+	                                <th>收款总笔数</th>
+	                                <th>收款总金额</th>
 	                                <th>总金额</th>
 	                            </tr>
 	                        </thead>
@@ -127,8 +130,17 @@
 							  				<s:property value="#rptDealerStatVo.dealerEmployeeName" />
 							  			</td>
 						  			</s:if>
-									<td class="bgright"  title="<s:property value="#rptDealerStatVo.totalAmount" />">
-						  				<s:property value="#rptDealerStatVo.totalAmount" />
+									<td class="bgright"  title="<s:property value="#rptDealerStatVo.refundAmount" />">
+						  				<s:property value="#rptDealerStatVo.refundAmount" />
+						  			</td>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.refundMoney/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${rptDealerStatVo.refundMoney/100}" pattern="###,###,###,##0.00"/>
+						  			</td>
+						  			<td class="bgright"  title="<s:property value="#rptDealerStatVo.payAmount" />">
+						  				<s:property value="#rptDealerStatVo.payAmount" />
+						  			</td>
+						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.payMoney/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${rptDealerStatVo.payMoney/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 						  			<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,##0.00"/>">
 						  				<fmt:formatNumber value="${rptDealerStatVo.totalMoney/100}" pattern="###,###,###,##0.00"/>

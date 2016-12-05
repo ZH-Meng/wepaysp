@@ -207,7 +207,7 @@
 						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 2">
 						  				<s:set var="tradeStatusStr">交易失败</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinPayDetailsVo.resultCode == 3">
+						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 3">
 						  				<s:set var="tradeStatusStr">交易撤销</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 4">

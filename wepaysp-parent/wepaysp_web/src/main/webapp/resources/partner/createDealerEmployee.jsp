@@ -45,6 +45,13 @@
 	                                </td>
 	                            </tr>
 	                            <tr>
+	                            	<th>员工类型</th>
+	                                <td>
+	                                	<s:select list="#{1:'收银员',2:'店长' }" listKey="key" listValue="value" name="dealerEmployeeVO.employeeType"  id="employeeType" headerKey="" headerValue="请选择"/>
+	                                	<span class="tj_bt">*</span>
+	                                </td>
+	                            </tr>
+	                            <tr>
 	                            	 <th>退款权限密码</th>
 	                                <td><s:password id="refundPassword" maxlength="6" name="dealerEmployeeVO.refundPassword" /><span class="tj_bt">*</span><span>6-20位长度的字母或数字！</span></td>
 	                            </tr>
@@ -90,6 +97,8 @@
 			var refundPassword = $("#refundPassword").val();
 			var state = $("#state").val();
 			var remark = $("#remark").val();
+			var employeeType = $("#employeeType").val();
+			
 			if (isBlank(loginId)) {
 				alert("登录名不能为空！");
 				$("#loginId").focus();
@@ -121,6 +130,10 @@
 			} else if (isBlank(storeOid)) {
 				alert("门店不能为空！");
 				$("#storeOid").focus();
+				return false;
+			} else if (isBlank(employeeType)) {
+				alert("员工类型不能为空！");
+				$("#employeeType").focus();
 				return false;
 			} else if (isBlank(refundPassword)) {
 				alert("退款权限密码不能为空！");

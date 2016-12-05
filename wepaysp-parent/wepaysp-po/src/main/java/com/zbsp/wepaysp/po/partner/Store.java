@@ -22,6 +22,7 @@ public class Store
     private String storeAddress;
     private String storeTel;
     private String qrCode;
+    private String qrCodePath;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -94,6 +95,15 @@ public class Store
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+    
+    @Column(name = "qr_code_path", length = 256)
+    public String getQrCodePath() {
+        return qrCodePath;
+    }
+    
+    public void setQrCodePath(String qrCodePath) {
+        this.qrCodePath = qrCodePath;
     }
 
     @Column(name = "CREATOR", nullable = false, length = 32)

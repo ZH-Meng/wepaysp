@@ -50,6 +50,13 @@
 	                                </td>
 	                            </tr>
 	                            <tr>
+	                            	<th>员工类型</th>
+	                                <td>
+	                                	<s:select list="#{1:'收银员',2:'店长' }" listKey="key" listValue="value" name="dealerEmployeeVO.employeeType"  id="employeeType" headerKey="" headerValue="请选择"/>
+	                                	<span class="tj_bt">*</span>
+	                                </td>
+	                            </tr>
+	                            <tr>
 	                            	<th>状态</th>
 	                                <td>
 	                                	<s:select list="#{1:'未使用',2:'使用中',3:'冻结'}" listKey="key" listValue="value" name="dealerEmployeeVO.state" id="state" headerKey="" headerValue="请选择"/>
@@ -88,7 +95,8 @@
 		var storeOid = $("#storeOid").val();
 		var state = $("#state").val();
 		var remark = $("#remark").val();
-	
+		var employeeType = $("#employeeType").val();
+		
 		if (isBlank(employeeName)) {
 			alert("姓名不能为空！");
 			$("#employeeName").focus();
@@ -104,6 +112,10 @@
 		} else if (isBlank(storeOid)) {
 			alert("门店不能为空！");
 			$("#storeOid").focus();
+			return false;
+		} else if (isBlank(employeeType)) {
+			alert("员工类型不能为空！");
+			$("#employeeType").focus();
 			return false;
 		} else if (isBlank(state)) {
 			alert("状态不能为空！");

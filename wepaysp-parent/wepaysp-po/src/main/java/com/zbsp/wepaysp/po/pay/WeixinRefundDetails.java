@@ -25,6 +25,7 @@ public class WeixinRefundDetails
      */
     private static final long serialVersionUID = -2387694473825090871L;
     private String iwoid;
+    private String weixinPayDetailsOid;
     private Dealer dealer;
     private DealerEmployee dealerEmployee;
     private Store store;
@@ -43,6 +44,7 @@ public class WeixinRefundDetails
     private String sign;
     private String outTradeNo;
     private String transactionId;
+    private Integer couponRefundType;
     private Integer totalFee;
     private Integer refundFee;
     private String refundFeeType;
@@ -65,6 +67,8 @@ public class WeixinRefundDetails
     private Integer couponRefundFeeSingle;
     private Timestamp transBeginTime;
     private Timestamp transEndTime;
+    private Timestamp endTime;
+    private Integer tradeStatus;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -83,7 +87,16 @@ public class WeixinRefundDetails
     public void setIwoid(String iwoid) {
         this.iwoid = iwoid;
     }
-
+    
+    @Column(name = "WEIXIN_PAY_DETAILS_OID", length = 32)
+    public String getWeixinPayDetailsOid() {
+        return weixinPayDetailsOid;
+    }
+    
+    public void setWeixinPayDetailsOid(String weixinPayDetailsOid) {
+        this.weixinPayDetailsOid = weixinPayDetailsOid;
+    }
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DEALER_OID", nullable = false)
     public Dealer getDealer() {
@@ -170,7 +183,7 @@ public class WeixinRefundDetails
         this.partner3Oid = partner3Oid;
     }
 
-    @Column(name = "APPID", nullable = false, length = 32)
+    @Column(name = "APPID", length = 32)
     public String getAppid() {
         return this.appid;
     }
@@ -215,7 +228,7 @@ public class WeixinRefundDetails
         this.deviceInfo = deviceInfo;
     }
 
-    @Column(name = "NONCE_STR", nullable = false, length = 32)
+    @Column(name = "NONCE_STR", length = 32)
     public String getNonceStr() {
         return this.nonceStr;
     }
@@ -224,7 +237,7 @@ public class WeixinRefundDetails
         this.nonceStr = nonceStr;
     }
 
-    @Column(name = "SIGN", nullable = false, length = 32)
+    @Column(name = "SIGN", length = 32)
     public String getSign() {
         return this.sign;
     }
@@ -251,7 +264,16 @@ public class WeixinRefundDetails
         this.transactionId = transactionId;
     }
 
-    @Column(name = "TOTAL_FEE", nullable = false)
+    @Column(name = "COUPON_REFUND_TYPE")
+    public Integer getCouponRefundType() {
+        return couponRefundType;
+    }
+    
+    public void setCouponRefundType(Integer couponRefundType) {
+        this.couponRefundType = couponRefundType;
+    }
+    
+    @Column(name = "TOTAL_FEE")
     public Integer getTotalFee() {
         return this.totalFee;
     }
@@ -260,7 +282,7 @@ public class WeixinRefundDetails
         this.totalFee = totalFee;
     }
 
-    @Column(name = "REFUND_FEE", nullable = false)
+    @Column(name = "REFUND_FEE")
     public Integer getRefundFee() {
         return this.refundFee;
     }
@@ -287,7 +309,7 @@ public class WeixinRefundDetails
         this.refundAccount = refundAccount;
     }
 
-    @Column(name = "RETURN_CODE", nullable = false, length = 16)
+    @Column(name = "RETURN_CODE", length = 16)
     public String getReturnCode() {
         return this.returnCode;
     }
@@ -305,7 +327,7 @@ public class WeixinRefundDetails
         this.returnMsg = returnMsg;
     }
 
-    @Column(name = "RESULT_CODE", nullable = false, length = 16)
+    @Column(name = "RESULT_CODE", length = 16)
     public String getResultCode() {
         return this.resultCode;
     }
@@ -447,6 +469,24 @@ public class WeixinRefundDetails
 
     public void setTransEndTime(Timestamp transEndTime) {
         this.transEndTime = transEndTime;
+    }
+    
+    @Column(name = "END_TIME", length = 0)
+    public Timestamp getEndTime() {
+        return endTime;
+    }
+    
+    public void setEndTime(Timestamp endTime) {
+        this.endTime = endTime;
+    }
+    
+    @Column(name = "trade_status")
+    public Integer getTradeStatus() {
+        return tradeStatus;
+    }
+
+    public void setTradeStatus(Integer tradeStatus) {
+        this.tradeStatus = tradeStatus;
     }
     
     @Column(name = "CREATOR", nullable = false, length = 32)

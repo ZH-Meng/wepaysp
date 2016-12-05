@@ -154,6 +154,7 @@ public class DealerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getStoreOid()), "门店Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getRefundPassword()), "退款权限密码不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getDealerOid()), "商户Oid不能为空");
+        Validator.checkArgument(dealerEmployeeVO.getEmployeeType() == null, "商户员工状态不能为空");
         
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
@@ -196,6 +197,7 @@ public class DealerEmployeeServiceImpl
         dealerEmployee.setState(dealerEmployeeVO.getState());
         dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
         dealerEmployee.setCreator(creator);
+        dealerEmployee.setEmployeeType(dealerEmployeeVO.getEmployeeType());
         commonDAO.save(dealerEmployee, false);
         
         // 创建用户
@@ -209,13 +211,16 @@ public class DealerEmployeeServiceImpl
         newUser.setBuildType(SysUser.BuildType.create.getValue());
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());
-        newUser.setUserLevel(SysUser.UserLevel.cashier.getValue());
+        newUser.setUserLevel(dealerEmployeeVO.getEmployeeType().intValue() == DealerEmployee.EmployeeType.storeManager.getValue() ? SysUser.UserLevel.shopManager.getValue() : SysUser.UserLevel.cashier.getValue());
         newUser.setDealerEmployee(dealerEmployee);
         newUser.setCreator(creator);
         commonDAO.save(newUser, false);
 
         // 设置默认角色
         String roleCode = SysNestedRoleCode.CASHIER;
+        if (DealerEmployee.EmployeeType.storeManager.getValue() == dealerEmployeeVO.getEmployeeType()) {// 店长
+            roleCode = SysNestedRoleCode.STORE_MANAGER;
+        }
 
         sql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
         paramMap.clear();
@@ -264,6 +269,7 @@ public class DealerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getMoblieNumber()), "商户员工手机号不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getStoreOid()), "门店Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeVO.getState()), "商户员工状态不能为空");
+        Validator.checkArgument(dealerEmployeeVO.getEmployeeType() == null, "商户员工状态不能为空");
         
         Date processBeginTime = new Date();
         // 查找商户
@@ -277,6 +283,66 @@ public class DealerEmployeeServiceImpl
         dealerEmployee.setEmployeeName(dealerEmployeeVO.getEmployeeName());
         dealerEmployee.setState(dealerEmployeeVO.getState());
         dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
+        if (dealerEmployee.getEmployeeType().intValue() != dealerEmployeeVO.getEmployeeType()) {// 员工类型改变
+            dealerEmployee.setEmployeeType(dealerEmployeeVO.getEmployeeType());
+            // 修改用户角色
+            
+            Map<String, Object> jpqlMap = new HashMap<String, Object>();
+            String newRoleCode = SysNestedRoleCode.CASHIER;
+            if (DealerEmployee.EmployeeType.storeManager.getValue() == dealerEmployeeVO.getEmployeeType()) {// 店长
+                newRoleCode = SysNestedRoleCode.STORE_MANAGER;
+            }
+
+            String jpql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
+            jpqlMap.clear();
+            jpqlMap.put("ROLEID", newRoleCode);
+            jpqlMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
+            SysRole newRole = commonDAO.findObject(jpql, jpqlMap, false);
+
+            if (newRole == null) {
+                throw new NotExistsException("未找到角色信息，RoleCode=" + newRoleCode);
+            } else {
+                // 原始角色
+                jpqlMap.put("ROLEID", newRoleCode == SysNestedRoleCode.CASHIER ? SysNestedRoleCode.STORE_MANAGER : SysNestedRoleCode.CASHIER);
+                SysRole oldRole = commonDAO.findObject(jpql, jpqlMap, false);
+                if (oldRole == null) {
+                    logger.warn("原始角色" + newRoleCode == SysNestedRoleCode.CASHIER ? SysNestedRoleCode.STORE_MANAGER : SysNestedRoleCode.CASHIER + "不存在");
+                }
+                // 用户
+                jpql = "from SysUser r where r.dealerEmployee.iwoid=:DEALEREMPLOYEEIWOID";
+                jpqlMap.clear();
+                jpqlMap.put("DEALEREMPLOYEEIWOID", dealerEmployee.getIwoid());
+                SysUser sysUser = commonDAO.findObject(jpql, jpqlMap, false);
+                if (sysUser == null) {
+                    throw new NotExistsException("未找到用户信息，商户员工oid=" + dealerEmployee.getIwoid());
+                }
+                // 更改用户级别
+                sysUser.setUserLevel(dealerEmployeeVO.getEmployeeType().intValue() == DealerEmployee.EmployeeType.storeManager.getValue() ? SysUser.UserLevel.shopManager.getValue() : SysUser.UserLevel.cashier.getValue());
+                commonDAO.update(sysUser);
+                
+                if (oldRole != null && sysUser != null) {
+                    // 删除原始角色用户关系
+                    jpql = "delete from SysAuthority r where r.sysRole=:ROLE and r.sysUser=:SYSUSER";
+                    jpqlMap.clear();
+                    jpqlMap.put("ROLE", oldRole);
+                    jpqlMap.put("SYSUSER", sysUser);
+                    commonDAO.executeBatch(jpql, jpqlMap, false);
+                }
+                
+                // 创建新的角色用户关系
+                SysAuthority sysAuthority = new SysAuthority();
+                sysAuthority.setIwoid(Generator.generateIwoid());
+                sysAuthority.setSysRole(newRole);
+                sysAuthority.setSysUser(sysUser);
+
+                commonDAO.save(sysAuthority, false);
+
+                if (newRole.getUseState().intValue() != SysRole.UseState.used.getValue()) {
+                    newRole.setUseState(SysRole.UseState.used.getValue());
+                    commonDAO.update(newRole);
+                }
+            }
+        }
         // 查找门店
         Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
         dealerEmployee.setStore(store);

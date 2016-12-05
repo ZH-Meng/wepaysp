@@ -37,6 +37,10 @@ public class RptDealerStatMonth
     private String partner3Oid;
     private String partnerEmployeeId;
     private String partnerEmployeeName;
+    private Long refundAmount;
+    private Long refundMoney;
+    private Long payAmount;
+    private Long payMoney;
     private Long totalAmount;
     private Long totalMoney;
     private BigDecimal partnerBonus;
@@ -239,6 +243,42 @@ public class RptDealerStatMonth
 
     public void setPartnerEmployeeName(String partnerEmployeeName) {
         this.partnerEmployeeName = partnerEmployeeName;
+    }
+    
+    @Column(name = "REFUND_AMOUNT", precision = 16, scale = 0)
+    public Long getRefundAmount() {
+        return this.refundAmount;
+    }
+
+    public void setRefundAmount(Long refundAmount) {
+        this.refundAmount = refundAmount;
+    }
+
+    @Column(name = "REFUND_MONEY", precision = 20, scale = 0)
+    public Long getRefundMoney() {
+        return this.refundMoney;
+    }
+
+    public void setRefundMoney(Long refundMoney) {
+        this.refundMoney = refundMoney;
+    }
+
+    @Column(name = "PAY_AMOUNT", precision = 16, scale = 0)
+    public Long getPayAmount() {
+        return this.payAmount;
+    }
+
+    public void setPayAmount(Long payAmount) {
+        this.payAmount = payAmount;
+    }
+
+    @Column(name = "PAY_MONEY", precision = 16, scale = 0)
+    public Long getPayMoney() {
+        return this.payMoney;
+    }
+
+    public void setPayMoney(Long payMoney) {
+        this.payMoney = payMoney;
     }
 
     @Column(name = "TOTAL_AMOUNT", precision = 16, scale = 0)

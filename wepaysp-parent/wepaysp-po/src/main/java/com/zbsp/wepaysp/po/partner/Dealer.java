@@ -36,6 +36,7 @@ public class Dealer
     private String techSupportPhone;
     private String subAppid;
     private String subMchId;
+    private String qrCodePath;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -237,6 +238,15 @@ public class Dealer
 
     public void setSubMchId(String subMchId) {
         this.subMchId = subMchId;
+    }
+    
+    @Column(name = "qr_code_path", length = 256)
+    public String getQrCodePath() {
+        return qrCodePath;
+    }
+    
+    public void setQrCodePath(String qrCodePath) {
+        this.qrCodePath = qrCodePath;
     }
 
     @Column(name = "CREATOR", nullable = false, length = 32)

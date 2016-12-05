@@ -1,6 +1,5 @@
 package com.zbsp.wepaysp.api.service.report.impl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +10,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.util.ArrayUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
@@ -77,7 +77,7 @@ public class RptDealerStatServiceImpl
 
         int subPartnerLevel = partnerLevel + 1;
         if ("self".equals(resultFlag)) {
-            sql.append("select d.partnerOid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerBonus)), max(p.feeRate) from " + poName + " d, Partner p where d.partnerOid = p.iwoid");
+            sql.append("select d.partnerOid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), sum(d.partnerBonus), max(p.feeRate), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d, Partner p where d.partnerOid = p.iwoid");
             sql.append(" and d.partnerLevel =:PARTNERLEVEL");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
@@ -95,7 +95,7 @@ public class RptDealerStatServiceImpl
                 throw new NotExistsException("不存在ID=" + partnerId + "的下级代理商");
             }
 
-            sql.append("select d.partner" + subPartnerLevel + "Oid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerBonus)), max(p.feeRate) from  " + poName + "  d, Partner p where d.partner" + subPartnerLevel + "Oid = p.iwoid");
+            sql.append("select d.partner" + subPartnerLevel + "Oid, max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), sum(d.partnerBonus), max(p.feeRate), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from  " + poName + "  d, Partner p where d.partner" + subPartnerLevel + "Oid = p.iwoid");
             sql.append(" and d.partnerLevel > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "Oid =:PARTNERAOID");
             sql.append(" and d.partner" + subPartnerLevel + "Oid =:PARTNERBOID");
@@ -109,7 +109,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("ENDTIME", endTime);
             statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if ("selfAndSub".equals(resultFlag)) {
-            sql.append("select d.partner_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.partner_bonus)), max(p.fee_rate) from " + tableName + " d, Partner_t  p where d.partner_Oid = p.iwoid");
+            sql.append("select d.partner_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), sum(d.partner_bonus), max(p.fee_rate), sum(d.refund_Amount), sum(d.refund_Money), sum(d.pay_Amount), sum(d.pay_Money) from " + tableName + " d, Partner_t  p where d.partner_Oid = p.iwoid");
             sql.append(" and d.partner_Level =:PARTNERLEVEL");
             sql.append(" and d.partner_Oid =:PARTNEROID");
             sql.append(" and d.start_Time >=:BEGINTIME");
@@ -118,7 +118,7 @@ public class RptDealerStatServiceImpl
 
             sql.append(" Union all ");
 
-            sql.append("select d.partner" + subPartnerLevel + "_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), round(sum(d.partner_bonus)), max(p.fee_rate) from  " + tableName + "  d, Partner_t  p  where d.partner" + subPartnerLevel + "_Oid = p.iwoid");
+            sql.append("select d.partner" + subPartnerLevel + "_Oid as partner_Oid, max(d.partner_Id), max(d.partner_Name), sum(d.total_Amount), sum(d.total_Money), sum(d.partner_bonus), max(p.fee_rate), sum(d.refund_Amount), sum(d.refund_Money), sum(d.pay_Amount), sum(d.pay_Money) from  " + tableName + "  d, Partner_t  p  where d.partner" + subPartnerLevel + "_Oid = p.iwoid");
             sql.append(" and d.partner_Level > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "_Oid =:PARTNERAOID");
             sql.append(" and d.start_Time >=:BEGINTIME");
@@ -138,18 +138,30 @@ public class RptDealerStatServiceImpl
             for (Object o : statrList) {
                 RptDealerStatVO vo = new RptDealerStatVO();
                 Object[] oArr = (Object[]) o;
-                // vo.setPartnerOid((String) oArr[0]);
-                vo.setPartnerId((String) oArr[1]);
-                vo.setPartnerName((String) oArr[2]);
+                //vo.setPartnerOid(String.valueOf(oArr[0]));
+                vo.setPartnerId(String.valueOf(oArr[1]));
+                vo.setPartnerName(String.valueOf(oArr[2]));
                 if (tableName != null) {
-                	vo.setTotalAmount(((BigDecimal) oArr[3]).longValue());
-                	vo.setTotalMoney(((BigDecimal) oArr[4]).longValue());
+                	vo.setTotalAmount(ArrayUtil.getBigDecimal(oArr, 3, 0).longValue());
+                	vo.setTotalMoney(ArrayUtil.getBigDecimal(oArr, 4, 0).longValue());
                 } else {
-                	vo.setTotalAmount((Long) oArr[3]);
-                    vo.setTotalMoney((Long) oArr[4]);
+                	vo.setTotalAmount(ArrayUtil.getLong(oArr, 3, 0));
+                    vo.setTotalMoney(ArrayUtil.getLong(oArr, 4, 0));
                 }
-                vo.setPartnerBonus((BigDecimal) oArr[5]);
-                vo.setFeeRate((Integer) oArr[6]);
+                vo.setPartnerBonus(ArrayUtil.getBigDecimal(oArr, 5, 0));
+                vo.setFeeRate(ArrayUtil.getInteger(oArr, 6, 0));
+                
+                if (tableName != null) {
+                    vo.setRefundAmount(ArrayUtil.getBigDecimal(oArr, 7, 0).longValue());
+                    vo.setRefundMoney(ArrayUtil.getBigDecimal(oArr, 8, 0).longValue());
+                    vo.setPayAmount(ArrayUtil.getBigDecimal(oArr, 9, 0).longValue());
+                    vo.setPayMoney(ArrayUtil.getBigDecimal(oArr, 10, 0).longValue());
+                } else {
+                    vo.setRefundAmount(ArrayUtil.getLong(oArr, 7, 0));
+                    vo.setRefundMoney(ArrayUtil.getLong(oArr, 8, 0));
+                    vo.setPayAmount(ArrayUtil.getLong(oArr, 9, 0));
+                    vo.setPayMoney(ArrayUtil.getLong(oArr, 10, 0));
+                }
                 resultList.add(vo);
             }
         }
@@ -300,7 +312,7 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
         if (StringUtils.isNotBlank(partnerOid)) {
-            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerEmployeeBonus)), d.partnerEmployeeId, max(d.partnerEmployeeName), max(pe.feeRate) from " + poName + " d, PartnerEmployee pe  where d.partnerEmployeeOid = pe.iwoid");
+            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), sum(d.partnerEmployeeBonus), d.partnerEmployeeId, max(d.partnerEmployeeName), max(pe.feeRate), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d, PartnerEmployee pe  where d.partnerEmployeeOid = pe.iwoid");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
@@ -319,7 +331,7 @@ public class RptDealerStatServiceImpl
             sqlMap.put("ENDTIME", endTime);
             statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         } else if (StringUtils.isNotBlank(partnerEmployeeOid)) {
-            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), round(sum(d.partnerEmployeeBonus)), max(d.partnerEmployeeId), max(d.partnerEmployeeName), max(pe.feeRate) from " + poName + " d, PartnerEmployee pe where d.partnerEmployeeOid = pe.iwoid");
+            sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), sum(d.partnerEmployeeBonus), max(d.partnerEmployeeId), max(d.partnerEmployeeName), max(pe.feeRate), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d, PartnerEmployee pe where d.partnerEmployeeOid = pe.iwoid");
             sql.append(" and d.partnerEmployeeOid =:PARTNEREMPLOYEEOID");
             sql.append(" and d.startTime >=:BEGINTIME");
             sql.append(" and d.startTime <:ENDTIME");
@@ -335,15 +347,19 @@ public class RptDealerStatServiceImpl
             for (Object o : statrList) {
                 RptDealerStatVO vo = new RptDealerStatVO();
                 Object[] oArr = (Object[]) o;
-                // vo.setPartnerOid((String) oArr[0]);
-                vo.setPartnerId((String) oArr[1]);
-                vo.setPartnerName((String) oArr[2]);
-                vo.setTotalAmount((Long) oArr[3]);
-                vo.setTotalMoney((Long) oArr[4]);
-                vo.setPartnerEmployeeBonus((BigDecimal) oArr[5]);
-                vo.setPartnerEmployeeId((String) oArr[6]);
-                vo.setPartnerEmployeeName((String) oArr[7]);
-                vo.setFeeRate((Integer) oArr[8]);
+                //vo.setPartnerOid(String.valueOf(oArr[0]));
+                vo.setPartnerId(String.valueOf(oArr[1]));
+                vo.setPartnerName(String.valueOf(oArr[2]));
+                vo.setTotalAmount(ArrayUtil.getLong(oArr, 3, 0));
+                vo.setTotalMoney(ArrayUtil.getLong(oArr, 4, 0));
+                vo.setPartnerEmployeeBonus(ArrayUtil.getBigDecimal(oArr, 5, 0));
+                vo.setPartnerEmployeeId(String.valueOf(oArr[6]));
+                vo.setPartnerEmployeeName(String.valueOf(oArr[7]));
+                vo.setFeeRate(ArrayUtil.getInteger(oArr, 8, 0));
+                vo.setRefundAmount(ArrayUtil.getLong(oArr, 9, 0));
+                vo.setRefundMoney(ArrayUtil.getLong(oArr, 10, 0));
+                vo.setPayAmount(ArrayUtil.getLong(oArr, 11, 0));
+                vo.setPayMoney(ArrayUtil.getLong(oArr, 12, 0));
                 resultList.add(vo);
             }
         }
@@ -434,7 +450,7 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
 
-        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), sum(d.totalAmount), sum(d.totalMoney) from " + poName + " d where 1=1");
+        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), sum(d.totalAmount), sum(d.totalMoney), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d where 1=1");
         sql.append(" and d.dealerOid =:DEALEROID");
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
@@ -452,12 +468,16 @@ public class RptDealerStatServiceImpl
             for (Object o : statrList) {
                 RptDealerStatVO vo = new RptDealerStatVO();
                 Object[] oArr = (Object[]) o;
-                vo.setDealerId((String) oArr[0]);
-                vo.setDealerName((String) oArr[1]);
-                vo.setStoreId((String) oArr[2]);
-                vo.setStoreName((String) oArr[3]);
-                vo.setTotalAmount((Long) oArr[4]);
-                vo.setTotalMoney((Long) oArr[5]);
+                vo.setDealerId(String.valueOf(oArr[0]));
+                vo.setDealerName(String.valueOf(oArr[1]));
+                vo.setStoreId(String.valueOf(oArr[2]));
+                vo.setStoreName(String.valueOf(oArr[3]));
+                vo.setTotalAmount(ArrayUtil.getLong(oArr, 4, 0));
+                vo.setTotalMoney(ArrayUtil.getLong(oArr, 5, 0));
+                vo.setRefundAmount(ArrayUtil.getLong(oArr, 6, 0));
+                vo.setRefundMoney(ArrayUtil.getLong(oArr, 7, 0));
+                vo.setPayAmount(ArrayUtil.getLong(oArr, 8, 0));
+                vo.setPayMoney(ArrayUtil.getLong(oArr, 9, 0));
                 resultList.add(vo);
             }
         }
@@ -539,7 +559,7 @@ public class RptDealerStatServiceImpl
         @SuppressWarnings("rawtypes")
         List statrList = null;
 
-        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmount), sum(d.totalMoney) from " + poName + " d where 1=1");
+        sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmount), sum(d.totalMoney), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d where 1=1");
         sql.append(" and d.dealerEmployeeOid is not null and d.dealerEmployeeOid <>'' ");// 排除收银员为空
         sql.append(" and d.startTime >=:BEGINTIME");
         sql.append(" and d.startTime <:ENDTIME");
@@ -577,14 +597,18 @@ public class RptDealerStatServiceImpl
             for (Object o : statrList) {
                 RptDealerStatVO vo = new RptDealerStatVO();
                 Object[] oArr = (Object[]) o;
-                vo.setDealerId((String) oArr[0]);
-                vo.setDealerName((String) oArr[1]);
-                vo.setStoreId((String) oArr[2]);
-                vo.setStoreName((String) oArr[3]);
-                vo.setDealerEmployeeId((String) oArr[4]);
-                vo.setDealerEmployeeName((String) oArr[5]);
-                vo.setTotalAmount((Long) oArr[6]);
-                vo.setTotalMoney((Long) oArr[7]);
+                vo.setDealerId(String.valueOf(oArr[0]));
+                vo.setDealerName(String.valueOf(oArr[1]));
+                vo.setStoreId(String.valueOf(oArr[2]));
+                vo.setStoreName(String.valueOf(oArr[3]));
+                vo.setDealerEmployeeId(String.valueOf(oArr[4]));
+                vo.setDealerEmployeeName(String.valueOf(oArr[5]));
+                vo.setTotalAmount(ArrayUtil.getLong(oArr, 6, 0));
+                vo.setTotalMoney(ArrayUtil.getLong(oArr, 7, 0));
+                vo.setRefundAmount(ArrayUtil.getLong(oArr, 8, 0));
+                vo.setRefundMoney(ArrayUtil.getLong(oArr, 9, 0));
+                vo.setPayAmount(ArrayUtil.getLong(oArr, 10, 0));
+                vo.setPayMoney(ArrayUtil.getLong(oArr, 11, 0));
                 resultList.add(vo);
             }
         }

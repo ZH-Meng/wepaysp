@@ -29,6 +29,11 @@ public class RptDealerStatVO
     private BigDecimal partnerBonus;
     private BigDecimal partnerEmployeeBonus;
 
+    private Long refundAmount;
+    private Long refundMoney;
+    private Long payAmount;
+    private Long payMoney;
+
     public String getPartnerId() {
         return partnerId;
     }
@@ -157,14 +162,14 @@ public class RptDealerStatVO
         this.storeOid = storeOid;
     }
 
-	public Integer getFeeRate() {
-		return feeRate;
-	}
+    public Integer getFeeRate() {
+        return feeRate;
+    }
 
-	public void setFeeRate(Integer feeRate) {
-		this.feeRate = feeRate;
-	}
-    
+    public void setFeeRate(Integer feeRate) {
+        this.feeRate = feeRate;
+    }
+
     public BigDecimal getPartnerBonus() {
         return partnerBonus;
     }
@@ -172,13 +177,45 @@ public class RptDealerStatVO
     public void setPartnerBonus(BigDecimal partnerBonus) {
         this.partnerBonus = partnerBonus;
     }
-    
+
     public BigDecimal getPartnerEmployeeBonus() {
         return partnerEmployeeBonus;
     }
-    
+
     public void setPartnerEmployeeBonus(BigDecimal partnerEmployeeBonus) {
         this.partnerEmployeeBonus = partnerEmployeeBonus;
+    }
+
+    public Long getRefundAmount() {
+        return refundAmount;
+    }
+
+    public void setRefundAmount(Long refundAmount) {
+        this.refundAmount = refundAmount;
+    }
+
+    public Long getRefundMoney() {
+        return refundMoney;
+    }
+
+    public void setRefundMoney(Long refundMoney) {
+        this.refundMoney = refundMoney;
+    }
+
+    public Long getPayAmount() {
+        return payAmount;
+    }
+
+    public void setPayAmount(Long payAmount) {
+        this.payAmount = payAmount;
+    }
+
+    public Long getPayMoney() {
+        return payMoney;
+    }
+
+    public void setPayMoney(Long payMoney) {
+        this.payMoney = payMoney;
     }
 
 }

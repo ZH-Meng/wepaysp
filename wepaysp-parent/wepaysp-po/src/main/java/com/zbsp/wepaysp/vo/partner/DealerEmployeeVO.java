@@ -11,10 +11,10 @@ public class DealerEmployeeVO
     implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 6954293319075245829L;
-	private String iwoid;
+     * 
+     */
+    private static final long serialVersionUID = 6954293319075245829L;
+    private String iwoid;
     private String storeId;
     private String storeName;
     private String dealerEmployeeId;
@@ -28,117 +28,126 @@ public class DealerEmployeeVO
     private String storeOid;
     private String oldRefundPassword;
     private String dealerOid;
-    
+    private Integer employeeType;
+
     public String getIwoid() {
         return iwoid;
     }
-    
+
     public void setIwoid(String iwoid) {
         this.iwoid = iwoid;
     }
-    
-	public String getStoreId() {
-		return storeId;
-	}
 
-	public void setStoreId(String storeId) {
-		this.storeId = storeId;
-	}
+    public String getStoreId() {
+        return storeId;
+    }
 
-	public String getStoreName() {
-		return storeName;
-	}
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
 
-	public void setStoreName(String storeName) {
-		this.storeName = storeName;
-	}
+    public String getStoreName() {
+        return storeName;
+    }
 
-	public String getDealerEmployeeId() {
-		return dealerEmployeeId;
-	}
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
 
-	public void setDealerEmployeeId(String dealerEmployeeId) {
-		this.dealerEmployeeId = dealerEmployeeId;
-	}
+    public String getDealerEmployeeId() {
+        return dealerEmployeeId;
+    }
 
-	public String getEmployeeName() {
-		return employeeName;
-	}
+    public void setDealerEmployeeId(String dealerEmployeeId) {
+        this.dealerEmployeeId = dealerEmployeeId;
+    }
 
-	public void setEmployeeName(String employeeName) {
-		this.employeeName = employeeName;
-	}
+    public String getEmployeeName() {
+        return employeeName;
+    }
 
-	public String getMoblieNumber() {
-		return moblieNumber;
-	}
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
 
-	public void setMoblieNumber(String moblieNumber) {
-		this.moblieNumber = moblieNumber;
-	}
+    public String getMoblieNumber() {
+        return moblieNumber;
+    }
 
-	public String getState() {
-		return state;
-	}
+    public void setMoblieNumber(String moblieNumber) {
+        this.moblieNumber = moblieNumber;
+    }
 
-	public void setState(String state) {
-		this.state = state;
-	}
+    public String getState() {
+        return state;
+    }
 
-	public String getRefundPassword() {
-		return refundPassword;
-	}
+    public void setState(String state) {
+        this.state = state;
+    }
 
-	public void setRefundPassword(String refundPassword) {
-		this.refundPassword = refundPassword;
-	}
+    public String getRefundPassword() {
+        return refundPassword;
+    }
 
-	public String getRemark() {
-		return remark;
-	}
+    public void setRefundPassword(String refundPassword) {
+        this.refundPassword = refundPassword;
+    }
 
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
+    public String getRemark() {
+        return remark;
+    }
 
-	public String getLoginId() {
-		return loginId;
-	}
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 
-	public void setLoginId(String loginId) {
-		this.loginId = loginId;
-	}
+    public String getLoginId() {
+        return loginId;
+    }
 
-	public String getLoginPwd() {
-		return loginPwd;
-	}
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
+    }
 
-	public void setLoginPwd(String loginPwd) {
-		this.loginPwd = loginPwd;
-	}
+    public String getLoginPwd() {
+        return loginPwd;
+    }
 
-	public String getStoreOid() {
-		return storeOid;
-	}
+    public void setLoginPwd(String loginPwd) {
+        this.loginPwd = loginPwd;
+    }
 
-	public void setStoreOid(String storeOid) {
-		this.storeOid = storeOid;
-	}
+    public String getStoreOid() {
+        return storeOid;
+    }
 
-	public String getOldRefundPassword() {
-		return oldRefundPassword;
-	}
+    public void setStoreOid(String storeOid) {
+        this.storeOid = storeOid;
+    }
 
-	public void setOldRefundPassword(String oldRefundPassword) {
-		this.oldRefundPassword = oldRefundPassword;
-	}
-    
+    public String getOldRefundPassword() {
+        return oldRefundPassword;
+    }
+
+    public void setOldRefundPassword(String oldRefundPassword) {
+        this.oldRefundPassword = oldRefundPassword;
+    }
+
     public String getDealerOid() {
         return dealerOid;
     }
-    
+
     public void setDealerOid(String dealerOid) {
         this.dealerOid = dealerOid;
     }
-	
+
+    public Integer getEmployeeType() {
+        return employeeType;
+    }
+
+    public void setEmployeeType(Integer employeeType) {
+        this.employeeType = employeeType;
+    }
+
 }

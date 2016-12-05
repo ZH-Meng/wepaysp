@@ -24,5 +24,8 @@ public class SysNestedRoleCode {
 
     /** 收银员 dealerEmployee */
     public static String CASHIER = "cashier";
+    
+    /** 分店店长 dealerEmployee */
+    public static String STORE_MANAGER = "storeManager";
 
 }
