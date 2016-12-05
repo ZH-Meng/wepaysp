@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
@@ -155,6 +156,20 @@ public class RptDealerStatAction
                         rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
                     }
                 }
+            } else if (manageUser.getUserLevel() == SysUser.UserLevel.shopManager.getValue()) {// 分店店长
+            	if (manageUser.getDataDealerEmployee() != null && manageUser.getDataDealerEmployee().getStore() != null) {
+            		paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
+            		if ("dealer".equals(listType)) {// 商户访问商户门店资金结算
+                        flag = true;
+                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Dealer(paramMap);
+                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Dealer(paramMap, 0, -1);
+                    } else if ("dealerEmployee".equals(listType)) {// 商户访问商户员工资金结算
+                        flag = true;
+                        paramMap.put("dealerEmployeeId", rptDealerStatVO.getDealerEmployeeId());
+                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
+                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
+                    }
+                }
             }
 
             if (!flag) {
@@ -162,6 +177,9 @@ public class RptDealerStatAction
                 setAlertMessage("当前用户无权" + logPrefix + "！");
                 return "accessDenied";
             }
+        } catch (NotExistsException e) {
+        	logger.warn(logPrefix + "错误：" + e.getMessage());
+        	setAlertMessage(e.getMessage());
         } catch (Exception e) {
         	logger.error(logPrefix + "错误：" + e.getMessage());
         	setAlertMessage(logPrefix + "错误！");

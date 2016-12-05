@@ -154,6 +154,7 @@ public class DealerEmployeeAction
                 dealerEmployeeService.doTransUpdateDealerEmployee(dealerEmployeeVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 logger.info("商户员工" + dealerEmployeeVO.getEmployeeName() + "修改成功");
                 setAlertMessage("商户员工" + dealerEmployeeVO.getEmployeeName() + "修改成功");
+                dealerEmployeeVO = null;
             } else {
                 logger.warn("修改商户员工失败，参数dealerEmployeeVO或者dealerEmployeeVO.getIwoid()为空！");
                 setAlertMessage("修改商户员工失败！");

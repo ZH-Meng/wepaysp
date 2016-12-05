@@ -50,7 +50,7 @@
 	                                </td>
 	                            </tr>
 	                            <tr>
-	                            	<th>员工类型</th>
+	                            	<th>员工级别</th>
 	                                <td>
 	                                	<s:select list="#{1:'收银员',2:'店长' }" listKey="key" listValue="value" name="dealerEmployeeVO.employeeType"  id="employeeType" headerKey="" headerValue="请选择"/>
 	                                	<span class="tj_bt">*</span>
@@ -114,7 +114,7 @@
 			$("#storeOid").focus();
 			return false;
 		} else if (isBlank(employeeType)) {
-			alert("员工类型不能为空！");
+			alert("员工级别不能为空！");
 			$("#employeeType").focus();
 			return false;
 		} else if (isBlank(state)) {

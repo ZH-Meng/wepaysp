@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
-import com.zbsp.wepaysp.common.constant.EnumDefine.RefundFlag;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.TradeType;
@@ -58,6 +57,7 @@ public class WeixinPayDetailsServiceImpl
         String partner3Oid = MapUtils.getString(paramMap, "partner3Oid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
@@ -87,6 +87,10 @@ public class WeixinPayDetailsServiceImpl
             sql.append(" and w.dealer.iwoid = :DEALEROID");
             sqlMap.put("DEALEROID", dealerOid);
         }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.store.iwoid = :STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+        }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
             sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
@@ -114,7 +118,7 @@ public class WeixinPayDetailsServiceImpl
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-            sql.append(" and w.transBeginTime <:ENDTIME ");
+            sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
 
@@ -176,6 +180,7 @@ public class WeixinPayDetailsServiceImpl
         String partner3Oid = MapUtils.getString(paramMap, "partner3Oid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
@@ -205,6 +210,10 @@ public class WeixinPayDetailsServiceImpl
             sql.append(" and w.dealer.iwoid = :DEALEROID");
             sqlMap.put("DEALEROID", dealerOid);
         }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.store.iwoid = :STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+        }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
             sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
@@ -232,7 +241,7 @@ public class WeixinPayDetailsServiceImpl
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-        	sql.append(" and w.transBeginTime <:ENDTIME ");
+        	sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
         

@@ -26,7 +26,7 @@
 		<s:if test="userLevel == 1 || userLevel == 2">
 			<s:set name="navTag">分润计算</s:set>
 		</s:if>
-		<s:elseif test="userLevel == 3 || userLevel == 5">
+		<s:elseif test="userLevel == 3 || userLevel == 4 || userLevel == 5">
 			<s:set name="navTag">资金结算</s:set>
 		</s:elseif>
 		<div class="bgposition">您现在的位置：<s:property value="#navTag" />&gt;微信退款明细</div>
@@ -41,7 +41,7 @@
 							<tbody>
 								<%-- 服务商、业务员、商户 --%>
 								<tr>
-									<s:if test="userLevel  > 0 && userLevel  <= 3">
+									<s:if test="userLevel  > 0 && userLevel  <= 4">
 										<s:set name="resetFlag" value="true"/>
 										<s:if test="userLevel  == 1">
 											<s:if test="partnerVoListLevel == 2">
@@ -71,11 +71,16 @@
 												<s:set name="queryCols"  value="5"/>
 											</s:if>
 										</s:if>
-										<s:if test="#queryCols == null">
-											<s:set name="queryCols"  value="3"/>
+										<s:if test="userLevel  == 1 || userLevel  == 2 || userLevel  == 3">
+											<th>门店ID</th>
+											<td><s:textfield name="weixinRefundDetailsVO.storeId" id="storeId" maxlength="9"/></td>
+											<s:if test="#queryCols == null">
+												<s:set name="queryCols"  value="3"/>
+											</s:if>
 										</s:if>
-										<th>门店ID</th>
-										<td><s:textfield name="weixinRefundDetailsVO.storeId" id="storeId" maxlength="9"/></td>
+										<s:if test="#queryCols == null">
+											<s:set name="queryCols"  value="1"/>
+										</s:if>
 										<th>收银员ID</th>
 										<td><s:textfield name="weixinRefundDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/></td>
 									</s:if>

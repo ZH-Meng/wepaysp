@@ -283,7 +283,7 @@ public class DealerEmployeeServiceImpl
         dealerEmployee.setEmployeeName(dealerEmployeeVO.getEmployeeName());
         dealerEmployee.setState(dealerEmployeeVO.getState());
         dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
-        if (dealerEmployee.getEmployeeType().intValue() != dealerEmployeeVO.getEmployeeType()) {// 员工类型改变
+        if (dealerEmployee.getEmployeeType() == null || dealerEmployee.getEmployeeType().intValue() != dealerEmployeeVO.getEmployeeType()) {// 员工类型改变
             dealerEmployee.setEmployeeType(dealerEmployeeVO.getEmployeeType());
             // 修改用户角色
             

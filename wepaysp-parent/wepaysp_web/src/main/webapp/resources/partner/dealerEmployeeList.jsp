@@ -80,6 +80,7 @@
 	                                <th>员工编号</th>
 	                                <th>登录名</th>
 	                                <th>姓名</th>
+	                                <th>员工级别</th>
 	                                <th>手机号码</th>
 	                                <th>状态</th>
 	                                <th>操作</th>
@@ -103,6 +104,18 @@
 						  			</td>
 						  			<td title="<s:property value="#dealerEmployeeVo.employeeName" />">
 						  				<s:property value="#dealerEmployeeVo.employeeName" />
+						  			</td>
+						  			<s:if test="#dealerEmployeeVo.employeeType == 1">
+						  				<s:set var="employeeTypeStr">收银员</s:set>
+						  			</s:if>
+						  			<s:elseif test="#dealerEmployeeVo.employeeType == 2">
+						  				<s:set var="employeeTypeStr">店长</s:set>
+						  			</s:elseif>
+						  			<s:else>
+						  				<s:set var="employeeTypeStr">收银员</s:set>
+						  			</s:else>
+						  			<td title="<s:property value="employeeTypeStr" />">
+						  				<s:property value="#employeeTypeStr" />
 						  			</td>
 						  			<td title="<s:property value="#dealerEmployeeVo.moblieNumber" />">
 						  				<s:property value="#dealerEmployeeVo.moblieNumber" />

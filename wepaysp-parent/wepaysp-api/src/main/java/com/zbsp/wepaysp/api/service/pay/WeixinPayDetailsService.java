@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -21,6 +20,7 @@ public interface WeixinPayDetailsService {
      *      partner3Oid:                       String类型，三级服务商Oid，根据此参数精确查询
      *      partnerEmployeeOid:           String类型，业务员Oid，根据此参数精确查询
      *      dealerOid:          				 String类型，商户Oid，根据此参数精确查询
+     *      storeOid:                           String类型，门店Oid，根据此参数精确查询
      *      dealerEmployeeOid:           String类型，收银员Oid，根据此参数精确查询
      *      partnerEmployeeId:     String类型，业务员ID，根据此参数模糊查询
      *      dealerId:                     String类型，商家ID，根据此参数模糊查询
@@ -46,6 +46,7 @@ public interface WeixinPayDetailsService {
      *      partner3Oid:                       String类型，三级服务商Oid，根据此参数精确查询
      *      partnerEmployeeOid:           String类型，业务员Oid，根据此参数精确查询
      *      dealerOid:                           String类型，商户Oid，根据此参数精确查询
+     *      storeOid:                           String类型，门店Oid，根据此参数精确查询
      *      dealerEmployeeOid:           String类型，收银员Oid，根据此参数精确查询
      *      partnerEmployeeId:     String类型，业务员Id，根据此参数模糊查询
      *      dealerId:                     String类型，商家ID，根据此参数模糊查询

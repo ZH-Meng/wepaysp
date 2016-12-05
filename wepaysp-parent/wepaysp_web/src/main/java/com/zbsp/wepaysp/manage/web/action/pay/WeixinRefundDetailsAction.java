@@ -99,6 +99,11 @@ public class WeixinRefundDetailsAction
                     paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
                     flag = true;
                 }
+            } else if (manageUser.getUserLevel() == SysUser.UserLevel.shopManager.getValue()) {// 分店店长
+            	if (manageUser.getDataDealerEmployee() != null && manageUser.getDataDealerEmployee().getStore() != null) {
+                    paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
+                    flag = true;
+                }
             }
 
             if (!flag) {

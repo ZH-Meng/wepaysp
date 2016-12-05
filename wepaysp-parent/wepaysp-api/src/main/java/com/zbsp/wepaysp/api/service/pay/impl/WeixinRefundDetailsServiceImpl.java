@@ -43,6 +43,7 @@ public class WeixinRefundDetailsServiceImpl
         String partner3Oid = MapUtils.getString(paramMap, "partner3Oid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
@@ -72,6 +73,10 @@ public class WeixinRefundDetailsServiceImpl
             sql.append(" and w.dealer.iwoid = :DEALEROID");
             sqlMap.put("DEALEROID", dealerOid);
         }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.store.iwoid = :STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+        }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
             sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
@@ -99,7 +104,7 @@ public class WeixinRefundDetailsServiceImpl
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-            sql.append(" and w.transBeginTime <:ENDTIME ");
+            sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
         sql.append(" order by w.transBeginTime desc");
@@ -158,6 +163,7 @@ public class WeixinRefundDetailsServiceImpl
         String partner3Oid = MapUtils.getString(paramMap, "partner3Oid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
@@ -188,6 +194,10 @@ public class WeixinRefundDetailsServiceImpl
             sql.append(" and w.dealer.iwoid = :DEALEROID");
             sqlMap.put("DEALEROID", dealerOid);
         }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.store.iwoid = :STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+        }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
             sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
@@ -215,7 +225,7 @@ public class WeixinRefundDetailsServiceImpl
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-            sql.append(" and w.transBeginTime <:ENDTIME ");
+            sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
         

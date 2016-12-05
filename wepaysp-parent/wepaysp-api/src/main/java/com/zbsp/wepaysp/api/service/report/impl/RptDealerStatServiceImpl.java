@@ -81,7 +81,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partnerLevel =:PARTNERLEVEL");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
             sql.append(" group by d.partnerOid");
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNEROID", partnerOid);
@@ -100,7 +100,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partner" + partnerLevel + "Oid =:PARTNERAOID");
             sql.append(" and d.partner" + subPartnerLevel + "Oid =:PARTNERBOID");
             sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
             sql.append(" group by d.partner" + subPartnerLevel + "Oid");
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNERAOID", partnerOid);
@@ -113,7 +113,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partner_Level =:PARTNERLEVEL");
             sql.append(" and d.partner_Oid =:PARTNEROID");
             sql.append(" and d.start_Time >=:BEGINTIME");
-            sql.append(" and d.start_Time <:ENDTIME");
+            sql.append(" and d.start_Time <=:ENDTIME");
             sql.append(" group by d.partner_Oid");
 
             sql.append(" Union all ");
@@ -122,7 +122,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partner_Level > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "_Oid =:PARTNERAOID");
             sql.append(" and d.start_Time >=:BEGINTIME");
-            sql.append(" and d.start_Time <:ENDTIME");
+            sql.append(" and d.start_Time <=:ENDTIME");
             sql.append(" group by d.partner" + subPartnerLevel + "_Oid");
 
             sqlMap.put("PARTNERLEVEL", partnerLevel);
@@ -225,7 +225,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partnerLevel =:PARTNERLEVEL");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
             //sql.append(" group by d.partnerOid");
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNEROID", partnerOid);
@@ -244,7 +244,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partner" + partnerLevel + "Oid =:PARTNERAOID");
             sql.append(" and d.partner" + subPartnerLevel + "Oid =:PARTNERBOID");
             sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
             //sql.append(" group by d.partner" + subPartnerLevel + "Oid");
             sqlMap.put("PARTNERLEVEL", partnerLevel);
             sqlMap.put("PARTNERAOID", partnerOid);
@@ -257,7 +257,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partner_Level =:PARTNERLEVEL");
             sql.append(" and d.partner_Oid =:PARTNEROID");
             sql.append(" and d.start_Time >=:BEGINTIME");
-            sql.append(" and d.start_Time <:ENDTIME");
+            sql.append(" and d.start_Time <=:ENDTIME");
             //sql.append(" group by d.partner_Oid");
 
             sql.append(" Union all ");
@@ -266,7 +266,7 @@ public class RptDealerStatServiceImpl
             sql.append(" and d.partner_Level > :PARTNERLEVEL");
             sql.append(" and d.partner" + partnerLevel + "_Oid =:PARTNERAOID");
             sql.append(" and d.start_Time >=:BEGINTIME");
-            sql.append(" and d.start_Time <:ENDTIME");
+            sql.append(" and d.start_Time <=:ENDTIME");
             //sql.append(" group by d.partner" + subPartnerLevel + "_Oid");
 
             sqlMap.put("PARTNERLEVEL", partnerLevel);
@@ -315,7 +315,7 @@ public class RptDealerStatServiceImpl
             sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), sum(d.partnerEmployeeBonus), d.partnerEmployeeId, max(d.partnerEmployeeName), max(pe.feeRate), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d, PartnerEmployee pe  where d.partnerEmployeeOid = pe.iwoid");
             sql.append(" and d.partnerOid =:PARTNEROID");
             sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
             if (StringUtils.isNotBlank(partnerEmployeeId)) {
                 // 校验查询服务商员工是否是当前服务商的下属
                 PartnerEmployee partnerEmployee = commonDAO.findObject("from PartnerEmployee p where p.partnerEmployeeId='" + partnerEmployeeId + "'", null, false);
@@ -334,7 +334,7 @@ public class RptDealerStatServiceImpl
             sql.append("select max(d.partnerOid), max(d.partnerId), max(d.partnerName), sum(d.totalAmount), sum(d.totalMoney), sum(d.partnerEmployeeBonus), max(d.partnerEmployeeId), max(d.partnerEmployeeName), max(pe.feeRate), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d, PartnerEmployee pe where d.partnerEmployeeOid = pe.iwoid");
             sql.append(" and d.partnerEmployeeOid =:PARTNEREMPLOYEEOID");
             sql.append(" and d.startTime >=:BEGINTIME");
-            sql.append(" and d.startTime <:ENDTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
 
             sql.append(" group by d.partnerEmployeeOid");
             sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
@@ -397,7 +397,7 @@ public class RptDealerStatServiceImpl
         StringBuffer sql = new StringBuffer();
         sql.append("select  count(distinct d.partnerEmployeeOid) from " + poName + " d where 1=1");
         sql.append(" and d.startTime >=:BEGINTIME");
-        sql.append(" and d.startTime <:ENDTIME");
+        sql.append(" and d.startTime <=:ENDTIME");
         if (StringUtils.isNotBlank(partnerOid)) {
             sql.append(" and d.partnerOid =:PARTNEROID");
             if (StringUtils.isNotBlank(partnerEmployeeId)) {
@@ -434,8 +434,10 @@ public class RptDealerStatServiceImpl
         Validator.checkArgument(StringUtils.isBlank(queryType), "查询方式不能为空");
         Validator.checkArgument(beginTime == null, "开始时间不能为空");
         Validator.checkArgument(endTime == null, "结束时间不能为空");
-        Validator.checkArgument(StringUtils.isBlank(dealerOid), "商户Oid不能为空");
-
+        if (StringUtils.isBlank(dealerOid) && StringUtils.isBlank(storeOid)) {
+            throw new IllegalArgumentException("商户Oid和门店Oid 至少一个不能为空");
+        }
+        
         String poName = null;
         if ("day".equals(queryType)) {
             poName = "RptDealerStatDay";
@@ -451,15 +453,20 @@ public class RptDealerStatServiceImpl
         List statrList = null;
 
         sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), sum(d.totalAmount), sum(d.totalMoney), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d where 1=1");
-        sql.append(" and d.dealerOid =:DEALEROID");
         sql.append(" and d.startTime >=:BEGINTIME");
-        sql.append(" and d.startTime <:ENDTIME");
-        if (StringUtils.isNotBlank(storeOid)) {
-            sql.append(" and d.storeOid =:STOREOID");
-            sqlMap.put("STOREOID", storeOid);
+        sql.append(" and d.startTime <=:ENDTIME");
+        if (StringUtils.isNotBlank(dealerOid)) {
+        	sql.append(" and d.dealerOid =:DEALEROID");
+        	sqlMap.put("DEALEROID", dealerOid);
+        	if (StringUtils.isNotBlank(storeOid)) {
+        		sql.append(" and d.storeOid =:STOREOID");
+        		sqlMap.put("STOREOID", storeOid);
+        	}
+        } else if (StringUtils.isNotBlank(storeOid)) {
+        	sql.append(" and d.storeOid =:STOREOID");
+    		sqlMap.put("STOREOID", storeOid);
         }
         sql.append(" group by d.dealerOid, d.storeOid");
-        sqlMap.put("DEALEROID", dealerOid);
         sqlMap.put("BEGINTIME", beginTime);
         sqlMap.put("ENDTIME", endTime);
         statrList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
@@ -496,7 +503,9 @@ public class RptDealerStatServiceImpl
         Validator.checkArgument(StringUtils.isBlank(queryType), "查询方式不能为空");
         Validator.checkArgument(beginTime == null, "开始时间不能为空");
         Validator.checkArgument(endTime == null, "结束时间不能为空");
-        Validator.checkArgument(StringUtils.isBlank(dealerOid), "商户Oid不能为空");
+        if (StringUtils.isBlank(dealerOid) && StringUtils.isBlank(storeOid)) {
+            throw new IllegalArgumentException("商户Oid和门店Oid 至少一个不能为空");
+        }
 
         String poName = null;
         if ("day".equals(queryType)) {
@@ -511,12 +520,18 @@ public class RptDealerStatServiceImpl
         StringBuffer sql = new StringBuffer();
 
         sql.append("select count(distinct d.storeOid) from " + poName + " d where 1=1");
-        sql.append(" and d.dealerOid =:DEALEROID");
         sql.append(" and d.startTime >=:BEGINTIME");
-        sql.append(" and d.startTime <:ENDTIME");
-        if (StringUtils.isNotBlank(storeOid)) {
-            sql.append(" and d.storeOid =:STOREOID");
-            sqlMap.put("STOREOID", storeOid);
+        sql.append(" and d.startTime <=:ENDTIME");
+        if (StringUtils.isNotBlank(dealerOid)) {
+        	sql.append(" and d.dealerOid =:DEALEROID");
+        	sqlMap.put("DEALEROID", dealerOid);
+        	if (StringUtils.isNotBlank(storeOid)) {
+        		sql.append(" and d.storeOid =:STOREOID");
+        		sqlMap.put("STOREOID", storeOid);
+        	}
+        } else if (StringUtils.isNotBlank(storeOid)) {
+        	sql.append(" and d.storeOid =:STOREOID");
+    		sqlMap.put("STOREOID", storeOid);
         }
         //sql.append(" group by d.dealerOid, d.storeOid");
         sqlMap.put("DEALEROID", dealerOid);
@@ -550,8 +565,8 @@ public class RptDealerStatServiceImpl
             throw new IllegalArgumentException("未指定正确的queryType");
         }
 
-        if (StringUtils.isBlank(dealerEmployeeOid) && StringUtils.isBlank(dealerOid)) {
-            throw new IllegalArgumentException("商户Oid和商户员工Oid 至少一个不能为空");
+        if (StringUtils.isBlank(dealerEmployeeOid) && StringUtils.isBlank(dealerOid) && StringUtils.isBlank(storeOid)) {
+            throw new IllegalArgumentException("商户Oid、门店Oid和商户员工Oid 至少一个不能为空");
         }
 
         Map<String, Object> sqlMap = new HashMap<String, Object>();
@@ -562,7 +577,7 @@ public class RptDealerStatServiceImpl
         sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmount), sum(d.totalMoney), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from " + poName + " d where 1=1");
         sql.append(" and d.dealerEmployeeOid is not null and d.dealerEmployeeOid <>'' ");// 排除收银员为空
         sql.append(" and d.startTime >=:BEGINTIME");
-        sql.append(" and d.startTime <:ENDTIME");
+        sql.append(" and d.startTime <=:ENDTIME");
 
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and d.dealerEmployeeOid =:DEALEREMPLOYEEOID");
@@ -584,9 +599,19 @@ public class RptDealerStatServiceImpl
                 sql.append(" and d.dealerEmployeeId =:DEALEREMPLOYEEID");
                 sqlMap.put("DEALEREMPLOYEEID", dealerEmployeeId);
             }
-
+        } else if (StringUtils.isNotBlank(storeOid)) {
+        	sql.append(" and d.storeOid =:STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+            if (StringUtils.isNotBlank(dealerEmployeeId)) {
+                // 校验查询商户员工是否属于当前门店
+                DealerEmployee dealerEmployee = commonDAO.findObject("from DealerEmployee p where p.dealerEmployeeId='" + dealerEmployeeId + "'", null, false);
+                if (dealerEmployee == null || dealerEmployee.getStore() == null || !dealerEmployee.getStore().getIwoid().equals(storeOid)) {
+                    throw new NotExistsException("当前门店不存在ID=" + dealerEmployeeId + "的员工");
+                }
+                sql.append(" and d.dealerEmployeeId =:DEALEREMPLOYEEID");
+                sqlMap.put("DEALEREMPLOYEEID", dealerEmployeeId);
+            }
         }
-
         sql.append(" group by d.dealerOid, d.storeOid, d.dealerEmployeeOid");
         sqlMap.put("BEGINTIME", beginTime);
         sqlMap.put("ENDTIME", endTime);
@@ -639,8 +664,8 @@ public class RptDealerStatServiceImpl
             throw new IllegalArgumentException("未指定正确的queryType");
         }
 
-        if (StringUtils.isBlank(dealerEmployeeOid) && StringUtils.isBlank(dealerOid)) {
-            throw new IllegalArgumentException("商户Oid和商户员工Oid 至少一个不能为空");
+        if (StringUtils.isBlank(dealerEmployeeOid) && StringUtils.isBlank(dealerOid) && StringUtils.isBlank(storeOid)) {
+            throw new IllegalArgumentException("商户Oid、门店Oid和商户员工Oid 至少一个不能为空");
         }
 
         Map<String, Object> sqlMap = new HashMap<String, Object>();
@@ -649,7 +674,7 @@ public class RptDealerStatServiceImpl
         sql.append("select count(distinct d.dealerEmployeeOid) from " + poName + " d where 1=1");
         sql.append(" and d.dealerEmployeeOid is not null and d.dealerEmployeeOid <>'' ");// 排除收银员为空
         sql.append(" and d.startTime >=:BEGINTIME");
-        sql.append(" and d.startTime <:ENDTIME");
+        sql.append(" and d.startTime <=:ENDTIME");
 
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
             sql.append(" and d.dealerEmployeeOid =:DEALEREMPLOYEEOID");
@@ -671,7 +696,18 @@ public class RptDealerStatServiceImpl
                 sql.append(" and d.dealerEmployeeId =:DEALEREMPLOYEEID");
                 sqlMap.put("DEALEREMPLOYEEID", dealerEmployeeId);
             }
-
+        } else if (StringUtils.isNotBlank(storeOid)) {
+        	sql.append(" and d.storeOid =:STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+            if (StringUtils.isNotBlank(dealerEmployeeId)) {
+                // 校验查询商户员工是否属于当前门店
+                DealerEmployee dealerEmployee = commonDAO.findObject("from DealerEmployee p where p.dealerEmployeeId='" + dealerEmployeeId + "'", null, false);
+                if (dealerEmployee == null || dealerEmployee.getStore() == null || !dealerEmployee.getStore().getIwoid().equals(storeOid)) {
+                    throw new NotExistsException("当前门店不存在ID=" + dealerEmployeeId + "的员工");
+                }
+                sql.append(" and d.dealerEmployeeId =:DEALEREMPLOYEEID");
+                sqlMap.put("DEALEREMPLOYEEID", dealerEmployeeId);
+            }
         }
 
         //sql.append(" group by d.dealerOid, d.storeOid, d.dealerEmployeeOid");

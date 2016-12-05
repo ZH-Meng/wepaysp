@@ -31,14 +31,22 @@
 							<tbody>
 								<s:set name="queryCols"  value="1"/>
 								<%-- 商户 --%>
-								<s:if test="userLevel == 3">
+								<s:if test="userLevel == 3 || userLevel == 4">
 									<tr>
-										<th>门店</th>
-		                                <td>
-		                                	<s:select list="storeVoList" listKey="iwoid" listValue="storeName" name="rptDealerStatVO.storeOid"  id="storeOid" headerKey="" headerValue="全部"/>
-		                                </td>
+										<s:if test="userLevel == 3">
+											<s:set name="queryCols" value="1"/>
+											<th>门店</th>
+			                                <td>
+			                                	<s:select list="storeVoList" listKey="iwoid" listValue="storeName" name="rptDealerStatVO.storeOid"  id="storeOid" headerKey="" headerValue="全部"/>
+			                                </td>
+										</s:if>
 		                                <s:if test="listType == 'dealerEmployee'">
-		                                	<s:set name="queryCols"  value="3"/>
+		                                	<s:if test="#queryCols == null">
+												<s:set name="queryCols"  value="1"/>
+											</s:if>
+											<s:else>
+												<s:set name="queryCols"  value="3"/>
+											</s:else>
 											<th>收银员ID</th>
 											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
 												<span>输入收银员ID精确搜索</span>
