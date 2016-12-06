@@ -15,6 +15,8 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
+import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
+import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -164,20 +166,20 @@ public class WeixinPayDetailsMainServiceImpl
             if (flag) {
                 String returnCode = wxNotify.getReturn_code();
                 String resultCode = wxNotify.getResult_code();
-                if ("SUCCESS".equals(returnCode) && "SUCCESS".equals(resultCode)) {
-                    try {
-                        weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, WeixinPackConverter.payNotify2weixinPayDetailsVO(wxNotify));
-                        result = new WxPayNotifyResultData("SUCCESS");
-                        result.setReturn_msg("成功");
-                    } catch (Exception e) {
-                        logger.error("微信支付结果通知错误，" + e.getMessage());
-                        result = new WxPayNotifyResultData("FAIL");
-                        result.setReturn_msg("失败");
-                    }
-                } else {
-                    result = new WxPayNotifyResultData("FAIL");
-                    result.setReturn_msg("失败");
+                try {
+	                if (StringUtils.equalsIgnoreCase(ReturnCode.FAIL.toString(), returnCode)) {
+	                	// TODO 关闭订单
+	                } else {
+                		weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, WeixinPackConverter.payNotify2weixinPayDetailsVO(wxNotify));
+	                }
+	                result = new WxPayNotifyResultData("SUCCESS");
+	                result.setReturn_msg("成功");
+                } catch (Exception e) {
+                	logger.error("微信支付结果通知错误，" + e.getMessage());
+                	result = new WxPayNotifyResultData("FAIL");
+                	result.setReturn_msg("失败");
                 }
+               //TODO 发送支付结果公众号信息
             } else {
                 result = new WxPayNotifyResultData("FAIL");
                 result.setReturn_msg("签名失败");
@@ -194,42 +196,41 @@ public class WeixinPayDetailsMainServiceImpl
     @Override
     public Map<String, Object> checkPayResult(String payResult, String weixinPayDetailOid) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        Integer tradeStatus = null;
         WeixinPayDetailsVO payDetailVO =  weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+        Integer tradeStatus = payDetailVO.getTradeStatus();
         
-        String listenerResult = null;
-        try {
-            // 主动查询微信支付结果
-            DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
-            WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
-            listenerResult = orderQueryListener.getResult();
-        } catch (Exception e) {
-            logger.error("订单查询失败，" + e.getMessage());
-            logger.error(e.getMessage(), e);
+        if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
+        	// 主动查询微信支付结果
+        	try {
+        		DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
+        		// 订单查询
+        		WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
+        		
+                payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+                tradeStatus = payDetailVO.getTradeStatus();// 当前订单状态
+        	} catch (Exception e) {
+        		logger.error("订单（系统订单ID：" + payDetailVO.getOutTradeNo() + "）查询失败，" + e.getMessage());
+        		logger.error(e.getMessage(), e);
+        	}
         }
-        
-        //FIXME
-        payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
-        tradeStatus = payDetailVO.getTradeStatus();// 订单状态
-        if (StringUtils.equalsIgnoreCase(listenerResult, DefaultScanPayBusinessResultListener.ON_SUCCESS)) {// 查询成功
-            if ("ok".equalsIgnoreCase(payResult)) {
-                if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {
-                    logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue());
-                }
-            } else if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
-                //weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
-                if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_CLOSED.getValue()) {
-                    logger.warn("微信H5支付结果为cancel，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue());
-                }
-            } else if ("error".equalsIgnoreCase(payResult)) {// 用户取消支付
-                if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_FAIL.getValue()) {
-                    logger.warn("微信H5支付结果为error，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue());
-                }
+
+        if ("ok".equalsIgnoreCase(payResult)) {
+            if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {
+                logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue() + "系统订单ID：" + payDetailVO.getOutTradeNo());
+            }
+        } else if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
+            //weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
+            if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_CLOSED.getValue()) {
+                logger.warn("微信H5支付结果为cancel，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue() + "系统订单ID：" + payDetailVO.getOutTradeNo());
+            }
+        } else if ("error".equalsIgnoreCase(payResult)) {// 用户取消支付
+            if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_FAIL.getValue()) {
+                logger.warn("微信H5支付结果为error，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue() + "系统订单ID：" + payDetailVO.getOutTradeNo());
             }
         }
-        resultMap.put("tradeStatus", tradeStatus);
-        resultMap.put("weixinPayDetailsVO", payDetailVO);
         
+        resultMap.put("tradeStatus", tradeStatus);
+        resultMap.put("weixinPayDetailsVO", payDetailVO);        
         return resultMap;
     }
     

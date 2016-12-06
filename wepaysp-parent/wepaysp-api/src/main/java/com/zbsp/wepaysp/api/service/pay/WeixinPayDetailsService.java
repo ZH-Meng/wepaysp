@@ -101,11 +101,12 @@ public interface WeixinPayDetailsService {
      * 根据Oid 取消支付
      * @param weixinPayDetailOid
      */
+    @Deprecated
     public void doTransCancelPay(String weixinPayDetailOid);
 
     /**
-     * 更新订单查询结果
-     * @param orderQueryRes2WeixinPayDetailsVO
+     * 更新微信支付订单查询结果，只支持查询成功更新
+     * @param orderQueryResultVO
      */
     public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO);
 
