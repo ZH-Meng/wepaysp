@@ -93,8 +93,8 @@ public class DealerEmployeeAction
 
     public String createDealerEmployee() {
         logger.info("开始添加商户员工.");
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
-            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     		if (!checkUser(manageUser, "add")) {
     			return "accessDenied";
             }
@@ -112,6 +112,18 @@ public class DealerEmployeeAction
         } catch (AlreadyExistsException e) {
             logger.error("商户员工添加失败：" + e.getMessage());
             setAlertMessage("商户员工添加失败：" + e.getMessage());
+            // 获取当前用户关联的商户下所有门店
+            Map<String, Object> paramMap = new HashMap<String, Object>();
+            paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+            storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
+            return "createDealerEmployee";
+        } catch (NotExistsException e) {
+            logger.error("商户员工添加失败：" + e.getMessage());
+            setAlertMessage("商户员工添加失败：" + e.getMessage());
+            // 获取当前用户关联的商户下所有门店
+            Map<String, Object> paramMap = new HashMap<String, Object>();
+            paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+            storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
             return "createDealerEmployee";
         } catch (Exception e) {
             logger.error("商户员工添加错误：" + e.getMessage());
@@ -160,13 +172,19 @@ public class DealerEmployeeAction
                 setAlertMessage("修改商户员工失败！");
                 return list();
             }
+        } catch (AlreadyExistsException e) {
+            logger.error("商户员工修改失败：" + e.getMessage());
+            setAlertMessage("商户员工修改失败：" + e.getMessage());
+            dealerEmployeeVO = null;
+            return list();
         } catch (NotExistsException e) {
             logger.error("商户员工修改失败：" + e.getMessage());
             setAlertMessage("商户员工修改失败：" + e.getMessage());
+            dealerEmployeeVO = null;
             return list();
         } catch (Exception e) {
-            logger.error("商户员工添加错误：" + e.getMessage());
-            setAlertMessage("商户员工添加错误！");
+            logger.error("商户员工修改错误：" + e.getMessage());
+            setAlertMessage("商户员工修改错误！");
             return "error";
         }
         return list();

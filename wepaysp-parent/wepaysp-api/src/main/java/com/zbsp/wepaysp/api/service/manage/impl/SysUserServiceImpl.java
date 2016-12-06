@@ -63,7 +63,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         } else if (sysUser.getState() == SysUser.State.frozen.getValue()) {
             throw new IllegalStateException("该用户已冻结，不允许登录！");
         }
-        if (sysUser.getDealerEmployee() != null) {
+        if (sysUser.getDealerEmployee() != null && StringUtils.isNotBlank(sysUser.getDealerEmployee().getIwoid())) {
         	sysUser.getDealerEmployee().getStore();
         }
 

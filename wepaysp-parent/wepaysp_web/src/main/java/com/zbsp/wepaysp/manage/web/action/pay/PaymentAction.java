@@ -181,7 +181,7 @@ public class PaymentAction
     }
     
     /**
-     * 是否是商户员工
+     * 是否是商户员工(收银员、业务员)
      * 
      * @return
      */
@@ -191,7 +191,7 @@ public class PaymentAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.cashier.getValue() || manageUser.getDataDealerEmployee() == null) {
+            if ((level != SysUser.UserLevel.cashier.getValue() && level != SysUser.UserLevel.shopManager.getValue()) || manageUser.getDataDealerEmployee() == null) {
                 return false;
             }
         }

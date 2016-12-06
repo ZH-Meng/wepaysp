@@ -180,7 +180,29 @@ public class DealerEmployeeServiceImpl
         
         // 查找门店
         Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
+        if (store == null) {
+            throw new NotExistsException("未找到门店信息");
+        }
         dealerEmployee.setStore(store);
+        
+        String roleCode = SysNestedRoleCode.CASHIER;// 默认角色
+        if (DealerEmployee.EmployeeType.storeManager.getValue() == dealerEmployeeVO.getEmployeeType()) {// 店长
+            roleCode = SysNestedRoleCode.STORE_MANAGER;
+            // 检查是否已有店长
+            if (checkIsExistStoreManager(dealerEmployeeVO.getStoreOid())) {
+                throw new AlreadyExistsException("当前门店已有店长");
+            }
+        }
+
+        sql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
+        paramMap.clear();
+        paramMap.put("ROLEID", roleCode);
+        paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
+        SysRole role = commonDAO.findObject(sql, paramMap, false);
+
+        if (role == null) {
+            throw new NotExistsException("未找到角色信息");
+        }
         
         // 获取 服务商员工ID下一个序列值
         sql = "select nextval('" + SysSequenceCode.PARTNER_EMPLOYEE + "') as sequence_value";
@@ -216,35 +238,18 @@ public class DealerEmployeeServiceImpl
         newUser.setCreator(creator);
         commonDAO.save(newUser, false);
 
-        // 设置默认角色
-        String roleCode = SysNestedRoleCode.CASHIER;
-        if (DealerEmployee.EmployeeType.storeManager.getValue() == dealerEmployeeVO.getEmployeeType()) {// 店长
-            roleCode = SysNestedRoleCode.STORE_MANAGER;
+        // 创建角色用户关系
+        SysAuthority sysAuthority = new SysAuthority();
+        sysAuthority.setIwoid(Generator.generateIwoid());
+        sysAuthority.setSysRole(role);
+        sysAuthority.setSysUser(newUser);
+
+        commonDAO.save(sysAuthority, false);
+
+        if (role.getUseState().intValue() != SysRole.UseState.used.getValue()) {
+            role.setUseState(SysRole.UseState.used.getValue());
+            commonDAO.update(role);
         }
-
-        sql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
-        paramMap.clear();
-        paramMap.put("ROLEID", roleCode);
-        paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
-        SysRole role = commonDAO.findObject(sql, paramMap, false);
-
-        if (role == null) {
-            throw new NotExistsException("未找到角色信息");
-        } else {
-            // 创建角色用户关系
-            SysAuthority sysAuthority = new SysAuthority();
-            sysAuthority.setIwoid(Generator.generateIwoid());
-            sysAuthority.setSysRole(role);
-            sysAuthority.setSysUser(newUser);
-
-            commonDAO.save(sysAuthority, false);
-
-            if (role.getUseState().intValue() != SysRole.UseState.used.getValue()) {
-                role.setUseState(SysRole.UseState.used.getValue());
-                commonDAO.update(role);
-            }
-        }
-
 
         BeanCopierUtil.copyProperties(dealerEmployee, dealerEmployeeVO);
 
@@ -277,22 +282,34 @@ public class DealerEmployeeServiceImpl
         if (dealerEmployee == null) {
             throw new NotExistsException("未找到要修改的商户员工对象");
         }
-
         String dealerEmployeeStr = dealerEmployee.toString();
+        
+        if (!StringUtils.equals(dealerEmployee.getStore().getIwoid(), dealerEmployeeVO.getStoreOid())) {
+            // 查找门店
+            Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
+            if (store == null) {
+                throw new NotExistsException("未找到门店信息");
+            }
+            dealerEmployee.setStore(store);
+        }
+
         dealerEmployee.setMoblieNumber(dealerEmployeeVO.getMoblieNumber());
         dealerEmployee.setEmployeeName(dealerEmployeeVO.getEmployeeName());
         dealerEmployee.setState(dealerEmployeeVO.getState());
         dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
         if (dealerEmployee.getEmployeeType() == null || dealerEmployee.getEmployeeType().intValue() != dealerEmployeeVO.getEmployeeType()) {// 员工类型改变
-            dealerEmployee.setEmployeeType(dealerEmployeeVO.getEmployeeType());
-            // 修改用户角色
-            
             Map<String, Object> jpqlMap = new HashMap<String, Object>();
             String newRoleCode = SysNestedRoleCode.CASHIER;
             if (DealerEmployee.EmployeeType.storeManager.getValue() == dealerEmployeeVO.getEmployeeType()) {// 店长
                 newRoleCode = SysNestedRoleCode.STORE_MANAGER;
+                // 检查是否已有店长
+                if (checkIsExistStoreManager(dealerEmployee.getStore().getIwoid())) {
+                    throw new AlreadyExistsException("当前门店已有店长");
+                }
             }
-
+            dealerEmployee.setEmployeeType(dealerEmployeeVO.getEmployeeType());
+            
+            // 修改用户角色
             String jpql = "from SysRole r where r.roleId=:ROLEID and r.state <> :CANCELSTATE";
             jpqlMap.clear();
             jpqlMap.put("ROLEID", newRoleCode);
@@ -308,7 +325,7 @@ public class DealerEmployeeServiceImpl
                 if (oldRole == null) {
                     logger.warn("原始角色" + newRoleCode == SysNestedRoleCode.CASHIER ? SysNestedRoleCode.STORE_MANAGER : SysNestedRoleCode.CASHIER + "不存在");
                 }
-                // 用户
+                // 查找关联用户
                 jpql = "from SysUser r where r.dealerEmployee.iwoid=:DEALEREMPLOYEEIWOID";
                 jpqlMap.clear();
                 jpqlMap.put("DEALEREMPLOYEEIWOID", dealerEmployee.getIwoid());
@@ -343,9 +360,6 @@ public class DealerEmployeeServiceImpl
                 }
             }
         }
-        // 查找门店
-        Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
-        dealerEmployee.setStore(store);
 
         dealerEmployee.setModifier(modifier);
         commonDAO.update(dealerEmployee);
@@ -418,6 +432,20 @@ public class DealerEmployeeServiceImpl
         DealerEmployeeVO dealerEmployeeVO = new DealerEmployeeVO();
         BeanCopierUtil.copyProperties(dealerEmployee, dealerEmployeeVO);
         return dealerEmployeeVO;
+	}
+	
+	private boolean checkIsExistStoreManager(String storeOid) {
+	    Validator.checkArgument(StringUtils.isBlank(storeOid), "门店Oid不能为空");
+	    Map<String, Object> jpqlMap = new HashMap<String, Object>();
+	    String jpql = "select count(d.iwoid) from DealerEmployee d where d.employeeType=:EMPLOYEETYPE and d.store.iwoid=:STOREOID";
+        jpqlMap.put("EMPLOYEETYPE", DealerEmployee.EmployeeType.storeManager.getValue());
+        jpqlMap.put("STOREOID", storeOid);
+        int count = commonDAO.queryObjectCount(jpql, jpqlMap, false);
+        if (count > 0) {
+            return true;
+        } else {
+            return false;
+        }
 	}
 	
 	 public void setSysLogService(SysLogService sysLogService) {

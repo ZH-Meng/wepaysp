@@ -145,14 +145,14 @@
 						  			</td>
 						  			
 						  			<s:if test="listType == 'partner'">
-										<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.partnerBonus/100}" pattern="###,###,###,##0.00"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10}" pattern="0.0"/>‰】">
-							  				<fmt:formatNumber value="${rptDealerStatVo.partnerBonus/100}" pattern="###,###,###,##0.00"/>
+										<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.partnerBonus/100 + 0.001}" pattern="###,###,###,##0.00"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10}" pattern="0.0"/>‰】">
+							  				<fmt:formatNumber value="${rptDealerStatVo.partnerBonus/100 + 0.001}" pattern="###,###,###,##0.00"/>
 							  				【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10}" pattern="0.0"/>‰】
 							  			</td>
 									</s:if>
 									<s:elseif test="listType == 'partnerEmployee'">
-										<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.partnerEmployeeBonus/100}" pattern="###,###,###,##0.00"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10}" pattern="0.0"/>‰】">
-							  				<fmt:formatNumber value="${rptDealerStatVo.partnerEmployeeBonus/100}" pattern="###,###,###,##0.00"/>
+										<td class="bgright" title="<fmt:formatNumber value="${rptDealerStatVo.partnerEmployeeBonus/100 + 0.001}" pattern="###,###,###,##0.00"/>【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10}" pattern="0.0"/>‰】">
+							  				<fmt:formatNumber value="${rptDealerStatVo.partnerEmployeeBonus/100 + 0.001}" pattern="###,###,###,##0.00"/>
 							  				【<fmt:formatNumber value="${rptDealerStatVo.feeRate/10}" pattern="0.0"/>‰】
 							  			</td>
 									</s:elseif>
