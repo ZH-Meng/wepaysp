@@ -4,6 +4,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.tencent.protocol.pay_protocol.ScanPayReqData;
 import com.tencent.protocol.pay_protocol.ScanPayResData;
+import com.tencent.protocol.pay_query_protocol.ScanPayQueryReqData;
+import com.tencent.protocol.pay_query_protocol.ScanPayQueryResData;
 import com.tencent.protocol.unified_order_protocol.UnifiedOrderReqData;
 import com.tencent.protocol.unified_order_protocol.UnifiedOrderResData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyData;
@@ -191,5 +193,62 @@ public class WeixinPackConverter {
         }
         // FIXME 待补全，只组装有用的数据
         return vo;
+    }
+
+    /**
+     * 订单查询结果包转换为WeixinPayDetailsVO
+     * @param orderQueryResData 订单查询结果包 
+     * @return WeixinPayDetailsVO
+     */
+    public static WeixinPayDetailsVO orderQueryRes2WeixinPayDetailsVO(ScanPayQueryResData orderQueryResData) {
+        WeixinPayDetailsVO  vo = new WeixinPayDetailsVO();
+        //协议层
+        vo.setReturnCode(orderQueryResData.getReturn_code());
+        vo.setReturnMsg(orderQueryResData.getReturn_msg());
+        vo.setOutTradeNo(orderQueryResData.getOut_trade_no());
+        
+        //协议返回的具体数据（以下字段在return_code 为SUCCESS 的时候有返回）
+        if (ReturnCode.SUCCESS.toString().equals(orderQueryResData.getReturn_code())) {
+            vo.setAppid(orderQueryResData.getAppid());
+            vo.setMchId(orderQueryResData.getMch_id());
+            vo.setNonceStr(orderQueryResData.getNonce_str());
+            vo.setSign(orderQueryResData.getSign());
+            vo.setResultCode(orderQueryResData.getResult_code());
+            vo.setErrCode(orderQueryResData.getErr_code());
+            vo.setErrCodeDes(orderQueryResData.getErr_code_des());
+            
+            //业务返回的具体数据（以下字段在return_code 和result_code 都为SUCCESS 的时候有返回）
+            if (ResultCode.SUCCESS.toString().equals(orderQueryResData.getResult_code())) {
+                vo.setDeviceInfo(orderQueryResData.getDevice_info());
+                vo.setOpenid(orderQueryResData.getOpenid());
+                vo.setIsSubscribe(orderQueryResData.getIs_subscribe());
+                vo.setTradeState(orderQueryResData.getTrade_state());
+                vo.setTradeType(orderQueryResData.getTrade_type());
+                vo.setBankType(orderQueryResData.getBank_type());
+                vo.setTotalFee(StringUtils.isNotBlank(orderQueryResData.getTotal_fee()) ? Integer.parseInt(orderQueryResData.getTotal_fee()) : null);
+                vo.setCouponFee(StringUtils.isNotBlank(orderQueryResData.getCoupon_fee()) ? Integer.parseInt(orderQueryResData.getCoupon_fee()) : null);
+                vo.setFeeType(orderQueryResData.getFee_type());
+                vo.setTransactionId(orderQueryResData.getTransaction_id());
+                vo.setAttach(orderQueryResData.getAttach());
+                vo.setTimeEnd(StringUtils.isNotBlank(orderQueryResData.getTime_end()) ? DateUtil.getDate(orderQueryResData.getTime_end(), "yyyyMMddHHmmss") : null);
+            }
+        }
+        return vo;
+    }
+
+    /**
+     * 支付明细VO转换为订单查询请求包
+     * @param payDetailVO
+     * @return 订单查询请求包 ScanPayQueryReqData
+     */
+    public static ScanPayQueryReqData weixinPayDetailsVO2OrderQueryReq(WeixinPayDetailsVO payDetailVO) {
+        ScanPayQueryReqData reqData = new ScanPayQueryReqData(
+            payDetailVO.getTransactionId(), 
+            payDetailVO.getOutTradeNo(), 
+            payDetailVO.getKeyPartner(), 
+            payDetailVO.getAppid(), 
+            payDetailVO.getMchId(), 
+            payDetailVO.getSubMchId()); 
+        return reqData;
     }
 }

@@ -85,6 +85,7 @@ public class WeixinPayDetailsVO
 
     private String prepayId;
     private String codeUrl;
+    private String tradeState;// 微信支付订单交易状态
 
     public String getIwoid() {
         return iwoid;
@@ -598,4 +599,12 @@ public class WeixinPayDetailsVO
         this.codeUrl = codeUrl;
     }
 
+    public String getTradeState() {
+        return tradeState;
+    }
+    
+    public void setTradeState(String tradeState) {
+        this.tradeState = tradeState;
+    }
+    
 }

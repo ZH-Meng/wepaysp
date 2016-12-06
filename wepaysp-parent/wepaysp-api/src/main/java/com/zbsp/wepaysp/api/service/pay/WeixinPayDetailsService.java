@@ -103,4 +103,10 @@ public interface WeixinPayDetailsService {
      */
     public void doTransCancelPay(String weixinPayDetailOid);
 
+    /**
+     * 更新订单查询结果
+     * @param orderQueryRes2WeixinPayDetailsVO
+     */
+    public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO);
+
 }

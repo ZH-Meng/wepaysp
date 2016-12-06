@@ -586,4 +586,10 @@ public class WeixinPayDetailsServiceImpl
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "取消支付关闭订单[tradeStatus=" + 4 + "]", processBeginTime, processBeginTime, null, payDetail.toString(), SysLog.State.success.getValue(), weixinPayDetailOid, null, SysLog.ActionType.modify.getValue());
     }
 
+    @Override
+    public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

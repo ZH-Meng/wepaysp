@@ -19,6 +19,7 @@ import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.api.util.WeixinPackConverter;
+import com.zbsp.wepaysp.api.listener.DefaultOrderQueryBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
@@ -194,23 +195,40 @@ public class WeixinPayDetailsMainServiceImpl
     public Map<String, Object> checkPayResult(String payResult, String weixinPayDetailOid) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Integer tradeStatus = null;
-        WeixinPayDetailsVO payDetails = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
-        if ("ok".equalsIgnoreCase(payResult)) {
-            tradeStatus = payDetails.getTradeStatus();
-            if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {
-                logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + payDetails.getTradeStatus().intValue());
+        WeixinPayDetailsVO payDetailVO =  weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+        
+        String listenerResult = null;
+        try {
+            // 主动查询微信支付结果
+            DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
+            WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
+            listenerResult = orderQueryListener.getResult();
+        } catch (Exception e) {
+            logger.error("订单查询失败，" + e.getMessage());
+            logger.error(e.getMessage(), e);
+        }
+        
+        //FIXME
+        payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+        tradeStatus = payDetailVO.getTradeStatus();// 订单状态
+        if (StringUtils.equalsIgnoreCase(listenerResult, DefaultScanPayBusinessResultListener.ON_SUCCESS)) {// 查询成功
+            if ("ok".equalsIgnoreCase(payResult)) {
+                if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {
+                    logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue());
+                }
+            } else if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
+                //weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
+                if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_CLOSED.getValue()) {
+                    logger.warn("微信H5支付结果为cancel，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue());
+                }
+            } else if ("error".equalsIgnoreCase(payResult)) {// 用户取消支付
+                if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_FAIL.getValue()) {
+                    logger.warn("微信H5支付结果为error，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue());
+                }
             }
-            if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {
-                // FIXME 结果通知未响应
-            }
-        } else if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
-            weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
-            tradeStatus = TradeStatus.TRADE_CLOSED.getValue();
-        } else {
-            tradeStatus = TradeStatus.TRADE_FAIL.getValue();
         }
         resultMap.put("tradeStatus", tradeStatus);
-        resultMap.put("weixinPayDetailsVO", payDetails);
+        resultMap.put("weixinPayDetailsVO", payDetailVO);
         
         return resultMap;
     }
