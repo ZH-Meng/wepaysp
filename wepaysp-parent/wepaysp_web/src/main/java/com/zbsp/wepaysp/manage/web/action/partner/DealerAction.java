@@ -1,5 +1,11 @@
 package com.zbsp.wepaysp.manage.web.action.partner;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +42,9 @@ public class DealerAction
     private DealerService dealerService;
     private List<PartnerEmployeeVO> partnerEmployeeVoList;
     private PartnerEmployeeService partnerEmployeeService;
-
+    private String qRCodeName;
+    private String dealerOid; 
+    
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -351,6 +359,57 @@ public class DealerAction
         return "updateDealer";
     }
     
+    /**
+     * 下载商户级别支付二维码图片<br>
+     * <pre>
+     * 校验权限；
+     * 判断此商户是否生成过二维码，且二维码文件是否存在；
+     * 如果二维码不存在则生成二维码图片
+     * <pre>
+     * @return
+     */
+    public String downloadPayQRCode() {
+        logger.info("下载商户级别支付二维码图片.");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (isPartner(manageUser) || isPartnerEmployee(manageUser)) {// 服务商或业务员下载商户二维码
+                if (StringUtils.isNotBlank(dealerOid)) {
+                    dealerVO = dealerService.doTransGetPayQRCode(dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                } else {
+                    logger.warn("非法下载商户级别支付二维码图片，参数dealerVO或者dealerVO.getIwoid()为空！");
+                    setAlertMessage("下载商户级别支付二维码图片失败！");
+                }
+            } else if (isDealer(manageUser)) {// 商户下载自己二位码
+                dealerVO = dealerService.doTransGetPayQRCode(manageUser.getDataDealer().getIwoid(), manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            } else {
+                logger.warn("无权下载商户级别支付二维码");
+                setAlertMessage("无权下载商户级别支付二维码");
+                return "accessDenied";
+            }
+        } catch (Exception e) {
+            logger.error("下载商户级别支付二维码错误：" + e.getMessage());
+            setAlertMessage("下载商户级别支付二维码错误！");
+            return "error";
+        }
+        return "getQRCodeImg";
+    }
+    
+    public InputStream getQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            File qrFile = new File(dealerVO.getQrCodePath());
+            inputStream = new FileInputStream(qrFile);
+            /*String fileNameTemp = "二维码-" + dealerVO.getCompany() + ".png";
+            qRCodeName = new String(fileNameTemp.getBytes("GBK"), "ISO8859-1");*/
+            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            logger.info("下载商户级别支付二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
 
     /**
      * 是否是业务员
@@ -455,6 +514,14 @@ public class DealerAction
 
     public void setPartnerEmployeeService(PartnerEmployeeService partnerEmployeeService) {
         this.partnerEmployeeService = partnerEmployeeService;
+    }
+    
+    public String getQRCodeName() {
+        return qRCodeName;
+    }
+
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
     }
 
 }

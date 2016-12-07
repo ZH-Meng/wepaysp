@@ -98,5 +98,15 @@ public interface DealerService {
      */
     public DealerVO doTransUpdateDealerBase(DealerVO dealerVO, String modifier, String operatorUserOid, String logFunctionOid)
         throws AlreadyExistsException;
+
+    /**
+     * 获取商户级别支付二维码（如果不存在则生成）
+     * @param dealerOid
+     * @param modifier 修改人名称
+     * @param operatorUserOid 操作用户Oid
+     * @param logFunctionOid 日志记录项Oid
+     * @return DealerVO 包含二维码path
+     */
+    public DealerVO doTransGetPayQRCode(String dealerOid, String modifier, String operatorUserOid, String logFunctionOid);
     
 }

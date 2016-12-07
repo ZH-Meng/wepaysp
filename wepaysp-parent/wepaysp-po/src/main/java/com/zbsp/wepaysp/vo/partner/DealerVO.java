@@ -36,6 +36,8 @@ public class DealerVO
     private String partnerEmployeeOid;
     private String partnerEmployeeName;
 
+    private String qrCodePath;
+    
     public String getIwoid() {
         return iwoid;
     }
@@ -210,6 +212,14 @@ public class DealerVO
 
     public void setPartnerEmployeeName(String partnerEmployeeName) {
         this.partnerEmployeeName = partnerEmployeeName;
+    }
+
+    public String getQrCodePath() {
+        return qrCodePath;
+    }
+    
+    public void setQrCodePath(String qrCodePath) {
+        this.qrCodePath = qrCodePath;
     }
 
 }

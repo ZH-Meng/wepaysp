@@ -21,6 +21,12 @@
 				<param name="namespace">/resources/partner</param>
 				<param name="method">goToCreateDealer</param>
 			</result>
+			<result name="getQRCodeImg" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
+				<param name="inputName">qRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
 		</action>
 		<!-- 门店管理 -->
 		<action name="storemanage" class="storeAction">

@@ -8,10 +8,16 @@
  */
 package com.zbsp.wepaysp.common.util;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.zbsp.wepaysp.common.constant.WxApiUrl;
 
 /**
  * 生成器工具类
@@ -22,6 +28,19 @@ public final class Generator {
     public static void main(String[] args) {
         System.out.println(generateSequenceYYYYMMddNum(1, 10000000000L));
         System.out.println(generateRandomNumber(32));
+    }
+    
+    public static String generateQRURL(String appId, String redirectURL) {
+        Validator.checkArgument(StringUtils.isBlank(appId), "appId不能为空！");
+        Validator.checkArgument(StringUtils.isBlank(redirectURL), "redirectURL不能为空！");
+        
+        String url = "";
+        try {
+            url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return url;
     }
     
     /**

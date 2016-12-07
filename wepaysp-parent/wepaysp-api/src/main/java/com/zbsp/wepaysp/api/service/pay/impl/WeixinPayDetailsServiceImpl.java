@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.LockModeType;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -412,7 +414,7 @@ public class WeixinPayDetailsServiceImpl
         String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
         jpqlMap.put("OUTTRADENO", outTradeNo);
         
-        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
         if (payDetails == null) {
             throw new NotExistsException("系统支付订单不存在！");
         }
@@ -420,6 +422,7 @@ public class WeixinPayDetailsServiceImpl
         String logDescTemp = "";
         
         if (StringUtils.equalsIgnoreCase(ReturnCode.SUCCESS.toString(), returnCode)) {// 通信成功
+            Validator.checkArgument(StringUtils.isBlank(payResultVO.getMchId()), "微信商户号不能为空");
             Validator.checkArgument(StringUtils.isBlank(resultCode), "微信支付结果码不能为空");
             payDetails.setReturnCode(returnCode);
             payDetails.setReturnMsg(payResultVO.getReturnMsg());
@@ -431,9 +434,13 @@ public class WeixinPayDetailsServiceImpl
                     throw new DataStateException("交易已完成，不能重复更新结果");
                 }
             }
+            logDescTemp = "通讯结果：成功";
             
             if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {
-                logDescTemp = "通讯结果：成功";
+                Validator.checkArgument(StringUtils.isBlank(payResultVO.getTransactionId()), "微信支付订单ID不能为空");
+                Validator.checkArgument(payResultVO.getTotalFee() == null, "订单金额不能为空");
+                int tradeStatus = TradeStatus.TRADE_SUCCESS.getValue();
+                
                 payDetails.setResultCode(resultCode);
                 payDetails.setBankType(payResultVO.getBankType());
                 payDetails.setTransactionId(payResultVO.getTransactionId());// 微信支付订单号
@@ -441,18 +448,30 @@ public class WeixinPayDetailsServiceImpl
                 payDetails.setIsSubscribe(payResultVO.getIsSubscribe());
                 
                 //payDetails.setTradeType(payResultVO.getTradeType());
-                // TODO 核对其他关键字段
+                // 比对关键信息
+                if (!StringUtils.equalsIgnoreCase(payDetails.getMchId(), payResultVO.getMchId())) {
+                    logger.error("商户号不一致：系统订单ID：" + payResultVO.getOutTradeNo() + "支付请求商户号："+ payDetails.getMchId() + "，响应商户号：" + payResultVO.getMchId());
+                    tradeStatus = TradeStatus.TRADE_FAIL.getValue();
+                    payDetails.setRemark("微信响应成功，但商户号不一致");
+                }
                 if (payDetails.getTotalFee().intValue() != payResultVO.getTotalFee().intValue()) {
                     logger.error("金额不一致：系统订单ID：" + payResultVO.getOutTradeNo() + "支付请求总金额："+ payDetails.getTotalFee().intValue() + "，响应总金额：" + payResultVO.getTotalFee().intValue());
+                    tradeStatus = TradeStatus.TRADE_FAIL.getValue();
+                    payDetails.setRemark((StringUtils.isBlank(payDetails.getRemark()) ? "微信响应成功，但" : (payDetails.getRemark() +",")) + "金额不一致");
                 }
+                
                 payDetails.setTotalFee(payResultVO.getTotalFee());
                 //String attach = payResultVO.getAttach();// 商户数据包
                 
                 payDetails.setCashFeeType(StringUtils.isNotBlank(payResultVO.getCashFeeType()) ? payResultVO.getCashFeeType() : "CNY");
                 payDetails.setCashFee(payResultVO.getCashFee());
                 payDetails.setTimeEnd(payResultVO.getTimeEnd());// 支付完成时间
-                payDetails.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
-                logDescTemp += "，支付结果：交易成功" + "，微信支付订单号：" + payResultVO.getTransactionId() + "，支付金额：" + payResultVO.getTotalFee();
+                payDetails.setTradeStatus(tradeStatus);
+                if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
+                    logDescTemp += "，支付结果：交易成功" + "，微信支付订单号：" + payResultVO.getTransactionId() + "，交易状态：" + tradeStatus + "，支付金额：" + payResultVO.getTotalFee();
+                } else {
+                    logDescTemp += "，支付结果：交易失败，" + payDetails.getRemark() + "，微信支付订单号：" + payResultVO.getTransactionId() + "，交易状态：" + tradeStatus;
+                }
             } else {
                 payDetails.setResultCode(ResultCode.FAIL.toString());
                 
@@ -588,11 +607,15 @@ public class WeixinPayDetailsServiceImpl
 
     @Override
     public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO) {
+        /*查询结果result_code=SUCCESS才更新结果；trade_state=SUCCESS时，比对total_fee与系统订单total_fee是否一致，不一致则更新结果为交易失败；*/ 
+        // 关键信息 result_code trade_state total_fee mch_id；其他非关键字段由SDK 通过验签完成校验
+        
     	Validator.checkArgument(orderQueryResultVO == null, "orderQueryResultVO不能为空");
     	Validator.checkArgument(StringUtils.equalsIgnoreCase(orderQueryResultVO.getReturnCode(), ReturnCode.SUCCESS.toString()), "returnCode必须为SUCCESS");
     	Validator.checkArgument(StringUtils.equalsIgnoreCase(orderQueryResultVO.getResultCode(), ResultCode.SUCCESS.toString()), "resultCode必须为SUCCESS");    	
         Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getOutTradeNo()), "系统订单ID不能为空");
         Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getTransactionId()), "微信支付订单ID不能为空");
+        Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getMchId()), "微信商户号不能为空");
         
         String tradeState = orderQueryResultVO.getTradeState();
         Validator.checkArgument(StringUtils.isBlank(tradeState), "订单状态不能为空");
@@ -603,23 +626,33 @@ public class WeixinPayDetailsServiceImpl
         String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
         jpqlMap.put("OUTTRADENO", orderQueryResultVO.getOutTradeNo());
         
-        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        // 查询订单并锁定，防止更新查询结果时，微信支付结果通知更新结果
+        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
         if (payDetails == null) {
             throw new NotExistsException("系统支付订单不存在！");
         }
+        
         logger.info("订单（系统ID=" +orderQueryResultVO.getOutTradeNo() + "）查询结果成功，订单状态：" + tradeState);
+        
         // 非处理中，代表系统已收到微信支付结果通知并处理
         if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) {
         	logger.info("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
         	if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
-                logger.error("金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "结果通知总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
+                logger.error("查询结果信息金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "支付结果通知总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
             }
         } else {
-        	if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
-        		if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
-                    logger.error("金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "支付请求总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
+            // 比对关键信息
+            if (!StringUtils.equalsIgnoreCase(payDetails.getMchId(), orderQueryResultVO.getMchId())) {
+                logger.error("查询结果信息商户号不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "主动查询请求商户号："+ payDetails.getMchId() + "，主动查询结果商户号：" + orderQueryResultVO.getMchId());
+                tradeState = TradeState.PAYERROR.toString();
+            }
+            if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
+                if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
+                    logger.error("查询结果信息金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "主动查询请求总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
+                    tradeState = TradeState.PAYERROR.toString();
                 }
             }
+            // 更新结果信息
             payDetails.setTotalFee(orderQueryResultVO.getTotalFee());
             //String attach = payResultVO.getAttach();// 商户数据包
             
@@ -630,6 +663,7 @@ public class WeixinPayDetailsServiceImpl
             payDetails.setCashFeeType(StringUtils.isNotBlank(orderQueryResultVO.getCashFeeType()) ? orderQueryResultVO.getCashFeeType() : "CNY");
             payDetails.setCashFee(orderQueryResultVO.getCashFee());
             payDetails.setTimeEnd(orderQueryResultVO.getTimeEnd());// 支付完成时间
+            
             if (StringUtils.equalsIgnoreCase(tradeState, TradeState.SUCCESS.toString())) {
             	payDetails.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.CLOSED.toString())) { 
@@ -638,8 +672,10 @@ public class WeixinPayDetailsServiceImpl
             	payDetails.setTradeStatus(TradeStatus.TRADE_REVERSED.getValue());
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.PAYERROR.toString())) { 
             	payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
+            	logger.warn("订单（系统ID=" +orderQueryResultVO.getOutTradeNo() + "）状态为交易失败");
             } else {
-            	//TODO 未支付，支付超时、转入退款
+                // 未支付，支付超时 用户支付中，对应交易处理中
+            	//TODO 转入退款
             }
             
             Date processEndTime = new Date();

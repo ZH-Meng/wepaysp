@@ -51,6 +51,13 @@ public class Partner
     private String modifier;
     private Timestamp modifyTime;
     private String remark;
+    
+    private String appId;
+    private String mchId;
+    private String partnerKey;
+    private String keyPath;
+    private String keyPassword;
+    private String appSecret;
 
     public static enum State {
         /** 状态:未使用 */        nouse("1"),
@@ -325,6 +332,60 @@ public class Partner
 
     public void setBankCard(String bankCard) {
         this.bankCard = bankCard;
+    }
+    
+    @Column(name = "APP_ID", length = 32)
+    public String getAppId() {
+        return this.appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    @Column(name = "MCH_ID", length = 32)
+    public String getMchId() {
+        return this.mchId;
+    }
+
+    public void setMchId(String mchId) {
+        this.mchId = mchId;
+    }
+
+    @Column(name = "PARTNER_KEY", length = 32)
+    public String getPartnerKey() {
+        return this.partnerKey;
+    }
+
+    public void setPartnerKey(String partnerKey) {
+        this.partnerKey = partnerKey;
+    }
+
+    @Column(name = "KEY_PATH", length = 32)
+    public String getKeyPath() {
+        return this.keyPath;
+    }
+
+    public void setKeyPath(String keyPath) {
+        this.keyPath = keyPath;
+    }
+
+    @Column(name = "KEY_PASSWORD", length = 32)
+    public String getKeyPassword() {
+        return this.keyPassword;
+    }
+
+    public void setKeyPassword(String keyPassword) {
+        this.keyPassword = keyPassword;
+    }
+
+    @Column(name = "APP_SECRET", length = 32)
+    public String getAppSecret() {
+        return this.appSecret;
+    }
+
+    public void setAppSecret(String appSecret) {
+        this.appSecret = appSecret;
     }
 
     @Column(name = "CREATOR", nullable = false, length = 32)

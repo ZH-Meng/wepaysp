@@ -32,6 +32,8 @@
 	
 	<bean id="dealerService" class="com.zbsp.wepaysp.api.service.partner.impl.DealerServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
+		<property name="qRCodeRootPath" value="c:\qRCodeFiles" />
+		<property name="callBackURL" value="https://api.payqianyan.com/nostate/pay/appidpay!wxCallBack.action" />
 	</bean>
 	
 	<bean id="storeService" class="com.zbsp.wepaysp.api.service.partner.impl.StoreServiceImpl" parent="baseService">

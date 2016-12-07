@@ -1,5 +1,7 @@
 package com.zbsp.wepaysp.api.service.partner.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,11 +14,13 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.constant.EnumDefine;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.QRCodeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysAuthority;
 import com.zbsp.wepaysp.po.manage.SysLog;
@@ -26,6 +30,7 @@ import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
+import com.google.zxing.WriterException;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
@@ -34,7 +39,9 @@ import com.zbsp.wepaysp.vo.partner.DealerVO;
 public class DealerServiceImpl
     extends BaseService
     implements DealerService {
-
+    
+    private String callBackURL;
+    private String qRCodeRootPath;
     private SysLogService sysLogService;
 
     @SuppressWarnings("unchecked")
@@ -453,6 +460,73 @@ public class DealerServiceImpl
         // 记录日志
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改商户基本信息[商户名称：" + dealer.getCompany() + " 手机号：" + dealer.getMoblieNumber() + " 邮箱：" + dealer.getEmail() + " QQ号码：" + dealer.getQqNumber() + "]", processBeginTime, processEndTime, dealerStr, newDealerStr, SysLog.State.success.getValue(), dealer.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
         return dealerVO;
+    }
+
+    @Override
+    public DealerVO doTransGetPayQRCode(String dealerOid, String modifier, String operatorUserOid, String logFunctionOid) {
+        Validator.checkArgument(StringUtils.isBlank(dealerOid), "商戶Oid不能为空！");
+        DealerVO dealerVO = new DealerVO();
+
+        Dealer dealer = commonDAO.findObject(Dealer.class, dealerOid);
+
+        String qrCodePath = dealer.getQrCodePath();
+        boolean qrCodeExist = false;
+        if (StringUtils.isNotBlank(qrCodePath)) {
+            File qrCodeFile = new File(qrCodePath);
+            if (qrCodeFile.exists() && qrCodeFile.isFile()) {
+                qrCodeExist = true;
+            }
+        }
+        if (StringUtils.isBlank(qrCodePath) || !qrCodeExist) {
+            String dealerStr = dealer.toString();
+            //String appid = dealer.getPartner().getAppId();
+            String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
+            // 生成二维码对应链接
+            String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
+            Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
+            Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
+            String qrURL = Generator.generateQRURL(appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid());
+            logger.info("商户-" + dealer.getCompany() + "生成微信支付二维码URL：" + qrURL);
+
+            // 路径生成规则：服务商ID/商户ID
+            String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId();
+            File filePath = new File(qRCodeRootPath + File.separator + relativePath);
+            if (!filePath.exists()) {
+                filePath.mkdirs();
+            }
+            String fileName = Generator.generateIwoid();
+            // 生成二位码图片
+            try {
+                QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
+                logger.info("商户-" + dealer.getCompany() + "生成二维码图片");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }
+            // 更新商户二维码地址信息
+            dealer.setQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
+            commonDAO.update(dealer);
+            
+            String newDealerStr = dealer.toString();
+            Date processEndTime = new Date();
+            // 记录修改日志
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改商户基本信息[商户名称：" + dealer.getCompany() + " 手机号：" + dealer.getMoblieNumber() + " 邮箱：" + dealer.getEmail() + " QQ号码：" + dealer.getQqNumber() + "]", processEndTime, processEndTime, dealerStr, newDealerStr, SysLog.State.success.getValue(), dealer.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+        }
+        BeanCopierUtil.copyProperties(dealer, dealerVO);
+        return dealerVO;
+    }
+    
+    public String getCallBackURL() {
+        return callBackURL;
+    }
+    
+    public void setCallBackURL(String callBackURL) {
+        this.callBackURL = callBackURL;
+    }
+
+    public void setqRCodeRootPath(String qRCodeRootPath) {
+        this.qRCodeRootPath = qRCodeRootPath;
     }
 
     public void setSysLogService(SysLogService sysLogService) {
