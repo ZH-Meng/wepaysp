@@ -21,6 +21,7 @@
 		<div class="bgposition">您现在的位置：${navTag }</div>
 		<s:form method="post">
 			<s:hidden id="iwoid" name="dealerEmployeeVO.iwoid"/>
+			<s:hidden id="dealerEmployeeOid" name="dealerEmployeeOid"/>
 			<s:hidden id="resetFlag" name="resetFlag"/>
 			<div class="bgtj">
 				<ul class="tj_title">
@@ -52,6 +53,14 @@
 				        		</manage:pass>
 				        		<manage:notPass>
 				        			<s:set var="hasUpdatePermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
+				            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!downloadPayQRCode.action">
+				        		<manage:pass>
+				        			<s:set var="hasDownQrCodePermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasDownQrCodePermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
 						</s:if>
@@ -139,6 +148,9 @@
 						  				<s:if test="#hasResetPermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="goToResetRefundPwd('<s:property value="#dealerEmployeeVo.iwoid" />')">重置退款权限密码</a>
 						  				</s:if>
+						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
+						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerEmployeeVo.iwoid" />')">下载二维码</a>
+						  				</s:if>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -172,6 +184,10 @@
 		function goToResetRefundPwd(iwoid){
 			$("#iwoid").val(iwoid);
 			invokeAction('goToResetRefundPwd');
+		}
+		function downloadPayQRCode(iwoid){
+			$("#dealerEmployeeOid").val(iwoid);
+			invokeAction('downloadPayQRCode');
 		}
 	</script>
 	

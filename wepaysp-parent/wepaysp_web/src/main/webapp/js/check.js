@@ -228,6 +228,20 @@ function isZInterger(str){
 	}
 	return false;
 }
+/**
+ * 判断两个日期，返回1代表date1大于date2;0代表相等，-1代表date1小于date2（日期格式yyyy-MM-dd）
+ * */
+function compareDate(date1, date2){
+	var d1 = new Date(Date.parse(date1.replace("-","/")));
+	var d2 = new Date(Date.parse(date2.replace("-","/")));
+	if (d1.getTime() > d2.getTime()) {
+		return 1;
+	} else if (d1.getTime() < d2.getTime()) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
 
 //判断两个日期字符串所表示的日期相隔月份（日期格式yyyy-MM-dd）
 function monthDiff(endDate, startDate){

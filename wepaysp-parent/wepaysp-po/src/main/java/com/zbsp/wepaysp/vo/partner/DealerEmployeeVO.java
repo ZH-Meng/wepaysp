@@ -29,7 +29,8 @@ public class DealerEmployeeVO
     private String oldRefundPassword;
     private String dealerOid;
     private Integer employeeType;
-
+    private String qrCodePath;
+    
     public String getIwoid() {
         return iwoid;
     }
@@ -150,4 +151,12 @@ public class DealerEmployeeVO
         this.employeeType = employeeType;
     }
 
+	public String getQrCodePath() {
+		return qrCodePath;
+	}
+
+	public void setQrCodePath(String qrCodePath) {
+		this.qrCodePath = qrCodePath;
+	}
+    
 }

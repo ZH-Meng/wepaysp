@@ -13,6 +13,7 @@
 		<div class="bgposition">您现在的位置：代理商管理&gt;商户信息管理</div>
 		<s:form method="post">
 			<s:hidden id="iwoid" name="dealerVO.iwoid"/>
+			<s:hidden id="dealerOid" name="dealerOid"/>
 			<s:hidden id="coreDataFlag" name="dealerVO.coreDataFlag"/>
 			<div class="bgtj">
 				<ul class="tj_title">
@@ -60,6 +61,14 @@
 				        		</manage:pass>
 				        		<manage:notPass>
 				        			<s:set var="hasUpdatePermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
+				            <manage:permission validateUrl="/resources/partner/dealermanage!downloadPayQRCode.action">
+				        		<manage:pass>
+				        			<s:set var="hasDownQrCodePermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasDownQrCodePermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
 						</s:else>
@@ -137,13 +146,16 @@
 						  			<td title="<s:property value="#dealerVo.techSupportPhone" />">
 						  				<s:property value="#dealerVo.techSupportPhone" />
 						  			</td>
-						  			<td title="修改">
+						  			<td title="操作">
 	  									<s:if test="#hasUpdateCorePermission eq 'yes' && #dealerVo.state != 3">
 						  					<a href="javascript:void(0);" onclick="toUpdateDealerCore('<s:property value="#dealerVo.iwoid" />')">修改</a>
 						  				</s:if>
 						  				<s:elseif test="#hasUpdatePermission eq 'yes' && #dealerVo.state != 3">
 						  					<a href="javascript:void(0);" onclick="toUpdateDealer('<s:property value="#dealerVo.iwoid" />')">修改</a>
 						  				</s:elseif>
+						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
+						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerVo.iwoid" />')">下载二维码</a>
+						  				</s:if>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -177,6 +189,10 @@
 		function toUpdateDealerCore(iwoid){
 			$("#iwoid").val(iwoid);
 			invokeAction('goToUpdateDealerCore');
+		}
+		function downloadPayQRCode(iwoid){
+			$("#dealerOid").val(iwoid);
+			invokeAction('downloadPayQRCode');
 		}
 	</script>
 	

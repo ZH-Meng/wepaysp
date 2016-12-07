@@ -13,6 +13,7 @@
 		<div class="bgposition">您现在的位置：商户信息管理&gt;门店信息管理</div>
 		<s:form method="post">
 			<s:hidden id="iwoid" name="storeVO.iwoid"/>
+			<s:hidden id="storeOid" name="storeOid"/>
 			<div class="bgtj">
 				<ul class="tj_title">
 					<li>查询条件</li>
@@ -42,6 +43,14 @@
 			        		</manage:pass>
 			        		<manage:notPass>
 			        			<s:set var="hasUpdatePermission">no</s:set>
+			        		</manage:notPass>
+			            </manage:permission>
+     				    <manage:permission validateUrl="/resources/partner/storemanage!downloadPayQRCode.action">
+			        		<manage:pass>
+			        			<s:set var="hasDownQrCodePermission">yes</s:set>
+			        		</manage:pass>
+			        		<manage:notPass>
+			        			<s:set var="hasDownQrCodePermission">no</s:set>
 			        		</manage:notPass>
 			            </manage:permission>
 						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>						
@@ -89,9 +98,12 @@
 						  			<td title="<s:property value="#storeVo.partnerCompany" />">
 						  				<s:property value="#storeVo.partnerCompany" />
 						  			</td>
-						  			<td title="修改">
+						  			<td title="操作">
 	  									<s:if test="#hasUpdatePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="toUpdateStore('<s:property value="#storeVo.iwoid" />')">修改</a>
+						  				</s:if>
+						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
+						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#storeVo.iwoid" />')">下载二维码</a>
 						  				</s:if>
 						  			</td>
 						  		</tr>
@@ -126,6 +138,10 @@
 		function toUpdateStoreCore(iwoid){
 			$("#iwoid").val(iwoid);
 			invokeAction('goToUpdateStoreCore');
+		}
+		function downloadPayQRCode(iwoid){
+			$("#storeOid").val(iwoid);
+			invokeAction('downloadPayQRCode');
 		}
 	</script>
 	

@@ -1,5 +1,7 @@
 package com.zbsp.wepaysp.api.service.partner.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,11 +14,13 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.constant.EnumDefine;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.QRCodeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysAuthority;
 import com.zbsp.wepaysp.po.manage.SysLog;
@@ -25,6 +29,7 @@ import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.google.zxing.WriterException;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
@@ -35,6 +40,8 @@ public class DealerEmployeeServiceImpl
     extends BaseService
     implements DealerEmployeeService {
 
+    private String callBackURL;
+    private String qRCodeRootPath;
     private SysLogService sysLogService;
     
     @SuppressWarnings("unchecked")
@@ -68,11 +75,13 @@ public class DealerEmployeeServiceImpl
         String employeeName = MapUtils.getString(paramMap, "employeeName");
         String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         
-        Validator.checkArgument(StringUtils.isBlank(dealerOid) && StringUtils.isBlank(dealerEmployeeOid), "商户Oid或商户员工Oid至少一个不能为空！");
+        Validator.checkArgument(StringUtils.isBlank(dealerOid) && StringUtils.isBlank(storeOid), "商户Oid或门店Oid至少一个不能为空！");
 
-        StringBuffer sql = new StringBuffer("select distinct(de) from DealerEmployee de, Dealer d where de.dealer=d");
+        //StringBuffer sql = new StringBuffer("select distinct(de) from DealerEmployee de, Dealer d where de.dealer=d");
+        StringBuffer sql = new StringBuffer("from DealerEmployee de where 1=1 ");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(employeeName)) {
@@ -83,14 +92,23 @@ public class DealerEmployeeServiceImpl
             sql.append(" and de.moblieNumber like :MOBLIENUMBER");
             sqlMap.put("MOBLIENUMBER", "%" + moblieNumber + "%");
         }
-
-        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
-            DealerEmployee de = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
-            dealerOid = de.getDealer().getIwoid();
+        
+        if (StringUtils.isNotBlank(dealerOid)) {
+        	sql.append(" and de.dealer.iwoid = :DEALEROID");
+        	sqlMap.put("DEALEROID", dealerOid);
         }
         
-        sql.append(" and de.dealer.iwoid = :DEALEROID");
-        sqlMap.put("DEALEROID", dealerOid);
+        if (StringUtils.isNotBlank(storeOid)) {
+        	sql.append(" and de.store.iwoid = :STOREOID");
+        	sqlMap.put("STOREOID", storeOid);
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+           /* DealerEmployee de = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
+            dealerOid = de.getDealer().getIwoid();*/
+        	sql.append(" and de.iwoid = :IWOID");
+        	sqlMap.put("IWOID", dealerEmployeeOid);
+        }
+        
         sql.append(" order by de.dealerEmployeeId desc");
         List<DealerEmployee> dealerEmployeeList = (List<DealerEmployee>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
@@ -434,6 +452,11 @@ public class DealerEmployeeServiceImpl
         return dealerEmployeeVO;
 	}
 	
+	/**
+	 * 检测是存在店长
+	 * @param storeOid
+	 * @return
+	 */
 	private boolean checkIsExistStoreManager(String storeOid) {
 	    Validator.checkArgument(StringUtils.isBlank(storeOid), "门店Oid不能为空");
 	    Map<String, Object> jpqlMap = new HashMap<String, Object>();
@@ -446,6 +469,77 @@ public class DealerEmployeeServiceImpl
         } else {
             return false;
         }
+	}
+	
+
+    @Override
+    public DealerEmployeeVO doTransGetPayQRCode(String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid) {
+        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "收银员Oid不能为空！");
+        DealerEmployeeVO dealerEmployeeVO = new DealerEmployeeVO();
+
+        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
+        if (dealerEmployee == null) {
+            throw new NotExistsException("收银员不存在");
+        }
+        
+        String qrCodePath = dealerEmployee.getQrCodePath();
+        boolean qrCodeExist = false;
+        if (StringUtils.isNotBlank(qrCodePath)) {
+            File qrCodeFile = new File(qrCodePath);
+            if (qrCodeFile.exists() && qrCodeFile.isFile()) {
+                qrCodeExist = true;
+            }
+        }
+        if (StringUtils.isBlank(qrCodePath) || !qrCodeExist) {
+            String dealerEmployeeStr = dealerEmployee.toString();
+            Store store = dealerEmployee.getStore();
+            Validator.checkArgument((store == null || StringUtils.isBlank(store.getIwoid())), "收银员缺少门店信息无法生成二维码");
+            Dealer dealer = store.getDealer();
+            Validator.checkArgument((dealer == null || StringUtils.isBlank(dealer.getIwoid())), "门店缺少商户信息无法生成二维码");
+            
+            //String appid = dealer.getPartner().getAppId();
+            String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
+            // 生成二维码对应链接
+            String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
+            Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
+            Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
+            String qrURL = Generator.generateQRURL(appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid());
+            logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成微信支付二维码URL：" + qrURL);
+
+            // 路径生成规则：服务商ID/商户ID/门店ID/收银员
+            String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId() + File.separator + store.getStoreId() + File.separator + dealerEmployee.getDealerEmployeeId();
+            File filePath = new File(qRCodeRootPath + File.separator + relativePath);
+            if (!filePath.exists()) {
+                filePath.mkdirs();
+            }
+            String fileName = Generator.generateIwoid();
+            // 生成二维码图片
+            try {
+                QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
+                logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成二维码图片");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }
+            // 更新收银员二维码地址信息
+            dealerEmployee.setQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
+            commonDAO.update(dealerEmployee);
+            
+            Date processEndTime = new Date();
+            // 记录修改日志
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改收银员二维码信息[二维码地址：" + dealerEmployee.getQrCodePath() + "]", processEndTime, processEndTime, dealerEmployeeStr, dealerEmployee.toString(), SysLog.State.success.getValue(), dealerEmployee.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+        }
+        BeanCopierUtil.copyProperties(dealerEmployee, dealerEmployeeVO);
+        return dealerEmployeeVO;
+    }
+
+    public void setCallBackURL(String callBackURL) {
+        this.callBackURL = callBackURL;
+    }
+    
+    public void setqRCodeRootPath(String qRCodeRootPath) {
+		this.qRCodeRootPath = qRCodeRootPath;
 	}
 	
 	 public void setSysLogService(SysLogService sysLogService) {

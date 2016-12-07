@@ -376,10 +376,11 @@ public class DealerAction
                 if (StringUtils.isNotBlank(dealerOid)) {
                     dealerVO = dealerService.doTransGetPayQRCode(dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
-                    logger.warn("非法下载商户级别支付二维码图片，参数dealerVO或者dealerVO.getIwoid()为空！");
+                    logger.warn("非法下载商户级别支付二维码图片，参数dealerOid为空！");
                     setAlertMessage("下载商户级别支付二维码图片失败！");
+                    return list();
                 }
-            } else if (isDealer(manageUser)) {// 商户下载自己二位码
+            } else if (isDealer(manageUser)) {// 商户下载自己二维码
                 dealerVO = dealerService.doTransGetPayQRCode(manageUser.getDataDealer().getIwoid(), manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             } else {
                 logger.warn("无权下载商户级别支付二维码");
@@ -389,7 +390,7 @@ public class DealerAction
         } catch (Exception e) {
             logger.error("下载商户级别支付二维码错误：" + e.getMessage());
             setAlertMessage("下载商户级别支付二维码错误！");
-            return "error";
+            return list();
         }
         return "getQRCodeImg";
     }

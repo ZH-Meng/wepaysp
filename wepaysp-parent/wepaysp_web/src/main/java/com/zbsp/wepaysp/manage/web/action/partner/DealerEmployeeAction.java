@@ -1,5 +1,11 @@
 package com.zbsp.wepaysp.manage.web.action.partner;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +42,8 @@ public class DealerEmployeeAction
     private StoreService storeService;
     private List<StoreVO> storeVoList;
     private String resetFlag;
+    private String qRCodeName;
+    private String dealerEmployeeOid;
 
     @Override
     protected String query(int start, int size) {
@@ -54,8 +62,9 @@ public class DealerEmployeeAction
             }
             if (isDealer(manageUser)) {
                 paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
-            } else if (isDealerEmployee(manageUser)) {
-                paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
+            } else if (isStoreManager(manageUser)) {
+                //paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
+            	paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
             }
             
             //rowCount = dealerEmployeeService.doJoinTransQueryDealerEmployeeCount(paramMap);
@@ -284,6 +293,56 @@ public class DealerEmployeeAction
         return "modifyRefundPwd";
    }
     
+    /**
+     * 下载收银员级别支付二维码图片<br>
+     * <pre>
+     * 校验权限；
+     * 判断此收银员是否生成过二维码，且二维码文件是否存在；
+     * 如果二维码不存在则生成二维码图片
+     * <pre>
+     * @return
+     */
+    public String downloadPayQRCode() {
+        logger.info("下载收银员级别支付二维码图片.");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            // 只有商户能下载收银员级别二维码
+            if (isDealer(manageUser) || isStoreManager(manageUser))  {
+                if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+                	dealerEmployeeVO = dealerEmployeeService.doTransGetPayQRCode(dealerEmployeeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                } else {
+                    logger.warn("非法下载收银员级别支付二维码图片，参数dealerEmployeeOid为空！");
+                    setAlertMessage("下载收银员级别支付二维码图片失败！");
+                    return list();
+                }
+            } else {
+                logger.warn("无权下载收银员级别支付二维码");
+                setAlertMessage("无权下载收银员级别支付二维码");
+                return "accessDenied";
+            }
+        } catch (Exception e) {
+            logger.error("下载收银员级别支付二维码错误：" + e.getMessage());
+            setAlertMessage("下载收银员级别支付二维码错误！");
+            return list();
+        }
+        return "getQRCodeImg";
+    }
+    
+    public InputStream getQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            File qrFile = new File(dealerEmployeeVO.getQrCodePath());
+            inputStream = new FileInputStream(qrFile);
+            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            logger.info("下载收银员级别支付二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
     public boolean checkUser(ManageUser manageUser, String operCode) {
     	String operDesc = "查看商户员工列表";
     	if ("query".equals(operCode)) {
@@ -299,21 +358,21 @@ public class DealerEmployeeAction
     	}
     	
     	if ("add".equals(operCode) || "update".equals(operCode) || "reset".equals(operCode)) {
-    		if (!isDealer(manageUser)) {
-                logger.warn("非商户用户不能" + operDesc);
-                setAlertMessage("非商户用户不能" + operDesc);
+    		if (!isDealer(manageUser) && !isStoreManager(manageUser)) {
+                logger.warn("非商户或店长不能" + operDesc);
+                setAlertMessage("非商户或店长不能" + operDesc);
                 return false;
     		}
     	} else if("query".equals(operCode)) {
-    		if (!isDealer(manageUser) && !isDealerEmployee(manageUser)) {
-                logger.warn("非商户或商户员工用户不能" + operDesc);
-                setAlertMessage("非商户或商户员工用户不能" + operDesc);
+    		if (!isDealer(manageUser) && !isStoreManager(manageUser)) {
+                logger.warn("非商户或店长不能" + operDesc);
+                setAlertMessage("非商户或店长不能" + operDesc);
                 return false;
     		}
     	} else if("modifyRefundPwd".equals(operCode)) {
     		if (!isDealerEmployee(manageUser)) {
-                logger.warn("非商户员工用户不能" + operDesc);
-                setAlertMessage("非商户员工用户不能" + operDesc);
+                logger.warn("非商户员工不能" + operDesc);
+                setAlertMessage("非商户员工不能" + operDesc);
                 return false;
     		}
     	} else {
@@ -341,7 +400,7 @@ public class DealerEmployeeAction
     }
     
     /**
-     * 是否是商户员工
+     * 是否是收银员
      * 
      * @return
      */
@@ -351,7 +410,25 @@ public class DealerEmployeeAction
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.cashier.getValue() || manageUser.getDataDealerEmployee() == null) {
+            if ((level != SysUser.UserLevel.cashier.getValue() && level != SysUser.UserLevel.shopManager.getValue()) || manageUser.getDataDealerEmployee() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * 是否是店长
+     * 
+     * @return
+     */
+    private boolean isStoreManager(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level != SysUser.UserLevel.shopManager.getValue() || manageUser.getDataDealerEmployee() == null) {
                 return false;
             }
         }
@@ -397,6 +474,14 @@ public class DealerEmployeeAction
 
 	public String getResetFlag() {
 		return resetFlag;
+	}
+
+	public String getQRCodeName() {
+		return qRCodeName;
+	}
+
+	public void setDealerEmployeeOid(String dealerEmployeeOid) {
+		this.dealerEmployeeOid = dealerEmployeeOid;
 	}
 
 }

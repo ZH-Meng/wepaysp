@@ -33,6 +33,12 @@
 			<result name="storeList">/resources/partner/storeList.jsp</result>
 			<result name="createStore">/resources/partner/createStore.jsp</result>
 			<result name="updateStore">/resources/partner/updateStore.jsp</result>
+			<result name="getQRCodeImg" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
+				<param name="inputName">qRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
 		</action>
 		<!-- 服务商员工管理 -->
 		<action name="partneremployeemanage" class="partnerEmployeeAction">
@@ -47,6 +53,12 @@
 			<result name="updateDealerEmployee">/resources/partner/updateDealerEmployee.jsp</result>
 			<result name="resetRefundPwd">/resources/partner/resetRefundPwd.jsp</result>
 			<result name="modifyRefundPwd">/resources/partner/modifyRefundPwd.jsp</result>
+			<result name="getQRCodeImg" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
+				<param name="inputName">qRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
 		</action>
 	</package>
 </struts>

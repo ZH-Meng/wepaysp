@@ -15,7 +15,6 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -200,9 +199,19 @@ public class WeixinPayDetailsMainServiceImpl
         Integer tradeStatus = payDetailVO.getTradeStatus();
         
         if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
+        	logger.info("订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
         	// 主动查询微信支付结果
         	try {
         		DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
+        		
+                // FIXME 从内存中获取 --------------------临时数据
+                String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
+                String certPassword = DevParam.CERT_PASSWORD.getValue(); 
+                String keyPartner = DevParam.KEY.getValue();
+                payDetailVO.setCertLocalPath(certLocalPath);
+                payDetailVO.setCertPassword(certPassword);
+                payDetailVO.setKeyPartner(keyPartner);
+                
         		// 订单查询
         		WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
         		

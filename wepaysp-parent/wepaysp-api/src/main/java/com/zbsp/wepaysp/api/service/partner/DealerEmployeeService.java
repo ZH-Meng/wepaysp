@@ -24,7 +24,8 @@ public interface DealerEmployeeService {
      * 查询参数Map中key的取值如下：
      * <pre>
      *		dealerOid:			 		String类型，商户Oid，根据此参数精确查询
-     *      dealerEmployeeOid   String类型，商户员工Oid，根据此参数精确查询，与dealerOid互斥
+     *		storeOid:					String类型，商户Oid，根据此参数精确查询
+     *      dealerEmployeeOid   String类型，商户员工Oid，根据此参数精确查询
      *      employeeName:    	 String类型，商户员工姓名，根据此参数模糊查询
      *      moblieNumber:         String类型，商户员工手机号，根据此参数模糊查询
      * </pre>
@@ -98,6 +99,15 @@ public interface DealerEmployeeService {
      * @return 修改成功返回修改后的商户员工对象VO
      */
     public DealerEmployeeVO doTransResetRefundPwd(String dealerEmployeeOid, String newPwd, String operatorOid, String operatorName, String logFunctionOid);
-    
+
+    /**
+     * 获取收银员级别支付二维码（如果不存在则生成）
+     * @param dealerEmployeeOid
+     * @param modifier 修改人名称
+     * @param operatorUserOid 操作用户Oid
+     * @param logFunctionOid 日志记录项Oid
+     * @return DealerEmployeeVO 包含二维码path
+     */
+    public DealerEmployeeVO doTransGetPayQRCode(String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid);
     
 }

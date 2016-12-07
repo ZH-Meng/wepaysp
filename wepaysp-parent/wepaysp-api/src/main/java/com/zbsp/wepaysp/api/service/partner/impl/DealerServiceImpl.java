@@ -468,7 +468,9 @@ public class DealerServiceImpl
         DealerVO dealerVO = new DealerVO();
 
         Dealer dealer = commonDAO.findObject(Dealer.class, dealerOid);
-
+        if (dealer == null) {
+            throw new NotExistsException("商户不存在");
+        }
         String qrCodePath = dealer.getQrCodePath();
         boolean qrCodeExist = false;
         if (StringUtils.isNotBlank(qrCodePath)) {
@@ -495,7 +497,7 @@ public class DealerServiceImpl
                 filePath.mkdirs();
             }
             String fileName = Generator.generateIwoid();
-            // 生成二位码图片
+            // 生成二维码图片
             try {
                 QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
                 logger.info("商户-" + dealer.getCompany() + "生成二维码图片");
@@ -508,17 +510,12 @@ public class DealerServiceImpl
             dealer.setQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
             commonDAO.update(dealer);
             
-            String newDealerStr = dealer.toString();
             Date processEndTime = new Date();
             // 记录修改日志
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改商户基本信息[商户名称：" + dealer.getCompany() + " 手机号：" + dealer.getMoblieNumber() + " 邮箱：" + dealer.getEmail() + " QQ号码：" + dealer.getQqNumber() + "]", processEndTime, processEndTime, dealerStr, newDealerStr, SysLog.State.success.getValue(), dealer.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改商户二维码信息[二维码地址：" + dealer.getQrCodePath() + "]", processEndTime, processEndTime, dealerStr, dealer.toString(), SysLog.State.success.getValue(), dealer.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
         }
         BeanCopierUtil.copyProperties(dealer, dealerVO);
         return dealerVO;
-    }
-    
-    public String getCallBackURL() {
-        return callBackURL;
     }
     
     public void setCallBackURL(String callBackURL) {

@@ -56,10 +56,10 @@
 									<td>
 										<strong class="timetj">
 	                                        <input class="dxbtn" type="radio" id="queryType1" name="queryType" value="day"/>自定义时段
-	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})" 
+	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
 											name="beginTime" id="beginTime" maxlength="20" value="<s:property value="beginTime"/>" />
 	                                        <span>至</span>
-	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})"
+	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
 											name="endTime" id="endTime" maxlength="20" value="<s:property value="endTime"/>" onchange="endTimeChange();"/>
 	                                        <span class="tj_bt">*</span>
 	                                    </strong>

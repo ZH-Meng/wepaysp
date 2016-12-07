@@ -92,7 +92,7 @@
 									<th>交易开始时间</th>
 									<td colspan="<s:property value='#queryCols' />">
 										<input style="width:185px;" type="text" name="beginTime" id="beginTime" class="Wdate" readonly="readonly" value="<s:property value="beginTime"/>"
-												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'})"/>
+												onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})"/>
 									<span class="tj_bt">*</span>
 									<span>交易截止时间</span>
 										<input style="width:185px;" type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
@@ -258,6 +258,10 @@
 			}
 			if(isBlank(endTime)){
 				alert('交易截止时间不能为空！');
+				return false;
+			}
+			if (compareDate(endTime, beginTime) == -1) {
+				alert('交易开始时间不能大于交易截止时间！');
 				return false;
 			}
 			if (beginTime.substring(0, 7) != endTime.substring(0, 7)) {

@@ -1,5 +1,11 @@
 package com.zbsp.wepaysp.manage.web.action.partner;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +37,9 @@ public class StoreAction
     private StoreVO storeVO;
     private List<StoreVO> storeVoList;
     private StoreService storeService;
-
+    private String qRCodeName;
+    private String storeOid; 
+    
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -162,15 +170,67 @@ public class StoreAction
         } catch (NotExistsException e) {
             logger.error("门店修改失败：" + e.getMessage());
             setAlertMessage("门店修改失败：" + e.getMessage());
+            storeVO = null;
             return list();
         } catch (Exception e) {
-            logger.error("门店添加错误：" + e.getMessage());
-            setAlertMessage("门店添加错误！");
-            return "error";
+            logger.error("门店修改错误：" + e.getMessage());
+            setAlertMessage("门店修改错误！");
+            storeVO = null;
+            return list();
         }
         return "updateStore";
     }
 
+    /**
+     * 下载门店级别支付二维码图片<br>
+     * <pre>
+     * 校验权限；
+     * 判断此门店是否生成过二维码，且二维码文件是否存在；
+     * 如果二维码不存在则生成二维码图片
+     * <pre>
+     * @return
+     */
+    public String downloadPayQRCode() {
+        logger.info("下载门店级别支付二维码图片.");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            // 只有商户能下载门店级别二维码
+            if (isDealer(manageUser)) {
+                if (StringUtils.isNotBlank(storeOid)) {
+                	storeVO = storeService.doTransGetPayQRCode(storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                } else {
+                    logger.warn("非法下载门店级别支付二维码图片，参数storeOid为空！");
+                    setAlertMessage("下载门店级别支付二维码图片失败！");
+                    return list();
+                }
+            } else {
+                logger.warn("无权下载门店级别支付二维码");
+                setAlertMessage("无权下载门店级别支付二维码");
+                return "accessDenied";
+            }
+        } catch (Exception e) {
+            logger.error("下载门店级别支付二维码错误：" + e.getMessage());
+            setAlertMessage("下载门店级别支付二维码错误！");
+            return list();
+        }
+        return "getQRCodeImg";
+    }
+    
+    public InputStream getQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            File qrFile = new File(storeVO.getQrCodePath());
+            inputStream = new FileInputStream(qrFile);
+            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            logger.info("下载门店级别支付二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
     /**
      * 是否是商户并且用户有关联商户
      * 
@@ -213,5 +273,14 @@ public class StoreAction
     public void setStoreService(StoreService storeService) {
         this.storeService = storeService;
     }
+
+	public String getQRCodeName() {
+		return qRCodeName;
+	}
+
+	public void setStoreOid(String storeOid) {
+		this.storeOid = storeOid;
+	}
+    
 
 }
