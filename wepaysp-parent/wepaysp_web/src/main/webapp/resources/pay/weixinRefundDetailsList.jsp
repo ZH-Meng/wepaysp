@@ -116,6 +116,14 @@
 					</li>
 				</ul>
 			</div>
+			<div class="bgtj_total">
+				<span style="margin-left:20px;">总比数：${totalVO.totalAmount }，退款总金额：				
+					<s:if test="totalVO.totalMoney == 0">0元</s:if>	
+					<s:else>
+						<fmt:formatNumber value="${totalVO.totalMoney / 100}" pattern="###,###,###,##0.00"/>元
+					</s:else>
+				</span>
+			</div>
 	    	<div class="bgtable">
 	            <ul class="bg_all">
 	                <li class="bg_table bg_table1">

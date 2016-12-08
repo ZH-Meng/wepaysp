@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,8 @@ import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
+import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 /**
@@ -40,7 +43,9 @@ public class WeixinRefundDetailsAction
     private int userLevel;
     private int partnerVoListLevel;
     private String listType;
-
+    private WeixinPayTotalVO totalVO;
+    
+    @SuppressWarnings("unchecked")
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -124,7 +129,12 @@ public class WeixinRefundDetailsAction
             
             rowCount = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsCount(paramMap);
             if (rowCount > 0) {
-            	weixinRefundDetailsVoList = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsList(paramMap, start, size);
+                Map<String, Object> resultMap = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetails(paramMap, start, size);
+                weixinRefundDetailsVoList = (List<WeixinRefundDetailsVO>) MapUtils.getObject(resultMap, "refundList");
+                // 合计
+                totalVO = (WeixinPayTotalVO) MapUtils.getObject(resultMap, "total");
+            } else {
+                totalVO = new WeixinPayTotalVO();
             }
         } catch (Exception e) {
             logger.error("微信交易明细查询列表错误：" + e.getMessage());
@@ -227,6 +237,10 @@ public class WeixinRefundDetailsAction
 
     public String getListType() {
         return listType;
+    }
+
+    public WeixinPayTotalVO getTotalVO() {
+        return totalVO;
     }
 
 }

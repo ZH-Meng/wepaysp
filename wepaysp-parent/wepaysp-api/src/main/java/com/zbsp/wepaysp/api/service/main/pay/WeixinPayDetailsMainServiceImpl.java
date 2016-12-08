@@ -147,6 +147,7 @@ public class WeixinPayDetailsMainServiceImpl
         String appid = null;
         WxPayNotifyData wxNotify = (WxPayNotifyData) Util.getObjectFromXML(respXmlString, WxPayNotifyData.class);
         if (wxNotify == null || StringUtils.isBlank(wxNotify.getAppid())) {
+            logger.error("公众号支付结果通知，解析参数格式失败，结果内容：" + respXmlString);
             result=new WxPayNotifyResultData("FAIL");
             result.setReturn_msg("解析参数格式失败");
         } else {
@@ -174,12 +175,14 @@ public class WeixinPayDetailsMainServiceImpl
 	                result = new WxPayNotifyResultData("SUCCESS");
 	                result.setReturn_msg("成功");
                 } catch (Exception e) {
-                	logger.error("微信支付结果通知错误，" + e.getMessage());
+                	logger.error("微信支付结果通知错误，结果内容：" + respXmlString + "，处理异常信息：" + e.getMessage());
                 	result = new WxPayNotifyResultData("FAIL");
                 	result.setReturn_msg("失败");
                 }
-               //TODO 发送支付结果公众号信息
+               // TODO 发送支付结果公众号信息（支付成功/失败）
+                
             } else {
+                logger.error("公众号支付结果通知，签名失败，结果内容：" + respXmlString);
                 result = new WxPayNotifyResultData("FAIL");
                 result.setReturn_msg("签名失败");
             }
@@ -199,28 +202,34 @@ public class WeixinPayDetailsMainServiceImpl
         Integer tradeStatus = payDetailVO.getTradeStatus();
         
         if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
-        	logger.info("订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
-        	// 主动查询微信支付结果
-        	try {
-        		DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
-        		
-                // FIXME 从内存中获取 --------------------临时数据
-                String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
-                String certPassword = DevParam.CERT_PASSWORD.getValue(); 
-                String keyPartner = DevParam.KEY.getValue();
-                payDetailVO.setCertLocalPath(certLocalPath);
-                payDetailVO.setCertPassword(certPassword);
-                payDetailVO.setKeyPartner(keyPartner);
+            if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
+                logger.info("订单状态处理中，用户取消支付，现主动发起关闭订单请求");
+                // TODO 关闭订单
                 
-        		// 订单查询
-        		WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
-        		
-                payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
-                tradeStatus = payDetailVO.getTradeStatus();// 当前订单状态
-        	} catch (Exception e) {
-        		logger.error("订单（系统订单ID：" + payDetailVO.getOutTradeNo() + "）查询失败，" + e.getMessage());
-        		logger.error(e.getMessage(), e);
-        	}
+            } else {
+                logger.info("订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
+                // 主动查询微信支付结果
+                try {
+                    DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
+                    
+                    // FIXME 从内存中获取 --------------------临时数据
+                    String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
+                    String certPassword = DevParam.CERT_PASSWORD.getValue(); 
+                    String keyPartner = DevParam.KEY.getValue();
+                    payDetailVO.setCertLocalPath(certLocalPath);
+                    payDetailVO.setCertPassword(certPassword);
+                    payDetailVO.setKeyPartner(keyPartner);
+                    
+                    // 订单查询
+                    WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
+                    
+                    payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+                    tradeStatus = payDetailVO.getTradeStatus();// 当前订单状态
+                } catch (Exception e) {
+                    logger.error("订单（系统订单ID：" + payDetailVO.getOutTradeNo() + "）查询失败，" + e.getMessage());
+                    logger.error(e.getMessage(), e);
+                }
+            }
         }
 
         if ("ok".equalsIgnoreCase(payResult)) {

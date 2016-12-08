@@ -37,6 +37,7 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
 
 public class WeixinPayDetailsServiceImpl
@@ -47,7 +48,8 @@ public class WeixinPayDetailsServiceImpl
 
     @SuppressWarnings("unchecked")
 	@Override
-    public List<WeixinPayDetailsVO> doJoinTransQueryWeixinPayDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult) {
+    public Map<String, Object> doJoinTransQueryWeixinPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
     	List<WeixinPayDetailsVO> resultList = new ArrayList<WeixinPayDetailsVO>();
  	   
         String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
@@ -64,6 +66,7 @@ public class WeixinPayDetailsServiceImpl
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String payType = MapUtils.getString(paramMap, "payType");
 
         //StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p and w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
@@ -124,12 +127,24 @@ public class WeixinPayDetailsServiceImpl
             sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
+        if (StringUtils.isNotBlank(payType)) {// 支付类型
+            sql.append(" and w.payType = :PAYTYPE");
+            sqlMap.put("PAYTYPE", payType);
+        }
 
         sql.append(" order by w.transBeginTime desc");
         List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
+        Long totalAmount = 0L;
+        Long totalMoney = 0L;
+        // 总笔数为记录总数，总金额为交易成功的总金额
         if(weixinPayDetailsList != null && !weixinPayDetailsList.isEmpty()) {
         	for (WeixinPayDetails weixinPayDetails : weixinPayDetailsList) {
+        	    totalAmount++;
+                if (weixinPayDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
+                    totalMoney += weixinPayDetails.getTotalFee();
+                }
+                
         		WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
         		//BeanCopierUtil.copyProperties(weixinPayDetails, vo);
         		vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
@@ -166,8 +181,12 @@ public class WeixinPayDetailsServiceImpl
         		resultList.add(vo);
         	}
         }
-        
-        return resultList;
+        WeixinPayTotalVO totalVO = new WeixinPayTotalVO();
+        totalVO.setTotalAmount(totalAmount);
+        totalVO.setTotalMoney(totalMoney);
+        resultMap.put("payList", resultList);
+        resultMap.put("total", totalVO);
+        return resultMap;
     }
 
     @Override
@@ -187,6 +206,7 @@ public class WeixinPayDetailsServiceImpl
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String payType = MapUtils.getString(paramMap, "payType");
 
         //StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p, w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
@@ -247,12 +267,12 @@ public class WeixinPayDetailsServiceImpl
         	sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
+        if (StringUtils.isNotBlank(payType)) {// 支付类型
+            sql.append(" and w.payType = :PAYTYPE");
+            sqlMap.put("PAYTYPE", payType);
+        }
         
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
-    }
-
-    public void setSysLogService(SysLogService sysLogService) {
-        this.sysLogService = sysLogService;
     }
 
     @Override
@@ -611,15 +631,13 @@ public class WeixinPayDetailsServiceImpl
         // 关键信息 result_code trade_state total_fee mch_id；其他非关键字段由SDK 通过验签完成校验
         
     	Validator.checkArgument(orderQueryResultVO == null, "orderQueryResultVO不能为空");
-    	Validator.checkArgument(StringUtils.equalsIgnoreCase(orderQueryResultVO.getReturnCode(), ReturnCode.SUCCESS.toString()), "returnCode必须为SUCCESS");
-    	Validator.checkArgument(StringUtils.equalsIgnoreCase(orderQueryResultVO.getResultCode(), ResultCode.SUCCESS.toString()), "resultCode必须为SUCCESS");    	
+    	Validator.checkArgument(!StringUtils.equalsIgnoreCase(orderQueryResultVO.getReturnCode(), ReturnCode.SUCCESS.toString()), "returnCode必须为SUCCESS");
+    	Validator.checkArgument(!StringUtils.equalsIgnoreCase(orderQueryResultVO.getResultCode(), ResultCode.SUCCESS.toString()), "resultCode必须为SUCCESS");    	
         Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getOutTradeNo()), "系统订单ID不能为空");
-        Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getTransactionId()), "微信支付订单ID不能为空");
         Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getMchId()), "微信商户号不能为空");
         
         String tradeState = orderQueryResultVO.getTradeState();
         Validator.checkArgument(StringUtils.isBlank(tradeState), "订单状态不能为空");
-        Validator.checkArgument(orderQueryResultVO.getTotalFee() == null, "订单金额不能为空");
         
         // 查找支付明细
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
@@ -647,23 +665,27 @@ public class WeixinPayDetailsServiceImpl
                 tradeState = TradeState.PAYERROR.toString();
             }
             if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
+                Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getTransactionId()), "微信支付订单ID不能为空");
+                Validator.checkArgument(orderQueryResultVO.getTotalFee() == null, "订单金额不能为空");
                 if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
                     logger.error("查询结果信息金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "主动查询请求总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
                     tradeState = TradeState.PAYERROR.toString();
                 }
+                // 更新结果信息
+                payDetails.setTotalFee(orderQueryResultVO.getTotalFee());
+                //String attach = payResultVO.getAttach();// 商户数据包
+                
+                payDetails.setBankType(orderQueryResultVO.getBankType());
+                payDetails.setTransactionId(orderQueryResultVO.getTransactionId());// 微信支付订单号
+                payDetails.setOpenid(orderQueryResultVO.getOpenid());// 用户标识
+                payDetails.setIsSubscribe(orderQueryResultVO.getIsSubscribe());
+                payDetails.setCashFeeType(StringUtils.isNotBlank(orderQueryResultVO.getCashFeeType()) ? orderQueryResultVO.getCashFeeType() : "CNY");
+                payDetails.setCashFee(orderQueryResultVO.getCashFee());
+                payDetails.setTimeEnd(orderQueryResultVO.getTimeEnd());// 支付完成时间
             }
-            // 更新结果信息
-            payDetails.setTotalFee(orderQueryResultVO.getTotalFee());
-            //String attach = payResultVO.getAttach();// 商户数据包
             
-            payDetails.setBankType(orderQueryResultVO.getBankType());
-            payDetails.setTransactionId(orderQueryResultVO.getTransactionId());// 微信支付订单号
-            payDetails.setOpenid(orderQueryResultVO.getOpenid());// 用户标识
-            payDetails.setIsSubscribe(orderQueryResultVO.getIsSubscribe());
-            payDetails.setCashFeeType(StringUtils.isNotBlank(orderQueryResultVO.getCashFeeType()) ? orderQueryResultVO.getCashFeeType() : "CNY");
-            payDetails.setCashFee(orderQueryResultVO.getCashFee());
-            payDetails.setTimeEnd(orderQueryResultVO.getTimeEnd());// 支付完成时间
-            
+            Date processEndTime = new Date();
+            payDetails.setTransEndTime(processEndTime);
             if (StringUtils.equalsIgnoreCase(tradeState, TradeState.SUCCESS.toString())) {
             	payDetails.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.CLOSED.toString())) { 
@@ -676,16 +698,18 @@ public class WeixinPayDetailsServiceImpl
             } else {
                 // 未支付，支付超时 用户支付中，对应交易处理中
             	//TODO 转入退款
+                payDetails.setTransEndTime(null);
             }
             
-            Date processEndTime = new Date();
-            payDetails.setTransEndTime(processEndTime);
             commonDAO.update(payDetails);
             
             // 记录日志-修改微信支付结果
             sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[订单查询结果：交易成功" + "，微信支付订单号：" + orderQueryResultVO.getTransactionId() + "，交易状态：" + tradeState + "，支付金额：" + orderQueryResultVO.getTotalFee() + "]", processEndTime, processEndTime, null, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
         }
     }
-    	
+    
+    public void setSysLogService(SysLogService sysLogService) {
+        this.sysLogService = sysLogService;
+    }
 
 }

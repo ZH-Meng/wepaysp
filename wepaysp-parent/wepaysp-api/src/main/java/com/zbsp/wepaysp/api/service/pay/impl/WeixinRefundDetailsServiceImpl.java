@@ -16,9 +16,11 @@ import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinRefundDetails;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
+import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 
@@ -30,7 +32,8 @@ public class WeixinRefundDetailsServiceImpl
 
     @SuppressWarnings("unchecked")
 	@Override
-    public List<WeixinRefundDetailsVO> doJoinTransQueryWeixinRefundDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult) {
+    public Map<String, Object> doJoinTransQueryWeixinRefundDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
     	List<WeixinRefundDetailsVO> resultList = new ArrayList<WeixinRefundDetailsVO>();
  	   
         String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
@@ -111,8 +114,16 @@ public class WeixinRefundDetailsServiceImpl
 
         List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
+        Long totalAmount = 0L;
+        Long totalMoney = 0L;
+        // 总笔数为记录总数，总金额为交易成功的总金额
         if(weixinRefundDetailsList != null && !weixinRefundDetailsList.isEmpty()) {
         	for (WeixinRefundDetails weixinRefundDetails : weixinRefundDetailsList) {
+        	    totalAmount++;
+                if (weixinRefundDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
+                    totalMoney += weixinRefundDetails.getTotalFee();
+                }
+                
         		WeixinRefundDetailsVO vo = new WeixinRefundDetailsVO();
         		//BeanCopierUtil.copyProperties(weixinRefundDetails, vo);
         		vo.setOutTradeNo(weixinRefundDetails.getOutTradeNo());
@@ -147,7 +158,12 @@ public class WeixinRefundDetailsServiceImpl
         	}
         }
         
-        return resultList;
+        WeixinPayTotalVO totalVO = new WeixinPayTotalVO();
+        totalVO.setTotalAmount(totalAmount);
+        totalVO.setTotalMoney(totalMoney);
+        resultMap.put("refundList", resultList);
+        resultMap.put("total", totalVO);
+        return resultMap;
     }
 
     @Override
@@ -232,15 +248,15 @@ public class WeixinRefundDetailsServiceImpl
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 
-    public void setSysLogService(SysLogService sysLogService) {
-        this.sysLogService = sysLogService;
-    }
-
 	@Override
 	public WeixinRefundDetailsVO doTransCreateRefundDetails(WeixinPayDetails weixinPayDetails, String creator,
 			String operatorUserOid, String logFunctionOid) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void setSysLogService(SysLogService sysLogService) {
+	    this.sysLogService = sysLogService;
 	}
     
 }

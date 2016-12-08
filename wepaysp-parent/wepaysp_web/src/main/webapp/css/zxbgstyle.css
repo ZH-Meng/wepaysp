@@ -36,6 +36,7 @@ textarea{overflow:auto;resize:none;}
 .bgposition{width:99%;min-width:1000px;margin:8px auto;height:36px;line-height:36px;border-bottom:1px solid #d9d9d9;text-indent:40px;background:url(../images/bg-wzico.jpg) no-repeat 10px 8px;font-size:12px;color:#a6a6a6;}
 
 .bgtj{width:99%;min-width:1000px;background:#fff;margin:8px auto;}
+.bgtj_total {width:99%;min-width:1000px;background:#f1f4f5;margin:8px auto; padding:10px 0px; color: red;}
 .topbai{padding-top:20px;}
 .tj_title{widht:100%;min-width:1000px;height:30px;line-height:30px;background:url(../images/tablebj.jpg) repeat-x;text-indent:20px;color:#de3442;color:#fff;font-weight:bold;}
 

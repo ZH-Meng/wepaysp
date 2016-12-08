@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
 /**
  * 微信交易明细
@@ -40,7 +42,9 @@ public class WeixinPayDetailsAction
     private int userLevel;
     private int partnerVoListLevel;
     private String listType;
+    private WeixinPayTotalVO totalVO;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -124,7 +128,12 @@ public class WeixinPayDetailsAction
             
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
             if (rowCount > 0) {
-            	weixinPayDetailsVoList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, start, size);
+                Map<String, Object> resultMap = weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(paramMap, start, size);
+                weixinPayDetailsVoList = (List<WeixinPayDetailsVO>) MapUtils.getObject(resultMap, "payList");
+            	// 合计
+            	totalVO = (WeixinPayTotalVO) MapUtils.getObject(resultMap, "total");
+            } else {
+                totalVO = new WeixinPayTotalVO();
             }
         } catch (Exception e) {
             logger.error("微信交易明细查询列表错误：" + e.getMessage());
@@ -227,6 +236,10 @@ public class WeixinPayDetailsAction
 
     public String getListType() {
         return listType;
+    }
+
+    public WeixinPayTotalVO getTotalVO() {
+        return totalVO;
     }
 
 }

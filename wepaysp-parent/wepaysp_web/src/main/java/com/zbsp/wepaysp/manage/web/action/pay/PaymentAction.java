@@ -20,6 +20,7 @@ import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails.PayType;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
@@ -170,6 +171,12 @@ public class PaymentAction
     	return "cashierDesk";
     }
     
+    /**
+     * 收银员在收银台查看当天刷卡支付收款记录
+     * @param dealerEmployeeOid
+     * @return
+     */
+    @SuppressWarnings("unchecked")
     private List<WeixinPayDetailsVO> listTodayPayDetails(String dealerEmployeeOid) {
     	Map<String, Object> paramMap = new HashMap<String, Object>();
         // 当前收银员当天的收款记录
@@ -177,7 +184,8 @@ public class PaymentAction
         paramMap.put("beginTime", TimeUtil.getDayStart(today));
         paramMap.put("endTime", TimeUtil.getDayEnd(today));
         paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
-        return weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsList(paramMap, 0, -1);
+        paramMap.put("payType", PayType.MICROPAY.toString());// 收银台刷卡支付
+        return (List<WeixinPayDetailsVO>) MapUtils.getObject(weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(paramMap, 0, -1), "payList");
     }
     
     /**

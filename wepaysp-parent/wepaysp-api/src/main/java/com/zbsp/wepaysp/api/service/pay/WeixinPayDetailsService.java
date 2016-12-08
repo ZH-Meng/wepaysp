@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
 /**
  * 微信交易明细service
@@ -28,14 +29,19 @@ public interface WeixinPayDetailsService {
      *      storeId:                      String类型，门店ID，根据此参数模糊查询
      *      beginTime:                       Date类型，交易开始时间，根据此参数模糊查询
      *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
+     *      payType:                        支付类型，根据此参数模糊查询
      * </pre>
      * 
      * @param paramMap 查询参数
      * @param startIndex 记录起始位置
      * @param maxResult 返回记录最大数
-     * @return 符合条件的信息列表
+     * @return Map
+     * <pre>
+     *   payList：交易List<WeixinPayDetailsVO>
+     *   total：合计WeixinPayTotalVO
+     *   <pre>
      */
-    public List<WeixinPayDetailsVO> doJoinTransQueryWeixinPayDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult);
+    public Map<String, Object> doJoinTransQueryWeixinPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult);
     
     /**
      * 统计符合条件的总数.
@@ -54,6 +60,7 @@ public interface WeixinPayDetailsService {
      *      storeId:                      String类型，门店ID，根据此参数模糊查询
      *      beginTime:                       Date类型，交易开始时间，根据此参数模糊查询
      *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
+     *      payType:                        支付类型，根据此参数模糊查询
      * </pre>
      * 
      * @param paramMap 查询参数

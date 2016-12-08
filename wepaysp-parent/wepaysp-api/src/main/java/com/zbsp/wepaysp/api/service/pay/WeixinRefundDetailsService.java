@@ -1,6 +1,5 @@
 package com.zbsp.wepaysp.api.service.pay;
 
-import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
@@ -32,9 +31,13 @@ public interface WeixinRefundDetailsService {
      * @param paramMap 查询参数
      * @param startIndex 记录起始位置
      * @param maxResult 返回记录最大数
-     * @return 符合条件的信息列表
+     * @return Map
+     * <pre>
+     *   refundList：交易List<WeixinRefundDetailsVO>
+     *   total：合计WeixinPayTotalVO
+     *   <pre>
      */
-    public List<WeixinRefundDetailsVO> doJoinTransQueryWeixinRefundDetailsList(Map<String, Object> paramMap, int startIndex, int maxResult);
+    public Map<String, Object> doJoinTransQueryWeixinRefundDetails(Map<String, Object> paramMap, int startIndex, int maxResult);
     
     /**
      * 统计符合条件的总数.
