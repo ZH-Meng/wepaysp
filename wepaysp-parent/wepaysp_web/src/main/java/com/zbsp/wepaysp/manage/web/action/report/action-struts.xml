@@ -3,10 +3,14 @@
  "http://struts.apache.org/dtds/struts-2.1.dtd">
 <struts>
 	<package name="report" namespace="/resources/report" extends="wepaysp-manage-default">
-		<!-- 微信交易明细 -->
+		<!-- 资金结算统计 -->
 		<action name="rptdealerstat" class="rptDealerStatAction">
 			<result name="rptDealerStatList">/resources/report/rptDealerStatList.jsp</result>
 			<result name="rptDealerStatList4Partner">/resources/report/rptDealerStatList4Partner.jsp</result>
+		</action>
+		
+		<action name="rptdealerstatday" class="rptDealerStatDayAction">
+			<result name="rptDealerStatByDayList">/resources/report/rptDealerStatByDayList.jsp</result>
 		</action>
 	</package>
 </struts>

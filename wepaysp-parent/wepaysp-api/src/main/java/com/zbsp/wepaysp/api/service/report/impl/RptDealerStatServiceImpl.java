@@ -22,6 +22,8 @@ import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 public class RptDealerStatServiceImpl
     extends BaseService
     implements RptDealerStatService {
+    
+    private String dealerStatDayQueyName; 
 
     @Override
     public List<RptDealerStatVO> doJoinTransQueryRptDealerStatList4Parnter(Map<String, Object> paramMap, int startIndex, int maxResult) {
@@ -715,6 +717,72 @@ public class RptDealerStatServiceImpl
         sqlMap.put("ENDTIME", endTime);
         
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
+    }
+
+    @Override
+    public List<RptDealerStatVO> doJoinTransQueryRptDealerStatTodayList4Dealer(Map<String, Object> paramMap, int startIndex, int maxResult) {
+        List<RptDealerStatVO> resultList = new ArrayList<RptDealerStatVO>();
+        Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
+        Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+
+        Validator.checkArgument(beginTime == null, "开始时间不能为空");
+        Validator.checkArgument(endTime == null, "结束时间不能为空");
+        Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid不能为空");
+        
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        
+        sqlMap.put("DEALEROID", dealerOid);
+        sqlMap.put("BEGINTIME", beginTime);
+        sqlMap.put("ENDTIME", endTime);
+        @SuppressWarnings("rawtypes")
+        List statrList  = commonDAO.findObjectListByNamedQuery(dealerStatDayQueyName, sqlMap);
+
+        if (statrList != null && !statrList.isEmpty()) {
+            for (Object o : statrList) {
+                RptDealerStatVO vo = new RptDealerStatVO();
+                
+                Object[] oArr = (Object[]) o;
+                vo.setPayAmount(ArrayUtil.getLong(oArr, 0, 0));
+                vo.setPayMoney(ArrayUtil.getLong(oArr, 1, 0));
+                vo.setRefundAmount(ArrayUtil.getLong(oArr, 2, 0));
+                vo.setRefundMoney(ArrayUtil.getLong(oArr, 3, 0));
+                vo.setTotalMoney(ArrayUtil.getLong(oArr, 4, 0));
+                vo.setDealerId(String.valueOf(oArr[5]));
+                vo.setDealerName(String.valueOf(oArr[6]));
+                vo.setStoreId(String.valueOf(oArr[7]));
+                vo.setStoreName(String.valueOf(oArr[8]));
+                
+                /*vo.setDealerOid(String.valueOf(oArr[9]));
+                vo.setStoreOid(String.valueOf(oArr[10]));*/
+                resultList.add(vo);
+            }
+        }
+
+        return resultList;
+    }
+
+    @Override
+    public List<RptDealerStatVO> doJoinTransQueryRptDealerStatTodayList4DealerE(Map<String, Object> paramMap, int i, int j) {
+        List<RptDealerStatVO> resultList = new ArrayList<RptDealerStatVO>();
+        Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
+        Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String queryType = MapUtils.getString(paramMap, "queryType");
+        String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
+
+        Validator.checkArgument(StringUtils.isBlank(queryType), "查询方式不能为空");
+        Validator.checkArgument(beginTime == null, "开始时间不能为空");
+        Validator.checkArgument(endTime == null, "结束时间不能为空");
+        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerEmployeeOid不能为空");
+
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+
+
+        return resultList;
+    }
+
+    public void setDealerStatDayQueyName(String dealerStatDayQueyName) {
+        this.dealerStatDayQueyName = dealerStatDayQueyName;
     }
 
 }
