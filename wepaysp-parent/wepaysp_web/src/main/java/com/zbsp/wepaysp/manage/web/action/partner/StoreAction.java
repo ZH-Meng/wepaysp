@@ -39,6 +39,7 @@ public class StoreAction
     private StoreService storeService;
     private String qRCodeName;
     private String storeOid; 
+    private String dealerOid;
     
     @Override
     protected String query(int start, int size) {
@@ -56,23 +57,23 @@ public class StoreAction
                 setAlertMessage("商户级别以下用户不能查看门店列表");
                 return "accessDenied";
             }
-            String dealerOid = storeVO.getDealerOid();
-            if (manageUser.getUserLevel().intValue() < SysUser.UserLevel.dealer.getValue()) {// 服务商、业务员
+            
+            if (manageUser.getUserLevel().intValue() < SysUser.UserLevel.dealer.getValue()) {// 服务商、业务员在 商户页面查看门店信息
                 if (StringUtils.isBlank(dealerOid)) {
                     logger.warn("门店查询列表失败：商户级别以上用户需要提供商户Oid才能查看门店列表");
                     setAlertMessage("门店查询列表失败：商户级别以上用户需要提供商户Oid才能查看门店列表");
                     return "accessDenied";
                 }
+                paramMap.put("dealerOid", dealerOid);
             } else {// 商户
-                if (manageUser.getDataDealer() == null) {
+                if (!isDealer(manageUser)) {
                     logger.warn("门店查询列表失败：当前用户属于商户级别，但是没有关联商户信息");
                     setAlertMessage("门店查询列表失败：当前用户属于商户级别，但是没有关联商户信息");
                     return "accessDenied";
                 } else {
-                    dealerOid = manageUser.getDataDealer().getIwoid();
+                    paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
                 }
             }
-            paramMap.put("dealerOid", dealerOid);
             storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
             //rowCount = storeService.doJoinTransQueryStoreCount(paramMap);
         } catch (Exception e) {
@@ -194,8 +195,8 @@ public class StoreAction
         logger.info("下载门店级别支付二维码图片.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // 只有商户能下载门店级别二维码
-            if (isDealer(manageUser)) {
+            // 代理商、业务员、商户能下载门店级别二维码
+            if (isPartner(manageUser) || isPartnerEmployee(manageUser) || isDealer(manageUser)) {
                 if (StringUtils.isNotBlank(storeOid)) {
                 	storeVO = storeService.doTransGetPayQRCode(storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
@@ -248,6 +249,43 @@ public class StoreAction
         }
         return true;
     }
+    
+    /**
+     * 是否是服务商
+     * 
+     * @return
+     */
+    private boolean isPartner(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否是业务员
+     * 
+     * @return
+     */
+    private boolean isPartnerEmployee(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.salesman.getValue() && manageUser.getDataPartnerEmployee() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public void setSession(Map<String, Object> session) {
@@ -282,5 +320,12 @@ public class StoreAction
 		this.storeOid = storeOid;
 	}
     
+    public String getDealerOid() {
+        return dealerOid;
+    }
+    
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
+    }
 
 }

@@ -44,7 +44,8 @@ public class DealerEmployeeAction
     private String resetFlag;
     private String qRCodeName;
     private String dealerEmployeeOid;
-
+    private String storeOid;
+    
     @Override
     protected String query(int start, int size) {
         Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -56,10 +57,22 @@ public class DealerEmployeeAction
             paramMap.put("moblieNumber", dealerEmployeeVO.getMoblieNumber());
             
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // 只有商户、商户员工可以查看商户员工列表，只有商户可以重置退款权限密码
-			if (!checkUser(manageUser, "yes".equals(resetFlag) ? "reset" :"query")) {
-				return "accessDenied";
+           
+            // 只有商户可以重置退款权限密码
+            //if (!checkUser(manageUser, "yes".equals(resetFlag) ? "reset" :"query")) {
+            if ("yes".equals(resetFlag)) {
+                if (!checkUser(manageUser, "reset")) {
+                    return "accessDenied";
+                }
+            } else {
+                // 门店页面查看商户员工，用户级别限制屏蔽
+                if (StringUtils.isNotBlank(storeOid)) {
+                    paramMap.put("storeOid", storeOid);
+                } else if (!checkUser(manageUser, "query")) {
+                    return "accessDenied";
+                }
             }
+            
             if (isDealer(manageUser)) {
                 paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
             } else if (isStoreManager(manageUser)) {
@@ -306,8 +319,8 @@ public class DealerEmployeeAction
         logger.info("下载收银员级别支付二维码图片.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // 只有商户能下载收银员级别二维码
-            if (isDealer(manageUser) || isStoreManager(manageUser))  {
+            // 代理商、业务员、商户、店长能下载收银员级别二维码
+            if (isPartner(manageUser) || isPartnerEmployee(manageUser) || isDealer(manageUser) || isStoreManager(manageUser))  {
                 if (StringUtils.isNotBlank(dealerEmployeeOid)) {
                 	dealerEmployeeVO = dealerEmployeeService.doTransGetPayQRCode(dealerEmployeeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
@@ -434,6 +447,43 @@ public class DealerEmployeeAction
         }
         return true;
     }
+    
+    
+    /**
+     * 是否是服务商
+     * 
+     * @return
+     */
+    private boolean isPartner(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否是业务员
+     * 
+     * @return
+     */
+    private boolean isPartnerEmployee(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level == SysUser.UserLevel.salesman.getValue() && manageUser.getDataPartnerEmployee() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void setSession(Map<String, Object> session) {
@@ -484,4 +534,13 @@ public class DealerEmployeeAction
 		this.dealerEmployeeOid = dealerEmployeeOid;
 	}
 
+    
+    public String getStoreOid() {
+        return storeOid;
+    }
+    
+    public void setStoreOid(String storeOid) {
+        this.storeOid = storeOid;
+    }
+	
 }

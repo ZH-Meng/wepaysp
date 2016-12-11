@@ -15,6 +15,7 @@
 			<s:hidden id="iwoid" name="dealerVO.iwoid"/>
 			<s:hidden id="dealerOid" name="dealerOid"/>
 			<s:hidden id="coreDataFlag" name="dealerVO.coreDataFlag"/>
+			<s:hidden id="partnerOid" name="partnerOid"/>
 			<div class="bgtj">
 				<ul class="tj_title">
 					<li>查询条件</li>
@@ -49,7 +50,12 @@
 				        		</manage:notPass>
 				            </manage:permission>
 						</s:if>
-						<s:else>
+						<s:elseif test="partnerOid != null && partnerOid != '' ">
+							<%-- TODO 查看门店按钮权限 --%>
+							<s:set name="findStoresFlag" value="true"/>
+							<s:set name="backFlag" value="true"/>
+						</s:elseif>
+						<s:elseif test="partnerOid == null || partnerOid == '' ">
 							<manage:permission validateUrl="/resources/partner/dealermanage!goToCreateDealer.action">
 				        		<manage:pass>
 									<a href="javascript:void(0);" onclick="toCreateDealer()">添加商户</a>
@@ -63,16 +69,20 @@
 				        			<s:set var="hasUpdatePermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
-				            <manage:permission validateUrl="/resources/partner/dealermanage!downloadPayQRCode.action">
-				        		<manage:pass>
-				        			<s:set var="hasDownQrCodePermission">yes</s:set>
-				        		</manage:pass>
-				        		<manage:notPass>
-				        			<s:set var="hasDownQrCodePermission">no</s:set>
-				        		</manage:notPass>
-				            </manage:permission>
-						</s:else>
-						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>						
+						</s:elseif>
+						
+			            <manage:permission validateUrl="/resources/partner/dealermanage!downloadPayQRCode.action">
+			        		<manage:pass>
+			        			<s:set var="hasDownQrCodePermission">yes</s:set>
+			        		</manage:pass>
+			        		<manage:notPass>
+			        			<s:set var="hasDownQrCodePermission">no</s:set>
+			        		</manage:notPass>
+			            </manage:permission>
+						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>
+						<s:if test="backFlag">
+							<a href="javascript:void(0);" onclick="history.back();">返回</a>
+						</s:if>						
 					</li>
 				</ul>
 			</div>
@@ -153,6 +163,10 @@
 						  				<s:elseif test="#hasUpdatePermission eq 'yes' && #dealerVo.state != 3">
 						  					<a href="javascript:void(0);" onclick="toUpdateDealer('<s:property value="#dealerVo.iwoid" />')">修改</a>
 						  				</s:elseif>
+						  				<%--TODO 添加按钮权限限制 --%>
+						  				<s:if test="findStoresFlag"> 
+						  					<a href="<%=request.getContextPath()%>/resources/partner/storemanage!list.action?dealerOid=<s:property value="#dealerVo.iwoid" />" >查看门店</a>
+						  				</s:if>
 						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerVo.iwoid" />')">下载二维码</a>
 						  				</s:if>

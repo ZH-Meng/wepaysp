@@ -23,6 +23,7 @@
 			<s:hidden id="iwoid" name="dealerEmployeeVO.iwoid"/>
 			<s:hidden id="dealerEmployeeOid" name="dealerEmployeeOid"/>
 			<s:hidden id="resetFlag" name="resetFlag"/>
+			<s:hidden id="storeOid" name="storeOid"/>
 			<div class="bgtj">
 				<ul class="tj_title">
 					<li>查询条件</li>
@@ -42,19 +43,24 @@
 					</li>
 					<li class="bg_button">
 						<s:if test="resetFlag != 'yes'">
-							<manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToCreateDealerEmployee.action">
-				        		<manage:pass>
-									<a href="javascript:void(0);" onclick="toCreateDealerEmployee()">添加员工</a>
-				        		</manage:pass>
-				            </manage:permission>
-				            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToUpdateDealerEmployee.action">
-				        		<manage:pass>
-				        			<s:set var="hasUpdatePermission">yes</s:set>
-				        		</manage:pass>
-				        		<manage:notPass>
-				        			<s:set var="hasUpdatePermission">no</s:set>
-				        		</manage:notPass>
-				            </manage:permission>
+							<s:if test="storeOid == null || storeOid == '' ">
+								<manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToCreateDealerEmployee.action">
+					        		<manage:pass>
+										<a href="javascript:void(0);" onclick="toCreateDealerEmployee()">添加员工</a>
+					        		</manage:pass>
+					            </manage:permission>
+					            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToUpdateDealerEmployee.action">
+					        		<manage:pass>
+					        			<s:set var="hasUpdatePermission">yes</s:set>
+					        		</manage:pass>
+					        		<manage:notPass>
+					        			<s:set var="hasUpdatePermission">no</s:set>
+					        		</manage:notPass>
+					            </manage:permission>
+							</s:if>
+							<s:else>
+								<s:set name="backFlag" value="true"/>
+							</s:else>
 				            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!downloadPayQRCode.action">
 				        		<manage:pass>
 				        			<s:set var="hasDownQrCodePermission">yes</s:set>
@@ -74,7 +80,10 @@
 				        		</manage:notPass>
 				            </manage:permission>
 						</s:else>
-						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>			
+						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>
+						<s:if test="backFlag">
+							<a href="javascript:void(0);" onclick="history.back();">返回</a>
+						</s:if>
 					</li>
 				</ul>
 			</div>

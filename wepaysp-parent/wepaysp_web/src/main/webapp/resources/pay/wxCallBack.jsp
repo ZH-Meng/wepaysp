@@ -23,25 +23,26 @@
 			<%-- <s:hidden name="partnerOid"/> --%>
 			<s:hidden name="dealerOid"/>
 			<s:hidden name="storeOid"/>
+			<s:hidden name="dealerEmployeeOid"/>
 			<s:hidden name="openid"/>
 
-		<div class="weui-panel">
-			<div class="company-info">
-				<p class="title1">${dealerName}订单</p>
+			<div class="weui-panel">
+				<div class="company-info">
+					<p class="title1">${dealerName}订单</p>
+				</div>
+				<div class="input-box">
+					<p class="input-title">消费总额</p>
+					<p class="input-amt">
+						<span class="fuhao">&yen;</span>
+						<input id="money" name="money" type="number" type="hidden" readonly="readonly" contenteditable="true" />
+					</p>
+					<div class="break-line"></div>
+					<p class="input-explain">可询问服务员消费总额</p>
+				</div>
+				<input id="ok-btn" type="button" class="weui_btn weui_btn_primary" onclick="submitOrder();"  value="确认买单" />			
 			</div>
-			<div class="input-box">
-				<p class="input-title">消费总额</p>
-				<p class="input-amt">
-					<span class="fuhao">&yen;</span>
-					<input id="money" name="money" type="number" type="hidden" readonly="readonly" contenteditable="true" />
-				</p>
-				<div class="break-line"></div>
-				<p class="input-explain">可询问服务员消费总额</p>
-			</div>
-			<input id="ok-btn" type="button" class="weui_btn weui_btn_primary" onclick="submitOrder();"  value="确认买单" />			
-		</div>
-		<div class="space-bar"></div>
-
+			<div class="space-bar"></div>
+		</form>
 		<script>
 			$(function () {
 				$("#money").focus();

@@ -19,6 +19,8 @@
 		<!-- <security:intercept-url pattern="/nostate/**/*"  filters="none" /> -->		
 		
 		<!-- 所有需要登录后访问的页面存放在/resources/目录下 -->
+		<security:intercept-url pattern="/resources/partner/dealeremployeemanage*" filters="none" />
+		<security:intercept-url pattern="/resources/partner/storemanage*" filters="none" />
 		<security:intercept-url pattern="/resources/*/*" access="IS_AUTHENTICATED_FULLY" />
 
 		<!-- 检测失效的sessionId,超时时定位到另外一个URL -->

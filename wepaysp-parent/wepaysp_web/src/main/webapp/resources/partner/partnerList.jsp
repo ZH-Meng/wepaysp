@@ -74,20 +74,20 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th class="five">序号</th>
-	                                <th>代理商编号</th>
+	                                <th class="thr">序号</th>
+	                                <th style="width: 120px;">代理商编号</th>
 	                                <th>登录名</th>
-	                                <th>父代理商</th>
-	                                <th>级别类型</th>
+	                                <!-- <th>父代理商</th> -->
+	                                <th class="five">级别类型</th>
 	                                <th>联系人</th>
 	                                <th>公司名称</th>
 	                                <th>地址</th>
 	                                <th>固定电话</th>
 	                                <th>手机</th>
 	                                <th>使用时间</th>
-	                                <th>状态</th>
-	                                <th>余额</th>
-	                                <th>操作</th>
+	                               <!--  <th>状态</th>
+	                                <th>余额</th> -->
+	                                <th class="twenty">操作</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -103,9 +103,9 @@
 						  			<td title="<s:property value="#partnerVo.loginId" />">
 						  				<s:property value="#partnerVo.loginId" />
 						  			</td>
-						  			<td title="<s:property value="#partnerVo.parentCompany" />">
+						  			<%-- <td title="<s:property value="#partnerVo.parentCompany" />">
 						  				<s:property value="#partnerVo.parentCompany" />
-						  			</td>
+						  			</td> --%>
 						  			<s:if test="#partnerVo.level == 1">
 						  				<s:set var="partnerLevelStr">一级</s:set>
 						  			</s:if>
@@ -139,7 +139,7 @@
 						  				至
 						  				<s:date name="#partnerVo.contractEnd" format="yyyy-MM-dd" />
 						  			</td>
-						  			<s:if test="#partnerVo.state == 1">
+						  			<%-- <s:if test="#partnerVo.state == 1">
 						  				<s:set var="stateStr">未使用</s:set>
 						  			</s:if>
 						  			<s:elseif test="#partnerVo.state == 2">
@@ -153,7 +153,7 @@
 						  			</td>
 						  			<td title="<s:property value="#partnerVo.balance" />">
 						  				<s:property value="#partnerVo.balance" />
-						  			</td>
+						  			</td> --%>
 						  			<td title="修改">
 						  				<s:if test="#hasUpdatePermission eq 'yes' && #partnerVo.state != 3 && isChildPage==1">
 						  					<a href="javascript:void(0);" onclick="toUpdatePartner('<s:property value="#partnerVo.iwoid" />')">修改</a>
@@ -161,12 +161,14 @@
 						  				<s:if test="#partnerVo.level < 3">
 						  					<a href="javascript:void(0);" onclick="findChildPartners('<s:property value="#partnerVo.iwoid" />')">查看下级代理商</a>
 						  				</s:if>
+										<%--TODO 添加按钮权限限制 --%>
+						  				<a href="<%=request.getContextPath()%>/resources/partner/dealermanage!list.action?partnerOid=<s:property value="#partnerVo.iwoid" />" >查看商户</a>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="14">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="11">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>

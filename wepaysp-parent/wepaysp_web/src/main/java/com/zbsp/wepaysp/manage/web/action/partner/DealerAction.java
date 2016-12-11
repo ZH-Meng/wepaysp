@@ -44,6 +44,7 @@ public class DealerAction
     private PartnerEmployeeService partnerEmployeeService;
     private String qRCodeName;
     private String dealerOid; 
+    private String partnerOid;
     
     @Override
     protected String query(int start, int size) {
@@ -63,7 +64,9 @@ public class DealerAction
                 	return "accessDenied";
                 }
             } else {
-                if (isPartnerEmployee(manageUser)) {
+                if ((isPartnerEmployee(manageUser) || isPartner(manageUser)) && StringUtils.isNotBlank(partnerOid)) {// 查看子代理或者下下级代理商的商户信息
+                    paramMap.put("partnerOid", partnerOid);
+                } else if (isPartnerEmployee(manageUser)) {
                     paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
                 } else if (isPartner(manageUser)) {
                 	paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
@@ -525,4 +528,12 @@ public class DealerAction
         this.dealerOid = dealerOid;
     }
 
+    public void setPartnerOid(String partnerOid) {
+        this.partnerOid = partnerOid;
+    }
+
+    public String getPartnerOid() {
+        return partnerOid;
+    }
+    
 }

@@ -49,6 +49,7 @@ public class AppIDPayAction
     private String dealerOid;
     private String dealerName;
     private String storeOid;
+    private String dealerEmployeeOid;
     private String money;
 
     /**
@@ -146,7 +147,8 @@ public class AppIDPayAction
         payDetailsVO.setPayType(WeixinPayDetails.PayType.JSAPI.getValue());// 交易类型公众号
         payDetailsVO.setDealerOid(dealerOid);
         payDetailsVO.setOpenid(openid);
-        payDetailsVO.setStoreOid(storeOid);
+        payDetailsVO.setStoreOid(storeOid);// 一店一码时，不为空
+        payDetailsVO.setDealerEmployeeOid(dealerEmployeeOid);// 一收银员一码时，不为空
         payDetailsVO.setNotifyUrl(wxPayNotifyURL);// 通知地址
 
         BigDecimal orderMoney = new BigDecimal(money);// 订单金额
@@ -284,9 +286,17 @@ public class AppIDPayAction
     public String getStoreOid() {
         return storeOid;
     }
-
+    
     public void setStoreOid(String storeOid) {
         this.storeOid = storeOid;
+    }
+    
+    public String getDealerEmployeeOid() {
+        return dealerEmployeeOid;
+    }
+    
+    public void setDealerEmployeeOid(String dealerEmployeeOid) {
+        this.dealerEmployeeOid = dealerEmployeeOid;
     }
 
     public void setMoney(String money) {

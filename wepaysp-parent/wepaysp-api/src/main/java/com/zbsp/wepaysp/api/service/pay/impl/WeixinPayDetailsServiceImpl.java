@@ -293,7 +293,19 @@ public class WeixinPayDetailsServiceImpl
             jsapiPay = true;
             Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getDealerOid()), "商户Oid不能为空");
             Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getOpenid()), "openId不能为空");
-        } else if (WeixinPayDetails.PayType.MICROPAY.getValue().equals(weixinPayDetailsVO.getPayType())) {// 公众号支付
+            if (StringUtils.isNotBlank(weixinPayDetailsVO.getStoreOid())) {
+                store = commonDAO.findObject(Store.class, weixinPayDetailsVO.getStoreOid());
+                if (store == null) {
+                    logger.warn("门店不存在，storeOid=" + weixinPayDetailsVO.getStoreOid());
+                }
+                if (StringUtils.isNotBlank(weixinPayDetailsVO.getDealerEmployeeOid())) {
+                    dealerEmployee = commonDAO.findObject(DealerEmployee.class, weixinPayDetailsVO.getDealerEmployeeOid());
+                    if (dealerEmployee == null) {
+                        logger.warn("收银员不存在，dealerEmployeeOid=" + weixinPayDetailsVO.getDealerEmployeeOid());
+                    }
+                }
+            }
+        } else if (WeixinPayDetails.PayType.MICROPAY.getValue().equals(weixinPayDetailsVO.getPayType())) {// 刷卡支付
             microPay = true;
             Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
             Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
@@ -317,10 +329,6 @@ public class WeixinPayDetailsServiceImpl
             throw new NotExistsException("商户不存在！");
         } else if (StringUtils.isBlank(dealer.getSubMchId())) {
             throw new InvalidValueException("商户信息缺失：sub_mch_id为空！");
-        }
-        
-        if (StringUtils.isNotBlank(weixinPayDetailsVO.getStoreOid())) {
-            store = commonDAO.findObject(Store.class, weixinPayDetailsVO.getStoreOid());
         }
         
         // FIXME 查找服务商，先从内存再到数据库查询，如果都没有则报错
