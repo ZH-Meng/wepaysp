@@ -55,6 +55,15 @@
 			        			<s:set var="hasUpdatePermission">no</s:set>
 			        		</manage:notPass>
 			            </manage:permission>
+			            <%-- 查看商户按钮权限 --%>
+			            <manage:permission validateUrl="/resources/partner/dealermanage!listByPartnerOid.action">
+			        		<manage:pass>
+			        			<s:set var="hasFindDealersPermission">yes</s:set>
+			        		</manage:pass>
+			        		<manage:notPass>
+			        			<s:set var="hasFindDealersPermission">no</s:set>
+			        		</manage:notPass>
+			            </manage:permission>
 			            
 						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>						
 						
@@ -74,11 +83,11 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th class="thr">序号</th>
+	                                <th style="width: 40px;">序号</th>
 	                                <th style="width: 120px;">代理商编号</th>
 	                                <th>登录名</th>
 	                                <!-- <th>父代理商</th> -->
-	                                <th class="five">级别类型</th>
+	                                <th class="five">级别</th>
 	                                <th>联系人</th>
 	                                <th>公司名称</th>
 	                                <th>地址</th>
@@ -161,8 +170,9 @@
 						  				<s:if test="#partnerVo.level < 3">
 						  					<a href="javascript:void(0);" onclick="findChildPartners('<s:property value="#partnerVo.iwoid" />')">查看下级代理商</a>
 						  				</s:if>
-										<%--TODO 添加按钮权限限制 --%>
-						  				<a href="<%=request.getContextPath()%>/resources/partner/dealermanage!list.action?partnerOid=<s:property value="#partnerVo.iwoid" />" >查看商户</a>
+										<s:if test="#hasFindDealersPermission eq 'yes'">
+							  				<a href="<%=request.getContextPath()%>/resources/partner/dealermanage!listByPartnerOid.action?partnerOid=<s:property value="#partnerVo.iwoid" />" >查看商户</a>
+										</s:if>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

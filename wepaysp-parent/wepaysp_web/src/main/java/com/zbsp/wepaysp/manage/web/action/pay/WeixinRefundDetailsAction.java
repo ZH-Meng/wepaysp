@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.common.util.DateUtil;
@@ -18,7 +17,6 @@ import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
-import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
@@ -28,11 +26,9 @@ import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
  * @author 孟郑宏
  */
 public class WeixinRefundDetailsAction
-    extends PageAction
-    implements SessionAware {
+    extends PageAction  {
 
     private static final long serialVersionUID = -4213656644621035327L;
-    private Map<String, Object> session;
     private WeixinRefundDetailsVO weixinRefundDetailsVO;
     private String beginTime;
     private String endTime;
@@ -180,11 +176,6 @@ public class WeixinRefundDetailsAction
 
     private Date convertS2D(String dateStr) {
         return DateUtil.getDate(dateStr, "yyyy-MM-dd");
-    }
-
-    @Override
-    public void setSession(Map<String, Object> session) {
-        this.session = session;
     }
 
     public WeixinRefundDetailsVO getWeixinRefundDetailsVO() {

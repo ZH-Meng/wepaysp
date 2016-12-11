@@ -49,8 +49,15 @@
 				            </manage:permission>
 			             </s:if>
 			            <s:elseif test="dealerOid != null && dealerOid != '' ">
-							<%-- TODO 查看商户员工按钮权限 --%>
-							<s:set name="findCashiersFlag" value="true"/>
+							<%-- 查看商户员工按钮权限 --%>
+				            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!listByStoreOid.action">
+				        		<manage:pass>
+				        			<s:set var="hasFindCashiersPermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasFindCashiersPermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
 							<s:set name="backFlag" value="true"/>
 						</s:elseif>
 						
@@ -76,7 +83,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th class="six">序号</th>
+	                                <th style="width: 40px;">序号</th>
 	                                <th>门店编号</th>
 	                                <th>门店名称</th>
 	                                <th>门店地址</th>
@@ -115,9 +122,8 @@
 	  									<s:if test="#hasUpdatePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="toUpdateStore('<s:property value="#storeVo.iwoid" />')">修改</a>
 						  				</s:if>
-						  				<%--TODO 添加按钮权限限制 --%>
-						  				<s:if test="findCashiersFlag">
-						  					<a href="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!list.action?storeOid=<s:property value="#storeVo.iwoid" />" >查看商户员工</a>
+						  				<s:if test="#hasFindCashiersPermission eq 'yes'">
+						  					<a href="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!listByStoreOid.action?storeOid=<s:property value="#storeVo.iwoid" />" >查看商户员工</a>
 						  				</s:if>
 						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#storeVo.iwoid" />')">下载二维码</a>

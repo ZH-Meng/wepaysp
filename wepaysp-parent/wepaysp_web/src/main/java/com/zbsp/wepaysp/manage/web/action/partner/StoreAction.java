@@ -18,6 +18,7 @@ import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
+import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
@@ -66,7 +67,7 @@ public class StoreAction
                 }
                 paramMap.put("dealerOid", dealerOid);
             } else {// 商户
-                if (!isDealer(manageUser)) {
+                if (!SysUserUtil.isDealer(manageUser)) {
                     logger.warn("门店查询列表失败：当前用户属于商户级别，但是没有关联商户信息");
                     setAlertMessage("门店查询列表失败：当前用户属于商户级别，但是没有关联商户信息");
                     return "accessDenied";
@@ -87,11 +88,24 @@ public class StoreAction
         initPageData(PageAction.defaultSmallPageSize);
         return goCurrent();
     }
+    
+    /**
+     * 根据商户Oid查看此商户开设的门店
+     */
+    public String listByDealerOid() {
+    	if (StringUtils.isBlank(dealerOid)) {
+    		logger.warn("dealerOid不能为空");
+        	setAlertMessage("非法查看门店信息列表");
+        	return ERROR;
+    	}
+    	initPageData(100);
+        return goCurrent();
+    }
 
     public String goToCreateStore() {
         logger.info("跳转创建门店页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isDealer(manageUser)) {
+        if (!SysUserUtil.isDealer(manageUser)) {
             logger.warn("非商户用户不能创建门店");
             setAlertMessage("非商户用户不能创建门店");
             return "accessDenied";
@@ -104,7 +118,7 @@ public class StoreAction
         logger.info("开始创建门店.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!isDealer(manageUser)) {
+            if (!SysUserUtil.isDealer(manageUser)) {
                 logger.warn("非商户用户不能创建门店");
                 setAlertMessage("非商户用户不能创建门店");
                 return "accessDenied";
@@ -134,7 +148,7 @@ public class StoreAction
     public String goToUpdateStore() {
         logger.info("跳转修改门店页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isDealer(manageUser)) {
+        if (!SysUserUtil.isDealer(manageUser)) {
             logger.warn("非商户用户不能修改门店");
             setAlertMessage("非商户用户不能修改门店");
             return "accessDenied";
@@ -154,7 +168,7 @@ public class StoreAction
         try {
             if (storeVO != null && StringUtils.isNotBlank(storeVO.getIwoid())) {
                 ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                if (!isDealer(manageUser)) {
+                if (!SysUserUtil.isDealer(manageUser)) {
                     logger.warn("非商户用户不能修改门店");
                     setAlertMessage("非商户用户不能修改门店");
                     return "accessDenied";
@@ -196,7 +210,7 @@ public class StoreAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             // 代理商、业务员、商户能下载门店级别二维码
-            if (isPartner(manageUser) || isPartnerEmployee(manageUser) || isDealer(manageUser)) {
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser)) {
                 if (StringUtils.isNotBlank(storeOid)) {
                 	storeVO = storeService.doTransGetPayQRCode(storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
@@ -231,61 +245,6 @@ public class StoreAction
         }
         return inputStream;
     }
-    
-    /**
-     * 是否是商户并且用户有关联商户
-     * 
-     * @return
-     */
-    private boolean isDealer(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.dealer.getValue() || manageUser.getDataDealer() == null) {// 非商户
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * 是否是服务商
-     * 
-     * @return
-     */
-    private boolean isPartner(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 是否是业务员
-     * 
-     * @return
-     */
-    private boolean isPartnerEmployee(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level == SysUser.UserLevel.salesman.getValue() && manageUser.getDataPartnerEmployee() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     @Override
     public void setSession(Map<String, Object> session) {

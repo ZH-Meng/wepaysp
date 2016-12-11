@@ -18,7 +18,7 @@ import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails.PayType;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
@@ -54,7 +54,7 @@ public class PaymentAction
         logger.info("开始跳转到收银台.");
 
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isDealerEmployee(manageUser)) {
+        if (!SysUserUtil.isDealerEmployee(manageUser)) {
             logger.warn("非收银员不能收银！");
             setAlertMessage("非收银员不能收银！");
             return "accessDenied";
@@ -77,7 +77,7 @@ public class PaymentAction
     public String cashier() {
         logger.info("开始收银.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isDealerEmployee(manageUser)) {
+        if (!SysUserUtil.isDealerEmployee(manageUser)) {
             logger.warn("非收银员不能收银！");
             setAlertMessage("非收银员不能收银！");
             return "accessDenied";
@@ -149,7 +149,7 @@ public class PaymentAction
     public String refund() {
     	logger.info("开始收银台退款.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isDealerEmployee(manageUser)) {
+        if (!SysUserUtil.isDealerEmployee(manageUser)) {
             logger.warn("非收银员不能收银！");
             setAlertMessage("非收银员不能收银！");
             return "accessDenied";
@@ -186,24 +186,6 @@ public class PaymentAction
         paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
         paramMap.put("payType", PayType.MICROPAY.toString());// 收银台刷卡支付
         return (List<WeixinPayDetailsVO>) MapUtils.getObject(weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(paramMap, 0, -1), "payList");
-    }
-    
-    /**
-     * 是否是商户员工(收银员、业务员)
-     * 
-     * @return
-     */
-    private boolean isDealerEmployee(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if ((level != SysUser.UserLevel.cashier.getValue() && level != SysUser.UserLevel.shopManager.getValue()) || manageUser.getDataDealerEmployee() == null) {
-                return false;
-            }
-        }
-        return true;
     }
     
     @Override

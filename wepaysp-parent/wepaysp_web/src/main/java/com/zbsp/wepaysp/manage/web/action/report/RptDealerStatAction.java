@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -27,11 +26,9 @@ import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
  * @author 孟郑宏
  */
 public class RptDealerStatAction
-    extends PageAction
-    implements SessionAware {
+    extends PageAction {
 
     private static final long serialVersionUID = 8509361391781384238L;
-    private Map<String, Object> session;
     private RptDealerStatVO rptDealerStatVO;
     private List<RptDealerStatVO> rptDealerStatVoList;
     private RptDealerStatService rptDealerStatService;
@@ -319,10 +316,6 @@ public class RptDealerStatAction
 
     public void setListType(String listType) {
         this.listType = listType;
-    }
-
-    public void setSession(Map<String, Object> session) {
-        this.session = session;
     }
 
     public void setRptDealerStatService(RptDealerStatService rptDealerStatService) {

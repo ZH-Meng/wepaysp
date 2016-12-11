@@ -14,8 +14,8 @@ import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
+import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.common.util.DateUtil;
-import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
@@ -46,7 +46,7 @@ public class PartnerAction
         Map<String, Object> paramMap = new HashMap<String, Object>();
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!isPartner(manageUser)) {
+            if (!SysUserUtil.isPartner(manageUser)) {
                 logger.warn("非代理商用户不能查看代理商信息列表");
                 setAlertMessage("非代理商用户不能查看代理商信息列表");
                 return "accessDenied";
@@ -104,7 +104,7 @@ public class PartnerAction
     public String goToCreatePartner() {
         logger.info("跳转添加代理商页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isPartner(manageUser)) {
+        if (!SysUserUtil.isPartner(manageUser)) {
             logger.warn("非代理商用户不能添加代理商信息");
             setAlertMessage("非代理商用户不能添加代理商信息");
             return "accessDenied";
@@ -129,7 +129,7 @@ public class PartnerAction
             }
             partnerVO.setContractBegin(convertS2D(contractBegin));
             partnerVO.setContractEnd(convertS2D(contractEnd));
-            if (isPartner(manageUser)) {// 添加子代理商
+            if (SysUserUtil.isPartner(manageUser)) {// 添加子代理商
                 partnerVO.setParentPartnerOid(manageUser.getDataPartner().getIwoid());
             } else {
                 logger.warn("非代理商用户不能添加代理商信息");
@@ -156,7 +156,7 @@ public class PartnerAction
     public String goToUpdatePartner() {
         logger.info("跳转修改代理商页面.");
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!isPartner(manageUser)) {
+        if (!SysUserUtil.isPartner(manageUser)) {
             logger.warn("非代理商用户不能修改代理商信息");
             setAlertMessage("非代理商用户不能添加代理商信息");
             return "accessDenied";
@@ -177,7 +177,7 @@ public class PartnerAction
         logger.info("开始修改代理商.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (!isPartner(manageUser)) {
+            if (!SysUserUtil.isPartner(manageUser)) {
                 logger.warn("非代理商用户不能修改代理商信息");
                 setAlertMessage("非代理商用户不能添加代理商信息");
                 return "accessDenied";
@@ -204,24 +204,6 @@ public class PartnerAction
             return "updatePartner";
         }
         return "updatePartner";
-    }
-    
-    /**
-     * 是否是服务商
-     * 
-     * @return
-     */
-    private boolean isPartner(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
-                return true;
-            }
-        }
-        return false;
     }
     
     private Date convertS2D(String dateStr) {

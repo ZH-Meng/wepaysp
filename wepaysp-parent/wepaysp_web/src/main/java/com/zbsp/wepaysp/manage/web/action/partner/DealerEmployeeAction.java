@@ -18,7 +18,7 @@ import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.vo.partner.DealerEmployeeVO;
@@ -73,9 +73,9 @@ public class DealerEmployeeAction
                 }
             }
             
-            if (isDealer(manageUser)) {
+            if (SysUserUtil.isDealer(manageUser)) {
                 paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
-            } else if (isStoreManager(manageUser)) {
+            } else if (SysUserUtil.isStoreManager(manageUser)) {
                 //paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
             	paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
             }
@@ -96,6 +96,19 @@ public class DealerEmployeeAction
      */
     public String list() {
         initPageData(PageAction.defaultSmallPageSize);
+        return goCurrent();
+    }
+    
+    /**
+     * 根据门店Oid查看此门店下的员工
+     */
+    public String listByStoreOid() {
+    	if (StringUtils.isBlank(storeOid)) {
+    		logger.warn("storeOid不能为空");
+        	setAlertMessage("非法查看商户员工信息列表");
+        	return ERROR;
+    	}
+    	initPageData(100);
         return goCurrent();
     }
 
@@ -320,7 +333,7 @@ public class DealerEmployeeAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             // 代理商、业务员、商户、店长能下载收银员级别二维码
-            if (isPartner(manageUser) || isPartnerEmployee(manageUser) || isDealer(manageUser) || isStoreManager(manageUser))  {
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser))  {
                 if (StringUtils.isNotBlank(dealerEmployeeOid)) {
                 	dealerEmployeeVO = dealerEmployeeService.doTransGetPayQRCode(dealerEmployeeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
@@ -371,19 +384,19 @@ public class DealerEmployeeAction
     	}
     	
     	if ("add".equals(operCode) || "update".equals(operCode) || "reset".equals(operCode)) {
-    		if (!isDealer(manageUser) && !isStoreManager(manageUser)) {
+    		if (!SysUserUtil.isDealer(manageUser) && !SysUserUtil.isStoreManager(manageUser)) {
                 logger.warn("非商户或店长不能" + operDesc);
                 setAlertMessage("非商户或店长不能" + operDesc);
                 return false;
     		}
     	} else if("query".equals(operCode)) {
-    		if (!isDealer(manageUser) && !isStoreManager(manageUser)) {
+    		if (!SysUserUtil.isDealer(manageUser) && !SysUserUtil.isStoreManager(manageUser)) {
                 logger.warn("非商户或店长不能" + operDesc);
                 setAlertMessage("非商户或店长不能" + operDesc);
                 return false;
     		}
     	} else if("modifyRefundPwd".equals(operCode)) {
-    		if (!isDealerEmployee(manageUser)) {
+    		if (!SysUserUtil.isDealerEmployee(manageUser)) {
                 logger.warn("非商户员工不能" + operDesc);
                 setAlertMessage("非商户员工不能" + operDesc);
                 return false;
@@ -392,97 +405,6 @@ public class DealerEmployeeAction
     		return false;
     	}
     	return true;
-    }
-
-    /**
-     * 是否是商户
-     * 
-     * @return
-     */
-    private boolean isDealer(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.dealer.getValue() || manageUser.getDataDealer() == null) {// 非商户
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * 是否是收银员
-     * 
-     * @return
-     */
-    private boolean isDealerEmployee(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if ((level != SysUser.UserLevel.cashier.getValue() && level != SysUser.UserLevel.shopManager.getValue()) || manageUser.getDataDealerEmployee() == null) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * 是否是店长
-     * 
-     * @return
-     */
-    private boolean isStoreManager(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.shopManager.getValue() || manageUser.getDataDealerEmployee() == null) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    
-    /**
-     * 是否是服务商
-     * 
-     * @return
-     */
-    private boolean isPartner(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level == SysUser.UserLevel.partner.getValue() && manageUser.getDataPartner() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 是否是业务员
-     * 
-     * @return
-     */
-    private boolean isPartnerEmployee(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level == SysUser.UserLevel.salesman.getValue() && manageUser.getDataPartnerEmployee() != null) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

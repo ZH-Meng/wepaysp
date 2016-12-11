@@ -12,7 +12,7 @@ import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.api.service.partner.PartnerEmployeeService;
 import com.zbsp.wepaysp.vo.partner.PartnerEmployeeVO;
 
@@ -47,9 +47,9 @@ public class PartnerEmployeeAction
 				return "accessDenied";
             }
             
-            if (isPartner(manageUser)) {
+            if (SysUserUtil.isPartner(manageUser)) {
                 paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
-            } else if (isPartnerEmployee(manageUser)) {
+            } else if (SysUserUtil.isPartnerEmployee(manageUser)) {
                 paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
             }
             
@@ -168,13 +168,13 @@ public class PartnerEmployeeAction
     	}
     	
     	if ("add".equals(operCode) || "update".equals(operCode)) {
-    		if (!isPartner(manageUser)) {
+    		if (!SysUserUtil.isPartner(manageUser)) {
                 logger.warn("非代理商用户不能" + operDesc);
                 setAlertMessage("非代理商用户不能" + operDesc);
                 return false;
     		}     
     	} else if("query".equals(operCode)) {
-    		if (!isPartner(manageUser) && !isPartnerEmployee(manageUser)) {
+    		if (!SysUserUtil.isPartner(manageUser) && !SysUserUtil.isPartnerEmployee(manageUser)) {
                 logger.warn("非代理商或代理商员工用户不能" + operDesc);
                 setAlertMessage("非代理商或代理商员工用户不能" + operDesc);
                 return false;
@@ -183,42 +183,6 @@ public class PartnerEmployeeAction
     		return false;
     	}
     	return true;
-    }
-
-    /**
-     * 是否是代理商
-     * 
-     * @return
-     */
-    private boolean isPartner(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.partner.getValue() || manageUser.getDataPartner() == null) {// 非代理商
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    /**
-     * 是否是代理商员工
-     * 
-     * @return
-     */
-    private boolean isPartnerEmployee(ManageUser manageUser) {
-        int level = 0;
-        if (manageUser.getUserLevel() == null) {
-            return false;
-        } else {
-            level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.salesman.getValue() || manageUser.getDataPartnerEmployee() == null) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override

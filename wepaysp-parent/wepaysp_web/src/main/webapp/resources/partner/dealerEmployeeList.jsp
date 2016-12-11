@@ -93,7 +93,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th class="six">序号</th>
+	                                <th style="width: 40px;">序号</th>
 	                                <th>门店编号</th>
 	                                <th>员工编号</th>
 	                                <th>登录名</th>

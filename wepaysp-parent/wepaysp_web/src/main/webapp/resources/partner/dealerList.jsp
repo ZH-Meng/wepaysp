@@ -40,7 +40,19 @@
 						</table>
 					</li>
 					<li class="bg_button">
+						<%-- 查看门店按钮权限，代理商、业务员都可在此页面查看门店，除了顶级服务商管理核心内容 --%>
+			            <manage:permission validateUrl="/resources/partner/storemanage!listByDealerOid.action">
+			        		<manage:pass>
+			        			<s:set var="hasFindStoresPermission">yes</s:set>
+			        		</manage:pass>
+			        		<manage:notPass>
+			        			<s:set var="hasFindStoresPermission">no</s:set>
+			        		</manage:notPass>
+			            </manage:permission>
+			            
+						<s:set name="findStoresFlag" value="true"/>
 						<s:if test="dealerVO != null && 'on' == dealerVO.coreDataFlag">
+							<s:set name="findStoresFlag" value="false"/>
 				            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealerCore.action">
 				        		<manage:pass>
 				        			<s:set var="hasUpdateCorePermission">yes</s:set>
@@ -51,8 +63,7 @@
 				            </manage:permission>
 						</s:if>
 						<s:elseif test="partnerOid != null && partnerOid != '' ">
-							<%-- TODO 查看门店按钮权限 --%>
-							<s:set name="findStoresFlag" value="true"/>
+							<%-- <s:set name="findStoresFlag" value="true"/> --%>
 							<s:set name="backFlag" value="true"/>
 						</s:elseif>
 						<s:elseif test="partnerOid == null || partnerOid == '' ">
@@ -92,19 +103,19 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th class="six">序号</th>
+	                                <th style="width: 40px;">序号</th>
 	                                <th>商户编号</th>
 	                                <th>登录名</th>
 	                                <th>联系人</th>
 	                                <th>公司名称</th>
-	                                <th>所属代理商</th>
+	                                <!-- <th>所属代理商</th> -->
 	                                <th>关联业务员</th>
 	                                <th>固定电话</th>
 	                                <th>手机</th>
-	                                <th>状态</th>
-	                                <th>技术支持联系人</th>
-	                                <th>技术支持电话</th>
-	                                <th>操作</th>
+	                                <!--  <th>状态</th>
+	                               	<th>技术支持联系人</th>
+	                                <th>技术支持电话</th> -->
+	                                <th class="twenty">操作</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -126,9 +137,9 @@
 						  			<td title="<s:property value="#dealerVo.company" />">
 						  				<s:property value="#dealerVo.company" />
 						  			</td>
-						  			<td title="<s:property value="#dealerVo.partnerCompany" />">
+						  			<%-- <td title="<s:property value="#dealerVo.partnerCompany" />">
 						  				<s:property value="#dealerVo.partnerCompany" />
-						  			</td>
+						  			</td> --%>
 						  			<td title="<s:property value="#dealerVo.partnerEmployeeName" />">
 						  				<s:property value="#dealerVo.partnerEmployeeName" />
 						  			</td>
@@ -138,6 +149,7 @@
 						  			<td title="<s:property value="#dealerVo.moblieNumber" />">
 						  				<s:property value="#dealerVo.moblieNumber" />
 						  			</td>
+						  			<%--
 						  			<s:if test="#dealerVo.state == 1">
 						  				<s:set var="stateStr">未使用</s:set>
 						  			</s:if>
@@ -155,7 +167,7 @@
 						  			</td>
 						  			<td title="<s:property value="#dealerVo.techSupportPhone" />">
 						  				<s:property value="#dealerVo.techSupportPhone" />
-						  			</td>
+						  			</td> --%>
 						  			<td title="操作">
 	  									<s:if test="#hasUpdateCorePermission eq 'yes' && #dealerVo.state != 3">
 						  					<a href="javascript:void(0);" onclick="toUpdateDealerCore('<s:property value="#dealerVo.iwoid" />')">修改</a>
@@ -163,9 +175,8 @@
 						  				<s:elseif test="#hasUpdatePermission eq 'yes' && #dealerVo.state != 3">
 						  					<a href="javascript:void(0);" onclick="toUpdateDealer('<s:property value="#dealerVo.iwoid" />')">修改</a>
 						  				</s:elseif>
-						  				<%--TODO 添加按钮权限限制 --%>
-						  				<s:if test="findStoresFlag"> 
-						  					<a href="<%=request.getContextPath()%>/resources/partner/storemanage!list.action?dealerOid=<s:property value="#dealerVo.iwoid" />" >查看门店</a>
+						  				<s:if test="#findStoresFlag eq true && #hasFindStoresPermission eq 'yes'"> 
+						  					<a href="<%=request.getContextPath()%>/resources/partner/storemanage!listByDealerOid.action?dealerOid=<s:property value="#dealerVo.iwoid" />" >查看门店</a>
 						  				</s:if>
 						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerVo.iwoid" />')">下载二维码</a>
@@ -175,7 +186,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="13">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="9">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>
