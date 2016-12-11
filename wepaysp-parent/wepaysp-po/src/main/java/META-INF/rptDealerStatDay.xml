@@ -9,177 +9,155 @@
 		result-set-mapping="queryDealerStatDayMapping">
 		<query>
 		<![CDATA[
-		SELECT 
-                    SUM(PAY_AMOUNT) AS payAmount,
-                    SUM(PAY_FEE) AS payFee,
-                    SUM(REFUND_AMOUNT) AS refundAmount,
-                    SUM(REFUND_FEE) AS refundFee,
-                    SUM(PAY_FEE) - SUM(REFUND_FEE) AS totalFee,                    
-					(SELECT DEALER_ID  FROM DEALER_T B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerId ,
-                    (SELECT COMPANY  FROM DEALER_T B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerName,
-                    (SELECT STORE_ID  FROM STORE_T C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeId,
-                    (SELECT STORE_NAME  FROM STORE_T C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeName,
-                    DEALER_OID AS dealerOid,
-                    STORE_OID AS storeOid
-		FROM
-		          (   SELECT  
-		                        DEALER_OID,
-		                        STORE_OID,
-		                        PARTNER_OID,
-		                        PARTNER_EMPLOYEE_OID,
-		                        IFNULL(PAY_AMOUNT, 0) PAY_AMOUNT,
-		                        IFNULL(PAY_FEE,0) PAY_FEE,
-		                        IFNULL(REFUND_AMOUNT, 0) REFUND_AMOUNT,
-		                        IFNULL(REFUND_FEE,0) REFUND_FEE              
-		                        
-		              FROM                  
-		          
-		                      (
-		                          SELECT  
-		                                    DEALER_OID,
-		                                    STORE_OID,
-		                                    PARTNER_OID,
-		                                    PARTNER_EMPLOYEE_OID,
-		                                    PAY_AMOUNT,
-		                                    PAY_FEE,
-		                                    REFUND_AMOUNT,
-		                                    REFUND_FEE              
-		                            
-		                          FROM
-		                            
-		                                (SELECT
-		                                    A.DEALER_OID,
-		                                    A.STORE_OID,
-		                                    A.PARTNER_OID,
-		                                    A.PARTNER_EMPLOYEE_OID,
-		                                    COUNT(1) PAY_AMOUNT,
-		                                    SUM(TOTAL_FEE) PAY_FEE     
-		                                  FROM
-		                                    WEIXIN_PAY_DETAILS_T A
-		                                  WHERE
-		                                    A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
-		                                  AND A.TRADE_STATUS = 1
-		                                  AND A.DEALER_OID =:DEALEROID
-		                                  GROUP BY
-		                                    A.DEALER_OID,
-		                                    A.STORE_OID,
-		                                    A.PARTNER_OID,
-		                                    A.PARTNER_EMPLOYEE_OID) PAY 
-		                          
-		                          LEFT  JOIN 
-		                          
-		                                  (SELECT
-		                                    R.DEALER_OID,
-		                                    R.STORE_OID,
-		                                    R.PARTNER_OID,
-		                                    R.PARTNER_EMPLOYEE_OID,
-		                                    COUNT(1) REFUND_AMOUNT,
-		                                    SUM(REFUND_FEE) REFUND_FEE    
-		                                  FROM
-		                                    WEIXIN_REFUND_DETAILS_T R
-		                                  WHERE
-		                                    R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
-		                                  AND R.TRADE_STATUS = 1
-		                                  AND R.DEALER_OID =:DEALEROID
-		                                  GROUP BY
-		                                    R.DEALER_OID,
-		                                    R.STORE_OID,
-		                                    R.PARTNER_OID,
-		                                    R.PARTNER_EMPLOYEE_OID) REFUND
-		                          USING(DEALER_OID,STORE_OID,PARTNER_OID,PARTNER_EMPLOYEE_OID)
-		                          
-		                          UNION 
-		                          
-		                          SELECT  
-		                                    DEALER_OID,
-		                                    STORE_OID,
-		                                    PARTNER_OID,
-		                                    PARTNER_EMPLOYEE_OID,
-		                                    PAY_AMOUNT,
-		                                    PAY_FEE,
-		                                    REFUND_AMOUNT,
-		                                    REFUND_FEE
-		                          FROM
-		                            
-		                                (SELECT
-		                                    A.DEALER_OID,
-		                                    A.STORE_OID,
-		                                    A.PARTNER_OID,
-		                                    A.PARTNER_EMPLOYEE_OID,
-		                                    COUNT(1) PAY_AMOUNT,
-		                                    SUM(TOTAL_FEE) PAY_FEE    
-		                                  FROM
-		                                    WEIXIN_PAY_DETAILS_T A
-		                                  WHERE
-		                                    A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME		                                  
-		                                  AND A.TRADE_STATUS = 1
-										 AND A.DEALER_OID =:DEALEROID
-		                                  GROUP BY
-		                                    A.DEALER_OID,
-		                                    A.STORE_OID,
-		                                    A.PARTNER_OID,
-		                                    A.PARTNER_EMPLOYEE_OID) PAY 
-		                          
-		                          RIGHT  JOIN 
-		                          
-		                                  (SELECT
-		                                    R.DEALER_OID,
-		                                    R.STORE_OID,
-		                                    R.PARTNER_OID,
-		                                    R.PARTNER_EMPLOYEE_OID,
-		                                    COUNT(1) REFUND_AMOUNT,
-		                                    SUM(REFUND_FEE) REFUND_FEE    
-		                                  FROM
-		                                    WEIXIN_REFUND_DETAILS_T R
-		                                  WHERE
-		                                    R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME		                                   
-		                                  AND R.TRADE_STATUS = 1
-										 AND R.DEALER_OID =:DEALEROID      
-		                                  GROUP BY
-		                                    R.DEALER_OID,
-		                                    R.STORE_OID,
-		                                    R.PARTNER_OID,
-		                                    R.PARTNER_EMPLOYEE_OID) REFUND
-		                          USING(DEALER_OID,STORE_OID,PARTNER_OID,PARTNER_EMPLOYEE_OID)
-		                      ) STORE
-		        	) INNER_TABLE
+			SELECT 
+                    SUM(IFNULL(PAY_AMOUNT,0)) AS payAmount,
+                    SUM(IFNULL(PAY_FEE,0)) AS payFee,
+                    SUM(IFNULL(REFUND_AMOUNT,0)) AS refundAmount,
+                    SUM(IFNULL(REFUND_FEE,0)) AS refundFee,
+                    SUM(IFNULL(PAY_FEE,0)) - SUM(IFNULL(REFUND_FEE,0)) AS totalFee,
+					(SELECT DEALER_ID  FROM dealer_t B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerId ,
+                    (SELECT COMPANY  FROM dealer_t B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerName,
+                    (SELECT STORE_ID  FROM store_t C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeId,
+                    (SELECT STORE_NAME  FROM store_t C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeName
+			FROM
+               (
+                   SELECT  
+                             DEALER_OID,
+                             STORE_OID,
+                             PARTNER_OID,
+                             PARTNER_EMPLOYEE_OID,
+                             PAY_AMOUNT,
+                             PAY_FEE,
+                             REFUND_AMOUNT,
+                             REFUND_FEE              
+                   FROM
+                         (SELECT
+                             A.DEALER_OID,
+                             A.STORE_OID,
+                             A.PARTNER_OID,
+                             A.PARTNER_EMPLOYEE_OID,
+                             COUNT(1) PAY_AMOUNT,
+                             SUM(TOTAL_FEE) PAY_FEE     
+                           FROM
+                             weixin_pay_details_t A
+                           WHERE
+                             A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
+                           AND A.TRADE_STATUS = 1
+                           AND A.DEALER_OID =:DEALEROID
+                           GROUP BY
+                             A.DEALER_OID,
+                             A.STORE_OID,
+                             A.PARTNER_OID,
+                             A.PARTNER_EMPLOYEE_OID) PAY 
+                   		LEFT  JOIN 
+                           (SELECT
+                             R.DEALER_OID,
+                             R.STORE_OID,
+                             R.PARTNER_OID,
+                             R.PARTNER_EMPLOYEE_OID,
+                             COUNT(1) REFUND_AMOUNT,
+                             SUM(REFUND_FEE) REFUND_FEE    
+                           FROM
+                             weixin_refund_details_t R
+                           WHERE
+                             R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
+                           AND R.TRADE_STATUS = 1
+                           AND R.DEALER_OID =:DEALEROID
+                           GROUP BY
+                             R.DEALER_OID,
+                             R.STORE_OID,
+                             R.PARTNER_OID,
+                             R.PARTNER_EMPLOYEE_OID) REFUND
+                   		USING(DEALER_OID,STORE_OID,PARTNER_OID,PARTNER_EMPLOYEE_OID)
+                   
+                   UNION 
+                   
+                   SELECT  
+                             DEALER_OID,
+                             STORE_OID,
+                             PARTNER_OID,
+                             PARTNER_EMPLOYEE_OID,
+                             PAY_AMOUNT,
+                             PAY_FEE,
+                             REFUND_AMOUNT,
+                             REFUND_FEE
+                   FROM
+                         (SELECT
+                             A.DEALER_OID,
+                             A.STORE_OID,
+                             A.PARTNER_OID,
+                             A.PARTNER_EMPLOYEE_OID,
+                             COUNT(1) PAY_AMOUNT,
+                             SUM(TOTAL_FEE) PAY_FEE    
+                           FROM
+                             weixin_pay_details_t A
+                           WHERE
+                             A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME		                                  
+                           	AND A.TRADE_STATUS = 1
+	 						AND A.DEALER_OID =:DEALEROID
+                           GROUP BY
+                             A.DEALER_OID,
+                             A.STORE_OID,
+                             A.PARTNER_OID,
+                             A.PARTNER_EMPLOYEE_OID) PAY 
+              			RIGHT  JOIN 
+                           (SELECT
+                             R.DEALER_OID,
+                             R.STORE_OID,
+                             R.PARTNER_OID,
+                             R.PARTNER_EMPLOYEE_OID,
+                             COUNT(1) REFUND_AMOUNT,
+                             SUM(REFUND_FEE) REFUND_FEE    
+                           FROM
+                             weixin_refund_details_t R
+                           WHERE
+                             R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME		                                   
+                            AND R.TRADE_STATUS = 1
+	 						AND R.DEALER_OID =:DEALEROID      
+                           GROUP BY
+                             R.DEALER_OID,
+                             R.STORE_OID,
+                             R.PARTNER_OID,
+                             R.PARTNER_EMPLOYEE_OID) REFUND
+           			 USING(DEALER_OID,STORE_OID,PARTNER_OID,PARTNER_EMPLOYEE_OID)
+	       	) INNER_TABLE
+	       	GROUP BY
+                 INNER_TABLE.DEALER_OID,
+                 INNER_TABLE.STORE_OID,
+                 INNER_TABLE.PARTNER_OID,
+                 INNER_TABLE.PARTNER_EMPLOYEE_OID
 		]]></query>
 	</named-native-query>
-	
-    <!-- 收银员结算统计 -->
-	<named-native-query name="queryDealerEmployeeStatDay"
+
+    <!-- 门店结算统计 -->
+	<named-native-query name="queryStoreStatDay"
 		result-set-mapping="queryDealerEmployeeStatDayMapping">
 		<query>
 		<![CDATA[
-		SELECT 
-                    DEALER_OID AS dealerOid,
-                    STORE_OID AS storeOid,
-                    DEALER_EMPLOYEE_OID AS dealerEmployeeOid,        
-                    SUM(PAY_AMOUNT) AS payAmount,
+			SELECT 
+                    SUM(IFNULL(PAY_AMOUNT,0)) AS payAmount,
                     SUM(IFNULL(PAY_FEE,0)) AS payFee,
-                    SUM(REFUND_AMOUNT) AS refundAmount,
-                    SUM(IFNULL(REFUND_FEE)) AS refundFee,
-                    SUM(IFNULL(PAY_FEE,0)) - SUM(IFNULL(REFUND_FEE)) AS totalFee,                    
-					(SELECT DEALER_ID  FROM DEALER_T B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerId ,
-                    (SELECT COMPANY  FROM DEALER_T B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerName,
-                    (SELECT STORE_ID  FROM STORE_T C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeId,
-                    (SELECT STORE_NAME  FROM STORE_T C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeName,
-                    (SELECT DEALER_EMPLOYEE_ID  FROM DEALER_EMPLOYEE_T D WHERE D.IWOID = INNER_TABLE.DEALER_EMPLOYEE_OID) AS dealerEmployeeId,
-                    (SELECT EMPLOYEE_NAME  FROM DEALER_EMPLOYEE_T D WHERE D.IWOID = INNER_TABLE.DEALER_EMPLOYEE_OID) AS dealerEmployeeName
-		FROM
+                    SUM(IFNULL(REFUND_AMOUNT,0)) AS refundAmount,
+                    SUM(IFNULL(REFUND_FEE,0)) AS refundFee,
+                    SUM(IFNULL(PAY_FEE,0)) - SUM(IFNULL(REFUND_FEE,0)) AS totalFee,   
+					(SELECT DEALER_ID  FROM dealer_t B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerId ,
+                    (SELECT COMPANY  FROM dealer_t B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerName,
+                    (SELECT STORE_ID  FROM store_t C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeId,
+                    (SELECT STORE_NAME  FROM store_t C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeName,
+                    (SELECT DEALER_EMPLOYEE_ID  FROM dealer_employee_t D WHERE D.IWOID = INNER_TABLE.DEALER_EMPLOYEE_OID) AS dealerEmployeeId,
+                    (SELECT EMPLOYEE_NAME  FROM dealer_employee_t D WHERE D.IWOID = INNER_TABLE.DEALER_EMPLOYEE_OID) AS dealerEmployeeName
+			FROM
 		          (   SELECT  
 		                        DEALER_OID,
 		                        STORE_OID,
 		                        DEALER_EMPLOYEE_OID,
 		                        PARTNER_OID,
 		                        PARTNER_EMPLOYEE_OID,
-		                        PAY_AMOUNT,
-		                        PAY_FEE,
-		                        REFUND_AMOUNT,
-		                        REFUND_FEE              
-		                        
+	                             PAY_AMOUNT,
+	                             PAY_FEE,
+	                             REFUND_AMOUNT,
+	                             REFUND_FEE
 		              FROM                  
-		          
 		                      (
 		                          SELECT  
 		                                    DEALER_OID,
@@ -191,9 +169,7 @@
 		                                    PAY_FEE,
 		                                    REFUND_AMOUNT,
 		                                    REFUND_FEE              
-		                            
 		                          FROM
-		                            
 		                                (SELECT
 		                                    A.DEALER_OID,
 		                                    A.STORE_OID,
@@ -202,19 +178,18 @@
 		                                    COUNT(1) PAY_AMOUNT,
 		                                    SUM(TOTAL_FEE) PAY_FEE     
 		                                  FROM
-		                                    WEIXIN_PAY_DETAILS_T A
+		                                    weixin_pay_details_t A
 		                                  WHERE
-		                                    A.TIME_END BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
-		                                  AND A.DEALER_EMPLOYEE_OID  IS NULL 
+		                                    A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
+		                                  AND A.DEALER_EMPLOYEE_OID  IS NULL
+		                                  AND A.STORE_OID=:STOREOID 
 		                                  AND A.TRADE_STATUS = 1
 		                                  GROUP BY
 		                                    A.DEALER_OID,
 		                                    A.STORE_OID,
 		                                    A.PARTNER_OID,
 		                                    A.PARTNER_EMPLOYEE_OID) PAY 
-		                          
 		                          LEFT  JOIN 
-		                          
 		                                  (SELECT
 		                                    R.DEALER_OID,
 		                                    R.STORE_OID,
@@ -223,10 +198,11 @@
 		                                    COUNT(1) REFUND_AMOUNT,
 		                                    SUM(REFUND_FEE) REFUND_FEE    
 		                                  FROM
-		                                    WEIXIN_REFUND_DETAILS_T R
+		                                    weixin_refund_details_t R
 		                                  WHERE
-		                                    R.END_TIME BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
-		                                  AND R.DEALER_EMPLOYEE_OID  IS NULL 
+		                                    R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
+		                                  AND R.DEALER_EMPLOYEE_OID  IS NULL
+		                                  AND R.STORE_OID=:STOREOID 
 		                                  AND R.TRADE_STATUS = 1
 		                                  GROUP BY
 		                                    R.DEALER_OID,
@@ -248,7 +224,6 @@
 		                                    REFUND_AMOUNT,
 		                                    REFUND_FEE
 		                          FROM
-		                            
 		                                (SELECT
 		                                    A.DEALER_OID,
 		                                    A.STORE_OID,
@@ -257,19 +232,18 @@
 		                                    COUNT(1) PAY_AMOUNT,
 		                                    SUM(TOTAL_FEE) PAY_FEE    
 		                                  FROM
-		                                    WEIXIN_PAY_DETAILS_T A
+		                                    weixin_pay_details_t A
 		                                  WHERE
-		                                    A.TIME_END BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
+		                                    A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
 		                                  AND A.DEALER_EMPLOYEE_OID  IS NULL 
+		                                  AND A.STORE_OID=:STOREOID
 		                                  AND A.TRADE_STATUS = 1
 		                                  GROUP BY
 		                                    A.DEALER_OID,
 		                                    A.STORE_OID,
 		                                    A.PARTNER_OID,
 		                                    A.PARTNER_EMPLOYEE_OID) PAY 
-		                          
 		                          RIGHT  JOIN 
-		                          
 		                                  (SELECT
 		                                    R.DEALER_OID,
 		                                    R.STORE_OID,
@@ -278,10 +252,11 @@
 		                                    COUNT(1) REFUND_AMOUNT,
 		                                    SUM(REFUND_FEE) REFUND_FEE    
 		                                  FROM
-		                                    WEIXIN_REFUND_DETAILS_T R
+		                                    weixin_refund_details_t R
 		                                  WHERE
-		                                    R.END_TIME BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
+		                                    R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
 		                                  AND R.DEALER_EMPLOYEE_OID  IS NULL 
+		                                  AND R.STORE_OID=:STOREOID
 		                                  AND R.TRADE_STATUS = 1
 		                                  GROUP BY
 		                                    R.DEALER_OID,
@@ -326,10 +301,11 @@
 		                                COUNT(1) PAY_AMOUNT,
 		                                SUM(TOTAL_FEE) PAY_FEE     
 		                              FROM
-		                                WEIXIN_PAY_DETAILS_T A
+		                                weixin_pay_details_t A
 		                              WHERE
-		                                A.TIME_END BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
-		                              AND A.DEALER_EMPLOYEE_OID  IS NOT NULL  
+		                                A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
+		                              AND A.DEALER_EMPLOYEE_OID  IS NOT NULL
+		                              AND A.STORE_OID=:STOREOID
 		                              AND A.TRADE_STATUS = 1
 		                              GROUP BY
 		                                A.DEALER_OID,
@@ -349,10 +325,11 @@
 		                                COUNT(1) REFUND_AMOUNT,
 		                                SUM(REFUND_FEE) REFUND_FEE    
 		                              FROM
-		                                WEIXIN_REFUND_DETAILS_T R
+		                                weixin_refund_details_t R
 		                              WHERE
-		                                R.END_TIME BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
-		                              AND R.DEALER_EMPLOYEE_OID  IS NOT NULL 
+		                                R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
+		                              AND R.DEALER_EMPLOYEE_OID  IS NOT NULL
+		                              AND R.STORE_OID=:STOREOID 
 		                              AND R.TRADE_STATUS = 1
 		                              GROUP BY
 		                                R.DEALER_OID,
@@ -385,10 +362,11 @@
 		                                COUNT(1) PAY_AMOUNT,
 		                                SUM(TOTAL_FEE) PAY_FEE    
 		                              FROM
-		                                WEIXIN_PAY_DETAILS_T A
+		                                weixin_pay_details_t A
 		                              WHERE
-		                                A.TIME_END BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
-		                              AND A.DEALER_EMPLOYEE_OID  IS NOT NULL 
+		                                A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
+		                              AND A.DEALER_EMPLOYEE_OID  IS NOT NULL
+		                              AND A.STORE_OID=:STOREOID 
 		                              AND A.TRADE_STATUS = 1
 		                              GROUP BY
 		                                A.DEALER_OID,
@@ -408,20 +386,165 @@
 		                                COUNT(1) REFUND_AMOUNT,
 		                                SUM(REFUND_FEE) REFUND_FEE    
 		                              FROM
-		                                WEIXIN_REFUND_DETAILS_T R
+		                                weixin_refund_details_t R
 		                              WHERE
-		                                R.END_TIME BETWEEN BEGIN_DATE_TIME AND END_DATE_TIME 
-		                              AND R.DEALER_EMPLOYEE_OID  IS NOT NULL 
+		                                R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
+		                              AND R.DEALER_EMPLOYEE_OID  IS NOT NULL
+		                              AND R.STORE_OID=:STOREOID
 		                              AND R.TRADE_STATUS = 1
 		                              GROUP BY
 		                                R.DEALER_OID,
 		                                R.STORE_OID,
-		                                R.DEALER_EMPLOYEE_OID , 
+		                                R.DEALER_EMPLOYEE_OID, 
 		                                R.PARTNER_OID,
 		                                R.PARTNER_EMPLOYEE_OID) REFUND
 		                      USING(DEALER_OID,STORE_OID,DEALER_EMPLOYEE_OID ,PARTNER_OID,PARTNER_EMPLOYEE_OID)
 		                  ) EMPLOYEE
 		        	) INNER_TABLE
+        	GROUP BY
+                 INNER_TABLE.DEALER_OID,
+                 INNER_TABLE.STORE_OID,
+                 INNER_TABLE.DEALER_EMPLOYEE_OID, 
+                 INNER_TABLE.PARTNER_OID,
+                 INNER_TABLE.PARTNER_EMPLOYEE_OID
+		]]></query>
+	</named-native-query>
+	
+    <!-- 收银员结算统计 -->
+	<named-native-query name="queryDealerEmployeeStatDay"
+		result-set-mapping="queryDealerEmployeeStatDayMapping">
+		<query>
+		<![CDATA[
+			SELECT 
+                    SUM(IFNULL(PAY_AMOUNT,0)) AS payAmount,
+                    SUM(IFNULL(PAY_FEE,0)) AS payFee,
+                    SUM(IFNULL(REFUND_AMOUNT,0)) AS refundAmount,
+                    SUM(IFNULL(REFUND_FEE,0)) AS refundFee,
+                    SUM(IFNULL(PAY_FEE,0)) - SUM(IFNULL(REFUND_FEE,0)) AS totalFee,                    
+					(SELECT DEALER_ID  FROM dealer_t B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerId ,
+                    (SELECT COMPANY  FROM dealer_t B WHERE B.IWOID = INNER_TABLE.DEALER_OID) AS dealerName,
+                    (SELECT STORE_ID  FROM store_t C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeId,
+                    (SELECT STORE_NAME  FROM store_t C WHERE C.IWOID = INNER_TABLE.STORE_OID) AS storeName,
+                    (SELECT DEALER_EMPLOYEE_ID  FROM dealer_employee_t D WHERE D.IWOID = INNER_TABLE.DEALER_EMPLOYEE_OID) AS dealerEmployeeId,
+                    (SELECT EMPLOYEE_NAME  FROM dealer_employee_t D WHERE D.IWOID = INNER_TABLE.DEALER_EMPLOYEE_OID) AS dealerEmployeeName
+			FROM
+             	(
+                 SELECT  
+                           DEALER_OID,
+                           STORE_OID,
+                           DEALER_EMPLOYEE_OID ,
+                           PARTNER_OID,
+                           PARTNER_EMPLOYEE_OID,
+                           PAY_AMOUNT,
+                           PAY_FEE,
+                           REFUND_AMOUNT,
+                           REFUND_FEE
+                 FROM
+                       (SELECT
+                           A.DEALER_OID,
+                           A.STORE_OID,
+                           A.DEALER_EMPLOYEE_OID ,
+                           A.PARTNER_OID,
+                           A.PARTNER_EMPLOYEE_OID,
+                           COUNT(1) PAY_AMOUNT,
+                           SUM(TOTAL_FEE) PAY_FEE     
+                         FROM
+                           weixin_pay_details_t A
+                         WHERE
+                           A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
+                         AND A.DEALER_EMPLOYEE_OID=:DEALEREMPLOYEEOID
+                         AND A.TRADE_STATUS = 1
+                         GROUP BY
+                           A.DEALER_OID,
+                           A.STORE_OID,
+                           A.DEALER_EMPLOYEE_OID ,
+                           A.PARTNER_OID,
+                           A.PARTNER_EMPLOYEE_OID) PAY 
+                 	LEFT  JOIN 
+                     	   	(SELECT
+                           R.DEALER_OID,
+                           R.STORE_OID,
+                           R.DEALER_EMPLOYEE_OID ,
+                           R.PARTNER_OID,
+                           R.PARTNER_EMPLOYEE_OID,
+                           COUNT(1) REFUND_AMOUNT,
+                           SUM(REFUND_FEE) REFUND_FEE    
+                         FROM
+                           weixin_refund_details_t R
+                         WHERE
+                           R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
+                         AND R.DEALER_EMPLOYEE_OID=:DEALEREMPLOYEEOID
+                         AND R.TRADE_STATUS = 1
+                         GROUP BY
+                           R.DEALER_OID,
+                           R.STORE_OID,
+                           R.DEALER_EMPLOYEE_OID , 
+                           R.PARTNER_OID,
+                           R.PARTNER_EMPLOYEE_OID) REFUND
+                 	USING(DEALER_OID,STORE_OID,DEALER_EMPLOYEE_OID ,PARTNER_OID,PARTNER_EMPLOYEE_OID)
+                 
+                 UNION 
+                 
+                 SELECT  
+                           DEALER_OID,
+                           STORE_OID,
+                           DEALER_EMPLOYEE_OID ,
+                           PARTNER_OID,
+                           PARTNER_EMPLOYEE_OID,
+                           PAY_AMOUNT,
+                           PAY_FEE,
+                           REFUND_AMOUNT,
+                           REFUND_FEE
+                 FROM
+                       (SELECT
+                           A.DEALER_OID,
+                           A.STORE_OID,
+                           A.DEALER_EMPLOYEE_OID ,
+                           A.PARTNER_OID,
+                           A.PARTNER_EMPLOYEE_OID,
+                           COUNT(1) PAY_AMOUNT,
+                           SUM(TOTAL_FEE) PAY_FEE    
+                         FROM
+                           weixin_pay_details_t A
+                         WHERE
+                           A.TIME_END BETWEEN :BEGINTIME AND :ENDTIME 
+                         AND A.DEALER_EMPLOYEE_OID=:DEALEREMPLOYEEOID
+                         AND A.TRADE_STATUS = 1
+                         GROUP BY
+                           A.DEALER_OID,
+                           A.STORE_OID,
+                           A.DEALER_EMPLOYEE_OID ,
+                           A.PARTNER_OID,
+                           A.PARTNER_EMPLOYEE_OID) PAY 
+                	 RIGHT  JOIN 
+                       	(SELECT
+                           R.DEALER_OID,
+                           R.STORE_OID,
+                           R.DEALER_EMPLOYEE_OID ,
+                           R.PARTNER_OID,
+                           R.PARTNER_EMPLOYEE_OID,
+                           COUNT(1) REFUND_AMOUNT,
+                           SUM(REFUND_FEE) REFUND_FEE    
+                         FROM
+                           weixin_refund_details_t R
+                         WHERE
+                           R.END_TIME BETWEEN :BEGINTIME AND :ENDTIME
+                         AND R.DEALER_EMPLOYEE_OID=:DEALEREMPLOYEEOID
+                         AND R.TRADE_STATUS = 1
+                         GROUP BY
+                           R.DEALER_OID,
+                           R.STORE_OID,
+                           R.DEALER_EMPLOYEE_OID , 
+                           R.PARTNER_OID,
+                           R.PARTNER_EMPLOYEE_OID) REFUND
+                 	USING(DEALER_OID,STORE_OID,DEALER_EMPLOYEE_OID ,PARTNER_OID,PARTNER_EMPLOYEE_OID)
+        	) INNER_TABLE
+       		GROUP BY
+                     INNER_TABLE.DEALER_OID,
+                     INNER_TABLE.STORE_OID,
+                     INNER_TABLE.DEALER_EMPLOYEE_OID , 
+                     INNER_TABLE.PARTNER_OID,
+                     INNER_TABLE.PARTNER_EMPLOYEE_OID
 		]]></query>
 	</named-native-query>
 	
@@ -435,8 +558,6 @@
 		<column-result name="dealerName" />
 		<column-result name="storeId" />
 		<column-result name="storeName" />
-		<column-result name="dealerOid" />
-		<column-result name="storeOid" />
 	</sql-result-set-mapping>
 	
 	<sql-result-set-mapping name="queryDealerEmployeeStatDayMapping">
@@ -449,7 +570,7 @@
 		<column-result name="dealerName" />
 		<column-result name="storeId" />
 		<column-result name="storeName" />
-		<column-result name="dealerOid" />
-		<column-result name="storeOid" />
+		<column-result name="dealerEmployeeId" />
+		<column-result name="dealerEmployeeName" />
 	</sql-result-set-mapping>
 </entity-mappings>

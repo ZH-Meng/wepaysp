@@ -56,6 +56,7 @@ public class RptDealerStatDayAction
             boolean todayFlag = false;
             if (StringUtils.isBlank(queryDate)) {
                 queryDay = new Date();
+                queryDate = convertD2S(queryDay);
                 todayFlag = true;
             } else {
                 queryDay = convertS2D(queryDate);
@@ -96,9 +97,9 @@ public class RptDealerStatDayAction
                 flag = true;
                 listType = "dealerEmployee";
                 paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
-                paramMap.put("dealerEmployeeId", rptDealerStatVO.getDealerEmployeeId());
+                //paramMap.put("dealerEmployeed", rptDealerStatVO.getDealerEmployeeId());
                 if (todayFlag) {
-                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatTodayList4Dealer(paramMap, 0, -1);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatTodayList4Store(paramMap, 0, -1);
                 } else {
                     rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Dealer(paramMap, 0, -1);
                 }
@@ -188,6 +189,10 @@ public class RptDealerStatDayAction
 
     private Date convertS2D(String dateStr) {
         return DateUtil.getDate(dateStr, "yyyy-MM-dd");
+    }
+    
+    private String convertD2S(Date date) {
+        return DateUtil.getDate(date, "yyyy-MM-dd");
     }
 
     public RptDealerStatVO getRptDealerStatVO() {

@@ -6,19 +6,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<s:if test="listType == 'dealer'">
-		<s:set name="title">商户门店按天资金结算</s:set>
-	</s:if>
-	<s:elseif test="listType == 'dealerEmployee'">
-		<s:set name="title">商户员工按天资金结算</s:set>
-	</s:elseif>
-	<title><s:property value="#title"/></title>
+	<title>按天查看资金结算</title>
 	<title></title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：资金结算&gt;<s:property value="#title"/></div>
+		<div class="bgposition">您现在的位置：资金结算&gt;按天查看资金结算</div>
 		<s:form id="queryForm" method="post">
 			<s:hidden name="listType"/>
 			<div class="bgtj">
@@ -29,37 +23,12 @@
 					<li class="bg_tjall">
 						<table>
 							<tbody>
-								<%-- <s:set name="queryCols"  value="1"/>
-								商户
-								<s:if test="userLevel == 3 || userLevel == 4">
-									<tr>
-										<s:if test="userLevel == 3">
-											<s:set name="queryCols" value="1"/>
-											<th>门店</th>
-			                                <td>
-			                                	<s:select list="storeVoList" listKey="iwoid" listValue="storeName" name="rptDealerStatVO.storeOid"  id="storeOid" headerKey="" headerValue="全部"/>
-			                                </td>
-										</s:if>
-		                                <s:if test="listType == 'dealerEmployee'">
-		                                	<s:if test="#queryCols == null">
-												<s:set name="queryCols"  value="1"/>
-											</s:if>
-											<s:else>
-												<s:set name="queryCols"  value="3"/>
-											</s:else>
-											<th>收银员ID</th>
-											<td><s:textfield name="rptDealerStatVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
-												<span>输入收银员ID精确搜索</span>
-											</td>
-		                                </s:if>
-									</tr>
-								</s:if> --%>
 								<tr>
 									<th>日期</th>
 									<td colspan="<s:property value ='#queryCols'/>">
 										<strong class="timetj">
-	                                        <input type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d}'})" 
-											name="queryDate" id="queryDate" maxlength="20" value="<s:property value="queryDate"/>" />
+	                                        <input style="width:185px;" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d}'})" 
+											name="queryDate" id="queryDate" maxlength="20" value="<s:property value='queryDate'/>" />
 	                                    </strong>
 									</td>
 								</tr>
@@ -67,10 +36,7 @@
 						</table>
 					</li>
 					<li class="bg_button">
-						<a href="javascript:void(0);" onclick="query('list');">查询</a>
-						<s:if test="userLevel ==3">
-							<a href="javascript:void(0);" onclick="reset();" >重写</a>
-						</s:if>
+						<a href="javascript:void(0);" onclick="query('listByDay');">查询</a>
 					</li>
 				</ul>
 			</div>
@@ -173,11 +139,6 @@
 				return false;
 			}
  			invokeAction(method);
-		}
-	
-		function reset() {
-			$("#storeOid").val("");
-			$("#dealerEmployeeId").val("");
 		}
 	</script>
 </body>

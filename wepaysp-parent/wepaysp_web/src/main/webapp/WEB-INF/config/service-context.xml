@@ -62,6 +62,8 @@
 	
 	<bean id="rptDealerStatService" class="com.zbsp.wepaysp.api.service.report.impl.RptDealerStatServiceImpl" parent="baseService" >
 		<property name="dealerStatDayQueyName" value="queryDealerStatDay" />
+		<property name="dealerEmployeeStatDayQueyName" value="queryDealerEmployeeStatDay" />
+		<property name="storeStatDayQueyName" value="queryStoreStatDay" />
 	</bean>
 	
 	<bean id="weixinPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainServiceImpl" parent="baseService" >

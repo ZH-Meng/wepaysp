@@ -165,7 +165,6 @@ public interface RptDealerStatService {
      *      beginTime:                      Date类型，交易开始时间，根据此参数模糊查询
      *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
      *      dealerOid:                      String类型，商户Oid，根据此参数精确查询
-     *      storeOid:                        String类型，门店Oid，根据此参数精确查询
      * </pre>
      * 
      * @param paramMap 查询参数
@@ -181,10 +180,24 @@ public interface RptDealerStatService {
      * <pre>
      *      beginTime:                      Date类型，交易开始时间，根据此参数模糊查询
      *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
-     *      dealerOid:                      String类型，商户Oid，根据此参数精确查询，非空代表商户查询
      *      storeOid:                        String类型，门店Oid，根据此参数精确查询
+     * </pre>
+     * 
+     * @param paramMap 查询参数
+     * @param startIndex 记录起始位置
+     * @param maxResult 返回记录最大数
+     * @return 符合条件的信息列表
+     */
+    public List<RptDealerStatVO> doJoinTransQueryRptDealerStatTodayList4Store(Map<String, Object> paramMap, int startIndex, int maxResult);
+
+    
+    /**
+     * 查询符合条件的当日收银员结算统计，查询结果按最后修改时间倒序排列.
+     * 查询参数Map中key的取值如下：
+     * <pre>
+     *      beginTime:                      Date类型，交易开始时间，根据此参数模糊查询
+     *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
      *      dealerEmployeeOid:         String类型，商户员工Oid，根据此参数精确查询，非空代表商户员工查询
-     *      dealerEmployeeId:           String类型，商户员工ID，根据此参数精确查询
      * </pre>
      * 
      * @param paramMap 查询参数

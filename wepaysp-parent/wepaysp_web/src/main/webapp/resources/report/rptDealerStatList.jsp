@@ -79,7 +79,7 @@
 					</li>
 					<li class="bg_button">
 						<a href="javascript:void(0);" onclick="query('list');">查询</a>
-						<s:if test="userLevel ==3">
+						<s:if test="userLevel ==3 || userLevel == 4">
 							<a href="javascript:void(0);" onclick="reset();" >重写</a>
 						</s:if>
 					</li>
