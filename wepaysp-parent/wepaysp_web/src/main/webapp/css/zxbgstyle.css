@@ -303,11 +303,20 @@ textarea{overflow:auto;resize:none;}
     left: 40%;
 }
 
-/*my ding*/
-
-
-
-
-
+/*
+--------------------------------------------------------------------		
+		开发人员：	mengzh
+		描述：	页面查询条件样式
+		版本： V1.0
+----------------------------------------------------------------------
+*/
+.query_condition{
+	background:#ecf0f1;font-size:12px;font-weight:normal; padding: 5px;
+}
+.condition_field{display:inline-block; padding: 1px 5px;}
+.condition_field input, .condition_field select{border: 1px solid #d1e4f5; color: #595959;font-size:12px; }
+.condition_field input[type=text] {height: 20px; width:140px; line-height: 20px; padding: 2px 1px; }
+.condition_field select{height: 24px; width:160px; line-height: 24px; padding: 0px 1px; }
+.field_label{display:inline-block; padding:5px;font-size:12px;}
 
 

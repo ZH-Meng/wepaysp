@@ -94,8 +94,8 @@
 	                                <th>固定电话</th>
 	                                <th>手机</th>
 	                                <th>使用时间</th>
-	                               <!--  <th>状态</th>
-	                                <th>余额</th> -->
+	                                <th>状态</th>
+	                                <!-- <th>余额</th> -->
 	                                <th class="twenty">操作</th>
 	                            </tr>
 	                        </thead>
@@ -148,7 +148,7 @@
 						  				至
 						  				<s:date name="#partnerVo.contractEnd" format="yyyy-MM-dd" />
 						  			</td>
-						  			<%-- <s:if test="#partnerVo.state == 1">
+						  			<s:if test="#partnerVo.state == 1">
 						  				<s:set var="stateStr">未使用</s:set>
 						  			</s:if>
 						  			<s:elseif test="#partnerVo.state == 2">
@@ -160,7 +160,7 @@
 						  			<td title="<s:property value="#stateStr" />">
 						  				<s:property value="#stateStr" />
 						  			</td>
-						  			<td title="<s:property value="#partnerVo.balance" />">
+						  			<%-- <td title="<s:property value="#partnerVo.balance" />">
 						  				<s:property value="#partnerVo.balance" />
 						  			</td> --%>
 						  			<td title="修改">
@@ -178,7 +178,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="11">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="12">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>

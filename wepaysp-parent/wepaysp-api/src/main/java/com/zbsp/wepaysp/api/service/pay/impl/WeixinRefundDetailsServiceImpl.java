@@ -50,6 +50,8 @@ public class WeixinRefundDetailsServiceImpl
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
+        String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
 
         // StringBuffer sql = new StringBuffer("select distinct(w) from WeixinRefundDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select distinct(w) from WeixinRefundDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
@@ -110,6 +112,15 @@ public class WeixinRefundDetailsServiceImpl
             sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            sql.append(" and w.outTradeNo = :OUTTRADENO");
+            sqlMap.put("OUTTRADENO", outTradeNo);
+        }
+        if (StringUtils.isNotBlank(transactionId)) {
+            sql.append(" and w.transactionId = :TRANSACTIONID");
+            sqlMap.put("TRANSACTIONID", transactionId);
+        }
+        
         sql.append(" order by w.transBeginTime desc");
 
         List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
@@ -183,6 +194,8 @@ public class WeixinRefundDetailsServiceImpl
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
+        String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
 
         // StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinRefundDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinRefundDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
@@ -243,6 +256,14 @@ public class WeixinRefundDetailsServiceImpl
         if (endTime != null ) {
             sql.append(" and w.transBeginTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
+        }
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            sql.append(" and w.outTradeNo = :OUTTRADENO");
+            sqlMap.put("OUTTRADENO", outTradeNo);
+        }
+        if (StringUtils.isNotBlank(transactionId)) {
+            sql.append(" and w.transactionId = :TRANSACTIONID");
+            sqlMap.put("TRANSACTIONID", transactionId);
         }
         
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);

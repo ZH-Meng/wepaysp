@@ -122,6 +122,8 @@ public class WeixinRefundDetailsAction
             paramMap.put("dealerId", weixinRefundDetailsVO.getDealerId());
             paramMap.put("dealerEmployeeId", weixinRefundDetailsVO.getDealerEmployeeId());
             paramMap.put("storeId", weixinRefundDetailsVO.getStoreId());
+            paramMap.put("outTradeNo", weixinRefundDetailsVO.getOutTradeNo());
+            paramMap.put("transactionId", weixinRefundDetailsVO.getTransactionId());
             
             rowCount = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsCount(paramMap);
             if (rowCount > 0) {
@@ -171,11 +173,11 @@ public class WeixinRefundDetailsAction
     }
 
     private String convertD2S(Date date) {
-        return DateUtil.getDate(date, "yyyy-MM-dd");
+        return DateUtil.getDate(date, "yyyy-MM-dd HH:mm:ss");
     }
-
+    
     private Date convertS2D(String dateStr) {
-        return DateUtil.getDate(dateStr, "yyyy-MM-dd");
+        return DateUtil.getDate(dateStr, "yyyy-MM-dd HH:mm:ss");
     }
 
     public WeixinRefundDetailsVO getWeixinRefundDetailsVO() {

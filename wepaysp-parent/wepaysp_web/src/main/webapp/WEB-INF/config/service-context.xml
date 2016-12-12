@@ -32,14 +32,14 @@
 	
 	<bean id="dealerService" class="com.zbsp.wepaysp.api.service.partner.impl.DealerServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
-		<property name="qRCodeRootPath" value="c:\qRCodeFiles" />
-		<property name="callBackURL" value="https://api.payqianyan.com/nostate/pay/appidpay!wxCallBack.action" />
+		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
+		<property name="callBackURL" value="${callBackURL}" />
 	</bean>
 	
 	<bean id="storeService" class="com.zbsp.wepaysp.api.service.partner.impl.StoreServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
-		<property name="qRCodeRootPath" value="c:\qRCodeFiles" />
-		<property name="callBackURL" value="https://api.payqianyan.com/nostate/pay/appidpay!wxCallBack.action" />
+		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
+		<property name="callBackURL" value="${callBackURL}" />
 	</bean>
 	
 	<bean id="partnerEmployeeService" class="com.zbsp.wepaysp.api.service.partner.impl.PartnerEmployeeServiceImpl" parent="baseService">
@@ -48,8 +48,8 @@
 	
 	<bean id="dealerEmployeeService" class="com.zbsp.wepaysp.api.service.partner.impl.DealerEmployeeServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
-		<property name="qRCodeRootPath" value="c:\qRCodeFiles" />
-		<property name="callBackURL" value="https://api.payqianyan.com/nostate/pay/appidpay!wxCallBack.action" />
+		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
+		<property name="callBackURL" value="${callBackURL}" />
 	</bean>
 	
 	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">

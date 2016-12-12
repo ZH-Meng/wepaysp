@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
-import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
 /**
  * 微信交易明细service
@@ -116,5 +116,13 @@ public interface WeixinPayDetailsService {
      * @param orderQueryResultVO
      */
     public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO);
+
+    /**
+     * 根据交易状态和交易开始时间在当前时间-间隔时间之前的记录
+     * @param state 交易状态
+     * @param intervalTime 间隔时间，毫秒数
+     * @return
+     */
+    public List<WeixinPayDetails> doJoinTransQueryWeixinPayDetailsByState(int state, long intervalTime);
 
 }

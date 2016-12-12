@@ -20,20 +20,16 @@
 					<li>查询条件</li>
 				</ul>
 				<ul class="bg_tjtab">
-					<li class="bg_tjall">
-						<table>
-							<tbody>
-								<tr>
-									<th>日期</th>
-									<td colspan="<s:property value ='#queryCols'/>">
-										<strong class="timetj">
-	                                        <input style="width:185px;" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d}'})" 
-											name="queryDate" id="queryDate" maxlength="20" value="<s:property value='queryDate'/>" />
-	                                    </strong>
-									</td>
-								</tr>
-							</tbody>
-						</table>
+					<li>
+						<div class="query_condition">
+							<div class="condition_field">
+								<span class="field_label">日期</span>
+								<strong class="timetj">
+                                       <input style="width:185px;" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d}'})" 
+										name="queryDate" id="queryDate" maxlength="20" value="<s:property value='queryDate'/>" />
+                                 </strong>
+                            </div>
+	                     </div>
 					</li>
 					<li class="bg_button">
 						<a href="javascript:void(0);" onclick="query('listByDay');">查询</a>

@@ -44,4 +44,11 @@ public interface WeixinPayDetailsMainService {
      */
     public Map<String, Object> checkPayResult(String jsPayResult, String weixinPayDetailOid);
 
+    /**
+     * 处理订单查询结果
+     * 
+     * @param queryResultVO 查询结果封装的weixinPayDetailsVO
+     */
+    public void handleOrderQueryResult(WeixinPayDetailsVO queryResultVO);
+
 }

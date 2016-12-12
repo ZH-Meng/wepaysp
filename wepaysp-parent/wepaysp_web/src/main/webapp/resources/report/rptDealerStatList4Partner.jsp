@@ -25,54 +25,46 @@
 					<li>查询条件</li>
 				</ul>
 				<ul class="bg_tjtab">
-					<li class="bg_tjall">
-						<table>
-							<tbody>
-								<%-- 服务商 --%>
-								<s:if test="userLevel == 1">
-										<s:if test="listType == 'partner' && (partnerLevel == 1 ||  partnerLevel == 2)">
-											<s:set name="resetFlag" value="true"/>
-											<tr>
-												<th>代理商ID</th>
-												<td><s:textfield name="rptDealerStatVO.partnerId" id="partnerId" maxlength="8"/>
-													<span>输入代理商ID精确搜索</span>
-												</td>
-											</tr>
-		                                </s:if>
-		                                <s:elseif test="listType == 'partnerEmployee'">
-		                                	<s:set name="resetFlag" value="true"/>
-			                                <tr>
-			                                	<s:set name="queryCols"  value="3"/>
-												<th>业务员ID</th>
-												<td>
-													<s:textfield name="rptDealerStatVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
-													<span>输入业务员ID精确搜索</span>
-												</td>
-											</tr>
-		                                </s:elseif>
-								</s:if>
-								<tr>
-									<th>时间</th>
-									<td>
-										<strong class="timetj">
-	                                        <input class="dxbtn" type="radio" id="queryType1" name="queryType" value="day"/>自定义时段
-	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
-											name="beginTime" id="beginTime" maxlength="20" value="<s:property value="beginTime"/>" />
-	                                        <span>至</span>
-	                                        <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
-											name="endTime" id="endTime" maxlength="20" value="<s:property value="endTime"/>" onchange="endTimeChange();"/>
-	                                        <span class="tj_bt">*</span>
-	                                    </strong>
-	                                    <strong class="timetj">
-	                                    	<input class="dxbtn" type="radio"  id="queryType2" name="queryType" value="month" />按月查询
-											<input onclick="typeChange('month');" type="text" class="Wdate" runat="server" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM',maxDate:'%y-{%M-1}-%d'})" 
-											name="monthTime" id="monthTime" maxlength="20" value="<s:property value="monthTime"/>" />	                                    	
-											<span class="tj_bt">*</span>
-	                                    </strong>
-									</td>
-								</tr>
-							</tbody>
-						</table>
+					<li>
+						<div class="query_condition">
+							<%-- 服务商 --%>
+							<s:if test="userLevel == 1">
+								<s:if test="listType == 'partner' && (partnerLevel == 1 ||  partnerLevel == 2)">
+									<s:set name="resetFlag" value="true"/>
+									<div class="condition_field">
+										<span class="field_label">代理商ID</span>
+										<s:textfield name="rptDealerStatVO.partnerId" id="partnerId" maxlength="8"/>
+										<span>输入代理商ID精确搜索</span>
+									</div>
+                                </s:if>
+                                <s:elseif test="listType == 'partnerEmployee'">
+                                	<s:set name="resetFlag" value="true"/>
+                                	<div class="condition_field">
+										<span class="field_label">业务员ID</span>
+										<s:textfield name="rptDealerStatVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
+										<span>输入业务员ID精确搜索</span>
+									</div>
+                                </s:elseif>
+							</s:if>
+							<div class="condition_field">
+								<span class="field_label">时间</span>
+								<strong class="timetj">
+                                	<input class="dxbtn" type="radio" id="queryType1" name="queryType" value="day"/>自定义时段
+                                    <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
+										name="beginTime" id="beginTime" maxlength="20" value="<s:property value="beginTime"/>" />
+                                     <span>至</span>
+                                     <input onclick="typeChange('day');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d-1}'})" 
+									name="endTime" id="endTime" maxlength="20" value="<s:property value="endTime"/>" />
+                                      <span class="tj_bt">*</span>
+                                </strong>
+                                <strong class="timetj">
+                                   	<input class="dxbtn" type="radio"  id="queryType2" name="queryType" value="month" />按月查询
+									<input onclick="typeChange('month');" type="text" class="Wdate" readonly="readonly" onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM',maxDate:'%y-{%M-1}-%d'})" 
+									name="monthTime" id="monthTime" maxlength="20" value="<s:property value="monthTime"/>" />	                                    	
+									<span class="tj_bt">*</span>
+                                </strong>
+                       		</div>
+                    	</div>
 					</li>
 					<li class="bg_button">
 						<a href="javascript:void(0);" onclick="query('list');">查询</a>
@@ -235,14 +227,6 @@
 				return false;
 			}
 			return true;
-		}
-		
-		function endTimeChange() {
-			var beginTime = $("#beginTime").val();
-			var endTime = $("#endTime").val();
-			if (endTime < beginTime) {
-				$("#beginTime").val(endTime);
-			}
 		}
 	</script>
 </body>

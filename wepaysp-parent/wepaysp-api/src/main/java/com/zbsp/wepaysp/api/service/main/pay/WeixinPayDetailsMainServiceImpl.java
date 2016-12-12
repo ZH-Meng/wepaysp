@@ -210,7 +210,7 @@ public class WeixinPayDetailsMainServiceImpl
                 logger.info("订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
                 // 主动查询微信支付结果
                 try {
-                    DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(weixinPayDetailsService);// 订单查询监听器
+                    DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(this);// 订单查询监听器
                     
                     // FIXME 从内存中获取 --------------------临时数据
                     String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
@@ -250,6 +250,14 @@ public class WeixinPayDetailsMainServiceImpl
         resultMap.put("tradeStatus", tradeStatus);
         resultMap.put("weixinPayDetailsVO", payDetailVO);        
         return resultMap;
+    }
+
+    @Override
+    public void handleOrderQueryResult(WeixinPayDetailsVO queryResultVO) {
+        // TODO Auto-generated method stub
+        // TODO 如果订单不存在，关闭订单
+        // 查询成功
+        //weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
     }
     
 }

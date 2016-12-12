@@ -115,13 +115,17 @@ public class WeixinPayDetailsAction
             // 用户级别，页面根据级别动态展示查询条件以及结果列表
             userLevel = manageUser.getUserLevel();
             
-            paramMap.put("beginTime", TimeUtil.getDayStart(convertS2D(beginTime)));
-            paramMap.put("endTime", TimeUtil.getDayEnd(convertS2D(endTime)));
+            /*paramMap.put("beginTime", TimeUtil.getDayStart(convertS2D(beginTime)));
+            paramMap.put("endTime", TimeUtil.getDayEnd(convertS2D(endTime)));*/
+            paramMap.put("beginTime", convertS2D(beginTime));
+            paramMap.put("endTime", convertS2D(endTime));
             
             paramMap.put("partnerEmployeeId", weixinPayDetailsVO.getPartnerEmployeeId());
             paramMap.put("dealerId", weixinPayDetailsVO.getDealerId());
             paramMap.put("dealerEmployeeId", weixinPayDetailsVO.getDealerEmployeeId());
             paramMap.put("storeId", weixinPayDetailsVO.getStoreId());
+            paramMap.put("outTradeNo", weixinPayDetailsVO.getOutTradeNo());
+            paramMap.put("transactionId", weixinPayDetailsVO.getTransactionId());
             
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
             if (rowCount > 0) {
@@ -171,11 +175,11 @@ public class WeixinPayDetailsAction
     }
 
     private String convertD2S(Date date) {
-        return DateUtil.getDate(date, "yyyy-MM-dd");
+        return DateUtil.getDate(date, "yyyy-MM-dd HH:mm:ss");
     }
     
     private Date convertS2D(String dateStr) {
-        return DateUtil.getDate(dateStr, "yyyy-MM-dd");
+        return DateUtil.getDate(dateStr, "yyyy-MM-dd HH:mm:ss");
     }
 
     public WeixinPayDetailsVO getWeixinPayDetailsVO() {

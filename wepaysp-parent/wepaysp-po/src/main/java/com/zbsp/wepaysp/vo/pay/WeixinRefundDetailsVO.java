@@ -31,7 +31,8 @@ public class WeixinRefundDetailsVO
     private String storeId;
     private String dealerEmployeeId;
     private String partnerId;
-
+    private String transactionId;
+    
     public String getIwoid() {
         return iwoid;
     }
@@ -207,5 +208,13 @@ public class WeixinRefundDetailsVO
 	public void setPartnerId(String partnerId) {
 		this.partnerId = partnerId;
 	}
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+    
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
 
 }
