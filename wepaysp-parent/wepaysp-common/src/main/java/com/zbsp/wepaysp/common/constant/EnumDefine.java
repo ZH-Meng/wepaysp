@@ -125,6 +125,67 @@ public class EnumDefine {
     }
     
     /**
+     * 系统报警枚举
+     * 
+     * @author 孟郑宏
+     */
+    public enum AlarmLogPrefix {
+        wxPayAPIMoneyException("【微信支付金额异常，系统报警】"),
+        /** 调用微信支付API失败 */
+        invokeWxPayAPIErr("【调用微信支付API失败，系统报警】"),
+        /** 发送微信支付请求失败 */
+        sendWxPayRequestException("【发送微信支付请求失败，系统报警】"),
+        /** 受理微信支付结果异常 */
+        handleWxPayResultException("【处理微信支付结果异常，系统报警】"),
+        /** 受理微信支付结果失败 */
+        handleWxPayResultErr("【处理微信支付结果失败，系统报警】"),
+        
+        aliPayAPIMoneyException("【支付宝支付金额异常，系统报警】"),
+        /** 调用支付宝支付API失败 */
+        invokeAliPayAPIErr("【调用支付宝支付API失败，系统报警】"),
+        /** 发送支付宝支付请求失败 */
+        sendAliPayRequestException("【发送支付宝支付请求失败，系统报警】"),
+        /** 受理支付宝支付结果异常 */
+        handleAliPayResultException("【处理支付宝支付结果异常，系统报警】"),
+        /** 受理支付宝支付结果失败 */
+        handleAliPayResultErr("【处理支付宝支付结果失败，系统报警】");
+
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        private AlarmLogPrefix(String value) {
+            this.value = value;
+        }
+    }
+    
+    /**微信订单查询错误码*/
+    public static enum OrderQueryErr {
+        /**订单不存在*/                      ORDERNOTEXIST,
+        /**系统错误，建议重新查询*/    SYSTEMERROR;
+    }
+    
+    /**微信订单关闭错误码*/
+    public static enum OrderClosedErr {
+        /** 订单已支付，不能发起关单，请当作已支付的正常交易 */
+        ORDERPAID,
+        /** 系统异常，请重新调用该API */
+        SYSTEMERROR,
+        /** 订单不存在，不需要关单，当作未提交的支付的订单 */
+        ORDERNOTEXIST,
+        /** 订单已关闭，无法重复关闭 */
+        ORDERCLOSED,
+        /** 参数签名结果不正确 */
+        SIGNERROR,
+        /** 未使用post传递参数 */
+        REQUIRE_POST_METHOD,
+        /** XML格式错误 */
+        XML_FORMAT_ERROR;
+    }
+    
+    /**
      * 是否可以退款标识
      */
     public static enum RefundFlag {

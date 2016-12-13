@@ -14,12 +14,17 @@ import com.tencent.protocol.unified_order_protocol.WxPayNotifyResultData;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
+import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
+import com.zbsp.wepaysp.common.constant.EnumDefine.OrderQueryErr;
+import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.api.util.WeixinPackConverter;
+import com.zbsp.wepaysp.api.listener.DefaultCloseOrderBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultOrderQueryBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
@@ -142,12 +147,12 @@ public class WeixinPayDetailsMainServiceImpl
     @Override
     public String handleWxPayNotify(String respXmlString) {
         Validator.checkArgument(StringUtils.isBlank(respXmlString), "支付结果通知字串不能为空");
-        logger.info("公众号支付结果通知处理API开始处理.");
+        logger.info("微信支付结果通知处理API开始处理.");
         WxPayNotifyResultData result=null;
         String appid = null;
         WxPayNotifyData wxNotify = (WxPayNotifyData) Util.getObjectFromXML(respXmlString, WxPayNotifyData.class);
         if (wxNotify == null || StringUtils.isBlank(wxNotify.getAppid())) {
-            logger.error("公众号支付结果通知，解析参数格式失败，结果内容：" + respXmlString);
+            logger.error("微信支付结果通知，解析参数格式失败，结果内容：" + respXmlString);
             result=new WxPayNotifyResultData("FAIL");
             result.setReturn_msg("解析参数格式失败");
         } else {
@@ -167,22 +172,26 @@ public class WeixinPayDetailsMainServiceImpl
                 String returnCode = wxNotify.getReturn_code();
                 String resultCode = wxNotify.getResult_code();
                 try {
-	                if (StringUtils.equalsIgnoreCase(ReturnCode.FAIL.toString(), returnCode)) {
-	                	// TODO 关闭订单
+	                if (StringUtils.equalsIgnoreCase(ReturnCode.SUCCESS.toString(), returnCode)) {
+	                    weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, WeixinPackConverter.payNotify2weixinPayDetailsVO(wxNotify));
+	                    result = new WxPayNotifyResultData("SUCCESS");
+	                    result.setReturn_msg("成功");
 	                } else {
-                		weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, WeixinPackConverter.payNotify2weixinPayDetailsVO(wxNotify));
+	                    logger.warn("微信支付结果通知，returnCode 为 FAIL");
+	                    result = new WxPayNotifyResultData("FAIL");
+	                    result.setReturn_msg("returnCode为FAIL");
 	                }
-	                result = new WxPayNotifyResultData("SUCCESS");
-	                result.setReturn_msg("成功");
                 } catch (Exception e) {
-                	logger.error("微信支付结果通知错误，结果内容：" + respXmlString + "，处理异常信息：" + e.getMessage());
+                    logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultErr.getValue(), 
+                        "微信支付结果通知错误，结果内容：" + respXmlString, "，异常信息：" + e.getMessage()));
+                    logger.error(e.getMessage(), e);
                 	result = new WxPayNotifyResultData("FAIL");
                 	result.setReturn_msg("失败");
                 }
-               // TODO 发送支付结果公众号信息（支付成功/失败）
+               // TODO 发送支付结果公众号信息（支付成功）
                 
             } else {
-                logger.error("公众号支付结果通知，签名失败，结果内容：" + respXmlString);
+                logger.error("微信支付结果通知，签名失败，结果内容：" + respXmlString);
                 result = new WxPayNotifyResultData("FAIL");
                 result.setReturn_msg("签名失败");
             }
@@ -201,32 +210,38 @@ public class WeixinPayDetailsMainServiceImpl
         WeixinPayDetailsVO payDetailVO =  weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
         Integer tradeStatus = payDetailVO.getTradeStatus();
         
+        // FIXME 从内存中获取 --------------------临时数据
+        String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
+        String certPassword = DevParam.CERT_PASSWORD.getValue(); 
+        String keyPartner = DevParam.KEY.getValue();
+        payDetailVO.setKeyPartner(keyPartner);
+        
         if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
             if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
-                logger.info("订单状态处理中，用户取消支付，现主动发起关闭订单请求");
-                // TODO 关闭订单
-                
+                logger.info("系统支付订单状态处理中，用户取消支付，现主动发起关闭订单请求");
+                // 关闭订单
+                try {
+                    WXPay.doCloseOrderBusiness(WeixinPackConverter.weixinPayDetailsVO2CloseOrderReq(payDetailVO),
+                        new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService), certLocalPath, certPassword, keyPartner);
+                } catch (Exception e) {
+                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                        "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
+                    logger.error(e.getMessage(), e);
+                }
             } else {
-                logger.info("订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
+                logger.info("系统支付订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
                 // 主动查询微信支付结果
                 try {
                     DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(this);// 订单查询监听器
                     
-                    // FIXME 从内存中获取 --------------------临时数据
-                    String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
-                    String certPassword = DevParam.CERT_PASSWORD.getValue(); 
-                    String keyPartner = DevParam.KEY.getValue();
-                    payDetailVO.setCertLocalPath(certLocalPath);
-                    payDetailVO.setCertPassword(certPassword);
-                    payDetailVO.setKeyPartner(keyPartner);
-                    
                     // 订单查询
-                    WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, payDetailVO.getCertLocalPath(), payDetailVO.getCertPassword(), payDetailVO.getKeyPartner());
+                    WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, certLocalPath, certPassword, payDetailVO.getKeyPartner());
                     
                     payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
                     tradeStatus = payDetailVO.getTradeStatus();// 当前订单状态
                 } catch (Exception e) {
-                    logger.error("订单（系统订单ID：" + payDetailVO.getOutTradeNo() + "）查询失败，" + e.getMessage());
+                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                        "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）查询错误", "，异常信息：" + e.getMessage()));
                     logger.error(e.getMessage(), e);
                 }
             }
@@ -253,11 +268,44 @@ public class WeixinPayDetailsMainServiceImpl
     }
 
     @Override
-    public void handleOrderQueryResult(WeixinPayDetailsVO queryResultVO) {
-        // TODO Auto-generated method stub
-        // TODO 如果订单不存在，关闭订单
-        // 查询成功
-        //weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
+    public void handleOrderQueryResult(String resultCode, WeixinPayDetailsVO queryResultVO) {
+        Validator.checkArgument(queryResultVO == null, "调用订单查询API结果queryResultVO不能为空");
+        Validator.checkArgument(StringUtils.isBlank(queryResultVO.getOutTradeNo()), "系统订单ID不能为空");
+        if (StringUtils.isBlank(resultCode)) {
+            Validator.checkArgument(StringUtils.isBlank(queryResultVO.getResultCode()), "resultCode不能空");
+            resultCode = queryResultVO.getResultCode();
+        }
+        
+        if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {// 查询成功
+            logger.info("调用订单查询API结果成功，更新系统订单状态");
+            weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
+        } else {
+            if (StringUtils.equalsIgnoreCase(OrderQueryErr.ORDERNOTEXIST.toString(), queryResultVO.getErrCode())) {// 订单不存在
+                logger.info("调用订单查询API结果【订单不存在】，调用关闭订单API");
+                
+                // FIXME 从内存中获取 --------------------临时数据
+                String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
+                String certPassword = DevParam.CERT_PASSWORD.getValue(); 
+                String keyPartner = DevParam.KEY.getValue();
+                queryResultVO.setKeyPartner(keyPartner);
+                
+                // 关闭订单
+                try {
+                    WXPay.doCloseOrderBusiness(WeixinPackConverter.weixinPayDetailsVO2CloseOrderReq(queryResultVO),
+                        new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService), certLocalPath, certPassword, keyPartner);
+                } catch (Exception e) {
+                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                        "系统支付订单(ID=" + queryResultVO.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
+                    logger.error(e.getMessage(), e);
+                }
+            } else if (StringUtils.equalsIgnoreCase(OrderQueryErr.SYSTEMERROR.toString(), queryResultVO.getErrCode())) {// 微信系统异常
+                logger.warn("系统支付订单(ID=" + queryResultVO.getOutTradeNo() + ")调用订单查询API结果错误码：SYSTEMERROR，错误描述：" + queryResultVO.getErrCodeDes() +"，【由定时器再发起查询】");
+            } else {
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "系统订单(ID=" + queryResultVO.getOutTradeNo() + ")调用订单查询API结果错误未知", 
+                    "错误码为" + queryResultVO.getErrCode() + "，错误描述为：" + queryResultVO.getErrCodeDes()));
+            }
+        }
+        
     }
     
 }

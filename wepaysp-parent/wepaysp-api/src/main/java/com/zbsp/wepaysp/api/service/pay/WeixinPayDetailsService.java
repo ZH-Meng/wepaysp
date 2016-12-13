@@ -125,4 +125,11 @@ public interface WeixinPayDetailsService {
      */
     public List<WeixinPayDetails> doJoinTransQueryWeixinPayDetailsByState(int state, long intervalTime);
 
+    /**
+     * 处理订单查询结果
+     * @param resultCode 业务结果码
+     * @param closeResultVO 关闭订单结果封装的weixinPayDetailsVO
+     */
+    public void doTransUpdateOrderCloseResult(String resultCode, WeixinPayDetailsVO closeResultVO);
+
 }

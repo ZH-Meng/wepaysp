@@ -36,44 +36,44 @@ public class DefaultUnifiedOrderBusinessResultListener implements UnifiedOrderBu
      * 遇到这个问题一般是程序没按照API规范去正确地传递参数导致，请仔细阅读API文档里面的字段说明
      */
     public void onFailByReturnCodeError(UnifiedOrderResData unifiedOrderResData) {
-        logger.warn("微信统一下单失败：没按照API规范去正确地传递参数");
+        logger.warn("微信统一下单失败：没按照API规范去正确地传递参数，系统订单ID=" + unifiedOrderResData.getOut_trade_no());
         result = ON_FAIL_BY_RETURN_CODE_ERROR;
     }
 
-    @Override
     /**
      * 同上，遇到这个问题一般是程序没按照API规范去正确地传递参数导致，请仔细阅读API文档里面的字段说明
      */
+    @Override
     public void onFailByReturnCodeFail(UnifiedOrderResData unifiedOrderResData) {
-        logger.warn("微信统一下单失败：微信下单通讯失败");
+        logger.warn("微信统一下单失败：通讯失败，系统订单ID=" + unifiedOrderResData.getOut_trade_no());
         updateOrderResult(unifiedOrderResData);
         result = ON_FAIL_BY_RETURN_CODE_FAIL;
     }
 
-    @Override
     /**
      * 统一下单请求API返回的数据签名验证失败，有可能数据被篡改了。遇到这种错误建议商户直接告警，做好安全措施
      */
+    @Override
     public void onFailBySignInvalid(UnifiedOrderResData unifiedOrderResData) {
-        logger.warn("微信统一下单失败：数据签名验证失败");
+        logger.warn("微信统一下单失败：数据签名验证失败，系统订单ID=" + unifiedOrderResData.getOut_trade_no());
         updateOrderResult(unifiedOrderResData);
         result = ON_FAIL_BY_SIGN_INVALID;
     }
 
-    @Override
     /**
      * 统一下单失败，其他原因导致，这种情况建议把log记录好
      */
+    @Override
     public void onFail(UnifiedOrderResData unifiedOrderResData) {
-        logger.warn("微信统一下单失败，错误码：" + unifiedOrderResData.getErr_code() +", 错误描述：" + unifiedOrderResData.getErr_code_des());
+        logger.warn("微信统一下单失败，系统订单ID=" + unifiedOrderResData.getOut_trade_no() +"，错误码：" + unifiedOrderResData.getErr_code() +", 错误描述：" + unifiedOrderResData.getErr_code_des());
         updateOrderResult(unifiedOrderResData);
         result = ON_FAIL;
     }
 
-    @Override
     /**
-     * 恭喜，统一下单成功，请返回成功结果
+     * 恭喜，统一下单成功
      */
+    @Override
     public void onSuccess(UnifiedOrderResData unifiedOrderResData) {
         logger.info("微信统一下单成功，预支付标识："+ unifiedOrderResData.getPrepay_id());
         updateOrderResult(unifiedOrderResData);

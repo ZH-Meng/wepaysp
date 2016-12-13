@@ -13,7 +13,9 @@ import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
+import com.zbsp.wepaysp.common.constant.EnumDefine.OrderClosedErr;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.TradeState;
@@ -24,6 +26,7 @@ import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.Dealer;
@@ -677,14 +680,24 @@ public class WeixinPayDetailsServiceImpl
             throw new NotExistsException("系统支付订单不存在！");
         }
         
-        logger.info("订单（系统ID=" +orderQueryResultVO.getOutTradeNo() + "）查询结果成功，订单状态：" + tradeState);
+        logger.info("系统支付订单（ID=" +orderQueryResultVO.getOutTradeNo() + "）查询结果成功，订单状态：" + tradeState);
         
         // 非处理中，代表系统已收到微信支付结果通知并处理
         if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) {
         	logger.info("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
-        	if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
-                logger.error("查询结果信息金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "支付结果通知总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
-            }
+        	if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
+        	    if (StringUtils.isBlank(orderQueryResultVO.getTransactionId())) {
+        	        logger.warn("查询结果交易状态为成功，微信支付单号为空");
+        	    }
+        	    if (payDetails.getTotalFee() == null) {
+        	        logger.warn("查询结果交易状态为成功，支付金额为空");
+        	    }
+        	    if (StringUtils.isNotBlank(orderQueryResultVO.getTransactionId()) && payDetails.getTotalFee() != null) {
+        	        if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
+        	            logger.error("查询结果信息金额不一致：系统订单ID：" + orderQueryResultVO.getOutTradeNo() + "支付结果通知总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue());
+        	        }
+        	    }
+        	}
         } else {
             // 比对关键信息
             if (!StringUtils.equalsIgnoreCase(payDetails.getMchId(), orderQueryResultVO.getMchId())) {
@@ -721,7 +734,7 @@ public class WeixinPayDetailsServiceImpl
             	payDetails.setTradeStatus(TradeStatus.TRADE_REVERSED.getValue());
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.PAYERROR.toString())) { 
             	payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
-            	logger.warn("订单（系统ID=" +orderQueryResultVO.getOutTradeNo() + "）状态为交易失败");
+            	logger.warn("系统支付订单（ID=" +orderQueryResultVO.getOutTradeNo() + "）状态为交易失败");
             } else {
                 // 未支付，支付超时 用户支付中，对应交易处理中
             	//TODO 转入退款
@@ -732,6 +745,62 @@ public class WeixinPayDetailsServiceImpl
             
             // 记录日志-修改微信支付结果
             sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[订单查询结果：交易成功" + "，微信支付订单号：" + orderQueryResultVO.getTransactionId() + "，交易状态：" + tradeState + "，支付金额：" + orderQueryResultVO.getTotalFee() + "]", processEndTime, processEndTime, null, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+        }
+    }
+    
+    @Override
+    public void doTransUpdateOrderCloseResult(String resultCode, WeixinPayDetailsVO closeResultVO) {
+        Validator.checkArgument(closeResultVO == null, "订单查询结果queryResultVO不能为空");
+        Validator.checkArgument(StringUtils.isBlank(closeResultVO.getOutTradeNo()), "系统订单ID不能为空");
+        String outTradeNo = closeResultVO.getOutTradeNo();
+        if (StringUtils.isBlank(resultCode)) {
+            Validator.checkArgument(StringUtils.isBlank(closeResultVO.getResultCode()), "resultCode不能空");
+            resultCode = closeResultVO.getResultCode();
+        }
+        
+        // 查找支付明细
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
+        jpqlMap.put("OUTTRADENO", closeResultVO.getOutTradeNo());
+        
+        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        if (payDetails == null) {
+            throw new NotExistsException("系统支付订单(ID=" + outTradeNo + ")不存在！");
+        }
+        
+        boolean canCloseFlag = false;
+        String errCode = closeResultVO.getErrCode();
+        if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {// 关闭成功
+            logger.info("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果为成功，准备更新系统订单状态为关闭");
+            canCloseFlag = true;
+        } else if (StringUtils.equalsIgnoreCase(OrderClosedErr.ORDERCLOSED.toString(), errCode)) {// 订单已关闭
+            logger.warn("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果为错误提示[订单已关闭]，检查系统订单状态");
+            if (payDetails.getTradeStatus() != null && payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_CLOSED.getValue()) {
+                logger.info("系统支付订单(ID=" + outTradeNo + ")状态与返回结果一致，为已关闭");
+            } else {
+                logger.info("系统支付订单(ID=" + outTradeNo + ")状态为" + TradeStatus.TRADE_CLOSED.getValue() + "准备更新系统订单状态为关闭");
+                canCloseFlag = true;
+            }
+        } else if (StringUtils.equalsIgnoreCase(OrderClosedErr.ORDERNOTEXIST.toString(), errCode)) {// 订单不存在，直接关闭系统订单
+            logger.warn("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果错误提示为[订单不存在]，准备直接关闭系统订单");
+            canCloseFlag = true;
+        } else if (StringUtils.equalsIgnoreCase(OrderClosedErr.ORDERPAID.toString(), errCode)) {// 订单已支付
+            logger.warn("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果错误提示为[订单已支付]，检查系统订单状态");
+            if (payDetails.getTradeStatus() != null && payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
+                logger.info("系统支付订单(ID=" + outTradeNo + ")状态与返回结果一致，为支付成功");
+            } else {
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "系统订单(ID=" + outTradeNo + ")状态为" + TradeStatus.TRADE_CLOSED.getValue() + "与微信关单结果[已支付]不一致"));
+            }
+        } else {
+            logger.warn("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果错误码："+ errCode +"，错误描述：" + closeResultVO.getErrCodeDes() +"，【此API不处理此错误结果】");
+            // SIGNERROR、REQUIRE_POST_METHOD、XML_FORMAT_ERROR 是请求错误，由监听器报警
+            // SYSTEMERROR
+        }
+        
+        if (canCloseFlag) {
+            payDetails.setTradeStatus(TradeStatus.TRADE_CLOSED.getValue());
+            commonDAO.update(payDetails);
+            logger.info("系统支付订单(ID=" + outTradeNo + ")关闭成功");
         }
     }
     

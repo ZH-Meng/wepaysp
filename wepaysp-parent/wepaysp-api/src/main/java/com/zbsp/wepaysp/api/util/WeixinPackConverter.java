@@ -2,6 +2,8 @@ package com.zbsp.wepaysp.api.util;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.tencent.protocol.close_order_protocol.CloseOrderReqData;
+import com.tencent.protocol.close_order_protocol.CloseOrderResData;
 import com.tencent.protocol.pay_protocol.ScanPayReqData;
 import com.tencent.protocol.pay_protocol.ScanPayResData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryReqData;
@@ -65,6 +67,8 @@ public class WeixinPackConverter {
         if (ReturnCode.SUCCESS.toString().equals(scanPayResData.getReturn_code())) {
             vo.setAppid(scanPayResData.getAppid());
             vo.setMchId(scanPayResData.getMch_id());
+            vo.setSubMchId(scanPayResData.getSub_mch_id());
+            //vo.setSubAppid(scanPayResData.getSub_appid());
             vo.setNonceStr(scanPayResData.getNonce_str());
             vo.setSign(scanPayResData.getSign());
             vo.setResultCode(scanPayResData.getResult_code());
@@ -173,6 +177,8 @@ public class WeixinPackConverter {
             vo.setAppid(wxNotify.getAppid());
             vo.setMchId(wxNotify.getMch_id());
             vo.setNonceStr(wxNotify.getNonce_str());
+            vo.setSubMchId(wxNotify.getSub_mch_id());
+            vo.setSubAppid(wxNotify.getSub_appid());
             vo.setSign(wxNotify.getSign());
             vo.setResultCode(wxNotify.getResult_code());
             vo.setErrCode(wxNotify.getErr_code());
@@ -211,6 +217,8 @@ public class WeixinPackConverter {
         if (ReturnCode.SUCCESS.toString().equals(orderQueryResData.getReturn_code())) {
             vo.setAppid(orderQueryResData.getAppid());
             vo.setMchId(orderQueryResData.getMch_id());
+            vo.setSubMchId(orderQueryResData.getSub_mch_id());
+            //vo.setSubAppid(orderQueryResData.getSub_appid());
             vo.setNonceStr(orderQueryResData.getNonce_str());
             vo.setSign(orderQueryResData.getSign());
             vo.setResultCode(orderQueryResData.getResult_code());
@@ -251,4 +259,46 @@ public class WeixinPackConverter {
             payDetailVO.getSubMchId()); 
         return reqData;
     }
+
+    /**
+     * 订单关闭结果包 转换为WeixinPayDetailsVO
+     * @param closeOrderResData 订单关闭结果包 
+     * @return WeixinPayDetailsVO
+     */
+    public static WeixinPayDetailsVO closeOrderRes2WeixinPayDetailsVO(CloseOrderResData closeOrderResData) {
+        WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
+        // 协议层
+        vo.setReturnCode(closeOrderResData.getReturn_code());
+        vo.setReturnMsg(closeOrderResData.getReturn_msg());
+        vo.setOutTradeNo(closeOrderResData.getOut_trade_no());
+        // 协议返回的具体数据（以下字段在return_code 为SUCCESS 的时候有返回）
+        if (ReturnCode.SUCCESS.toString().equals(closeOrderResData.getReturn_code())) {
+            vo.setAppid(closeOrderResData.getAppid());
+            vo.setMchId(closeOrderResData.getMch_id());
+            vo.setSubMchId(closeOrderResData.getSub_mch_id());
+            vo.setSubAppid(closeOrderResData.getSub_appid());
+            vo.setNonceStr(closeOrderResData.getNonce_str());
+            vo.setSign(closeOrderResData.getSign());
+            vo.setResultCode(closeOrderResData.getResult_code());
+            vo.setErrCode(closeOrderResData.getErr_code());
+            vo.setErrCodeDes(closeOrderResData.getErr_code_des());
+        }
+        return vo;
+    }
+    
+    /**
+     * 支付明细VO转换为订单关闭请求包
+     * @param payDetailVO
+     * @return 订单关闭请求包 CloseOrderReqData
+     */
+    public static CloseOrderReqData weixinPayDetailsVO2CloseOrderReq(WeixinPayDetailsVO payDetailVO) {
+        CloseOrderReqData reqData = new CloseOrderReqData(
+            payDetailVO.getOutTradeNo(), 
+            payDetailVO.getKeyPartner(), 
+            payDetailVO.getAppid(), 
+            payDetailVO.getMchId(), 
+            payDetailVO.getSubMchId()); 
+        return reqData;
+    }
+    
 }
