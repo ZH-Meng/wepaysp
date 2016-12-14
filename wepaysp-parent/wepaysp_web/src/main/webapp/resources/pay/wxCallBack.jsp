@@ -75,7 +75,72 @@
 					$("#money").focus();
 					return;
 				}
-				$("#orderForm").submit();
+				
+				$.post("<%=request.getContextPath()%>/nostate/pay/appidpay!createOrder.action",
+					  {
+						"dealerOid":dealerOid,"openid":openid,"money":money,
+					  	"storeOid":$.trim($("#storeOid").val()),
+					  	"dealerEmployeeOid":$.trim($("#dealerEmployeeOid").val())
+					  },
+					  function(data,status){
+					    console.log(data.result);
+					    console.log(data.weixinPayDetailOid);
+					    if (status == "success" || status == "SUCCESS") {
+					    	console.log(data);
+					    	if (data.result == "success" || data.result == "SUCCESS") {
+						    	callPay(data.jSPayReqData, data.weixinPayDetailOid);
+					    	} else {
+					    		alert("系统错误，下单失败");
+					    		/* if (data.desc != null && data.desc != "") {
+						    		alert(data.desc);
+					    		} else {
+					    			alert("系统错误，下单失败");
+					    		} */
+					    	}
+					    } else {
+					    	alert("系统异常，请重试！");
+					    }
+				  }, "json");
+			}
+			
+			function onBridgeReady(param, payDetailOid) {
+			    WeixinJSBridge.invoke(
+			       'getBrandWCPayRequest', {
+			           "appId" : param.appId,     //公众号名称，由商户传入     
+			           "timeStamp" : param.timeStamp,         //时间戳，自1970年以来的秒数     
+			           "nonceStr" : param.nonceStr, //随机串     
+			           "package" : param.dataPackage,     
+			           "signType" : "MD5",         //微信签名方式：     
+			           "paySign" : param.paySign //微信签名 
+			        },
+			       
+			        function(res){     
+			            if (res.err_msg == "get_brand_wcpay_request:ok" ) {// 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+			           		//TODO 请求系统，根据真实返回结果来响应
+		        			//alert("支付成功");
+		                	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=ok";
+			            } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
+				           	//alert("支付过程中用户取消");
+				           	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=cancel";
+			            } else {
+			            	alert('支付失败');
+				           	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=error";
+			            }
+			        }
+			   ); 
+			}
+			
+			function callPay(param, payDetailOid) {
+				if (typeof WeixinJSBridge == "undefined"){
+					   if( document.addEventListener ){
+					       document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+					   }else if (document.attachEvent){
+					       document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+					       document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+					   }
+					}else{
+					   onBridgeReady(param, payDetailOid);
+				}
 			}
 		</script>
 </body>

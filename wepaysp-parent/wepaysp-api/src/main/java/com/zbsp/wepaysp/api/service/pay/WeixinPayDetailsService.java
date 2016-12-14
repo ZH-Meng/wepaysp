@@ -105,10 +105,9 @@ public interface WeixinPayDetailsService {
     public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetailsByOid(String weixinPayDetailOid);
 
     /**
-     * 根据Oid 取消支付
+     * 根据Oid 取消支付，状态置为待关闭
      * @param weixinPayDetailOid
      */
-    @Deprecated
     public void doTransCancelPay(String weixinPayDetailOid);
 
     /**
@@ -123,7 +122,7 @@ public interface WeixinPayDetailsService {
      * @param intervalTime 间隔时间，毫秒数
      * @return
      */
-    public List<WeixinPayDetails> doJoinTransQueryWeixinPayDetailsByState(int state, long intervalTime);
+    public List<WeixinPayDetails> doJoinTransQueryWeixinPayDetailsByState(int[] stateArr, long intervalTime);
 
     /**
      * 处理订单查询结果

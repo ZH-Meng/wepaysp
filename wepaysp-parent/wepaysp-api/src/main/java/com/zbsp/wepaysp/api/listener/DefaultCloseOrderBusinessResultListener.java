@@ -63,7 +63,7 @@ public class DefaultCloseOrderBusinessResultListener implements CloseOrderBusine
      * 关闭订单失败，其他原因导致，这种情况建议把log记录好
      */
     public void onCloseOrderFail(CloseOrderResData closeOrderResData) {
-        logger.warn("微信关闭订单失败，，系统订单ID=" + closeOrderResData.getOut_trade_no() +"，错误码：" + closeOrderResData.getErr_code() +", 错误描述：" + closeOrderResData.getErr_code_des());
+        logger.warn("微信关闭订单失败，系统订单ID=" + closeOrderResData.getOut_trade_no() +"，错误码：" + closeOrderResData.getErr_code() +", 错误描述：" + closeOrderResData.getErr_code_des());
         weixinPayDetailsService.doTransUpdateOrderCloseResult("FAIL", WeixinPackConverter.closeOrderRes2WeixinPayDetailsVO(closeOrderResData));
         result = ON_CLOSE_ORDER_FAIL;
     }
@@ -73,7 +73,7 @@ public class DefaultCloseOrderBusinessResultListener implements CloseOrderBusine
      * 恭喜，关闭订单成功
      */
     public void onCloseOrderSuccess(CloseOrderResData closeOrderResData) {
-        logger.info("微信关闭订单成功");
+        logger.info("微信关闭订单成功，系统订单ID=" + closeOrderResData.getOut_trade_no() );
         weixinPayDetailsService.doTransUpdateOrderCloseResult("SUCCESS", WeixinPackConverter.closeOrderRes2WeixinPayDetailsVO(closeOrderResData));
         result = ON_CLOSE_ORDER_SUCCESS;
     }

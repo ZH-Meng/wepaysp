@@ -2,6 +2,7 @@ package com.zbsp.wepaysp.manage.web.action.pay;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import com.zbsp.wepaysp.common.http.exception.HttpProcessException;
 import com.zbsp.wepaysp.common.http.httpclient.HttpClientUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
+import com.zbsp.wepaysp.manage.web.vo.jsonresult.CreateOrderResult;
 import com.zbsp.wepaysp.manage.web.vo.wxauth.AccessTokenResultVO;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
@@ -118,28 +120,37 @@ public class AppIDPayAction
         logger.info("微信支付回调成功.");
         return "wxCallBack";
     }
-
+    
     /**
      * 创建订单->微信下单->更新订单->跳转字符
      * 
      * @return
+     * @throws IOException 
      */
-    public String createOrder() {
+    public void createOrder() throws IOException {
         logger.info("开始微信下单.");
+        HttpServletResponse response=ServletActionContext.getResponse();
+        response.setContentType("text/html;charset=UTF-8"); 
+        PrintWriter out = response.getWriter();  
+        CreateOrderResult result = null;
         if (StringUtils.isBlank(money) && NumberUtils.isNumber(money)) {
-            logger.warn("金额无效！");
+            /*logger.warn("金额无效！");
             setAlertMessage("金额无效，请重新输入，单位为元！");
-            return "wxCallBack";
+            return "wxCallBack";*/
+            result = new CreateOrderResult("moneyInvalid", "金额无效，请重新输入，单位为元！", null, null);
         }
         if (StringUtils.isBlank(dealerOid) || StringUtils.isBlank(openid)) {
-            logger.warn("商户Oid和openid都不能为空！");
+            /*logger.warn("商户Oid和openid都不能为空！");
             setAlertMessage("参数缺失，请重试！");
             // FIXME 重新准备隐藏信息
-            return "wxCallBack";
+            return "wxCallBack";*/
+            result = new CreateOrderResult("paramMiss", "参数缺失，请重试！", null, null);
+
         }
         if (StringUtils.isBlank(wxPayNotifyURL)) {
             logger.debug("微信支付统一下单通知URL为空！");
-            return ERROR;
+            //return ERROR;
+            result = new CreateOrderResult("error", "系统错误！", null, null);
         }
 
         // 保存交易明细
@@ -164,27 +175,33 @@ public class AppIDPayAction
 
             if (!StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), resCode)) {// 公众号下单失败
                 logger.warn("公众号下单失败，错误码：" + resCode + "，错误描述：" + resDesc);
-                setAlertMessage(resDesc);
-                return "wxCallBack";
+                /*setAlertMessage(resDesc);
+                return "wxCallBack";*/
+                result = new CreateOrderResult(resCode, resDesc, null, null);
             } else {
+                result = new CreateOrderResult("success", "下单成功", jsPayReqData, weixinPayDetailOid);
                 logger.info("公众号下单成功，跳转支付页面！");
             }
 
         } catch (InvalidValueException e) {
             logger.warn(e.getMessage());
             setAlertMessage("下单失败！");
+            result = new CreateOrderResult("error", "下单失败", null, null);
         } catch (IllegalArgumentException e) {
             logger.warn(e.getMessage());
             setAlertMessage("下单失败！");
+            result = new CreateOrderResult("error", "下单失败", null, null);
         } catch (NotExistsException e) {
             logger.warn(e.getMessage());
             setAlertMessage("下单失败！");
+            result = new CreateOrderResult("error", "下单失败", null, null);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             setAlertMessage("下单失败！");
+            result = new CreateOrderResult("error", "下单错误", null, null);
         }
-
-        return "JSPAY";
+        out.println(JSONUtil.toJSONString(result, false));
+        //return "JSPAY";
     }
     
     public void wxPayNotify() {// FIXME 迁移至restFul 接口

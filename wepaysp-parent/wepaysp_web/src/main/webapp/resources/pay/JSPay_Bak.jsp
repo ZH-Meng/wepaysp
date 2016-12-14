@@ -1,5 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>微信安全支付</title>
+<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 <script type="text/javascript">
+	$(function(){
 		callPay();
 		
 		function onBridgeReady() {
@@ -41,4 +48,10 @@
 				   onBridgeReady();
 			}
 		}
+		
+	});
 </script>
+</head>
+<body>
+</body>
+</html>

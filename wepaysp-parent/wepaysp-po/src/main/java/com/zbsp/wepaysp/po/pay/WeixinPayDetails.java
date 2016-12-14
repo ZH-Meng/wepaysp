@@ -106,7 +106,9 @@ public class WeixinPayDetails
         /** 1：交易成功 */     TRADE_SUCCESS(1),
         /** 2：交易失败 */     TRADE_FAIL(2),
         /** 3：交易撤销 */     TRADE_REVERSED(3),
-        /** 3：交易关闭 */     TRADE_CLOSED(4);
+        /** 4：交易关闭 */     TRADE_CLOSED(4),
+        /** 5：交易待关闭 */     TRADE_TO_BE_CLOSED(5); 
+        
         private int value;
 
         public int getValue() {
@@ -613,9 +615,14 @@ public class WeixinPayDetails
         this.remark = remark;
     }
 
-	@Override
-	public String toString() {
-		return "WeixinPayDetails [body=" + body + ", outTradeNo=" + outTradeNo + ", totalFee=" + totalFee + ", feeType=" + feeType + ", authCode=" + authCode + ", transBeginTime=" + transBeginTime +"]";				
-	}
+    @Override
+    public String toString() {
+        return "WeixinPayDetails [payType=" + payType + ", deviceInfo=" + deviceInfo + ", body=" + body
+                + ", outTradeNo=" + outTradeNo + ", totalFee=" + totalFee + ", authCode=" + authCode + ", returnCode="
+                + returnCode + ", returnMsg=" + returnMsg + ", resultCode=" + resultCode + ", errCode=" + errCode
+                + ", errCodeDes=" + errCodeDes + ", openid=" + openid + ", tradeType=" + tradeType + ", transactionId="
+                + transactionId + ", timeEnd=" + timeEnd + ", transBeginTime=" + transBeginTime + ", tradeStatus="
+                + tradeStatus + "]";
+    }
 
 }

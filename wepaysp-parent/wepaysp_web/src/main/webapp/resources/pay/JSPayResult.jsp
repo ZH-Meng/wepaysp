@@ -23,8 +23,7 @@
 			<div class="succ-info">
 				<p class="info1">${weixinPayDetailsVO.dealerName }</p>
 				<p class="info2">&yen;<fmt:formatNumber value="${weixinPayDetailsVO.totalFee/100}" pattern="###,###,###,##0.00"/></p>
-				<div class="break-line"></div>
-			</div>
+				<div class="break-line"></div>			
 		</s:if>
 		<s:elseif test="tradeStatus == 0">	
 			<p class="error-title">
@@ -42,11 +41,10 @@
 				<div class="break-line"></div>
 				<div class="succ-item">
 					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}</span>
-				</div>
-			</div>				
+				</div>				
 		</s:elseif>
 		
-		<s:elseif test="tradeStatus == 4">	
+		<s:elseif test="tradeStatus == 4 || tradeStatus == 5">	
 			<p class="error-title">
 				 <i class="weui_icon_warn"></i>订单已取消
 			</p>
@@ -62,8 +60,7 @@
 				<div class="break-line"></div>
 				<div class="succ-item">
 					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}</span>
-				</div>
-			</div>
+				</div>		
 		</s:elseif>
 		<s:elseif test="tradeStatus == 2">
 			<p class="error-title">
@@ -80,23 +77,21 @@
 				<div class="break-line"></div>				
 				<div class="succ-item">
 					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}</span>
-				</div>
-			</div>
+				</div>	
 		</s:elseif>
 			
-		<div class="succ-item">
-			门&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;店<span class="fr">${weixinPayDetailsVO.storeName }</span>
-		</div>
-		<div class="succ-item">
-			交易单号<span class="fr">${weixinPayDetailsVO.outTradeNo }</span>
-		</div>
-		<div class="succ-item">
-			交易时间<span class="fr"><s:date name="weixinPayDetailsVO.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/></span>
-		</div>
-		<div class="pay-method">
-			<i class="icon iconfont icon-weixinzhifu"></i>微信支付
-		</div>
+			<div class="succ-item">
+				门&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;店<span class="fr">${weixinPayDetailsVO.storeName }</span>
+			</div>
+			<div class="succ-item">
+				交易单号<span class="fr">${weixinPayDetailsVO.outTradeNo }</span>
+			</div>
+			<div class="succ-item">
+				交易时间<span class="fr"><s:date name="weixinPayDetailsVO.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/></span>
+			</div>
+			<div class="pay-method">
+				<i class="icon iconfont icon-weixinzhifu"></i>微信支付
+			</div>
+	      </div>
 	</body>
 </html>
-
-

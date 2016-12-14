@@ -35,7 +35,7 @@ public class QRCodeUtil {
 		Map<EncodeHintType, String> hints = new HashMap<EncodeHintType, String>();
 		// 内容所使用编码
 		hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-		BitMatrix bitMatrix = multiFormatWriter.encode(content, BarcodeFormat.QR_CODE, 800, 800, hints);
+		BitMatrix bitMatrix = multiFormatWriter.encode(content, BarcodeFormat.QR_CODE, 400, 400, hints);
 
 		// 1.1去白边
 		int[] rec = bitMatrix.getEnclosingRectangle();

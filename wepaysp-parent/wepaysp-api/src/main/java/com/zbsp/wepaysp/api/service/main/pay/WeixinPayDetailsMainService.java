@@ -38,11 +38,15 @@ public interface WeixinPayDetailsMainService {
     /**
      * 检查微信公众号支付结果
      * 
-     * @param jsPayResult 检查的结果，jsPayResult = ok 才会与db中结果检查
+     * @param payResult H5支付结果，如果系统订单为非处理中，直接返回；反之，如果payResult=cancel，直接取消订单（状态为待关闭），payResult =其他，调查询订单接口
      * @param weixinPayDetailOid 支付明细Oid
-     * @return 
+     * @return Map
+     * <pre>         
+     *  tradeStatus 交易状态
+     *  weixinPayDetailsVO 交易明细
+     * <pre>         
      */
-    public Map<String, Object> checkPayResult(String jsPayResult, String weixinPayDetailOid);
+    public Map<String, Object> checkPayResult(String payResult, String weixinPayDetailOid);
 
     /**
      * 处理订单查询结果

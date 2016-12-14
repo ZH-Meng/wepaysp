@@ -69,38 +69,33 @@ public class WeixinPayDetailsMainServiceImpl
                 // 组包、调用刷卡API
                 WXPay.doScanPayBusiness(WeixinPackConverter.weixinPayDetailsVO2ScanPayReq(weixinPayDetailsVO), scanPayListener, weixinPayDetailsVO.getCertLocalPath(), weixinPayDetailsVO.getCertPassword(), weixinPayDetailsVO.getKeyPartner());
                 
-                String listenerResult = scanPayListener.getResult();
                 transactionId = scanPayListener.getTranscationID();// 正常情况业务结果为成功时返回
 
-                if (StringUtils.equalsIgnoreCase(listenerResult, DefaultScanPayBusinessResultListener.ON_FAIL_BY_RETURN_CODE_ERROR)) {
-                    logger.warn("系统订单ID" + outTradeNo + "微信刷卡支付失败，没按照API规范去正确地传递参数");
-                } else {
-                    // 查询支付结果
-                    Map<String, Object> jpqlMap = new HashMap<String, Object>();
-                    String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
-                    jpqlMap.put("OUTTRADENO", outTradeNo);
-                    
-                    WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
-                    if (payDetails == null) {
-                        throw new NotExistsException("系统支付订单不存在！");
-                    }
-                    
-                    String wxResultCode = payDetails.getResultCode();
-                    resCode = payDetails.getErrCode();
-                    resDesc = payDetails.getErrCodeDes();
-                    
-                    if (StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), wxResultCode)) {// 业务结果：成功
-                        resCode = WxPayResult.SUCCESS.getCode();
-                        resDesc = WxPayResult.SUCCESS.getDesc();
-                        logger.info("系统订单ID=" + outTradeNo + "微信刷卡支付成功，微信支付订单ID=" + payDetails.getTransactionId());
-                    } else {// 支付失败或错误
-                        logger.warn("系统订单ID" + outTradeNo + "微信刷卡支付失败，错误码：" + resCode + "，错误描述：" + resDesc);
-                    }
+                // 查询支付结果
+                Map<String, Object> jpqlMap = new HashMap<String, Object>();
+                String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
+                jpqlMap.put("OUTTRADENO", outTradeNo);
+
+                WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+                if (payDetails == null) {
+                    throw new NotExistsException("系统支付订单不存在！");
+                }
+
+                String wxResultCode = payDetails.getResultCode();
+                resCode = payDetails.getErrCode();
+                resDesc = payDetails.getErrCodeDes();
+
+                if (StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), wxResultCode)) {// 业务结果：成功
+                    resCode = WxPayResult.SUCCESS.getCode();
+                    resDesc = WxPayResult.SUCCESS.getDesc();
+                    logger.info("系统订单ID=" + outTradeNo + "微信刷卡支付成功，微信支付订单ID=" + payDetails.getTransactionId());
+                } else {// 支付失败或错误
+                    logger.warn("系统订单ID" + outTradeNo + "微信刷卡支付失败，错误码：" + resCode + "，错误描述：" + resDesc);
                 }
                 resultMap.put("transactionId", transactionId);
             } catch (Exception e) {
-                logger.error("支付失败，" + e.getMessage());
-                logger.error(e.getMessage(), e);
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                    "系统支付订单(ID=" + outTradeNo + "）支付错误", "，异常信息：" + e.getMessage()));
             }
         } else if (StringUtils.equals(PayType.JSAPI.getValue(), payType)) {// 公众号支付
             logger.info("开始微信公众号下单！");
@@ -127,8 +122,8 @@ public class WeixinPayDetailsMainServiceImpl
                 }
                 resultMap.put("prepayId", prepayId);
             } catch (Exception e) {
-                logger.error("公众号下单失败，" + e.getMessage());
-                logger.error(e.getMessage(), e);
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                    "系统支付订单(ID=" + outTradeNo + "）公众号下单错误", "，异常信息：" + e.getMessage()));
             }
         }
         
@@ -208,7 +203,7 @@ public class WeixinPayDetailsMainServiceImpl
     public Map<String, Object> checkPayResult(String payResult, String weixinPayDetailOid) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         WeixinPayDetailsVO payDetailVO =  weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
-        Integer tradeStatus = payDetailVO.getTradeStatus();
+        int tradeStatus = payDetailVO.getTradeStatus();
         
         // FIXME 从内存中获取 --------------------临时数据
         String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
@@ -216,10 +211,11 @@ public class WeixinPayDetailsMainServiceImpl
         String keyPartner = DevParam.KEY.getValue();
         payDetailVO.setKeyPartner(keyPartner);
         
-        if (tradeStatus.intValue() == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
+        if (tradeStatus == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
             if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
-                logger.info("系统支付订单状态处理中，用户取消支付，现主动发起关闭订单请求");
                 // 关闭订单
+                // 由于立即关闭订单提示 支付锁定，扣款和撤销间隔要在10s以上，所以先将订单设置为待关闭，由定时任务处理
+                /*logger.info("系统支付订单状态处理中，用户取消支付，现主动发起关闭订单请求");
                 try {
                     WXPay.doCloseOrderBusiness(WeixinPackConverter.weixinPayDetailsVO2CloseOrderReq(payDetailVO),
                         new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService), certLocalPath, certPassword, keyPartner);
@@ -227,6 +223,13 @@ public class WeixinPayDetailsMainServiceImpl
                     logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
                         "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
                     logger.error(e.getMessage(), e);
+                }*/
+                logger.info("系统支付订单状态处理中，用户取消支付，设置订单状态为待关闭");
+                tradeStatus = TradeStatus.TRADE_TO_BE_CLOSED.getValue();
+                try {
+                    weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
+                } catch (Exception e) {
+                    logger.error("取消订单（设置状态为待关闭）失败，异常信息：" + e.getMessage());
                 }
             } else {
                 logger.info("系统支付订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
@@ -246,24 +249,24 @@ public class WeixinPayDetailsMainServiceImpl
                 }
             }
         }
-
+        
         if ("ok".equalsIgnoreCase(payResult)) {
-            if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {
-                logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue() + "系统订单ID：" + payDetailVO.getOutTradeNo());
+            if (tradeStatus != TradeStatus.TRADE_SUCCESS.getValue()) {
+                logger.warn("微信H5支付结果为ok，系统支付交易状态为：" + tradeStatus + "系统订单ID：" + payDetailVO.getOutTradeNo());
             }
         } else if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
             //weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
-            if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_CLOSED.getValue()) {
-                logger.warn("微信H5支付结果为cancel，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue() + "系统订单ID：" + payDetailVO.getOutTradeNo());
+            if (tradeStatus != TradeStatus.TRADE_TO_BE_CLOSED.getValue()) {
+                logger.warn("微信H5支付结果为cancel，系统支付交易状态为：" + tradeStatus + "系统订单ID：" + payDetailVO.getOutTradeNo());
             }
         } else if ("error".equalsIgnoreCase(payResult)) {// 用户取消支付
-            if (payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_FAIL.getValue()) {
-                logger.warn("微信H5支付结果为error，系统支付交易状态为：" + payDetailVO.getTradeStatus().intValue() + "系统订单ID：" + payDetailVO.getOutTradeNo());
+            if (tradeStatus != TradeStatus.TRADE_FAIL.getValue()) {
+                logger.warn("微信H5支付结果为error，系统支付交易状态为：" + tradeStatus + "系统订单ID：" + payDetailVO.getOutTradeNo());
             }
         }
         
         resultMap.put("tradeStatus", tradeStatus);
-        resultMap.put("weixinPayDetailsVO", payDetailVO);        
+        resultMap.put("weixinPayDetailsVO", payDetailVO);
         return resultMap;
     }
 

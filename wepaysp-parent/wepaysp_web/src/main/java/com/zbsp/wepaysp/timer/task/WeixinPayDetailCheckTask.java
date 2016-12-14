@@ -19,6 +19,7 @@ import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 
 /**
  * 微信支付交易明细状态检查作业，状态处理中的需要处理
@@ -42,8 +43,9 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
     @Override
     public void doJob() {
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[开始]"));
-        // 查出前intervalTime毫秒的交易处理中的记录
-        List<WeixinPayDetails> tradingList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByState(WeixinPayDetails.TradeStatus.TRADEING.getValue(), intervalTime);
+        // 查出前intervalTime毫秒的交易处理中和待关闭的记录
+        List<WeixinPayDetails> tradingList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByState(
+            new int[] { WeixinPayDetails.TradeStatus.TRADEING.getValue(), WeixinPayDetails.TradeStatus.TRADE_TO_BE_CLOSED.getValue() }, intervalTime);
         
         // 开始时间限制时间
         Date minDate = new Date(new Date().getTime() - maxQueryIntervaltime);
@@ -54,6 +56,7 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
             int querySuccTimes = 0;
             int closeErrTimes = 0;
             int queryErrTimes = 0; 
+            boolean closeFlag = false; 
             for (WeixinPayDetails payDetail : tradingList) {
                 // String partnerOid = payDetail.getPartner1Oid();
                 // 查找服务商配置信息                    
@@ -61,9 +64,15 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
                 String keyPartner = EnumDefine.DevParam.KEY.getValue();
                 String certLocalPath = EnumDefine.DevParam.CERT_LOCAL_PATH.getValue();
                 String certPassword = EnumDefine.DevParam.CERT_PASSWORD.getValue();
+                if (payDetail.getTradeStatus() != null && payDetail.getTradeStatus() == TradeStatus.TRADE_TO_BE_CLOSED.getValue()) {
+                    closeFlag = true;
+                } else {
+                    if (TimeUtil.timeBefore(payDetail.getTransBeginTime(), minDate)) {// 交易时间是否在1小时之前
+                        closeFlag = true;
+                    }
+                }
                 
-                // 交易时间是否在1小时之前
-                if (TimeUtil.timeBefore(payDetail.getTransBeginTime(), minDate)) {
+                if (closeFlag) {
                     // 调用关闭订单API
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 开始调用关闭订单API ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
                     try {
