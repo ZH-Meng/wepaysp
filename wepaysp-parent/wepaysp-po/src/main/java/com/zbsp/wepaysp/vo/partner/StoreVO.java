@@ -25,6 +25,7 @@ public class StoreVO
     private String qrCode;
     private String remark;
     private String qrCodePath;
+    private String bindQrCodePath;
     
     public String getIwoid() {
         return iwoid;
@@ -112,6 +113,14 @@ public class StoreVO
 
 	public void setQrCodePath(String qrCodePath) {
 		this.qrCodePath = qrCodePath;
+	}
+
+	public String getBindQrCodePath() {
+		return bindQrCodePath;
+	}
+
+	public void setBindQrCodePath(String bindQrCodePath) {
+		this.bindQrCodePath = bindQrCodePath;
 	}
     
 }

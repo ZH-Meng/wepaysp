@@ -39,6 +39,12 @@
 				<param name="inputName">qRCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
+			<result name="storeBindWxID">/resources/partner/storeBindWxID.jsp</result>
+			<result name="getBindQRCodeImg" type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">bindQRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
 		</action>
 		<!-- 服务商员工管理 -->
 		<action name="partneremployeemanage" class="partnerEmployeeAction">
@@ -57,6 +63,12 @@
 				<param name="contentType">application/octet-stream</param>
 				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
 				<param name="inputName">qRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="dealerEmployeeBindWxID">/resources/partner/dealerEmployeeBindWxID.jsp</result>
+			<result name="getBindQRCodeImg" type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">bindQRCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
 		</action>

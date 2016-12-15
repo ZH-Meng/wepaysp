@@ -128,6 +128,7 @@
 						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#storeVo.iwoid" />')">下载二维码</a>
 						  				</s:if>
+						  				<a href="javascript:void(0);" onclick="toBindWxID('<s:property value="#storeVo.iwoid" />')">绑定支付通知</a>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -166,6 +167,11 @@
 			$("#storeOid").val(iwoid);
 			invokeAction('downloadPayQRCode');
 		}
+		function toBindWxID(iwoid){
+			$("#storeOid").val(iwoid);
+			invokeAction('goToBindWxID');
+		}
+		
 	</script>
 	
 </body>

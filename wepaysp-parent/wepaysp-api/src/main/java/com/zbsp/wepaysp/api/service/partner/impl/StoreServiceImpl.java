@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
@@ -37,7 +38,7 @@ public class StoreServiceImpl
     private String bindCallBackURL;
     private String qRCodeRootPath;
     private SysLogService sysLogService;
-
+    
     @Override
     public StoreVO doJoinTransQueryStoreByOid(String storeOid) {
         Validator.checkArgument(StringUtils.isBlank(storeOid), "门店Oid不能为空！");
@@ -219,7 +220,7 @@ public class StoreServiceImpl
     }
 
     @Override
-    public StoreVO doTransGetPayQRCode(String storeOid, String modifier, String operatorUserOid, String logFunctionOid) {
+    public StoreVO doTransGetQRCode(int qRCodeType, String storeOid, String modifier, String operatorUserOid, String logFunctionOid) {
         Validator.checkArgument(StringUtils.isBlank(storeOid), "门店Oid不能为空！");
         StoreVO storeVO = new StoreVO();
 
@@ -227,8 +228,15 @@ public class StoreServiceImpl
         if (store == null) {
             throw new NotExistsException("门店不存在");
         }
+        String qrCodePath = null;
+        if (QRCodeType.PAY.getValue() == qRCodeType) {
+        	qrCodePath = store.getQrCodePath();
+        } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+        	qrCodePath = store.getBindQrCodePath();
+        } else {
+        	throw new IllegalArgumentException("参数错误，二维码类型不支持" + qRCodeType);
+        }
         
-        String qrCodePath = store.getQrCodePath();
         boolean qrCodeExist = false;
         if (StringUtils.isNotBlank(qrCodePath)) {
             File qrCodeFile = new File(qrCodePath);
@@ -243,12 +251,21 @@ public class StoreServiceImpl
             
             //String appid = dealer.getPartner().getAppId();
             String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
-            // 生成二维码对应链接
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
-            Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(1, appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid());
-            logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成微信支付二维码URL：" + qrURL);
+            
+            String qrURL = null;
+            String callBackTemp = null;
+            if (QRCodeType.PAY.getValue() == qRCodeType) {
+            	Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化程序时校验
+            	callBackTemp = callBackURL;
+            } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+                Validator.checkArgument(StringUtils.isBlank(bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");// FIXME 初始化程序时校验
+                callBackTemp = bindCallBackURL;
+            }
+            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid());
+            // 生成二维码对应链接
+            logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成二维码，类型：" + qRCodeType + "，URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID/门店ID
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId() + File.separator + store.getStoreId();
@@ -260,79 +277,25 @@ public class StoreServiceImpl
             // 生成二维码图片
             try {
                 QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
-                logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成二维码图片");
+                logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成二维码（类型：" + qRCodeType + "）图片");
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (WriterException e) {
                 e.printStackTrace();
             }
+            
+            String pathTemp = filePath.getPath() + File.separator + fileName + ".png";
             // 更新门店二维码地址信息
-            store.setQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
+            if (QRCodeType.PAY.getValue() == qRCodeType) {
+            	store.setQrCodePath(pathTemp);
+            } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+            	store.setBindQrCodePath(pathTemp);
+            }
             commonDAO.update(store);
             
             Date processEndTime = new Date();
             // 记录修改日志
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改门店二维码信息[二维码地址：" + store.getQrCodePath() + "]", processEndTime, processEndTime, storeStr, store.toString(), SysLog.State.success.getValue(), store.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
-        }
-        BeanCopierUtil.copyProperties(store, storeVO);
-        return storeVO;
-    }
-
-    @Override
-    public StoreVO doTransGetBindQRCode(String storeOid, String modifier, String operatorUserOid, String logFunctionOid) {
-        Validator.checkArgument(StringUtils.isBlank(storeOid), "门店Oid不能为空！");
-        StoreVO storeVO = new StoreVO();
-
-        Store store = commonDAO.findObject(Store.class, storeOid);
-        if (store == null) {
-            throw new NotExistsException("门店不存在");
-        }
-        
-        String qrCodePath = store.getBindQrCodePath();
-        boolean qrCodeExist = false;
-        if (StringUtils.isNotBlank(qrCodePath)) {
-            File qrCodeFile = new File(qrCodePath);
-            if (qrCodeFile.exists() && qrCodeFile.isFile()) {
-                qrCodeExist = true;
-            }
-        }
-        if (StringUtils.isBlank(qrCodePath) || !qrCodeExist) {
-            String storeStr = store.toString();
-            Dealer dealer = store.getDealer();
-            Validator.checkArgument((dealer == null || StringUtils.isBlank(dealer.getIwoid())), "门店缺少商户信息无法生成二维码");
-            
-            //String appid = dealer.getPartner().getAppId();
-            String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
-            // 生成二维码对应链接
-            String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
-            Validator.checkArgument(StringUtils.isBlank(bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");// FIXME 初始化类时校验
-            Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(2, appid, bindCallBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid());
-            logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成微信支付通知绑定二维码URL：" + qrURL);
-
-            // 路径生成规则：服务商ID/商户ID/门店ID
-            String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId() + File.separator + store.getStoreId();
-            File filePath = new File(qRCodeRootPath + File.separator + relativePath);
-            if (!filePath.exists()) {
-                filePath.mkdirs();
-            }
-            String fileName = Generator.generateIwoid();
-            // 生成二维码图片
-            try {
-                QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
-                logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成二维码图片");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (WriterException e) {
-                e.printStackTrace();
-            }
-            // 更新门店绑定二维码地址信息
-            store.setBindQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
-            commonDAO.update(store);
-            
-            Date processEndTime = new Date();
-            // 记录修改日志
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改门店信息[绑定二维码地址：" + store.getBindQrCodePath() + "]", processEndTime, processEndTime, storeStr, store.toString(), SysLog.State.success.getValue(), store.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改门店二维码信息[二维码地址：" + pathTemp + "]", processEndTime, processEndTime, storeStr, store.toString(), SysLog.State.success.getValue(), store.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
         }
         BeanCopierUtil.copyProperties(store, storeVO);
         return storeVO;

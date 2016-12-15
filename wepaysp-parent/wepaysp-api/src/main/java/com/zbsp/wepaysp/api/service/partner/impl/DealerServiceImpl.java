@@ -15,6 +15,7 @@ import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
@@ -487,7 +488,7 @@ public class DealerServiceImpl
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(1, appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid());
+            String qrURL = Generator.generateQRURL(QRCodeType.PAY.getValue(), appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid());
             logger.info("商户-" + dealer.getCompany() + "生成微信支付二维码URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID

@@ -15,6 +15,7 @@ import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
@@ -41,6 +42,7 @@ public class DealerEmployeeServiceImpl
     implements DealerEmployeeService {
 
     private String callBackURL;
+    private String bindCallBackURL;
     private String qRCodeRootPath;
     private SysLogService sysLogService;
     
@@ -473,7 +475,7 @@ public class DealerEmployeeServiceImpl
 	
 
     @Override
-    public DealerEmployeeVO doTransGetPayQRCode(String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid) {
+    public DealerEmployeeVO doTransGetQRCode(int qRCodeType, String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid) {
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "收银员Oid不能为空！");
         DealerEmployeeVO dealerEmployeeVO = new DealerEmployeeVO();
 
@@ -482,7 +484,15 @@ public class DealerEmployeeServiceImpl
             throw new NotExistsException("收银员不存在");
         }
         
-        String qrCodePath = dealerEmployee.getQrCodePath();
+        String qrCodePath = null;
+        if (QRCodeType.PAY.getValue() == qRCodeType) {
+        	qrCodePath = dealerEmployee.getQrCodePath();
+        } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+        	qrCodePath = dealerEmployee.getBindQrCodePath();
+        } else {
+        	throw new IllegalArgumentException("参数错误，二维码类型不支持" + qRCodeType);
+        }
+        
         boolean qrCodeExist = false;
         if (StringUtils.isNotBlank(qrCodePath)) {
             File qrCodeFile = new File(qrCodePath);
@@ -501,10 +511,19 @@ public class DealerEmployeeServiceImpl
             String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
             // 生成二维码对应链接
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
-            Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(1, appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid());
-            logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成微信支付二维码URL：" + qrURL);
+            
+            String qrURL = null;
+            String callBackTemp = null;
+            if (QRCodeType.PAY.getValue() == qRCodeType) {
+            	Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化程序时校验
+            	callBackTemp = callBackURL;
+            } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+                Validator.checkArgument(StringUtils.isBlank(bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
+                callBackTemp = bindCallBackURL;
+            }
+            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid());
+            logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成微信支付二维码，类型：" + qRCodeType + "，URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID/门店ID/收银员
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId() + File.separator + store.getStoreId() + File.separator + dealerEmployee.getDealerEmployeeId();
@@ -516,19 +535,25 @@ public class DealerEmployeeServiceImpl
             // 生成二维码图片
             try {
                 QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
-                logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成二维码图片");
+                logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成二维码（类型：" + qRCodeType + "）图片");
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (WriterException e) {
                 e.printStackTrace();
             }
-            // 更新收银员二维码地址信息
-            dealerEmployee.setQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
+            
+            String pathTemp = filePath.getPath() + File.separator + fileName + ".png";
+            // 更新门店二维码地址信息
+            if (QRCodeType.PAY.getValue() == qRCodeType) {
+            	dealerEmployee.setQrCodePath(pathTemp);
+            } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+            	dealerEmployee.setBindQrCodePath(pathTemp);
+            }
             commonDAO.update(dealerEmployee);
             
             Date processEndTime = new Date();
             // 记录修改日志
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改收银员二维码信息[二维码地址：" + dealerEmployee.getQrCodePath() + "]", processEndTime, processEndTime, dealerEmployeeStr, dealerEmployee.toString(), SysLog.State.success.getValue(), dealerEmployee.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改收银员二维码信息[二维码地址：" + pathTemp + "]", processEndTime, processEndTime, dealerEmployeeStr, dealerEmployee.toString(), SysLog.State.success.getValue(), dealerEmployee.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
         }
         BeanCopierUtil.copyProperties(dealerEmployee, dealerEmployeeVO);
         return dealerEmployeeVO;
@@ -545,5 +570,9 @@ public class DealerEmployeeServiceImpl
 	 public void setSysLogService(SysLogService sysLogService) {
 	        this.sysLogService = sysLogService;
 	 }
+
+	public void setBindCallBackURL(String bindCallBackURL) {
+		this.bindCallBackURL = bindCallBackURL;
+	}
 
 }

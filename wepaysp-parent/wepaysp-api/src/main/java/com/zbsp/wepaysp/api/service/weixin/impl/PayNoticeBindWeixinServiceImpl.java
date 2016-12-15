@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.api.service.weixin;
+package com.zbsp.wepaysp.api.service.weixin.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
+import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
@@ -75,6 +76,7 @@ public class PayNoticeBindWeixinServiceImpl
                     vo.setBindDealerEmployeeName(wx.getBindDealerEmployee().getEmployeeName());
                     vo.setBindDealerEmployeeOid(wx.getBindDealerEmployee().getIwoid());
                 }
+                resultList.add(vo);
             }
         }
         return resultList;
@@ -116,5 +118,9 @@ public class PayNoticeBindWeixinServiceImpl
         commonDAO.executeBatch(jpql.toString(), jpqlMap, false);
         logger.info("删除微信支付通知绑定信息，oid=" + payNoticeBindWeixinOid);
     }
+
+	public void setSysLogService(SysLogService sysLogService) {
+		this.sysLogService = sysLogService;
+	}
 
 }

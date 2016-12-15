@@ -21,7 +21,8 @@
 	</bean>
 	
 	<bean id="storeAction" class="com.zbsp.wepaysp.manage.web.action.partner.StoreAction" scope="prototype">
-		<property name="storeService" ref="storeService"></property>
+		<property name="storeService" ref="storeService" />
+		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
 	<bean id="partnerEmployeeAction" class="com.zbsp.wepaysp.manage.web.action.partner.PartnerEmployeeAction" scope="prototype">
@@ -31,6 +32,7 @@
 	<bean id="dealerEmployeeAction" class="com.zbsp.wepaysp.manage.web.action.partner.DealerEmployeeAction" scope="prototype">
 		<property name="dealerEmployeeService" ref="dealerEmployeeService"></property>
 		<property name="storeService" ref="storeService"></property>
+		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
 </beans>

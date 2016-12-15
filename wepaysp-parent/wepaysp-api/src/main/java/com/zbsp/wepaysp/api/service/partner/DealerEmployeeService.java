@@ -101,13 +101,14 @@ public interface DealerEmployeeService {
     public DealerEmployeeVO doTransResetRefundPwd(String dealerEmployeeOid, String newPwd, String operatorOid, String operatorName, String logFunctionOid);
 
     /**
-     * 获取收银员级别支付二维码（如果不存在则生成）
+     * 获取收银员级别二维码（如果不存在则生成）
+     * @param qRCodeType 二维码类型：1为支付二维码，2为微信支付通知绑定二维码
      * @param dealerEmployeeOid
      * @param modifier 修改人名称
      * @param operatorUserOid 操作用户Oid
      * @param logFunctionOid 日志记录项Oid
      * @return DealerEmployeeVO 包含二维码path
      */
-    public DealerEmployeeVO doTransGetPayQRCode(String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid);
+    public DealerEmployeeVO doTransGetQRCode(int qRCodeType, String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid);
     
 }

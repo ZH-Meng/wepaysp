@@ -188,6 +188,26 @@ public class EnumDefine {
     }
     
     /**
+     * 二维码类型
+     * @author mengzh
+     *
+     */
+    public static enum QRCodeType {
+    	/** 支付二维码*/ 				PAY(1),
+    	/** 绑定支付通知二维码*/ 	BIND_PAY_NOTICE(2);
+    	
+    	private int value;
+    	
+    	public int getValue() {
+    		return value;
+    	}
+    	
+    	private QRCodeType(int value) {
+    		this.value = value;
+		}
+    }
+    
+    /**
      * 是否可以退款标识
      */
     public static enum RefundFlag {

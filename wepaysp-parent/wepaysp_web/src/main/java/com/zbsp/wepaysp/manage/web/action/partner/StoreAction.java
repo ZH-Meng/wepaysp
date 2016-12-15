@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
@@ -217,7 +218,7 @@ public class StoreAction
             // 代理商、业务员、商户能下载门店级别二维码
             if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser)) {
                 if (StringUtils.isNotBlank(storeOid)) {
-                	storeVO = storeService.doTransGetPayQRCode(storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                	storeVO = storeService.doTransGetQRCode(QRCodeType.PAY.getValue(), storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
                     logger.warn("非法下载门店级别支付二维码图片，参数storeOid为空！");
                     setAlertMessage("下载门店级别支付二维码图片失败！");
@@ -236,6 +237,7 @@ public class StoreAction
         return "getQRCodeImg";
     }
     
+    /**下载门店级别支付二维码*/
     public InputStream getQRCodeImg() {
         InputStream inputStream = null;
         try {
@@ -252,20 +254,20 @@ public class StoreAction
     }
     
     /**
-     * 跳转绑定页面
-     * 
+     * 跳转微信支付通知绑定微信账户页面
+     * <pre>
+     * 		查询当前门店绑定的微信用户信息列表；
+     * 		在结果页面加载二维码图片；
+     * </pre>
      * @return
      */
-    public String goTobindWxID() {
+    public String goToBindWxID() {
         logger.info("跳转微信支付通知绑定微信账户页面");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             // 代理商、业务员、商户能下载门店级别二维码
             if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser)) {
                 if (StringUtils.isNotBlank(storeOid)) {
-                    // 加载绑定二维码
-                    storeVO = storeService.doTransGetBindQRCode(storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
-                    
                     // 查询已绑定的信息
                     Map<String, Object> paramMap = new HashMap<String, Object>();
 
@@ -287,7 +289,51 @@ public class StoreAction
             setAlertMessage("绑定微信支付通知错误！");
             return list();
         }
-        return "bindWxID";
+        return "storeBindWxID";
+    }
+
+    /**
+     * 加载绑定微信支付通知二维码
+     * @return
+     */
+    public String loadBindQRCode() {
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (StringUtils.isNotBlank(storeOid)) {
+                // 加载绑定二维码
+                storeVO = storeService.doTransGetQRCode(QRCodeType.BIND_PAY_NOTICE.getValue(), storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            } 
+        } catch (Exception e) {
+            logger.error("加载绑定二维码错误：" + e.getMessage());
+        }
+    	return "getBindQRCodeImg";
+    }
+    
+    /**
+     * 返回绑定微信支付通知二维码图片流
+     * @return
+     */
+    public InputStream getBindQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            File qrFile = new File(storeVO.getBindQrCodePath());
+            inputStream = new FileInputStream(qrFile);
+            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            logger.info("下载门店级别绑定支付通知二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
+    public void goToDeleteBindWxID() {
+    	
+    }
+    
+    public String batchUpdateBindWxID() {
+    	return SUCCESS;
     }
     
     @Override
@@ -322,15 +368,18 @@ public class StoreAction
 	public void setStoreOid(String storeOid) {
 		this.storeOid = storeOid;
 	}
-    
-    public String getDealerOid() {
+	
+    public String getStoreOid() {
+		return storeOid;
+	}
+
+	public String getDealerOid() {
         return dealerOid;
     }
     
     public void setDealerOid(String dealerOid) {
         this.dealerOid = dealerOid;
     }
-
     
     public List<PayNoticeBindWeixinVO> getPayNoticeBindWeixinVoList() {
         return payNoticeBindWeixinVoList;

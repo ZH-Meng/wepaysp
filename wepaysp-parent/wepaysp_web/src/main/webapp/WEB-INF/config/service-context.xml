@@ -40,6 +40,7 @@
 		<property name="sysLogService" ref="sysLogService" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="callBackURL" value="${callBackURL}" />
+		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 	</bean>
 	
 	<bean id="partnerEmployeeService" class="com.zbsp.wepaysp.api.service.partner.impl.PartnerEmployeeServiceImpl" parent="baseService">
@@ -50,6 +51,7 @@
 		<property name="sysLogService" ref="sysLogService" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="callBackURL" value="${callBackURL}" />
+		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 	</bean>
 	
 	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">
@@ -74,5 +76,9 @@
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
 		<property name="weixinRefundDetailsService" ref="weixinRefundDetailsService" />
 	</bean>
+	
+	<bean id="payNoticeBindWeixinService" class="com.zbsp.wepaysp.api.service.weixin.impl.PayNoticeBindWeixinServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>	
 	
 </beans>

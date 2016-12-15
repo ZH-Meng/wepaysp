@@ -14,15 +14,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
+import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
+import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.vo.partner.DealerEmployeeVO;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
+import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 /**
  * 商户员工（收银员）管理
@@ -45,6 +49,8 @@ public class DealerEmployeeAction
     private String qRCodeName;
     private String dealerEmployeeOid;
     private String storeOid;
+    private PayNoticeBindWeixinService payNoticeBindWeixinService;
+    private List<PayNoticeBindWeixinVO> payNoticeBindWeixinVoList;
     
     @Override
     protected String query(int start, int size) {
@@ -335,7 +341,7 @@ public class DealerEmployeeAction
             // 代理商、业务员、商户、店长能下载收银员级别二维码
             if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser))  {
                 if (StringUtils.isNotBlank(dealerEmployeeOid)) {
-                	dealerEmployeeVO = dealerEmployeeService.doTransGetPayQRCode(dealerEmployeeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                	dealerEmployeeVO = dealerEmployeeService.doTransGetQRCode(QRCodeType.PAY.getValue(), dealerEmployeeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
                     logger.warn("非法下载收银员级别支付二维码图片，参数dealerEmployeeOid为空！");
                     setAlertMessage("下载收银员级别支付二维码图片失败！");
@@ -367,6 +373,81 @@ public class DealerEmployeeAction
             e.printStackTrace();
         }
         return inputStream;
+    }
+    
+    /**
+     * 跳转微信支付通知绑定微信账户页面
+     * <pre>
+     * 		查询当前收银员绑定的微信用户信息列表；
+     * 		在结果页面加载二维码图片；
+     * </pre>
+     * @return
+     */
+    public String goToBindWxID() {
+        logger.info("跳转微信支付通知绑定微信账户页面");
+        try {
+            if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+                // 查询已绑定的信息
+                Map<String, Object> paramMap = new HashMap<String, Object>();
+
+                paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
+                paramMap.put("type", PayNoticeBindWeixin.Type.dealerEmployee.getValue());
+                payNoticeBindWeixinVoList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(paramMap);
+            } else {
+                logger.warn("非法绑定微信支付通知，参数dealerEmployeeOid为空！");
+                setAlertMessage("绑定微信支付通知失败！");
+                return list();
+            }
+        } catch (Exception e) {
+            logger.error("绑定微信支付通知错误：" + e.getMessage());
+            setAlertMessage("绑定微信支付通知错误！");
+            return list();
+        }
+        return "dealerEmployeeBindWxID";
+    }
+
+    /**
+     * 加载绑定微信支付通知二维码
+     * @return
+     */
+    public String loadBindQRCode() {
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+                // 加载绑定二维码
+            	dealerEmployeeVO = dealerEmployeeService.doTransGetQRCode(QRCodeType.BIND_PAY_NOTICE.getValue(), dealerEmployeeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            } 
+        } catch (Exception e) {
+            logger.error("加载绑定二维码错误：" + e.getMessage());
+        }
+    	return "getBindQRCodeImg";
+    }
+    
+    /**
+     * 返回绑定微信支付通知二维码图片流
+     * @return
+     */
+    public InputStream getBindQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            File qrFile = new File(dealerEmployeeVO.getBindQrCodePath());
+            inputStream = new FileInputStream(qrFile);
+            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            logger.info("下载收银员级别绑定支付通知二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
+    public void goToDeleteBindWxID() {
+    	
+    }
+    
+    public String batchUpdateBindWxID() {
+    	return SUCCESS;
     }
     
     public boolean checkUser(ManageUser manageUser, String operCode) {
@@ -456,13 +537,28 @@ public class DealerEmployeeAction
 		this.dealerEmployeeOid = dealerEmployeeOid;
 	}
 
-    
-    public String getStoreOid() {
+    public String getDealerEmployeeOid() {
+		return dealerEmployeeOid;
+	}
+
+	public String getStoreOid() {
         return storeOid;
     }
     
     public void setStoreOid(String storeOid) {
         this.storeOid = storeOid;
     }
+
+	public List<PayNoticeBindWeixinVO> getPayNoticeBindWeixinVoList() {
+		return payNoticeBindWeixinVoList;
+	}
+
+	public void setPayNoticeBindWeixinVoList(List<PayNoticeBindWeixinVO> payNoticeBindWeixinVoList) {
+		this.payNoticeBindWeixinVoList = payNoticeBindWeixinVoList;
+	}
+
+	public void setPayNoticeBindWeixinService(PayNoticeBindWeixinService payNoticeBindWeixinService) {
+		this.payNoticeBindWeixinService = payNoticeBindWeixinService;
+	}
 	
 }

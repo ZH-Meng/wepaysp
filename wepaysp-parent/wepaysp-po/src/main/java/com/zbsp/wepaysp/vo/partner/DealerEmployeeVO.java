@@ -10,9 +10,6 @@ import java.io.Serializable;
 public class DealerEmployeeVO
     implements Serializable {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 6954293319075245829L;
     private String iwoid;
     private String storeId;
@@ -30,6 +27,7 @@ public class DealerEmployeeVO
     private String dealerOid;
     private Integer employeeType;
     private String qrCodePath;
+    private String bindQrCodePath;
     
     public String getIwoid() {
         return iwoid;
@@ -158,5 +156,13 @@ public class DealerEmployeeVO
 	public void setQrCodePath(String qrCodePath) {
 		this.qrCodePath = qrCodePath;
 	}
-    
+
+	public String getBindQrCodePath() {
+		return bindQrCodePath;
+	}
+
+	public void setBindQrCodePath(String bindQrCodePath) {
+		this.bindQrCodePath = bindQrCodePath;
+	}
+	
 }
