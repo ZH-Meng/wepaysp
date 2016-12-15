@@ -20,8 +20,11 @@ import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
+import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
+import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 /**
  * 门店管理
@@ -41,6 +44,8 @@ public class StoreAction
     private String qRCodeName;
     private String storeOid; 
     private String dealerOid;
+    private PayNoticeBindWeixinService payNoticeBindWeixinService;
+    private List<PayNoticeBindWeixinVO> payNoticeBindWeixinVoList;
     
     @Override
     protected String query(int start, int size) {
@@ -245,7 +250,46 @@ public class StoreAction
         }
         return inputStream;
     }
+    
+    /**
+     * 跳转绑定页面
+     * 
+     * @return
+     */
+    public String goTobindWxID() {
+        logger.info("跳转微信支付通知绑定微信账户页面");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            // 代理商、业务员、商户能下载门店级别二维码
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser)) {
+                if (StringUtils.isNotBlank(storeOid)) {
+                    // 加载绑定二维码
+                    storeVO = storeService.doTransGetBindQRCode(storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                    
+                    // 查询已绑定的信息
+                    Map<String, Object> paramMap = new HashMap<String, Object>();
 
+                    paramMap.put("storeOid", storeOid);
+                    paramMap.put("type", PayNoticeBindWeixin.Type.store.getValue());
+                    payNoticeBindWeixinVoList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(paramMap);
+                } else {
+                    logger.warn("非法绑定微信支付通知，参数storeOid为空！");
+                    setAlertMessage("绑定微信支付通知失败！");
+                    return list();
+                }
+            } else {
+                logger.warn("无权绑定微信支付通知");
+                setAlertMessage("无权绑定微信支付通知");
+                return "accessDenied";
+            }
+        } catch (Exception e) {
+            logger.error("绑定微信支付通知错误：" + e.getMessage());
+            setAlertMessage("绑定微信支付通知错误！");
+            return list();
+        }
+        return "bindWxID";
+    }
+    
     @Override
     public void setSession(Map<String, Object> session) {
         this.session = session;
@@ -285,6 +329,19 @@ public class StoreAction
     
     public void setDealerOid(String dealerOid) {
         this.dealerOid = dealerOid;
+    }
+
+    
+    public List<PayNoticeBindWeixinVO> getPayNoticeBindWeixinVoList() {
+        return payNoticeBindWeixinVoList;
+    }
+
+    public void setPayNoticeBindWeixinVoList(List<PayNoticeBindWeixinVO> payNoticeBindWeixinVoList) {
+        this.payNoticeBindWeixinVoList = payNoticeBindWeixinVoList;
+    }
+    
+    public void setPayNoticeBindWeixinService(PayNoticeBindWeixinService payNoticeBindWeixinService) {
+        this.payNoticeBindWeixinService = payNoticeBindWeixinService;
     }
 
 }

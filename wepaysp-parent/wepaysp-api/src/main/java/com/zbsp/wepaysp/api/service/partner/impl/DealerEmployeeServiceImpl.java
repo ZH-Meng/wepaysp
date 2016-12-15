@@ -503,7 +503,7 @@ public class DealerEmployeeServiceImpl
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid());
+            String qrURL = Generator.generateQRURL(1, appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid());
             logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成微信支付二维码URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID/门店ID/收银员

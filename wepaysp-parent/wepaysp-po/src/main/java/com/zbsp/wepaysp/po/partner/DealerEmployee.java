@@ -24,6 +24,7 @@ public class DealerEmployee
     private String moblieNumber;
     private String state;
     private String qrCodePath;
+    private String bindQrCodePath;
     private String refundPassword;
     private String creator;
     private Timestamp createTime;
@@ -133,6 +134,15 @@ public class DealerEmployee
     
     public void setQrCodePath(String qrCodePath) {
         this.qrCodePath = qrCodePath;
+    }
+    
+    @Column(name = "bind_qr_code_path", length = 256)
+    public String getBindQrCodePath() {
+        return bindQrCodePath;
+    }
+    
+    public void setBindQrCodePath(String bindQrCodePath) {
+        this.bindQrCodePath = bindQrCodePath;
     }
 
     @Column(name = "REFUND_PASSWORD", length = 32)

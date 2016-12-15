@@ -23,6 +23,7 @@ public class Store
     private String storeTel;
     private String qrCode;
     private String qrCodePath;
+    private String bindQrCodePath;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -102,6 +103,15 @@ public class Store
         return qrCodePath;
     }
     
+    @Column(name = "bind_qr_code_path", length = 256)
+    public String getBindQrCodePath() {
+        return bindQrCodePath;
+    }
+    
+    public void setBindQrCodePath(String bindQrCodePath) {
+        this.bindQrCodePath = bindQrCodePath;
+    }
+
     public void setQrCodePath(String qrCodePath) {
         this.qrCodePath = qrCodePath;
     }

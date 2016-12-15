@@ -30,13 +30,25 @@ public final class Generator {
         System.out.println(generateRandomNumber(32));
     }
     
-    public static String generateQRURL(String appId, String redirectURL) {
+    /**
+     * 生成微信二维码
+     * 
+     * @param qrType 二维码类型，1 为支付二维码，2为 微信支付通知绑定二维码
+     * @param appId
+     * @param redirectURL 微信网页授权回调地址
+     * @return
+     */
+    public static String generateQRURL(int qrType, String appId, String redirectURL) {
         Validator.checkArgument(StringUtils.isBlank(appId), "appId不能为空！");
         Validator.checkArgument(StringUtils.isBlank(redirectURL), "redirectURL不能为空！");
         
         String url = "";
         try {
-            url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+            if (qrType == 1) {
+                url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+            } else if (qrType == 2) { 
+                url = WxApiUrl.JSAPI_AUTH_SNSAPI_USERINFO.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

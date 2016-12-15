@@ -133,6 +133,8 @@ public class EnumDefine {
         wxPayAPIMoneyException("【微信支付金额异常，系统报警】"),
         /** 调用微信支付API失败 */
         invokeWxPayAPIErr("【调用微信支付API失败，系统报警】"),
+        /** 调用微信支付API失败 */
+        invokeWxJSAPIErr("【调用微信公众号接口API失败，系统报警】"),
         /** 发送微信支付请求失败 */
         sendWxPayRequestException("【发送微信支付请求失败，系统报警】"),
         /** 受理微信支付结果异常 */

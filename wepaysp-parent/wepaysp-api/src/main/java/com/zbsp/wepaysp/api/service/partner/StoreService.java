@@ -84,5 +84,15 @@ public interface StoreService {
      * @return StoreVO 包含二维码path
      */
     public StoreVO doTransGetPayQRCode(String storeOid, String modifier, String operatorUserOid, String logFunctionOid);
+
+    /**
+     * 获取门店级别支付通知绑定二维码（如果不存在则生成）
+     * @param storeOid
+     * @param modifier 修改人名称
+     * @param operatorUserOid 操作用户Oid
+     * @param logFunctionOid 日志记录项Oid
+     * @return StoreVO 包含二维码path
+     */
+    public StoreVO doTransGetBindQRCode(String storeOid, String modifier, String operatorUserOid, String logFunctionOid);
     
 }

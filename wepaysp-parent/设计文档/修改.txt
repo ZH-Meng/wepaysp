@@ -1,4 +1,6 @@
-
+2016-12-15
+	新增 pay_notice_bind_weixin_t表
+	store_t、dealer_employee_t 分别增加 bind_qr_code_path 字段
 
  weixin_pay_details_t 中的`trade_status`  使用说明：0：交易中  1：交易成功 2：交易失败  3:交易撤销（标准流程中自动触发的交易撤销）  4：交易关闭
 
