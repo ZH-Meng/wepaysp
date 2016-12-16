@@ -1,7 +1,7 @@
 package com.zbsp.wepaysp.common.constant;
 
 /**
- * 访问微信参数名常量
+ * 访问微信参数名常量，暂无用处，用做了解
  * 
  * @author 孟郑宏
  */
@@ -11,7 +11,8 @@ public class WxParam {
     public static final String APP_ID = "appid";
     /** 公众号的appsecret */
     public static final String APP__SECRET = "secret";
-    /** 用户统一授权获取的code */
+    /** 用户同意授权获取的code，code作为换取access_token和openid的票据，每次用户授权带上的code将不一样，code只能使用一次，（5分钟未被使用自动过期，不确定）<br>
+     * 若用户禁止授权，则重定向后不会带上code参数*/
     public static final String CODE = "code";
     /** 通过code换取网页授权access_token时，值为 authorization_code；刷新access_token时值为 refresh_token； */
     public static final String GRANT_TYPE = "grant_type";

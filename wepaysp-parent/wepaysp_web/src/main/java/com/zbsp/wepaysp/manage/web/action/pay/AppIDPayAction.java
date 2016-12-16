@@ -25,8 +25,8 @@ import com.zbsp.wepaysp.common.http.exception.HttpProcessException;
 import com.zbsp.wepaysp.common.http.httpclient.HttpClientUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
-import com.zbsp.wepaysp.manage.web.vo.jsonresult.CreateOrderResult;
-import com.zbsp.wepaysp.manage.web.vo.wxauth.AccessTokenResultVO;
+import com.zbsp.wepaysp.manage.web.vo.appid.WxAuthAccessTokenResult;
+import com.zbsp.wepaysp.manage.web.vo.appid.CreateOrderResult;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
@@ -81,7 +81,7 @@ public class AppIDPayAction
      */
     public String wxCallBack() {
         logger.info("微信支付开始回调...");
-        if (!checkCallBankParam()) {
+        if (!checkCallBackParam()) {
             return ERROR;
         }
         // 根据partnerOid查找APPID、SECRET
@@ -97,12 +97,12 @@ public class AppIDPayAction
         // String refreshAccessTokenURL = WxApiUrl.JSAPI_REFRESH_ACCESS_TOKEN.replace("APPID", "").replace("REFRESH_TOKEN", "");// 刷新access_token的URL设置方式
 
         HttpConfig httpConfig = HttpConfig.custom(ParamType.NONE);// 参数在URL拼接完成
-        AccessTokenResultVO accessTokenResult = null;
+        WxAuthAccessTokenResult accessTokenResult = null;
         try {
             // 调用API获取access_token、openid
             String jsonResult = HttpClientUtil.get(httpConfig.url(getAccessTokenURL).encoding("UTF-8"));
             // 转化JSON结果
-            accessTokenResult = JSONUtil.parseObject(jsonResult, AccessTokenResultVO.class);
+            accessTokenResult = JSONUtil.parseObject(jsonResult, WxAuthAccessTokenResult.class);
             // 校验获取access_token、openid结果
             if (checkAccessTokenResult(accessTokenResult) && StringUtils.isNotBlank(accessTokenResult.getOpenid())) {
                 // 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
@@ -247,7 +247,7 @@ public class AppIDPayAction
      * 
      * @return
      */
-    private boolean checkCallBankParam() {
+    private boolean checkCallBackParam() {
         if (StringUtils.isBlank(code)) {
             logger.warn("用户访问公众号，选择禁止授权.");
             // TODO 因为scope 选择snsapi_base，不弹出授权页面，直接跳转，所以暂不处理此情况
@@ -275,7 +275,7 @@ public class AppIDPayAction
      * @param accessTokenResultVO
      * @return
      */
-    private boolean checkAccessTokenResult(AccessTokenResultVO accessTokenResultVO) {
+    private boolean checkAccessTokenResult(WxAuthAccessTokenResult accessTokenResultVO) {
         boolean result = false;
         if (accessTokenResultVO == null) {
             logger.warn("accessTokenResultVO为空");

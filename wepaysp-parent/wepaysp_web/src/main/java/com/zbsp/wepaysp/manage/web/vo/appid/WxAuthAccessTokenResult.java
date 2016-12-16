@@ -1,8 +1,8 @@
-package com.zbsp.wepaysp.manage.web.vo.wxauth;
+package com.zbsp.wepaysp.manage.web.vo.appid;
 
 import java.io.Serializable;
 
-public class AccessTokenResultVO
+public class WxAuthAccessTokenResult
     implements Serializable {
 
     private static final long serialVersionUID = -3987495109135961662L;

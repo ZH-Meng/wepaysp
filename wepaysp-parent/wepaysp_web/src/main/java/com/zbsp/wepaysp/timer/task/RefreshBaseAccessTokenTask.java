@@ -6,14 +6,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.tencent.WXPay;
-import com.tencent.protocol.base_access_token_protocol.GetBaseAccessTokenReqData;
-import com.tencent.protocol.base_access_token_protocol.GetBaseAccessTokenResData;
-import com.zbsp.wepaysp.api.util.WeixinUtil;
+import com.tencent.protocol.appid.base_access_token_protocol.GetBaseAccessTokenReqData;
+import com.tencent.protocol.appid.base_access_token_protocol.GetBaseAccessTokenResData;
 import com.zbsp.wepaysp.common.constant.EnumDefine;
 import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
 
+/**
+ * 刷新基本支持的AccessToken作业
+ * 
+ * @author 孟郑宏
+ */
 @Component
 public class RefreshBaseAccessTokenTask
     extends TimerBasicTask {
@@ -65,8 +69,6 @@ public class RefreshBaseAccessTokenTask
             }
         }
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[结束]"));
-        
-        //FIXME WeixinUtil.sendTemplateMsg(null, null, null, null, accessToken);
     }
     
     private boolean getAccessToken(String appid, String secret, String certLocalPath, String certPassword) {
@@ -96,20 +98,20 @@ public class RefreshBaseAccessTokenTask
     /**
      * 校验http get 获取access_token的结果
      * 
-     * @param accessTokenResultVO
+     * @param getBaseAccessTokenResData
      * @return
      */
-    private boolean checkAccessTokenResult(GetBaseAccessTokenResData accessTokenResultVO) {
+    private boolean checkAccessTokenResult(GetBaseAccessTokenResData getBaseAccessTokenResData) {
         boolean result = false;
-        if (accessTokenResultVO == null) {
-            logger.warn("accessTokenResultVO为空");
+        if (getBaseAccessTokenResData == null) {
+            logger.warn("getBaseAccessTokenResData为空");
         } else {
-            logger.debug(accessTokenResultVO.toString());
+            logger.debug(getBaseAccessTokenResData.toString());
         }
-        if (StringUtils.isNotBlank(accessTokenResultVO.getAccess_token())) {
+        if (StringUtils.isNotBlank(getBaseAccessTokenResData.getAccess_token())) {
             result = true;
-        } else if (StringUtils.isNotBlank(accessTokenResultVO.getErrcode())) {
-            result = true;
+        } else if (StringUtils.isNotBlank(getBaseAccessTokenResData.getErrcode())) {
+            result = false;
         } else {
             logger.warn("get or refresh access_token result invalid");
         }

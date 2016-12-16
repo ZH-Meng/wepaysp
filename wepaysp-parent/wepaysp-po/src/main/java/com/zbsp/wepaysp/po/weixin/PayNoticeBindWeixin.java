@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.zbsp.wepaysp.po.partner.Store;
 
 @Entity
 @Table(name = "pay_notice_bind_weixin_t")
@@ -21,8 +22,8 @@ public class PayNoticeBindWeixin
      */
     private static final long serialVersionUID = 2586932124207327622L;
     private String iwoid;
-    private String payDealerEmployeeOid;
-    private String storeOid;
+    private DealerEmployee payDealerEmployee;
+    private Store store;
     private DealerEmployee bindDealerEmployee;
     private String openid;
     private String nickname;
@@ -91,22 +92,24 @@ public class PayNoticeBindWeixin
         this.iwoid = iwoid;
     }
 
-    @Column(name = "STORE_OID", length = 32)
-    public String getStoreOid() {
-        return storeOid;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PAY_DEALER_EMPLOYEE_OID")
+    public DealerEmployee getPayDealerEmployee() {
+        return payDealerEmployee;
+    }
+
+    public void setPayDealerEmployee(DealerEmployee payDealerEmployee) {
+        this.payDealerEmployee = payDealerEmployee;
     }
     
-    public void setStoreOid(String storeOid) {
-        this.storeOid = storeOid;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "STORE_OID")
+    public Store getStore() {
+        return store;
     }
-
-    @Column(name = "PAY_DEALER_EMPLOYEE_OID", length = 32)
-    public String getPayDealerEmployeeOid() {
-        return payDealerEmployeeOid;
-    }
-
-    public void setPayDealerEmployeeOid(String payDealerEmployeeOid) {
-        this.payDealerEmployeeOid = payDealerEmployeeOid;
+    
+    public void setStore(Store store) {
+        this.store = store;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -211,8 +214,8 @@ public class PayNoticeBindWeixin
 
     @Override
     public String toString() {
-        return "PayNoticeBindWeixin [payDealerEmployeeOid=" + payDealerEmployeeOid + ", storeOid=" + storeOid + ", "
-            + "bindDealerEmployee=" + bindDealerEmployee.getIwoid() + ", "
+        return "PayNoticeBindWeixin [payDealerEmployee=" + (payDealerEmployee != null ? payDealerEmployee.getEmployeeName() : "") + ", store=" + (store != null ? store.getStoreName() : "")  + ", "
+            + "bindDealerEmployee=" +  (bindDealerEmployee != null ? bindDealerEmployee.getEmployeeName() : "") + ", "
                 + "openid=" + openid + ", nickname=" + nickname + ", sex=" + sex + ", type=" + type + ", state=" + state + "]";
     }
     

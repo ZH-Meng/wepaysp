@@ -9,13 +9,17 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
+import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
@@ -50,11 +54,11 @@ public class PayNoticeBindWeixinServiceImpl
             jpqlMap.put("TYPE", type);
         }
         if (StringUtils.isNotBlank(storeOid)) {
-            jpql.append(" and p.storeOid = :STOREOID");
+            jpql.append(" and p.store.iwoid = :STOREOID");
             jpqlMap.put("STOREOID", storeOid);
         }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
-            jpql.append(" and p.payDealerEmployeeOid = :PAYDEALEREMPLOYEEOID");
+            jpql.append(" and p.payDealerEmployee.iwoid = :PAYDEALEREMPLOYEEOID");
             jpqlMap.put("PAYDEALEREMPLOYEEOID", dealerEmployeeOid);
         }
         if (StringUtils.isNotBlank(state)) {
@@ -70,10 +74,21 @@ public class PayNoticeBindWeixinServiceImpl
             for (PayNoticeBindWeixin wx : payNoticeBindWeixinList) {
                 PayNoticeBindWeixinVO vo = new PayNoticeBindWeixinVO();
                 BeanCopierUtil.copyProperties(wx, vo);
+                
+                if (wx.getPayDealerEmployee() != null) {
+                    vo.setPayDealerEmployeeName(wx.getPayDealerEmployee().getEmployeeName());
+                    vo.setPayDealerEmployeeId(wx.getPayDealerEmployee().getDealerEmployeeId());
+                    vo.setPayDealerEmployeeOid(wx.getPayDealerEmployee().getIwoid());
+                }
+                if (wx.getStore() != null) {
+                    vo.setStoreOid(wx.getStore().getIwoid());
+                    vo.setStoreId(wx.getStore().getStoreId());
+                    vo.setStoreName(wx.getStore().getStoreName());
+                }
+                
                 if (wx.getBindDealerEmployee() != null) {
                     vo.setBindDealerEmployeeName(wx.getBindDealerEmployee().getEmployeeName());
                     vo.setBindDealerEmployeeId(wx.getBindDealerEmployee().getDealerEmployeeId());
-                    vo.setBindDealerEmployeeName(wx.getBindDealerEmployee().getEmployeeName());
                     vo.setBindDealerEmployeeOid(wx.getBindDealerEmployee().getIwoid());
                 }
                 resultList.add(vo);
@@ -110,7 +125,7 @@ public class PayNoticeBindWeixinServiceImpl
 
     @Override
     public void doTransDeletePayNoticeBindWeixin(String payNoticeBindWeixinOid) {
-        Validator.checkArgument(StringUtils.isBlank(payNoticeBindWeixinOid), "type不能为空！");
+        Validator.checkArgument(StringUtils.isBlank(payNoticeBindWeixinOid), "payNoticeBindWeixinOid不能为空！");
         
         StringBuffer jpql = new StringBuffer("delete from PayNoticeBindWeixin p where p.iwoid=:IWOID");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
@@ -119,6 +134,71 @@ public class PayNoticeBindWeixinServiceImpl
         logger.info("删除微信支付通知绑定信息，oid=" + payNoticeBindWeixinOid);
     }
 
+    @Override
+    public PayNoticeBindWeixinVO doTransAddPayNoticeBindWeixin(String bindType, String toRelateOid, GetUserinfoResData userinfoResData) {
+        Validator.checkArgument(StringUtils.isBlank(bindType), "bindType不能为空！");
+        Validator.checkArgument(userinfoResData == null, "userinfoResData不能为空！");
+        Validator.checkArgument(StringUtils.isBlank(userinfoResData.getOpenid()), "userinfoResData.openid不能为空！");
+        
+        //TODO 校验是否绑定过              
+        PayNoticeBindWeixin po = new PayNoticeBindWeixin();
+        String logTemp = "";
+        if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
+            Validator.checkArgument(StringUtils.isBlank(toRelateOid), "dealerEmployeeOid不能为空！");
+            // 绑定收银员
+            DealerEmployee de = commonDAO.findObject(DealerEmployee.class, toRelateOid);
+            if (de == null) {
+                throw new NotExistsException("微信支付通知绑定，收银员不存在，dealerEmployeeOid=" + toRelateOid);
+            }
+            po.setPayDealerEmployee(de);
+            logTemp = "，关联收银员：" + toRelateOid;
+        } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType)) {
+            Validator.checkArgument(StringUtils.isBlank(toRelateOid), "storeOid不能为空！");
+            // 绑定门店
+            Store store = commonDAO.findObject(Store.class, toRelateOid);
+            if (store == null) {
+                throw new NotExistsException("微信支付通知绑定，门店不存在，storeOid=" + toRelateOid);
+            }
+            po.setStore(store);
+            logTemp = "，关联门店：" + toRelateOid;
+        } else {
+            throw new IllegalArgumentException("参数type只能是1或者2");
+        }
+        po.setIwoid(Generator.generateIwoid());
+        po.setState(PayNoticeBindWeixin.State.open.getValue());// 默认开启
+        po.setOpenid(userinfoResData.getOpenid());
+        po.setNickname(userinfoResData.getNickname());
+        po.setSex(StringUtils.isBlank(userinfoResData.getSex()) ? 0 : Integer.parseInt(userinfoResData.getSex()));
+        po.setType(bindType);
+        po.setCreator(userinfoResData.getOpenid());
+        // TODO 考虑增加字段 来维护昵称与微信尽量保持一致
+        commonDAO.save(po, false);
+        
+        // 记录日志
+        Date logTime = new Date();
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "创建支付通知绑定信息[绑定类别=" + po.getType() +"，openid=" + po.getOpenid() + ", 昵称=" + po.getNickname() + ", 性别=" + po.getSex() + ", 状态=" + po.getState() + logTemp+ "]", 
+            logTime, logTime, null, po.toString(), SysLog.State.success.getValue(), po.getIwoid(), null, SysLog.ActionType.create.getValue());
+        
+        PayNoticeBindWeixinVO vo = new PayNoticeBindWeixinVO();
+        BeanCopierUtil.copyProperties(po, vo);
+        
+        if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
+            Store sto = po.getPayDealerEmployee().getStore();
+            vo.setPayDealerEmployeeName(po.getPayDealerEmployee().getEmployeeName());
+            vo.setPayDealerEmployeeId(po.getPayDealerEmployee().getDealerEmployeeId());
+            vo.setPayDealerEmployeeOid(po.getPayDealerEmployee().getIwoid());
+            vo.setStoreOid(sto.getIwoid());
+            vo.setStoreId(sto.getStoreId());
+            vo.setStoreName(sto.getStoreName());
+        } else {
+            vo.setStoreOid(po.getStore().getIwoid());
+            vo.setStoreId(po.getStore().getStoreId());
+            vo.setStoreName(po.getStore().getStoreName());
+        }
+        
+        return vo;
+    }
+    
 	public void setSysLogService(SysLogService sysLogService) {
 		this.sysLogService = sysLogService;
 	}

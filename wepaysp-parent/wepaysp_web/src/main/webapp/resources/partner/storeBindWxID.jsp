@@ -28,7 +28,7 @@
 <%-- 			<img src="<%=request.getContextPath()%>/resources/partner/storemanage!loadBindQRCode.action?storeOid=${storeOid}" alt="支付通知二维码" width="200" height="200"/> --%>
 <!-- 		</div> -->
 		
-		<s:form id="bindListForm" method="post" action="<%=request.getContextPath()%>/resources/partner/storemanage!batchUpdateBindWxID.action">
+		<form id="bindListForm" action="<%=request.getContextPath()%>/resources/partner/storemanage!batchUpdateBindWxID.action"" method="post">
 	    	<div class="bgtable">
 	            <ul class="bg_all">
 	                <li class="bg_table bg_table1">
@@ -82,7 +82,7 @@
 	                </li>
 	            </ul>
 	    	</div>
-	    </s:form>
+	    </form>
 	</div>
 	<div>
 		说明：

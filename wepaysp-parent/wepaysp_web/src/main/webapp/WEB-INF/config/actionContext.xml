@@ -19,4 +19,6 @@
 	<import resource="action/partner-action-context.xml"/>
 	<import resource="action/pay-action-context.xml"/>
 	<import resource="action/report-action-context.xml"/>
+	<import resource="action/appid-action-context.xml"/>
+	
 </beans>

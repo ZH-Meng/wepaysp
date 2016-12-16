@@ -75,6 +75,26 @@ public class Partner
         }
     }
     
+    /**
+     * 
+     *  服务商级别 
+     */
+    public static enum Level {
+        /** 1顶级服务商 */     LEVEL_TOP(1),
+        /** 2级服务商 */        LEVEL_2(2),
+        /** 3三级服务商*/      LEVEL_3(3);
+
+        private int value;
+
+        public int getValue() {
+            return value;
+        }
+
+        private Level(int value) {
+            this.value = value;
+        }
+    }
+    
     public Partner() {
     }
 

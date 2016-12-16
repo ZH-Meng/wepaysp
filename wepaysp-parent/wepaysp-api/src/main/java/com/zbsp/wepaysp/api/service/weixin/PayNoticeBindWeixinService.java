@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.api.service.weixin;
 import java.util.List;
 import java.util.Map;
 
+import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 /**
@@ -30,4 +31,13 @@ public interface PayNoticeBindWeixinService {
     public void doTransUpdatePayNoticeBindWeixinList(List<PayNoticeBindWeixinVO> bindVOList, String modifier, String operatorUserOid, String logFunctionOid);
     
     public void doTransDeletePayNoticeBindWeixin(String payNoticeBindWeixinOid);
+
+    /**
+     * 绑定微信账号和门店/收银员，bindType=1 绑定门店，bindType=2绑定门店
+     * @param bindType 绑定类型
+     * @param toRelateOid bindType=1 为storeOid，bindType=2为 dealerEmployeeOid
+     * @param userinfoResData
+     * @return PayNoticeBindWeixinVO
+     */
+    public PayNoticeBindWeixinVO doTransAddPayNoticeBindWeixin(String bindType, String toRelateOid, GetUserinfoResData userinfoResData);
 }

@@ -14,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.common.config.SysNestedRoleCode;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
-import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -33,6 +33,8 @@ import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.google.zxing.WriterException;
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
@@ -41,9 +43,8 @@ public class DealerServiceImpl
     extends BaseService
     implements DealerService {
     
-    private String callBackURL;
-    private String qRCodeRootPath;
     private SysLogService sysLogService;
+    private SysConfigService sysConfigService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -482,18 +483,24 @@ public class DealerServiceImpl
         }
         if (StringUtils.isBlank(qrCodePath) || !qrCodeExist) {
             String dealerStr = dealer.toString();
-            //String appid = dealer.getPartner().getAppId();
-            String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
-            // 生成二维码对应链接
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
-            Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化类时校验
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(QRCodeType.PAY.getValue(), appid, callBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid());
+            
+            Map<String, String > partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+            if (partnerMap == null || partnerMap.isEmpty()) {
+                throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
+            }
+            String appid = partnerMap.get(SysEnvKey.WX_APP_ID);// 微信公众号ID
+            
+            // 生成二维码对应链接
+            Validator.checkArgument(StringUtils.isBlank(SysConfig.payCallBackURL), "未配置微信公众号支付扫码回调地址无法生成支付二维码");
+            Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
+            String qrURL = Generator.generateQRURL(QRCodeType.PAY.getValue(), appid, SysConfig.payCallBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid());
             logger.info("商户-" + dealer.getCompany() + "生成微信支付二维码URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId();
-            File filePath = new File(qRCodeRootPath + File.separator + relativePath);
+            File filePath = new File(SysConfig.qRCodeRootPath + File.separator + relativePath);
             if (!filePath.exists()) {
                 filePath.mkdirs();
             }
@@ -518,15 +525,11 @@ public class DealerServiceImpl
         BeanCopierUtil.copyProperties(dealer, dealerVO);
         return dealerVO;
     }
+
+    public void setSysConfigService(SysConfigService sysConfigService) {
+        this.sysConfigService = sysConfigService;
+    }
     
-    public void setCallBackURL(String callBackURL) {
-        this.callBackURL = callBackURL;
-    }
-
-    public void setqRCodeRootPath(String qRCodeRootPath) {
-        this.qRCodeRootPath = qRCodeRootPath;
-    }
-
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }

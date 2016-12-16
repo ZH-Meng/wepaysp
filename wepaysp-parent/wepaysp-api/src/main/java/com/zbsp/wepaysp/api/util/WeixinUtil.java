@@ -6,9 +6,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 import com.tencent.WXPay;
-import com.tencent.protocol.send_template_msg_protocol.SendTemplateMsgReqData;
-import com.tencent.protocol.send_template_msg_protocol.SendTemplateMsgResData;
-import com.tencent.protocol.send_template_msg_protocol.TemplateData;
+import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgReqData;
+import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgResData;
+import com.tencent.protocol.appid.send_template_msg_protocol.TemplateData;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;

@@ -133,7 +133,7 @@ public class EnumDefine {
         wxPayAPIMoneyException("【微信支付金额异常，系统报警】"),
         /** 调用微信支付API失败 */
         invokeWxPayAPIErr("【调用微信支付API失败，系统报警】"),
-        /** 调用微信支付API失败 */
+        /** 调用微信公众号API失败 */
         invokeWxJSAPIErr("【调用微信公众号接口API失败，系统报警】"),
         /** 发送微信支付请求失败 */
         sendWxPayRequestException("【发送微信支付请求失败，系统报警】"),
@@ -206,6 +206,30 @@ public class EnumDefine {
     		this.value = value;
 		}
     }
+    
+    /**
+     * 公众号授权类型
+     * 
+     * @author mengzh
+     *
+     */
+    public static enum GrantType {
+        /** 获取网页授权access_token*/         AUTHORIZATION_CODE("authorization_code"),
+        /** 刷新网页授权access_token*/        REFRESH_TOKEN("refresh_token"),
+        /** 获取基础支持的access_token*/     client_credential("CLIENT_CREDENTIAL");
+        
+        private String value;
+        
+        public String getValue() {
+            return value;
+        }
+        
+        private GrantType(String value) {
+            this.value = value;
+        }
+    }
+    
+    
     
     /**
      * 是否可以退款标识

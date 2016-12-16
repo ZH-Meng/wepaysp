@@ -2,7 +2,7 @@ package com.zbsp.wepaysp.manage.web.util;
 
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.JSONUtil;
-import com.zbsp.wepaysp.manage.web.vo.wxauth.AccessTokenResultVO;
+import com.zbsp.wepaysp.manage.web.vo.appid.WxAuthAccessTokenResult;
 
 /**
  * 微信支付模拟请求结果
@@ -20,7 +20,7 @@ public class WxPayResultSimulator {
      */
     public static String jsAPIAuthSucc(String apiURL) {
         System.out.println("模拟微信网页授权，URL：" + apiURL);
-        AccessTokenResultVO result = new AccessTokenResultVO();
+        WxAuthAccessTokenResult result = new WxAuthAccessTokenResult();
         result.setAccess_token(Generator.generateIwoid());
         result.setExpires_in(new Long(7200));
         result.setRefresh_token(Generator.generateIwoid());
@@ -43,7 +43,7 @@ public class WxPayResultSimulator {
      */
     public static String jsAPIRefreshTokenSucc(String apiURL) {
         System.out.println("模拟微信刷新access_token，URL：" + apiURL);
-        AccessTokenResultVO result = new AccessTokenResultVO();
+        WxAuthAccessTokenResult result = new WxAuthAccessTokenResult();
         result.setAccess_token(Generator.generateIwoid());
         result.setExpires_in(new Long(7200));
         result.setRefresh_token(Generator.generateIwoid());

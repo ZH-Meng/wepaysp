@@ -1,5 +1,7 @@
 package com.zbsp.wepaysp.vo.weixin;
 
+import java.sql.Timestamp;
+
 /**
  * 微信支付（门店/收银员级别）通知绑定收银员VO
  * 
@@ -15,7 +17,12 @@ public class PayNoticeBindWeixinVO
     private static final long serialVersionUID = 3801534516962277126L;
     private String iwoid;
     private String payDealerEmployeeOid;
+    private String payDealerEmployeeId;
+    private String payDealerEmployeeName;
     private String storeOid;
+    private String storeId;
+    private String storeName;
+
     private String bindDealerEmployeeOid;
     private String bindDealerEmployeeId;
     private String bindDealerEmployeeName;
@@ -24,6 +31,7 @@ public class PayNoticeBindWeixinVO
     private Integer sex;
     private String type;
     private String state;
+    private Timestamp createTime;
 
     public PayNoticeBindWeixinVO() {
     }
@@ -115,5 +123,46 @@ public class PayNoticeBindWeixinVO
     public void setState(String state) {
         this.state = state;
     }
+
+    public String getPayDealerEmployeeId() {
+        return payDealerEmployeeId;
+    }
+
+    public void setPayDealerEmployeeId(String payDealerEmployeeId) {
+        this.payDealerEmployeeId = payDealerEmployeeId;
+    }
+
+    public String getPayDealerEmployeeName() {
+        return payDealerEmployeeName;
+    }
+
+    public void setPayDealerEmployeeName(String payDealerEmployeeName) {
+        this.payDealerEmployeeName = payDealerEmployeeName;
+    }
+
+    public String getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+    
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+    
 
 }

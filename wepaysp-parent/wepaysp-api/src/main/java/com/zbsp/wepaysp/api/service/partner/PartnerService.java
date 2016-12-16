@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
+import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 
 /**
@@ -18,6 +19,13 @@ public interface PartnerService {
      * @return 服务商对象
      */
     public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid);
+    
+    /**
+     * 查找使用中的顶级服务商集合
+     * @param topPartnerOid 指定某个顶级服务商Oid
+     * @return
+     */
+    public List<Partner> doJoinTransQueryTopPartner(String topPartnerOid);
 	
     /**
      * 查询符合条件的列表，查询结果按最后修改时间倒序排列.

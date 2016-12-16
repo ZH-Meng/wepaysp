@@ -13,8 +13,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
-import com.zbsp.wepaysp.common.constant.EnumDefine;
 import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
@@ -26,6 +26,8 @@ import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.google.zxing.WriterException;
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
@@ -34,10 +36,8 @@ public class StoreServiceImpl
     extends BaseService
     implements StoreService {
 
-    private String callBackURL;
-    private String bindCallBackURL;
-    private String qRCodeRootPath;
     private SysLogService sysLogService;
+    private SysConfigService sysConfigService;
     
     @Override
     public StoreVO doJoinTransQueryStoreByOid(String storeOid) {
@@ -140,7 +140,7 @@ public class StoreServiceImpl
         Validator.checkArgument(storeVO == null, "门店对象不能为空");
         Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
-        Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
+        //Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(storeVO.getStoreName()), "门店名称不能为空");
         // Validator.checkArgument(StringUtils.isBlank(storeVO.getStoreTel()), "门店联系电话不能为空");
         Validator.checkArgument(StringUtils.isBlank(storeVO.getDealerOid()), "商户Oid不能为空");
@@ -189,7 +189,7 @@ public class StoreServiceImpl
         Validator.checkArgument(StringUtils.isBlank(storeVO.getIwoid()), "服务商Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
-        Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
+        //Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
         Validator.checkArgument(StringUtils.isBlank(storeVO.getStoreName()), "门店名称不能为空");
         // Validator.checkArgument(StringUtils.isBlank(storeVO.getStoreTel()), "门店联系电话不能为空");
 
@@ -248,20 +248,23 @@ public class StoreServiceImpl
             String storeStr = store.toString();
             Dealer dealer = store.getDealer();
             Validator.checkArgument((dealer == null || StringUtils.isBlank(dealer.getIwoid())), "门店缺少商户信息无法生成二维码");
-            
-            //String appid = dealer.getPartner().getAppId();
-            String appid = EnumDefine.DevParam.APPID.getValue();// FIXME
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
+            
+            Map<String, String > partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+            if (partnerMap == null || partnerMap.isEmpty()) {
+                throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
+            }
+            String appid = partnerMap.get(SysEnvKey.WX_APP_ID);// 微信公众号ID
             
             String qrURL = null;
             String callBackTemp = null;
             if (QRCodeType.PAY.getValue() == qRCodeType) {
-            	Validator.checkArgument(StringUtils.isBlank(callBackURL), "未配置微信扫码回调地址无法生成二维码");// FIXME 初始化程序时校验
-            	callBackTemp = callBackURL;
+            	Validator.checkArgument(StringUtils.isBlank(SysConfig.payCallBackURL), "未配置微信公众号支付扫码回调地址无法生成支付二维码");
+            	callBackTemp = SysConfig.payCallBackURL;
             } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
-                Validator.checkArgument(StringUtils.isBlank(bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");// FIXME 初始化程序时校验
-                callBackTemp = bindCallBackURL;
+                Validator.checkArgument(StringUtils.isBlank(SysConfig.bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
+                callBackTemp = SysConfig.bindCallBackURL;
             }
             qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid());
             // 生成二维码对应链接
@@ -269,7 +272,7 @@ public class StoreServiceImpl
 
             // 路径生成规则：服务商ID/商户ID/门店ID
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId() + File.separator + store.getStoreId();
-            File filePath = new File(qRCodeRootPath + File.separator + relativePath);
+            File filePath = new File(SysConfig.qRCodeRootPath + File.separator + relativePath);
             if (!filePath.exists()) {
                 filePath.mkdirs();
             }
@@ -300,17 +303,9 @@ public class StoreServiceImpl
         BeanCopierUtil.copyProperties(store, storeVO);
         return storeVO;
     }
-
-    public void setCallBackURL(String callBackURL) {
-        this.callBackURL = callBackURL;
-    }
     
-    public void setBindCallBackURL(String bindCallBackURL) {
-        this.bindCallBackURL = bindCallBackURL;
-    }
-
-    public void setqRCodeRootPath(String qRCodeRootPath) {
-        this.qRCodeRootPath = qRCodeRootPath;
+    public void setSysConfigService(SysConfigService sysConfigService) {
+        this.sysConfigService = sysConfigService;
     }
 
     public void setSysLogService(SysLogService sysLogService) {

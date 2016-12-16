@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.manage.web.vo.jsonresult;
+package com.zbsp.wepaysp.manage.web.vo.appid;
 
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 
