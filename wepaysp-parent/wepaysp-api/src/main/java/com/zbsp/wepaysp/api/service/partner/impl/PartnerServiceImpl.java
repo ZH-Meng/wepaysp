@@ -62,12 +62,27 @@ public class PartnerServiceImpl
     
     @SuppressWarnings("unchecked")
     @Override
-    public List<Partner> doJoinTransQueryTopPartner(String topPartnerOid) {
-        if (StringUtils.isNotBlank(topPartnerOid)) {
-            List<Partner> topPartnerList = new ArrayList<Partner>();
-            Partner top = commonDAO.findObject(Partner.class, topPartnerOid);
-            topPartnerList.add(top);
-            return topPartnerList;
+    public List<Partner> doJoinTransQueryTopPartner(String queryKey, Integer type) { 
+        if (StringUtils.isNotBlank(queryKey)) {
+        	Validator.checkArgument(type == null, "查找方式type不能为空");
+        	if (type != 1 && type != 2) {
+        		throw new IllegalArgumentException("查找方式type只能为1或2");
+        	}
+        	List<Partner> topPartnerList = new ArrayList<Partner>();
+        	if (type == 1) {
+        		Partner top = commonDAO.findObject(Partner.class, queryKey);
+        		if (top != null && !Partner.State.frozen.getValue().equals(top.getState()) && Partner.Level.LEVEL_TOP.getValue() ==  top.getLevel()) {
+        			topPartnerList.add(top);
+        		}
+        	} else if (type == 2) {
+        		String jpql= "from Partner p where p.level=:LEVEL and p.state!=:STATE and p.appid=:APPID";
+        		Map<String, Object> jpqlMap = new HashMap<String, Object>();
+                jpqlMap.put("LEVEL", Partner.Level.LEVEL_TOP.getValue());
+                jpqlMap.put("STATE", Partner.State.frozen.getValue());
+                jpqlMap.put("APPID", queryKey);
+                return (List<Partner>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        	}
+        	 return topPartnerList;
         } else {
             String jpql= "from Partner p where p.level=:LEVEL and p.state!=:STATE";
             Map<String, Object> jpqlMap = new HashMap<String, Object>();

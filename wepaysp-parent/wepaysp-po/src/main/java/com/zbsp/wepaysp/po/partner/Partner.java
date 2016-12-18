@@ -381,7 +381,7 @@ public class Partner
         this.partnerKey = partnerKey;
     }
 
-    @Column(name = "KEY_PATH", length = 32)
+    @Column(name = "KEY_PATH", length = 128)
     public String getKeyPath() {
         return this.keyPath;
     }

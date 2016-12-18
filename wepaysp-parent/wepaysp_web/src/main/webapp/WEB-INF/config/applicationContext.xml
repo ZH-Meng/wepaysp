@@ -27,6 +27,7 @@
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
 		<property name="driverClass" value="${driverClass}" />
 		<property name="jdbcUrl" value="${jdbcUrl}" />
+		<!-- <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/wepay_sp?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false" /> -->
 		<property name="user" value="${user}" />
 		<property name="password" value="${password}" />
 		<property name="initialPoolSize" value="${initialPoolSize}" />
@@ -89,5 +90,5 @@
   	<bean id="springContextUtil" class="com.zbsp.wepaysp.manage.web.util.SpringContextUtil" />
   	
 	<import resource="service-context.xml" />
-	<!-- <import resource="spring-task-context.xml" /> -->
+	<import resource="spring-task-context.xml" />
 </beans>

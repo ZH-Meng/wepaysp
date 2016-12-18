@@ -14,26 +14,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
 
-import com.zbsp.wepaysp.common.constant.WxApiUrl;
-import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.EnumDefine.GrantType;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
-import com.zbsp.wepaysp.common.http.common.HttpConfig;
-import com.zbsp.wepaysp.common.http.common.HttpConfig.ParamType;
-import com.zbsp.wepaysp.common.http.exception.HttpProcessException;
-import com.zbsp.wepaysp.common.http.httpclient.HttpClientUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
-import com.zbsp.wepaysp.manage.web.vo.appid.WxAuthAccessTokenResult;
 import com.zbsp.wepaysp.manage.web.vo.appid.CreateOrderResult;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.tencent.WXPay;
+import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenReqData;
+import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
-import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
-import com.zbsp.wepaysp.vo.partner.PartnerVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -43,7 +42,6 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
  */
 public class AppIDPayAction
     extends BaseAction {
-    
 
     private static final long serialVersionUID = -7528241554406736862L;
 
@@ -54,25 +52,26 @@ public class AppIDPayAction
     private String dealerEmployeeOid;
     private String money;
 
+    /** -----授权回调回传-静默用户同意------ */
     /**
      * code作为换取access_token和openid的票据，每次用户授权带上的code将不一样，code只能使用一次，（5分钟未被使用自动过期，不确定）<br>
      * 若用户禁止授权，则重定向后不会带上code参数
      */
     private String code;
+    //private String state;
+    
     /** 用户在公众号的标识 */
     private String openid;
-    private String state;
-    private String wxPayNotifyURL;
     /** JS支付 请求包 */
     private JSPayReqData jsPayReqData;
 
-    private DealerService dealerService;
-    private PartnerService partnerService;
-    private WeixinPayDetailsMainService weixinPayDetailsMainService;
     private String weixinPayDetailOid;
     private String payResult;
     private WeixinPayDetailsVO weixinPayDetailsVO;
     private String tradeStatus;
+    private DealerService dealerService;
+    private WeixinPayDetailsMainService weixinPayDetailsMainService;
+    
     /**
      * 微信浏览器授权后回调，目前使用公众号支付不需要access_token，只是下单时需要access_token<br>
      * 其他：微信公众平台开发（其中有一个支付接口）会用access_token（有时效性，调用API有限），需要考虑 access_token缓存或刷新方案
@@ -84,36 +83,46 @@ public class AppIDPayAction
         if (!checkCallBackParam()) {
             return ERROR;
         }
-        // 根据partnerOid查找APPID、SECRET
-        PartnerVO accessPartner = partnerService.doJoinTransQueryPartnerByOid(partnerOid);// FIXME 改为先从内存获取
-        if (accessPartner == null) {
-            logger.warn("微信支付回调访问的服务商不存在，partnerOid：" + partnerOid);
+        
+        if (StringUtils.isBlank(partnerOid)) {
+        	logger.error("微信支付非法回调，partnerOid为空");
+        }
+        
+        // 从内存中获取服务商配置信息
+        Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partnerOid);
+        if (partnerMap == null || partnerMap.isEmpty()) {
+            logger.error("微信支付通知绑定微信账户微信回调访问的服务商不存在，partnerOid：" + partnerOid);
             return ERROR;
         }
-        // FIXME 通过PartnerVO获取
-        String appid = DevParam.APPID.getValue();
-        String appsecret = DevParam.APPSECRET.getValue();
-        String getAccessTokenURL = WxApiUrl.JSAPI_GET_ACCESS_TOKEN.replace("APPID", appid).replace("SECRET", appsecret).replace("CODE", code);
-        // String refreshAccessTokenURL = WxApiUrl.JSAPI_REFRESH_ACCESS_TOKEN.replace("APPID", "").replace("REFRESH_TOKEN", "");// 刷新access_token的URL设置方式
-
-        HttpConfig httpConfig = HttpConfig.custom(ParamType.NONE);// 参数在URL拼接完成
-        WxAuthAccessTokenResult accessTokenResult = null;
+        
+        // 通过code换取网页授权access_token 和 openid
+        GetAuthAccessTokenReqData authReqData = new GetAuthAccessTokenReqData(GrantType.AUTHORIZATION_CODE.getValue(), 
+            MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID), MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET), code, null);
+        
+        GetAuthAccessTokenResData authResult = null;
         try {
-            // 调用API获取access_token、openid
-            String jsonResult = HttpClientUtil.get(httpConfig.url(getAccessTokenURL).encoding("UTF-8"));
-            // 转化JSON结果
-            accessTokenResult = JSONUtil.parseObject(jsonResult, WxAuthAccessTokenResult.class);
-            // 校验获取access_token、openid结果
-            if (checkAccessTokenResult(accessTokenResult) && StringUtils.isNotBlank(accessTokenResult.getOpenid())) {
-                // 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
-                openid = accessTokenResult.getOpenid();
+            logger.info("开始获取网页授权access_token 和 openid");
+            
+            String jsonResult = WXPay.requestGetAuthAccessTokenService(authReqData, 
+                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
+            authResult = JSONUtil.parseObject(jsonResult, GetAuthAccessTokenResData.class);
+            
+            // 校验获取access_token
+            if (checkAccessTokenResult(authResult)) {
+            	// 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
+                openid = authResult.getOpenid();
+                logger.info("auth_access_token：" + authResult.getAccess_token() + "，expires_in：" + authResult.getExpires_in() + ",openid = " + openid);
+                // TODO 设置过期时间
+                /*由于access_token拥有较短的有效期，当access_token超时后，可以使用refresh_token进行刷新，
+                refresh_token拥有较长的有效期（7天、30天、60天、90天），当refresh_token失效的后，需要用户重新授权。
+                如果需要定期同步用户的昵称，则需要考虑刷新access_token*/
             } else {
-                logger.warn("获取openid失败");
+                logger.warn("获取网页授权Access_token失败，错误码：" + authResult.getErrcode() + "，错误描述：" + authResult.getErrmsg());
                 return ERROR;
             }
-        } catch (HttpProcessException e) {
-            logger.warn("http请求错误，" + e.getMessage(), e);
         } catch (Exception e) {
+            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
+                "获取网页授权Access_token失败", "，异常信息：" + e.getMessage()));
             logger.error(e.getMessage(), e);
             return ERROR;
         }
@@ -142,13 +151,13 @@ public class AppIDPayAction
         if (StringUtils.isBlank(dealerOid) || StringUtils.isBlank(openid)) {
             /*logger.warn("商户Oid和openid都不能为空！");
             setAlertMessage("参数缺失，请重试！");
-            // FIXME 重新准备隐藏信息
+            // FIXME 非法提交订单时，重新准备隐藏信息
             return "wxCallBack";*/
             result = new CreateOrderResult("paramMiss", "参数缺失，请重试！", null, null);
 
         }
-        if (StringUtils.isBlank(wxPayNotifyURL)) {
-            logger.debug("微信支付统一下单通知URL为空！");
+        if (StringUtils.isBlank(SysConfig.wxPayNotifyURL)) {
+            logger.error("系统配置异常：微信支付统一下单通知URL为空！");
             //return ERROR;
             result = new CreateOrderResult("error", "系统错误！", null, null);
         }
@@ -160,7 +169,7 @@ public class AppIDPayAction
         payDetailsVO.setOpenid(openid);
         payDetailsVO.setStoreOid(storeOid);// 一店一码时，不为空
         payDetailsVO.setDealerEmployeeOid(dealerEmployeeOid);// 一收银员一码时，不为空
-        payDetailsVO.setNotifyUrl(wxPayNotifyURL);// 通知地址
+        payDetailsVO.setNotifyUrl(SysConfig.wxPayNotifyURL);// 通知地址
 
         BigDecimal orderMoney = new BigDecimal(money);// 订单金额
         payDetailsVO.setTotalFee(orderMoney.multiply(new BigDecimal(100)).intValue());// 元转化为分
@@ -204,6 +213,9 @@ public class AppIDPayAction
         //return "JSPAY";
     }
     
+    /**
+     * 微信异步通知支付结果
+     */
     public void wxPayNotify() {// FIXME 迁移至restFul 接口
         // 校验签名
         HttpServletRequest request = ServletActionContext.getRequest();
@@ -241,7 +253,7 @@ public class AppIDPayAction
         }
         return "jsPayResult";
     }
-
+    
     /**
      * 检查微信网页授权回调的系统URL中参数是否完整和正确
      * 
@@ -250,7 +262,7 @@ public class AppIDPayAction
     private boolean checkCallBackParam() {
         if (StringUtils.isBlank(code)) {
             logger.warn("用户访问公众号，选择禁止授权.");
-            // TODO 因为scope 选择snsapi_base，不弹出授权页面，直接跳转，所以暂不处理此情况
+            // 因为scope 选择snsapi_base，不弹出授权页面，直接跳转，所以暂不处理此情况
             return false;
         }
         // 校验商户等参数
@@ -272,26 +284,26 @@ public class AppIDPayAction
     /**
      * 校验http get 获取access_token的结果
      * 
-     * @param accessTokenResultVO
+     * @param getAuthAccessTokenResData
      * @return
      */
-    private boolean checkAccessTokenResult(WxAuthAccessTokenResult accessTokenResultVO) {
+    private boolean checkAccessTokenResult(GetAuthAccessTokenResData getAuthAccessTokenResData) {
         boolean result = false;
-        if (accessTokenResultVO == null) {
-            logger.warn("accessTokenResultVO为空");
+        if (getAuthAccessTokenResData == null) {
+            logger.warn("getBaseAccessTokenResData为空");
         } else {
-            logger.debug(accessTokenResultVO.toString());
+            logger.debug(getAuthAccessTokenResData.toString());
         }
-        if (StringUtils.isNotBlank(accessTokenResultVO.getAccess_token()) && accessTokenResultVO.getExpires_in() != null && StringUtils.isNotBlank(accessTokenResultVO.getRefresh_token()) && StringUtils.isNotBlank(accessTokenResultVO.getOpenid())) {
+        if (StringUtils.isNotBlank(getAuthAccessTokenResData.getAccess_token()) && StringUtils.isNotBlank(getAuthAccessTokenResData.getOpenid())) {
             result = true;
-        } else if (StringUtils.isNotBlank(accessTokenResultVO.getErrcode())) {
-            result = true;
+        } else if (StringUtils.isNotBlank(getAuthAccessTokenResData.getErrcode())) {
+            result = false;
         } else {
-            logger.warn("get or refresh access_token result invalid");
+            logger.warn("get auth access_token result invalid");
         }
         return result;
     }
-
+    
     public String getDealerOid() {
         return dealerOid;
     }
@@ -348,14 +360,6 @@ public class AppIDPayAction
         this.code = code;
     }
     
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public void setWxPayNotifyURL(String wxPayNotifyURL) {
-        this.wxPayNotifyURL = wxPayNotifyURL;
-    }
-    
     public String getWeixinPayDetailOid() {
         return weixinPayDetailOid;
     }
@@ -390,10 +394,6 @@ public class AppIDPayAction
 
     public void setDealerService(DealerService dealerService) {
         this.dealerService = dealerService;
-    }
-
-    public void setPartnerService(PartnerService partnerService) {
-        this.partnerService = partnerService;
     }
 
     public void setWeixinPayDetailsMainService(WeixinPayDetailsMainService weixinPayDetailsMainService) {

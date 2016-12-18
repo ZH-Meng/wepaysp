@@ -8,7 +8,7 @@ import com.tencent.business.ScanPayBusiness;
 import com.tencent.protocol.pay_protocol.ScanPayResData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryResData;
 import com.tencent.protocol.reverse_protocol.ReverseResData;
-import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
+import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.util.WeixinPackConverter;
 
 
@@ -32,17 +32,15 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
     public static final String ON_FAIL_BY_AUTH_CODE_INVALID = "on_fail_by_auth_code_invalid";
     public static final String ON_FAIL_BY_MONEY_NOT_ENOUGH = "on_fail_by_money_not_enough";
 
-
-
     public static final String ON_FAIL = "on_fail";
     public static final String ON_SUCCESS = "on_success";
 
     private String result = "";
     private String transcationID = "";
     
-    private WeixinPayDetailsService weixinPayDetailsService;
-    public DefaultScanPayBusinessResultListener(WeixinPayDetailsService weixinPayDetailsService) {
-    	this.weixinPayDetailsService = weixinPayDetailsService;
+    private WeixinPayDetailsMainService weixinPayDetailsMainService;
+    public DefaultScanPayBusinessResultListener(WeixinPayDetailsMainService weixinPayDetailsMainService) {
+    	this.weixinPayDetailsMainService = weixinPayDetailsMainService;
 	}
 
     @Override
@@ -151,20 +149,12 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
         this.transcationID = transcationID;
     }
     
-	public WeixinPayDetailsService getWeixinPayDetailsService() {
-		return weixinPayDetailsService;
-	}
-
-	public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
-		this.weixinPayDetailsService = weixinPayDetailsService;
-	}
-	
     /**
      * 调用service更新交易明细
      * @param scanPayResData
      */
     private void updatePayResult(ScanPayResData scanPayResData) {
-        weixinPayDetailsService.doTransUpdatePayResult(scanPayResData.getReturn_code(), scanPayResData.getResult_code(), WeixinPackConverter.scanPayRes2WeixinPayDetailsVO(scanPayResData));
+    	weixinPayDetailsMainService.updateScanPayResult(scanPayResData.getReturn_code(), scanPayResData.getResult_code(), WeixinPackConverter.scanPayRes2WeixinPayDetailsVO(scanPayResData));
     }
     
 }

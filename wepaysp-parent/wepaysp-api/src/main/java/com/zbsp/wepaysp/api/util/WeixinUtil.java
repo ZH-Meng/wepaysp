@@ -1,16 +1,28 @@
 package com.zbsp.wepaysp.api.util;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.tencent.WXPay;
+import com.tencent.protocol.appid.base_access_token_protocol.GetBaseAccessTokenReqData;
+import com.tencent.protocol.appid.base_access_token_protocol.GetBaseAccessTokenResData;
 import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgReqData;
 import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgResData;
 import com.tencent.protocol.appid.send_template_msg_protocol.TemplateData;
+import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -21,6 +33,13 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
  */
 public class WeixinUtil {
     
+    /**日志对象*/
+    protected Logger logger = LogManager.getLogger(WeixinUtil.class);
+    
+    private int refreshLimitErrorCount = 3;
+    private long expire_time;
+    private String access_token;
+	
     /**FIXME 可以在数据库中灵活配置需要通知的业务和模版ID的对应关系，以及模版ID的启用停用*/
     private static String TEMPLATE_ID_PAY_SUCCESS = "nJWFUU8wDvd7elT4znZivLLHmMYl_ajID6cd4OujHa0";
     
@@ -54,11 +73,14 @@ public class WeixinUtil {
         /*
          * {{first.DATA}} 订单编号：{{keyword1.DATA}} 订单金额：{{keyword2.DATA}} 实付金额：{{keyword3.DATA}} 消费地点：{{keyword4.DATA}} 消费时间：{{keyword5.DATA}} {{remark.DATA}}
          */
-        TemplateData first = new TemplateData("收到一笔支付通知，订单信息如下", "#000000");
+        TemplateData first = new TemplateData("收到一笔支付通知，订单信息如下：", "#000000");
         dataMap.put("first", first);
+      	DecimalFormat myformat = new DecimalFormat();
+    	myformat.applyPattern("###,###,##0.00");
+    	
         TemplateData keyword1 = new TemplateData(payResultVO.getOutTradeNo(), "#000000");
-        TemplateData keyword2 = new TemplateData(payResultVO.getTotalFee() + "", "#000000");
-        TemplateData keyword3 = new TemplateData(payResultVO.getTotalFee() + "", "#000000");
+        TemplateData keyword2 = new TemplateData(myformat.format(new BigDecimal(payResultVO.getTotalFee()).divide(new BigDecimal(100))) + "元", "#000000");
+        TemplateData keyword3 = new TemplateData(myformat.format(new BigDecimal(payResultVO.getTotalFee()).divide(new BigDecimal(100))) + "元", "#000000");
         TemplateData keyword4 = new TemplateData(payResultVO.getDealerName() + "-" + payResultVO.getStoreName(), "#000000");
         TemplateData keyword5 = new TemplateData(DateUtil.getDate(payResultVO.getTransBeginTime(), "yyyy-MM-dd HH:mm:ss"));
         dataMap.put("keyword1", keyword1);
@@ -73,4 +95,117 @@ public class WeixinUtil {
         // 返回消息发送结果（不能确定是否下发至微信用户，需要查看事件推送结果）
         return JSONUtil.parseObject(jsonResult, SendTemplateMsgResData.class);
     }
+    
+    /**
+     * 获取Base_access_token，如果过期则先刷新再返回
+     * @param partner1Oid
+     * @return
+     */
+    public String getBaseAccessToken(String partner1Oid) {
+    	Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid); 
+    	String accessToken = MapUtils.getString(partnerMap, SysEnvKey.WX_BASE_ACCESS_TOKEN);
+		Long expireTime = MapUtils.getLong(partnerMap, SysEnvKey.WX_BASE_EXPIRE_TIME);
+		// 检查和设置开关
+		boolean flag = false;
+    	if (StringUtils.isBlank(accessToken)) {// 首次启动
+    		flag = true;
+    	} else if (expireTime == null || new Date().getTime() >= (expireTime.longValue() - 60 * 60 * 2)) {// access_token过期 提前两分钟刷新
+    		flag = true;
+    	}
+    	if (flag) {
+    		return refreshBaseAccessToken(partner1Oid);
+    	} else {
+    		return accessToken;
+    	}
+    }
+    
+    /**
+     * 刷新Base_access_token
+     * @param partner1Oid 服务商Oid
+     */
+    public String refreshBaseAccessToken(String partner1Oid) {
+    	Validator.checkArgument(StringUtils.isBlank(partner1Oid), "partner1Oid不能为空");
+    	Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid); 
+    	String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
+    	logger.info("服务商（"+ appid +"）开始调用刷新access_token接口");
+		
+		String secret= MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET);
+		String certLocalPath= MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH);
+		String certPassword= MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD);
+		boolean result = false;
+		for (int i = 1; i <= refreshLimitErrorCount; i++) {
+			if (getAccessToken(appid, secret, certLocalPath, certPassword)) {
+				logger.info("服务商（"+ appid  +"）获取/刷新Access_token成功");
+				result = true;
+				// 缓存access_token 和 expire_time
+				partnerMap.put(SysEnvKey.WX_BASE_ACCESS_TOKEN, access_token);
+				partnerMap.put(SysEnvKey.WX_BASE_EXPIRE_TIME, expire_time);
+				
+				logger.info("服务商（"+ appid +"）分别更新以partner1Oid、appid为key的Map配置");
+				SysConfig.partnerConfigMap.put(partner1Oid, partnerMap);
+				SysConfig.partnerConfigMap2.put(appid, partnerMap);
+				return access_token;
+			} else {
+				logger.error("服务商（"+ appid  +"）获取/刷新Access_token失败第" + i + "次");
+				try {
+					Thread.sleep(3000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		if (!result) {
+			logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
+					"服务商（"+ appid  +"）获取/刷新Access_token失败"));
+		}
+		return null;
+    }
+    
+    private boolean getAccessToken(String appid, String secret, String certLocalPath, String certPassword) {
+        try {
+            String jsonResult = WXPay.requestGetBaseAccessTokenService(new GetBaseAccessTokenReqData(appid, secret), certLocalPath, certPassword);
+            // 转化JSON结果
+            GetBaseAccessTokenResData accessTokenResult = JSONUtil.parseObject(jsonResult, GetBaseAccessTokenResData.class);
+            // 校验获取access_token
+            if (checkAccessTokenResult(accessTokenResult)) {
+                access_token = accessTokenResult.getAccess_token();
+                logger.info("access_token：" + accessTokenResult.getAccess_token() + "，expires_in：" + accessTokenResult.getExpires_in());
+                // 设置过期时间
+                expire_time = new Date().getTime() + accessTokenResult.getExpires_in() * 1000;
+                return true;
+            } else {
+                logger.error("获取/刷新Access_token失败，错误码：" + accessTokenResult.getErrcode() + "，错误描述：" + accessTokenResult.getErrmsg());
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
+                "获取/刷新Access_token失败", "，异常信息：" + e.getMessage()));
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * 校验http get 获取access_token的结果
+     * 
+     * @param getBaseAccessTokenResData
+     * @return
+     */
+    private boolean checkAccessTokenResult(GetBaseAccessTokenResData getBaseAccessTokenResData) {
+        boolean result = false;
+        if (getBaseAccessTokenResData == null) {
+            logger.warn("getBaseAccessTokenResData为空");
+        } else {
+            logger.debug(getBaseAccessTokenResData.toString());
+        }
+        if (StringUtils.isNotBlank(getBaseAccessTokenResData.getAccess_token())) {
+            result = true;
+        } else if (StringUtils.isNotBlank(getBaseAccessTokenResData.getErrcode())) {
+            result = false;
+        } else {
+            logger.warn("get or refresh access_token result invalid");
+        }
+        return result;
+    }
+    
 }

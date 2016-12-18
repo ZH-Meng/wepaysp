@@ -55,4 +55,13 @@ public interface WeixinPayDetailsMainService {
      */
     public void handleOrderQueryResult(String resultCode, WeixinPayDetailsVO queryResultVO);
 
+    /**
+     * 更新扫码支付结果，如果支付成功，向收银员发送支付成功通知
+     * 
+     * @param returnCode 业务结果 SUCCESS/FAIL，FAIL时错误信息详见errCode
+     * @param resultCode 业务结果码
+     * @param payResultVO 封装的支付结果VO
+     */
+	public void updateScanPayResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO);
+
 }

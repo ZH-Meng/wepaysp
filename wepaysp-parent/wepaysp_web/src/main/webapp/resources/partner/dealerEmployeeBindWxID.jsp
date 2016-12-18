@@ -16,29 +16,30 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：商户信息管理&gt;门店信息管理&gt;绑定支付通知</div>
+		<div class="bgposition">您现在的位置：商户信息管理&gt;>商户员工管理&gt;绑定支付通知</div>
 		<div class="bgtj">
 			<ul class="tj_title">
 				<li>二维码</li>
 			</ul>
 			<div class="qrCode_wrapper">
 				<div class="qrCode_block">
-					<img src="<%=request.getContextPath()%>/resources/partner/storemanage!loadBindQRCode.action?storeOid=${storeOid}" alt="支付通知二维码" width="200" height="200"/>
+					<img src="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!loadBindQRCode.action?dealerEmployeeOid=${dealerEmployeeOid}" alt="支付通知二维码" width="200" height="200"/>
 					<span class="qrCode_title">绑定支付通知二维码</span>
 				</div>
 				<div class="qrCode_block">
-					<img src="<%=request.getContextPath()%>/resources/partner/storemanage!loadAppidQRCode.action?storeOid=${storeOid}" alt="公众号二维码" width="200" height="200"/>
+					<img src="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!loadAppidQRCode.action?dealerEmployeeOid=${dealerEmployeeOid}" alt="公众号二维码" width="200" height="200"/>
 					<span class="qrCode_title">公众号二维码</span>
 				</div>
 				<div class="qrCode_remark_block">
 					说明：
 					<p>1、商家可设置最多5名店员；</p>
 					<p>2、顾客付款后，店员可收到支付通知，用于交易确认；</p>
-					<p>3、店员在关注公众号后，通过微信扫描“绑定支付通知二维码”，可在移动端查看收款列表和收款汇总；</p>		
+					<p>3、店员在关注公众号后，通过微信扫描“绑定支付通知二维码”，可在移动端查看收款列表和收款汇总；</p>
 				</div>
 			</div>
 		</div>
-		<manage:permission validateUrl="/resources/partner/storemanage!deleteBindWxID.action">
+		
+		<manage:permission validateUrl="/resources/partner/dealeremployeemanage!deleteBindWxID.action">
      		<manage:pass>
      			<s:set var="hasDeleteBindWxIDPermission">yes</s:set>
      		</manage:pass>
@@ -46,7 +47,7 @@
      			<s:set var="hasDeleteBindWxIDPermission">no</s:set>
      		</manage:notPass>
          </manage:permission>
-         <manage:permission validateUrl="/resources/partner/storemanage!batchUpdateBindWxID.action">
+         <manage:permission validateUrl="/resources/partner/dealeremployeemanage!batchUpdateBindWxID.action">
      		<manage:pass>
      			<s:set var="hasUpdateBindWxIDPermission">yes</s:set>
      		</manage:pass>
@@ -54,10 +55,9 @@
      			<s:set var="hasUpdateBindWxIDPermission">no</s:set>
      		</manage:notPass>
          </manage:permission>
-         
+		
 		<s:form id="bindListForm" method="post">
-		<%-- <form id="bindListForm" action="<%=request.getContextPath()%>/resources/partner/storemanage!batchUpdateBindWxID.action"" method="post"> --%>
-			<s:hidden id="storeOid" name="storeOid"/>
+			<s:hidden id="dealerEmployeeOid" name="dealerEmployeeOid"/>
 			<s:hidden id="payNoticeBindWeixinOid" name="payNoticeBindWeixinOid"/>
 	    	<div class="bgtable">
 	            <ul class="bg_all">
@@ -91,7 +91,7 @@
 										<span class="tj_bt">*</span>	                                	
 	                                </td>
 						  			<td title="操作">
-						  			 	<s:if test="#hasDeleteBindWxIDPermission eq 'yes'">
+	  									<s:if test="#hasDeleteBindWxIDPermission eq 'yes'">
 	  										<a href="javascript:void(0);" onclick="toDeleteBind('<s:property value="#payNoticeBindWeixinVo.iwoid" />')">删除</a>
 										</s:if>
 						  			</td>
@@ -143,7 +143,6 @@
 			if (flag) {
 				invokeAction('batchUpdateBindWxID');
 			}
-			//$("#bindListForm").submit();
 		}
 	</script>
 </body>

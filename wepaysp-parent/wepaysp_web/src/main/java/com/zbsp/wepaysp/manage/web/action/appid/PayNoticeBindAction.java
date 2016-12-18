@@ -10,11 +10,12 @@ import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenRe
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoReqData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
-import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.EnumDefine.GrantType;
 import com.zbsp.wepaysp.common.util.JSONUtil;
@@ -54,7 +55,6 @@ public class PayNoticeBindAction
     private String bindType;
     private DealerEmployeeService dealerEmployeeService;
     private StoreService storeService;
-    private SysConfigService sysConfigService;
     private PayNoticeBindWeixinService  payNoticeBindWeixinService;
 
     /**
@@ -69,8 +69,12 @@ public class PayNoticeBindAction
             return result;
         }
         
-        // 根据partnerOid查找APPID、SECRET
-        Map<String, String> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+        if (StringUtils.isBlank(partnerOid)) {
+        	logger.error("微信支付非法回调，partnerOid为空");
+        }
+        
+        // 从内存中获取服务商配置信息
+        Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partnerOid);
         if (partnerMap == null || partnerMap.isEmpty()) {
             logger.warn("微信支付通知绑定微信账户微信回调访问的服务商不存在，partnerOid：" + partnerOid);
             bindResult = new PayNoticeBindResult("partner_invalid", "服务商信息无效");
@@ -86,7 +90,7 @@ public class PayNoticeBindAction
             logger.info("开始获取网页授权access_token 和 openid");
             
             String jsonResult = WXPay.requestGetAuthAccessTokenService(authReqData, 
-                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.CERT_PASSWORD));
+                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
             authResult = JSONUtil.parseObject(jsonResult, GetAuthAccessTokenResData.class);
             
             // 校验获取access_token
@@ -118,7 +122,7 @@ public class PayNoticeBindAction
         try {
             logger.info("开始拉取用户信息");
             String jsonResult = WXPay.requestGetUserinfoService(userinfoReqData,
-                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.CERT_PASSWORD));
+                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
             userinfoResult = JSONUtil.parseObject(jsonResult, GetUserinfoResData.class);
             
             // 校验获取access_token
@@ -133,8 +137,14 @@ public class PayNoticeBindAction
                 String toRelateOid = PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType) ? dealerEmployeeOid : storeOid;
                 
                 // 绑定，前台页面根据绑定结果展示相应的门店/收银员信息
-                payNoticeBindWeixinVO = payNoticeBindWeixinService.doTransAddPayNoticeBindWeixin(bindType, toRelateOid, userinfoResult);
-                bindResult = new PayNoticeBindResult("success", "绑定成功");
+                try {
+                	payNoticeBindWeixinVO = payNoticeBindWeixinService.doTransAddPayNoticeBindWeixin(bindType, toRelateOid, userinfoResult);
+					bindResult = new PayNoticeBindResult("success", "绑定成功");
+				} catch (AlreadyExistsException e) {
+					logger.info(e.getMessage());
+					bindResult = new PayNoticeBindResult("bound", "已绑定过并且当前有效");
+					// TODO 跳转门店/收银员公众号展示资金统计
+				}
             } else {
                 logger.warn("获取用户信息失败，错误码：" + userinfoResult.getErrcode() + "，错误描述：" + userinfoResult.getErrmsg());
                 bindResult = new PayNoticeBindResult("wx_auth_error", "授权失败，请重试");
@@ -283,10 +293,6 @@ public class PayNoticeBindAction
 
     public void setStoreService(StoreService storeService) {
         this.storeService = storeService;
-    }
-    
-    public void setSysConfigService(SysConfigService sysConfigService) {
-        this.sysConfigService = sysConfigService;
     }
 
     public void setPayNoticeBindWeixinService(PayNoticeBindWeixinService payNoticeBindWeixinService) {

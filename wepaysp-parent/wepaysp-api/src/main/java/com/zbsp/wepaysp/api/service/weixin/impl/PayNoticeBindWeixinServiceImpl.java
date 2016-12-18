@@ -13,6 +13,7 @@ import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
+import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
@@ -66,7 +67,7 @@ public class PayNoticeBindWeixinServiceImpl
             jpqlMap.put("STATE", state);
         }
 
-        jpql.append(" order by p.createTime desc");
+        jpql.append(" order by p.modifyTime desc");
         
         @SuppressWarnings("unchecked")
         List<PayNoticeBindWeixin> payNoticeBindWeixinList = (List<PayNoticeBindWeixin>) commonDAO.findObjectList(jpql.toString(), jpqlMap, false);
@@ -110,13 +111,17 @@ public class PayNoticeBindWeixinServiceImpl
             }
             String oldWxStr = wx.toString();
             Date processBeginTime = new Date();
-            DealerEmployee bindDealerEmployee = new DealerEmployee();
-            bindDealerEmployee.setIwoid(vo.getBindDealerEmployeeOid());
-            wx.setBindDealerEmployee(bindDealerEmployee);
+            if (StringUtils.isNotBlank(vo.getBindDealerEmployeeOid())) {
+            	DealerEmployee bindDealerEmployee = new DealerEmployee();
+            	bindDealerEmployee.setIwoid(vo.getBindDealerEmployeeOid());
+            	wx.setBindDealerEmployee(bindDealerEmployee);
+            } else {
+            	wx.setBindDealerEmployee(null);
+            }
             wx.setState(vo.getState());
             wx.setModifier(modifier);
             commonDAO.update(wx);
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "微信支付通知绑定信息[绑定收银员姓名oid：" + vo.getIwoid() + "，状态：" + vo.getState() + "]", processBeginTime, processBeginTime, oldWxStr, wx.toString(), SysLog.State.success.getValue(), wx.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "微信支付通知绑定信息[绑定收银员姓名oid：" + vo.getBindDealerEmployeeOid() + "，状态：" + vo.getState() + "]", processBeginTime, processBeginTime, oldWxStr, wx.toString(), SysLog.State.success.getValue(), wx.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
             count++;
         }
         
@@ -130,8 +135,10 @@ public class PayNoticeBindWeixinServiceImpl
         StringBuffer jpql = new StringBuffer("delete from PayNoticeBindWeixin p where p.iwoid=:IWOID");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         jpqlMap.put("IWOID", payNoticeBindWeixinOid);
-        commonDAO.executeBatch(jpql.toString(), jpqlMap, false);
-        logger.info("删除微信支付通知绑定信息，oid=" + payNoticeBindWeixinOid);
+        int delteCount =commonDAO.executeBatch(jpql.toString(), jpqlMap, false);
+        if (delteCount > 0) {
+        	logger.info("删除微信支付通知绑定信息，oid=" + payNoticeBindWeixinOid);
+        }
     }
 
     @Override
@@ -139,12 +146,28 @@ public class PayNoticeBindWeixinServiceImpl
         Validator.checkArgument(StringUtils.isBlank(bindType), "bindType不能为空！");
         Validator.checkArgument(userinfoResData == null, "userinfoResData不能为空！");
         Validator.checkArgument(StringUtils.isBlank(userinfoResData.getOpenid()), "userinfoResData.openid不能为空！");
+        Validator.checkArgument(!PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType) && 
+        		!PayNoticeBindWeixin.Type.store.getValue().equals(bindType), "参数type只能是1或者2！");
+        Validator.checkArgument(StringUtils.isBlank(toRelateOid), "支付通知绑定门店或收银员Oid不能为空！");
         
-        //TODO 校验是否绑定过              
+        // 校验是否绑定过
+        String jpql = "from PayNoticeBindWeixin p where p.openid=:OPENID and p.type=:TYPE";
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        jpqlMap.put("OPENID", userinfoResData.getOpenid());
+        jpqlMap.put("TYPE", bindType);
+        
+        @SuppressWarnings("rawtypes")
+		List list = null;
         PayNoticeBindWeixin po = new PayNoticeBindWeixin();
         String logTemp = "";
         if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
-            Validator.checkArgument(StringUtils.isBlank(toRelateOid), "dealerEmployeeOid不能为空！");
+        	jpql += " and p.payDealerEmployee.iwoid =:PAYDEALEREMPLOYEEOID";
+        	jpqlMap.put("PAYDEALEREMPLOYEEOID", toRelateOid);
+        	list = commonDAO.findObjectList(jpql, jpqlMap, false);
+        	if (list != null && list.size() > 0) {
+        		throw new AlreadyExistsException("已绑定过此收银员级支付通知，忽略绑定");
+        	}
+        	
             // 绑定收银员
             DealerEmployee de = commonDAO.findObject(DealerEmployee.class, toRelateOid);
             if (de == null) {
@@ -153,7 +176,13 @@ public class PayNoticeBindWeixinServiceImpl
             po.setPayDealerEmployee(de);
             logTemp = "，关联收银员：" + toRelateOid;
         } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType)) {
-            Validator.checkArgument(StringUtils.isBlank(toRelateOid), "storeOid不能为空！");
+        	jpql += " and p.store.iwoid =:STOREOID";
+        	jpqlMap.put("STOREOID", toRelateOid);
+        	list = commonDAO.findObjectList(jpql, jpqlMap, false);
+        	if (list != null && list.size() > 0) {
+        		throw new AlreadyExistsException("已绑定过此门店级支付通知，忽略绑定");
+        	}
+        	
             // 绑定门店
             Store store = commonDAO.findObject(Store.class, toRelateOid);
             if (store == null) {
@@ -161,9 +190,8 @@ public class PayNoticeBindWeixinServiceImpl
             }
             po.setStore(store);
             logTemp = "，关联门店：" + toRelateOid;
-        } else {
-            throw new IllegalArgumentException("参数type只能是1或者2");
         }
+        
         po.setIwoid(Generator.generateIwoid());
         po.setState(PayNoticeBindWeixin.State.open.getValue());// 默认开启
         po.setOpenid(userinfoResData.getOpenid());

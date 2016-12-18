@@ -85,5 +85,12 @@ public interface StoreService {
      * @return StoreVO 包含二维码path
      */
     public StoreVO doTransGetQRCode(int qRCodeType, String storeOid, String modifier, String operatorUserOid, String logFunctionOid);
+    
+    /**
+     * 获取当前门店归属的顶级服务商Oid
+     * @param storeOid
+     * @return topPartnerOid
+     */
+	public String doJoinTransGetTopPartnerOid(String storeOid);
 
 }

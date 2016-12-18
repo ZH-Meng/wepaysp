@@ -57,6 +57,14 @@
 					        			<s:set var="hasUpdatePermission">no</s:set>
 					        		</manage:notPass>
 					            </manage:permission>
+					            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToBindWxID.action">
+					        		<manage:pass>
+					        			<s:set var="hasBindWxIDPermission">yes</s:set>
+					        		</manage:pass>
+					        		<manage:notPass>
+					        			<s:set var="hasBindWxIDPermission">no</s:set>
+					        		</manage:notPass>
+					            </manage:permission>
 							</s:if>
 							<s:else>
 								<s:set name="backFlag" value="true"/>
@@ -100,8 +108,8 @@
 	                                <th>姓名</th>
 	                                <th>员工级别</th>
 	                                <th>手机号码</th>
-	                                <th>状态</th>
-	                                <th>操作</th>
+	                                <th style="width: 60px;">状态</th>
+	                                <th class="twenty">操作</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -160,6 +168,9 @@
 						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerEmployeeVo.iwoid" />')">下载二维码</a>
 						  				</s:if>
+						  				<s:if test="#hasBindWxIDPermission eq 'yes'">
+						  					<a href="javascript:void(0);" onclick="toBindWxID('<s:property value="#dealerEmployeeVo.iwoid" />')">绑定支付通知</a>
+					  					</s:if>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -197,6 +208,10 @@
 		function downloadPayQRCode(iwoid){
 			$("#dealerEmployeeOid").val(iwoid);
 			invokeAction('downloadPayQRCode');
+		}
+		function toBindWxID(iwoid){
+			$("#dealerEmployeeOid").val(iwoid);
+			invokeAction('goToBindWxID');
 		}
 	</script>
 	

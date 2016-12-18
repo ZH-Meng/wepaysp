@@ -2,7 +2,10 @@ package com.zbsp.wepaysp.timer.task;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,9 +15,10 @@ import com.tencent.protocol.close_order_protocol.CloseOrderReqData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryReqData;
 import com.zbsp.wepaysp.api.listener.DefaultCloseOrderBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultOrderQueryBusinessResultListener;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
-import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
@@ -57,13 +61,26 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
             int closeErrTimes = 0;
             int queryErrTimes = 0; 
             boolean closeFlag = false; 
+    		
+    		Map<String, Object> partnerMap = null;
+    		String certLocalPath = null;
+    		String certPassword = null;
+    		String keyPartner = null;
             for (WeixinPayDetails payDetail : tradingList) {
-                // String partnerOid = payDetail.getPartner1Oid();
-                // 查找服务商配置信息                    
-                // FIXME 静态开发数据
-                String keyPartner = EnumDefine.DevParam.KEY.getValue();
-                String certLocalPath = EnumDefine.DevParam.CERT_LOCAL_PATH.getValue();
-                String certPassword = EnumDefine.DevParam.CERT_PASSWORD.getValue();
+            	if (StringUtils.isBlank(payDetail.getPartner1Oid())) {
+            		logger.error("订单信息缺失：partner1Oid为空！");
+            	}
+            	
+            	// 从内存中获取服务商配置信息
+            	partnerMap = SysConfig.partnerConfigMap.get(payDetail.getPartner1Oid());
+            	if (partnerMap != null && !partnerMap.isEmpty()) {
+            		certLocalPath = MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH);
+            		certPassword = MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD);
+            		keyPartner = MapUtils.getString(partnerMap, SysEnvKey.WX_KEY);
+        		} else {
+        			throw new RuntimeException("系统数据异常，服务商配置信息不存在");
+        		}
+            	
                 if (payDetail.getTradeStatus() != null && payDetail.getTradeStatus() == TradeStatus.TRADE_TO_BE_CLOSED.getValue()) {
                     closeFlag = true;
                 } else {

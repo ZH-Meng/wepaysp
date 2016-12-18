@@ -45,6 +45,11 @@
 				<param name="inputName">bindQRCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
+			<result name="getAppidQRCodeImg" type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">appidQRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
 		</action>
 		<!-- 服务商员工管理 -->
 		<action name="partneremployeemanage" class="partnerEmployeeAction">
@@ -69,6 +74,11 @@
 			<result name="getBindQRCodeImg" type="stream">
 				<param name="contentType">image/jpeg</param>
 				<param name="inputName">bindQRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="getAppidQRCodeImg" type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">appidQRCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
 		</action>

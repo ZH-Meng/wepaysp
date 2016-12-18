@@ -187,6 +187,20 @@ public class EnumDefine {
         XML_FORMAT_ERROR;
     }
     
+    /**发送模板消息结果码*/
+    public static enum SendTempMsgErr {
+        /**成功*/                      SUCCESS("0");
+    	private String value;
+    	
+    	public String getValue() {
+    		return value;
+    	}
+    	
+    	private SendTempMsgErr(String value) {
+    		this.value = value;
+		}
+    }
+    
     /**
      * 二维码类型
      * @author mengzh

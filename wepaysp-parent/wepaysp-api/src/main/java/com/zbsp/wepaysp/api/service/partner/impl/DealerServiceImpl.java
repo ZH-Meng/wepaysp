@@ -486,11 +486,11 @@ public class DealerServiceImpl
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
             
-            Map<String, String > partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+            Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
             if (partnerMap == null || partnerMap.isEmpty()) {
                 throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
             }
-            String appid = partnerMap.get(SysEnvKey.WX_APP_ID);// 微信公众号ID
+            String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
             
             // 生成二维码对应链接
             Validator.checkArgument(StringUtils.isBlank(SysConfig.payCallBackURL), "未配置微信公众号支付扫码回调地址无法生成支付二维码");

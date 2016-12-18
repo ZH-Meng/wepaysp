@@ -28,8 +28,19 @@ public interface PayNoticeBindWeixinService {
      */
     public List<PayNoticeBindWeixinVO> doJoinTransQueryPayNoticeBindWeixinList(Map<String, Object> paramMap);
     
+    /**
+     * 批量更新支付通知绑定信息
+     * @param bindVOList 前台传的绑定List
+     * @param modifier
+     * @param operatorUserOid
+     * @param logFunctionOid
+     */
     public void doTransUpdatePayNoticeBindWeixinList(List<PayNoticeBindWeixinVO> bindVOList, String modifier, String operatorUserOid, String logFunctionOid);
     
+    /**
+     * 删除支付通知绑定信息
+     * @param payNoticeBindWeixinOid
+     */
     public void doTransDeletePayNoticeBindWeixin(String payNoticeBindWeixinOid);
 
     /**

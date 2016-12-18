@@ -13,8 +13,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.EnumDefine.DevParam;
 import com.zbsp.wepaysp.common.constant.EnumDefine.OrderClosedErr;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
@@ -37,6 +37,7 @@ import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
@@ -46,6 +47,7 @@ public class WeixinPayDetailsServiceImpl
     extends BaseService
     implements WeixinPayDetailsService {
     
+	private SysConfigService sysConfigService;
     private SysLogService sysLogService;
 
     @SuppressWarnings("unchecked")
@@ -351,15 +353,15 @@ public class WeixinPayDetailsServiceImpl
             throw new NotExistsException("商户不存在！");
         } else if (StringUtils.isBlank(dealer.getSubMchId())) {
             throw new InvalidValueException("商户信息缺失：sub_mch_id为空！");
+        } else if (StringUtils.isBlank(dealer.getPartner1Oid())) {
+            throw new InvalidValueException("商户信息缺失：partner1Oid为空！");
         }
         
-        // FIXME 查找服务商，先从内存再到数据库查询，如果都没有则报错
-        Partner partner = commonDAO.findObject(Partner.class, dealer.getPartner1Oid());
-        if (partner == null) {
+        // 查找服务商
+        Partner topPartner = commonDAO.findObject(Partner.class, dealer.getPartner1Oid());
+        if (topPartner == null) {
             throw new NotExistsException("服务商不存在！");
         }
-        // TODO 检查服务商配置
-        
         
         // 创建订单
         WeixinPayDetails newPayOrder = new WeixinPayDetails();
@@ -389,23 +391,21 @@ public class WeixinPayDetailsServiceImpl
 
         /*----------微信支付参数-公有-必传--------*/
         
-        // 微信公众号、商户号，sdk会处理
+        // 从内存中获取服务商配置信息
+        Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(dealer.getPartner1Oid());
         
-        // FIXME --------------------临时数据
-        String certLocalPath = DevParam.CERT_LOCAL_PATH.getValue();
-        String certPassword = DevParam.CERT_PASSWORD.getValue(); 
-        String keyPartner = DevParam.KEY.getValue();
-        weixinPayDetailsVO.setCertLocalPath(certLocalPath);
-        weixinPayDetailsVO.setCertPassword(certPassword);
-        weixinPayDetailsVO.setKeyPartner(keyPartner);
-        String appId = DevParam.APPID.getValue();
-        String mchId = DevParam.MCHID.getValue();
-        
-        
-        // newPayOrder.setAppid(partner.getAppId());// 服务商公众号ID
-        // newPayOrder.setMchid(partner.getMchId());// 商户号
-        newPayOrder.setAppid(appId);
-        newPayOrder.setMchId(mchId);
+		if (partnerMap != null && !partnerMap.isEmpty()) {
+			
+			weixinPayDetailsVO.setCertLocalPath(MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH));
+			weixinPayDetailsVO.setCertPassword(MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
+			weixinPayDetailsVO.setKeyPartner(MapUtils.getString(partnerMap, SysEnvKey.WX_KEY));
+	        newPayOrder.setAppid(MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID));// 服务商公众号ID
+	        newPayOrder.setMchId(MapUtils.getString(partnerMap, SysEnvKey.WX_MCH_ID));// 商户号
+	        // 这两项 newPayOrder 复制给 weixinPayDetailsVO   
+		} else {
+			throw new RuntimeException("系统数据异常，服务商配置信息不存在");
+		}
+
         newPayOrder.setSubMchId(dealer.getSubMchId());// 子商户号
         // newPayOrder.setNonceStr(Generator.generateRandomString(32));// 随机字符串，sdk会自动生成
         newPayOrder.setBody(dealer.getCompany() + (store == null ? "" : "-" + store.getStoreName()));// 商品描述 线下门店——门店品牌名-城市分店名-实际商品名称
@@ -452,7 +452,7 @@ public class WeixinPayDetailsServiceImpl
     }
 
     @Override
-    public void doTransUpdatePayResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO) {
+    public WeixinPayDetailsVO doTransUpdatePayResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO) {
         logger.debug("returnCode：" + returnCode + "resultCode：" + resultCode);
         Date processBeginTime = new Date();
         Validator.checkArgument(payResultVO == null, "支付结果对象不能为空");
@@ -470,7 +470,7 @@ public class WeixinPayDetailsServiceImpl
         }
         String oldPayDetailStr = payDetails.toString();
         String logDescTemp = "";
-        
+        WeixinPayDetailsVO returnPayDetailVO = null;
         if (StringUtils.equalsIgnoreCase(ReturnCode.SUCCESS.toString(), returnCode)) {// 通信成功
             Validator.checkArgument(StringUtils.isBlank(payResultVO.getMchId()), "微信商户号不能为空");
             Validator.checkArgument(StringUtils.isBlank(resultCode), "微信支付结果码不能为空");
@@ -524,6 +524,14 @@ public class WeixinPayDetailsServiceImpl
                 payDetails.setTradeStatus(tradeStatus);
                 if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
                     logDescTemp += "，支付结果：交易成功" + "，微信支付订单号：" + payResultVO.getTransactionId() + "，交易状态：" + tradeStatus + "，支付金额：" + payResultVO.getTotalFee();
+                    
+                    // 组装返回结果
+                    returnPayDetailVO = new WeixinPayDetailsVO();
+                    BeanCopierUtil.copyProperties(payDetails, returnPayDetailVO);
+                    returnPayDetailVO.setStoreOid(payDetails.getStore() != null ? payDetails.getStore().getIwoid() : "");
+                    returnPayDetailVO.setDealerEmployeeOid(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getIwoid() : "");
+                    returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");
+                    returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
                 } else {
                     logDescTemp += "，支付结果：交易失败，" + payDetails.getRemark() + "，微信支付订单号：" + payResultVO.getTransactionId() + "，交易状态：" + tradeStatus;
                 }
@@ -560,6 +568,7 @@ public class WeixinPayDetailsServiceImpl
         
         // 记录日志-修改微信支付结果
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[" + logDescTemp + "]", processBeginTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+        return returnPayDetailVO;
     }
 
     @Override
@@ -870,7 +879,11 @@ public class WeixinPayDetailsServiceImpl
         return (List<WeixinPayDetails>) super.commonDAO.findObjectList(jpql, paramMap, false);
     }
     
-    public void setSysLogService(SysLogService sysLogService) {
+    public void setSysConfigService(SysConfigService sysConfigService) {
+		this.sysConfigService = sysConfigService;
+	}
+
+	public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }
 

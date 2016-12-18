@@ -33,8 +33,19 @@
 				<div class="succ-item">
 					绑定时间<span class="fr"><s:date name="payNoticeBindWeixinVO.createTime" format="yyyy-MM-dd HH:mm:ss"/></span>
 				</div>
-	      </div>
+	     	 </div>
 		</s:if>
+		<s:elseif test="bindResult.result == 'bound' ">
+			<p class="error-title">
+				 <i class="weui_icon_warn"></i>已绑定
+			</p>		
+			<div class="succ-info">
+				<div class="error-bottom">
+					<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+				</div>			
+				<p class="info2">${bindResult.desc }</p>
+			</div>
+		</s:elseif>
 		<s:else>
 			<p class="error-title">
 				 <i class="weui_icon_warn"></i>绑定失败

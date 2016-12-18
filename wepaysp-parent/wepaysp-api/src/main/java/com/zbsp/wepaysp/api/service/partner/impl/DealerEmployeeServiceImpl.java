@@ -510,11 +510,11 @@ public class DealerEmployeeServiceImpl
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
             
-            Map<String, String > partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+            Map<String, Object > partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
             if (partnerMap == null || partnerMap.isEmpty()) {
                 throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
             }
-            String appid = partnerMap.get(SysEnvKey.WX_APP_ID);// 微信公众号ID
+            String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
             
             String qrURL = null;
             String callBackTemp = null;
@@ -525,7 +525,7 @@ public class DealerEmployeeServiceImpl
                 Validator.checkArgument(StringUtils.isBlank(SysConfig.bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
                 callBackTemp = SysConfig.bindCallBackURL;
             }
-            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid());
+            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + "&dealerEmployeeOid=" + dealerEmployee.getIwoid() + (QRCodeType.PAY.getValue() == qRCodeType ? "&showwxpaytitle=1" : ""));
             logger.info("收银员-" + dealerEmployee.getEmployeeName() + "("+ dealer.getCompany() + "-"+ store.getStoreName() + "店)生成微信支付二维码，类型：" + qRCodeType + "，URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID/门店ID/收银员
@@ -562,6 +562,20 @@ public class DealerEmployeeServiceImpl
         return dealerEmployeeVO;
     }
     
+	@Override
+	public String doJoinTransGetTopPartnerOid(String dealerEmployeeOid) {
+		Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerEmployeeOid不能为空！");
+        String topPartnerOid = null;
+        DealerEmployee de = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
+        if (de != null) {
+            // 商户
+            Dealer d = de.getDealer();
+            if (d != null) {
+            	topPartnerOid = d.getPartner1Oid();
+            }
+        }
+        return topPartnerOid;
+	}    
     public void setSysConfigService(SysConfigService sysConfigService) {
         this.sysConfigService = sysConfigService;
     }

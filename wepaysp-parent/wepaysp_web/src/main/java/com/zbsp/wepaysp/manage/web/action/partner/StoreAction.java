@@ -10,11 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
@@ -22,8 +24,11 @@ import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
+import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
+import com.zbsp.wepaysp.vo.partner.DealerEmployeeVO;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
 import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
@@ -43,10 +48,13 @@ public class StoreAction
     private List<StoreVO> storeVoList;
     private StoreService storeService;
     private String qRCodeName;
-    private String storeOid; 
+    private String storeOid;
     private String dealerOid;
     private PayNoticeBindWeixinService payNoticeBindWeixinService;
     private List<PayNoticeBindWeixinVO> payNoticeBindWeixinVoList;
+    private List<DealerEmployeeVO> dealerEmployeeVoList;
+    private DealerEmployeeService dealerEmployeeService;
+    private String payNoticeBindWeixinOid;
     
     @Override
     protected String query(int start, int size) {
@@ -265,15 +273,19 @@ public class StoreAction
         logger.info("跳转微信支付通知绑定微信账户页面");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // 代理商、业务员、商户能下载门店级别二维码
-            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser)) {
+            
+            if (SysUserUtil.isDealer(manageUser)) {// 商户
                 if (StringUtils.isNotBlank(storeOid)) {
                     // 查询已绑定的信息
                     Map<String, Object> paramMap = new HashMap<String, Object>();
-
                     paramMap.put("storeOid", storeOid);
                     paramMap.put("type", PayNoticeBindWeixin.Type.store.getValue());
                     payNoticeBindWeixinVoList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(paramMap);
+                    
+                    // 查询门店下员工
+                    paramMap.clear();
+                    paramMap.put("storeOid", storeOid);
+                    dealerEmployeeVoList = dealerEmployeeService.doJoinTransQueryDealerEmployeeList(paramMap, 0, -1);
                 } else {
                     logger.warn("非法绑定微信支付通知，参数storeOid为空！");
                     setAlertMessage("绑定微信支付通知失败！");
@@ -302,7 +314,7 @@ public class StoreAction
             if (StringUtils.isNotBlank(storeOid)) {
                 // 加载绑定二维码
                 storeVO = storeService.doTransGetQRCode(QRCodeType.BIND_PAY_NOTICE.getValue(), storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
-            } 
+            }
         } catch (Exception e) {
             logger.error("加载绑定二维码错误：" + e.getMessage());
         }
@@ -319,7 +331,7 @@ public class StoreAction
             File qrFile = new File(storeVO.getBindQrCodePath());
             inputStream = new FileInputStream(qrFile);
             qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
-            logger.info("下载门店级别绑定支付通知二维码图片成功.");
+            logger.info("加载门店级别绑定支付通知二维码图片成功.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -328,12 +340,92 @@ public class StoreAction
         return inputStream;
     }
     
-    public void goToDeleteBindWxID() {
-    	
+    public String loadAppidQRCode() {
+    	return "getAppidQRCodeImg";
     }
     
+    /**
+     * 返回绑定微信公众号二维码图片流
+     * @return
+     */
+    public InputStream getAppidQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+        	String partner1Oid = storeService.doJoinTransGetTopPartnerOid(storeOid);
+			if (StringUtils.isNotBlank(partner1Oid)) {
+				Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid);
+				if (partnerMap != null && !partnerMap.isEmpty()) {
+					String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
+					File qrFile = new File(SysConfig.appidQrCodePath + File.separator + appid + ".png");
+					inputStream = new FileInputStream(qrFile);
+					qRCodeName = URLEncoder.encode(qrFile.getName(), "utf-8");
+					logger.info("加载公众号（" + appid + "）二维码图片成功.");
+				}
+			}
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
+    /**删除微信支付通知绑定*/
+    public String deleteBindWxID() {
+    	logger.info("删除微信支付通知绑定");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            
+            if (SysUserUtil.isDealer(manageUser)) {// 商户
+                if (StringUtils.isNotBlank(payNoticeBindWeixinOid) && StringUtils.isNotBlank(storeOid)) {
+                    // 删除绑定
+                    payNoticeBindWeixinService.doTransDeletePayNoticeBindWeixin(payNoticeBindWeixinOid);
+                    logger.info("删除微信支付通知绑定成功，跳转绑定页面");
+                    return goToBindWxID();
+                } else {
+                    logger.warn("非法删除微信支付通知绑定，参数payNoticeBindWeixinOid为空！");
+                    setAlertMessage("删除微信支付通知绑定信息失败！");
+                    return "accessDenied";
+                }
+            } else {
+                logger.warn("无权删除微信支付通知绑定");
+                setAlertMessage("无权删除微信支付通知绑定");
+                return "accessDenied";
+            }
+        } catch (Exception e) {
+            logger.error("删除微信支付通知绑定错误：" + e.getMessage());
+            setAlertMessage("删除微信支付通知绑定错误！");
+            return ERROR;
+        }
+    }
+    
+    /**批量更新微信支付通知绑定*/
     public String batchUpdateBindWxID() {
-    	return SUCCESS;
+    	logger.info("开始批量更新微信支付通知绑定");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            
+            if (SysUserUtil.isDealer(manageUser)) {// 商户
+                if (payNoticeBindWeixinVoList != null && !payNoticeBindWeixinVoList.isEmpty() && StringUtils.isNotBlank(storeOid)) {
+                    // 更新绑定
+                	payNoticeBindWeixinService.doTransUpdatePayNoticeBindWeixinList(payNoticeBindWeixinVoList, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                	logger.info("批量更新微信支付通知绑定成功，跳转绑定页面");
+                    return goToBindWxID();
+                } else {
+                    logger.warn("非法批量更新微信支付通知绑定，参数payNoticeBindWeixinOid为空！");
+                    setAlertMessage("批量更新微信支付通知绑定失败！");
+                    return "accessDenied";
+                }
+            } else {
+                logger.warn("无权批量更新微信支付通知绑定");
+                setAlertMessage("无权批量更新微信支付通知绑定");
+                return "accessDenied";
+            }
+        } catch (Exception e) {
+            logger.error("批量更新微信支付通知绑定错误：" + e.getMessage());
+            setAlertMessage("批量更新微信支付通知绑定错误！");
+            return ERROR;
+        }
     }
     
     @Override
@@ -392,5 +484,17 @@ public class StoreAction
     public void setPayNoticeBindWeixinService(PayNoticeBindWeixinService payNoticeBindWeixinService) {
         this.payNoticeBindWeixinService = payNoticeBindWeixinService;
     }
+
+	public List<DealerEmployeeVO> getDealerEmployeeVoList() {
+		return dealerEmployeeVoList;
+	}
+
+	public void setDealerEmployeeService(DealerEmployeeService dealerEmployeeService) {
+		this.dealerEmployeeService = dealerEmployeeService;
+	}
+
+	public void setPayNoticeBindWeixinOid(String payNoticeBindWeixinOid) {
+		this.payNoticeBindWeixinOid = payNoticeBindWeixinOid;
+	}
 
 }

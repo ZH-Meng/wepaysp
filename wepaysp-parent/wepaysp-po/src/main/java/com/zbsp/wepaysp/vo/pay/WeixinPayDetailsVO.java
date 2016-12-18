@@ -27,7 +27,8 @@ public class WeixinPayDetailsVO
 
     private Date beginTime;
     private Date endTime;
-
+    
+    private String partner1Oid;
     private String partner2Oid;
     private String partner3Oid;
 
@@ -606,5 +607,13 @@ public class WeixinPayDetailsVO
     public void setTradeState(String tradeState) {
         this.tradeState = tradeState;
     }
+
+	public String getPartner1Oid() {
+		return partner1Oid;
+	}
+
+	public void setPartner1Oid(String partner1Oid) {
+		this.partner1Oid = partner1Oid;
+	}
     
 }

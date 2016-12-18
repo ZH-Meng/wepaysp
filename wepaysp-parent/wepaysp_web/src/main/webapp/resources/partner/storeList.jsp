@@ -47,6 +47,14 @@
 				        			<s:set var="hasUpdatePermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
+				            <manage:permission validateUrl="/resources/partner/storemanage!goToBindWxID.action">
+				        		<manage:pass>
+				        			<s:set var="hasBindWxIDPermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasBindWxIDPermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
 			             </s:if>
 			            <s:elseif test="dealerOid != null && dealerOid != '' ">
 							<%-- 查看商户员工按钮权限 --%>
@@ -89,8 +97,8 @@
 	                                <th>门店地址</th>
 	                                <th>联系电话</th>
 	                                <th>商户</th>
-	                                <th>代理商</th>	                                
-	                                <th>操作</th>
+	                                <th>代理商</th>
+	                                <th class="twenty">操作</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -128,7 +136,9 @@
 						  				<s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#storeVo.iwoid" />')">下载二维码</a>
 						  				</s:if>
-						  				<a href="javascript:void(0);" onclick="toBindWxID('<s:property value="#storeVo.iwoid" />')">绑定支付通知</a>
+						  				<s:if test="#hasBindWxIDPermission eq 'yes'">
+						  					<a href="javascript:void(0);" onclick="toBindWxID('<s:property value="#storeVo.iwoid" />')">绑定支付通知</a>
+					  					</s:if>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -171,7 +181,6 @@
 			$("#storeOid").val(iwoid);
 			invokeAction('goToBindWxID');
 		}
-		
 	</script>
 	
 </body>

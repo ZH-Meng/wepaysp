@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.main.init.impl;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
+import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.SystemInitException;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -23,16 +25,16 @@ public class SysConfigServiceImpl
     private String wxPayNotifyURL;
     private String bindCallBackURL;
     private String qRCodeRootPath;
+    private String appidQrCodePath;
 
-    /** 
-     * 系统支持多个服务商配置，key=partnerOid，value为服务商配置Map
-     *  服务商配置Map key ：SysEnvKey.WX_APPID、SysEnvKey.WX_MCH_ID、SysEnvKey.WX_SECRET、SysEnvKey.WX_CERT_LOCAL_PATH、SysEnvKey.CERT_PASSWORD、SysEnvKey.WX_KEY
-     *  */
-    private Map<String, Map<String, String>> partnerConfigMap = new HashMap<String, Map<String, String>>();
-
-    private PartnerService partnerService; 
+    private PartnerService partnerService;
+    
     /**
-     * 初始化方法
+     * 初始化方法<br>
+     *  初始化系统静态配置<br>
+     * 检查注入参数完整性<br>
+     * 加载状态为非冻结服务商配置信息到内存<br>
+     * 启动获取Base_acction_token<br>
      * @throws SystemInitException 
      */
     public void init() throws SystemInitException {
@@ -55,16 +57,31 @@ public class SysConfigServiceImpl
         if (StringUtils.isBlank(qRCodeRootPath)) {
             throw new SystemInitException("初始化系统配置信息失败，参数缺失：qRCodeRootPath");
         } else {
+        	File dirs = new File(qRCodeRootPath);
+        	if (!dirs.exists()) {
+        		dirs.mkdirs();
+        	}
             logger.info("初始化系统配置信息：qRCodeRootPath=" + qRCodeRootPath);
+        }
+        if (StringUtils.isBlank(appidQrCodePath)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appidQrCodePath");
+        } else {
+        	File dirs = new File(appidQrCodePath);
+        	if (!dirs.exists()) {
+        		dirs.mkdirs();
+        	}
+            logger.info("初始化系统配置信息：appidQrCodePath=" + appidQrCodePath);
         }
         
         // 初始化系统静态配置
         SysConfig.payCallBackURL = payCallBackURL;
+        SysConfig.wxPayNotifyURL = wxPayNotifyURL;
         SysConfig.bindCallBackURL = bindCallBackURL;
         SysConfig.qRCodeRootPath = qRCodeRootPath;
+        SysConfig.appidQrCodePath = appidQrCodePath;
 
         // 加载状态为非冻结服务商配置信息到内存，FIXME 考虑清除和更新的问题
-        List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(null);
+        List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(null, null);
         if (topPartnerList == null || topPartnerList.size() < 1) {
             throw new SystemInitException("初始化系统配置信息失败，没有查到非冻结的顶级服务商");
         } else {
@@ -72,7 +89,7 @@ public class SysConfigServiceImpl
         }
         
         for(Partner topPartner : topPartnerList) {
-            Map<String, String> pMap = new HashMap<String, String>();
+            Map<String, Object> pMap = new HashMap<String, Object>();
             // 校验服务商配置的完整性
             if (StringUtils.isBlank(topPartner.getAppId()) || StringUtils.isBlank(topPartner.getMchId()) || StringUtils.isBlank(topPartner.getAppSecret()) || 
                 StringUtils.isBlank(topPartner.getKeyPath()) || StringUtils.isBlank(topPartner.getKeyPassword()) || StringUtils.isBlank(topPartner.getPartnerKey())){
@@ -84,22 +101,27 @@ public class SysConfigServiceImpl
             pMap.put(SysEnvKey.WX_MCH_ID, topPartner.getMchId());
             pMap.put(SysEnvKey.WX_SECRET, topPartner.getAppSecret());
             pMap.put(SysEnvKey.WX_CERT_LOCAL_PATH, topPartner.getKeyPath());
-            pMap.put(SysEnvKey.CERT_PASSWORD, topPartner.getKeyPassword());
+            pMap.put(SysEnvKey.WX_CERT_PASSWORD, topPartner.getKeyPassword());
             pMap.put(SysEnvKey.WX_KEY, topPartner.getPartnerKey());
-            partnerConfigMap.put(topPartner.getIwoid(), pMap);
+            SysConfig.partnerConfigMap.put(topPartner.getIwoid(), pMap);
+            SysConfig.partnerConfigMap2.put(topPartner.getAppId(), pMap);
+            
+            // 启动获取Base_acction_token
+            //new WeixinUtil().refreshBaseAccessToken(topPartner.getIwoid());
         }
+        
     }
 
     @Override
-    public Map<String, String> getPartnerCofigInfoByPartnerOid(String partnerOid) {
+    public Map<String, Object> getPartnerCofigInfoByPartnerOid(String partnerOid) {
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "partnerOid不能为空");
-        if (!partnerConfigMap.containsKey(partnerOid)) {
-            Map<String, String> pMap = new HashMap<String, String>();
+        if (!SysConfig.partnerConfigMap.containsKey(partnerOid)) {
+            Map<String, Object> pMap = new HashMap<String, Object>();
             
             logger.info("缓存中服务商信息不存在，partnerOid=" + partnerOid + "开始从数据库查找");
-            List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(partnerOid);
+            List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(partnerOid, 1);
             if (topPartnerList == null || topPartnerList.isEmpty() || topPartnerList.get(0) == null) {
-                logger.error("数据库使用中的服务商信息不存在，partnerOid=" + partnerOid);
+                logger.error("数据库非冻结的的服务商信息不存在，partnerOid=" + partnerOid);
             } else {
                 Partner topPartner = topPartnerList.get(0);
                 if (StringUtils.isBlank(topPartner.getAppId()) || StringUtils.isBlank(topPartner.getMchId()) || StringUtils.isBlank(topPartner.getAppSecret()) || 
@@ -111,22 +133,48 @@ public class SysConfigServiceImpl
                     pMap.put(SysEnvKey.WX_MCH_ID, topPartner.getMchId());
                     pMap.put(SysEnvKey.WX_SECRET, topPartner.getAppSecret());
                     pMap.put(SysEnvKey.WX_CERT_LOCAL_PATH, topPartner.getKeyPath());
-                    pMap.put(SysEnvKey.CERT_PASSWORD, topPartner.getKeyPassword());
+                    pMap.put(SysEnvKey.WX_CERT_PASSWORD, topPartner.getKeyPassword());
                     pMap.put(SysEnvKey.WX_KEY, topPartner.getPartnerKey());
-                    partnerConfigMap.put(partnerOid, pMap);
+                    SysConfig.partnerConfigMap.put(partnerOid, pMap);
                 }
             }
             return pMap;
         } else {
-            return partnerConfigMap.get(partnerOid);
+            return SysConfig.partnerConfigMap.get(partnerOid);
         }
     }
-
-    @Override
-    public Map<String, String> getPartnerCofigInfoByOutTradeNo(String outTradeNo) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    
+	@Override
+	public Map<String, Object> getPartnerCofigInfoByAppid(String appid) {
+		Validator.checkArgument(StringUtils.isBlank(appid), "appid不能为空");
+        if (!SysConfig.partnerConfigMap2.containsKey(appid)) {
+            Map<String, Object> pMap = new HashMap<String, Object>();
+            
+            logger.info("缓存中服务商信息不存在，appid=" + appid + "开始从数据库查找");
+            List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(appid, 2);
+            if (topPartnerList == null || topPartnerList.isEmpty() || topPartnerList.get(0) == null) {
+                logger.error("数据库非冻结的服务商信息不存在，appid=" + appid);
+            } else {
+                Partner topPartner = topPartnerList.get(0);
+                if (StringUtils.isBlank(topPartner.getAppId()) || StringUtils.isBlank(topPartner.getMchId()) || StringUtils.isBlank(topPartner.getAppSecret()) || 
+                    StringUtils.isBlank(topPartner.getKeyPath()) || StringUtils.isBlank(topPartner.getKeyPassword()) || StringUtils.isBlank(topPartner.getPartnerKey())){
+                    logger.error("顶级服务商信息配置不完整，appid=" + appid);
+                } else {
+                    // 数据库存在，将其缓存
+                    pMap.put(SysEnvKey.WX_APP_ID, topPartner.getAppId());
+                    pMap.put(SysEnvKey.WX_MCH_ID, topPartner.getMchId());
+                    pMap.put(SysEnvKey.WX_SECRET, topPartner.getAppSecret());
+                    pMap.put(SysEnvKey.WX_CERT_LOCAL_PATH, topPartner.getKeyPath());
+                    pMap.put(SysEnvKey.WX_CERT_PASSWORD, topPartner.getKeyPassword());
+                    pMap.put(SysEnvKey.WX_KEY, topPartner.getPartnerKey());
+                    SysConfig.partnerConfigMap2.put(appid, pMap);
+                }
+            }
+            return pMap;
+        } else {
+            return SysConfig.partnerConfigMap2.get(appid);
+        }
+	}
 
     public void setPayCallBackURL(String payCallBackURL) {
         this.payCallBackURL = payCallBackURL;
@@ -143,8 +191,12 @@ public class SysConfigServiceImpl
     public void setqRCodeRootPath(String qRCodeRootPath) {
         this.qRCodeRootPath = qRCodeRootPath;
     }
+    
+    public void setAppidQrCodePath(String appidQrCodePath) {
+		this.appidQrCodePath = appidQrCodePath;
+	}
 
-    public void setPartnerService(PartnerService partnerService) {
+	public void setPartnerService(PartnerService partnerService) {
         this.partnerService = partnerService;
     }
 

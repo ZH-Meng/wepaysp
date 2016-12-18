@@ -18,6 +18,7 @@
 		<property name="wxPayNotifyURL" value="${wxPayNotifyURL}" />
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
+		<property name="appidQrCodePath" value="${appidQrCodePath}" />
 	</bean>
 	
 	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />
@@ -58,6 +59,7 @@
 	
 	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
+		<property name="sysConfigService" ref="sysConfigService" />
 	</bean>
     
 	<bean id="weixinRefundDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinRefundDetailsServiceImpl" parent="baseService">
@@ -72,6 +74,8 @@
 	
 	<bean id="weixinPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainServiceImpl" parent="baseService" >
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="sysConfigService" ref="sysConfigService" />
+		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
 	<bean id="weixinRefundDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainServiceImpl" parent="baseService" >

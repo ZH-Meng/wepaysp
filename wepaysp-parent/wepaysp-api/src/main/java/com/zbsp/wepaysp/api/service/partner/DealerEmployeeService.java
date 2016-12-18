@@ -110,5 +110,12 @@ public interface DealerEmployeeService {
      * @return DealerEmployeeVO 包含二维码path
      */
     public DealerEmployeeVO doTransGetQRCode(int qRCodeType, String dealerEmployeeOid, String modifier, String operatorUserOid, String logFunctionOid);
+
+    /**
+     * 获取当前收银员归属的顶级服务商Oid
+     * @param dealerEmployeeOid
+     * @return topPartnerOid
+     */
+	public String doJoinTransGetTopPartnerOid(String dealerEmployeeOid);
     
 }

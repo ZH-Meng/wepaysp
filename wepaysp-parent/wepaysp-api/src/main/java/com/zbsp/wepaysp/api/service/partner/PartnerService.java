@@ -21,11 +21,12 @@ public interface PartnerService {
     public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid);
     
     /**
-     * 查找使用中的顶级服务商集合
-     * @param topPartnerOid 指定某个顶级服务商Oid
+     * 查找非冻结的顶级服务商集合
+     * @param queryKey 非必填，type=1时指定某个顶级服务商Oid，type=2指公众号appi
+     * @param type queryKey 不为空时必填
      * @return
      */
-    public List<Partner> doJoinTransQueryTopPartner(String topPartnerOid);
+    public List<Partner> doJoinTransQueryTopPartner(String queryKey, Integer type);
 	
     /**
      * 查询符合条件的列表，查询结果按最后修改时间倒序排列.

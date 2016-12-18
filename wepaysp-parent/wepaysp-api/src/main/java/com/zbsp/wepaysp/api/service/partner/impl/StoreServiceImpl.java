@@ -251,11 +251,11 @@ public class StoreServiceImpl
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
             
-            Map<String, String > partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+            Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
             if (partnerMap == null || partnerMap.isEmpty()) {
                 throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
             }
-            String appid = partnerMap.get(SysEnvKey.WX_APP_ID);// 微信公众号ID
+            String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
             
             String qrURL = null;
             String callBackTemp = null;
@@ -266,7 +266,7 @@ public class StoreServiceImpl
                 Validator.checkArgument(StringUtils.isBlank(SysConfig.bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
                 callBackTemp = SysConfig.bindCallBackURL;
             }
-            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid());
+            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + (QRCodeType.PAY.getValue() == qRCodeType ? "&showwxpaytitle=1" : ""));
             // 生成二维码对应链接
             logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成二维码，类型：" + qRCodeType + "，URL：" + qrURL);
 
@@ -303,6 +303,21 @@ public class StoreServiceImpl
         BeanCopierUtil.copyProperties(store, storeVO);
         return storeVO;
     }
+    
+	@Override
+	public String doJoinTransGetTopPartnerOid(String storeOid) {
+		Validator.checkArgument(StringUtils.isBlank(storeOid), "storeOid不能为空！");
+        String topPartnerOid = null;
+        Store store = commonDAO.findObject(Store.class, storeOid);
+        if (store != null) {
+            // 商户
+            Dealer d = store.getDealer();
+            if (d != null) {
+            	topPartnerOid = d.getPartner1Oid();
+            }
+        }
+        return topPartnerOid;
+	}
     
     public void setSysConfigService(SysConfigService sysConfigService) {
         this.sysConfigService = sysConfigService;

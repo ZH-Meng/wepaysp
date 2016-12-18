@@ -15,7 +15,7 @@ public class WxApiUrl {
     /**
      * 弹出授权网页授权URL，公众号链接或者二维码对应链接，获取code，需要替换参数 APPID、REDIRECT_URI、STATE（可以不传，设置为""）<br>
      */
-    public static final String JSAPI_AUTH_SNSAPI_USERINFO = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SNSAPI_USERINFO &state=STATE#wechat_redirect";
+    public static final String JSAPI_AUTH_SNSAPI_USERINFO = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
     
     /**
      * 通过code换取网页授权access_token，get方式请求，需要替换参数 APPID、SECRET、CODE（用户统一授权后得到）、grant_type=authorization_code；
