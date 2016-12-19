@@ -1,7 +1,50 @@
+2016-12-18
+	ALTER TABLE `partner_t`
+MODIFY COLUMN `KEY_PATH`  varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `PARTNER_KEY`;
+
 2016-12-15
 	新增 pay_notice_bind_weixin_t表
 	store_t、dealer_employee_t 分别增加 bind_qr_code_path 字段
 
+	CREATE TABLE PAY_NOTICE_BIND_WEIXIN_T
+	(
+	   IWOID                CHAR(32) NOT NULL COMMENT 'UUID',
+	   STORE_OID            CHAR(32) COMMENT '支付门店',
+	   PAY_DEALER_EMPLOYEE_OID CHAR(32) COMMENT '支付收银员',
+	   BIND_DEALER_EMPLOYEE_OID CHAR(32) COMMENT '微信帐号绑定收银员',
+	   OPENID               VARCHAR(32) NOT NULL COMMENT '唯一标识',
+	   NICKNAME             VARCHAR(256) COMMENT '用户昵称',
+	   SEX                  INT COMMENT '值为1时是男性，值为2时是女性，值为0时是未知',
+	   TYPE                 CHAR(1) COMMENT '绑定类型，1绑定门店支付码，2绑定收银员支付码',
+	   STATE                CHAR(1) NOT NULL COMMENT '1开启，2关闭',
+	  `CREATOR` varchar(32) NOT NULL COMMENT '创建者',
+	  `CREATE_TIME` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+	  `MODIFIER` varchar(32) DEFAULT NULL COMMENT '最后修改者',
+	  `MODIFY_TIME` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '记录最后修改时间',
+	  `REMARK` varchar(256) DEFAULT NULL COMMENT '备注',
+	   PRIMARY KEY (IWOID)
+	);
+
+	ALTER TABLE PAY_NOTICE_BIND_WEIXIN_T COMMENT '支付通知绑定微信账户表';
+
+	ALTER TABLE PAY_NOTICE_BIND_WEIXIN_T ADD CONSTRAINT FK_PAY_NOTICE_BIND_WEIXIN_T_R101 FOREIGN KEY (STORE_OID)
+		  REFERENCES STORE_T (IWOID) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+	ALTER TABLE PAY_NOTICE_BIND_WEIXIN_T ADD CONSTRAINT FK_PAY_NOTICE_BIND_WEIXIN_T_R102 FOREIGN KEY (PAY_DEALER_EMPLOYEE_OID)
+		  REFERENCES DEALER_EMPLOYEE_T (IWOID) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+	ALTER TABLE PAY_NOTICE_BIND_WEIXIN_T ADD CONSTRAINT FK_PAY_NOTICE_BIND_WEIXIN_T_R103 FOREIGN KEY (BIND_DEALER_EMPLOYEE_OID)
+		  REFERENCES DEALER_EMPLOYEE_T (IWOID) ON DELETE RESTRICT ON UPDATE RESTRICT;
+	
+	
+	ALTER TABLE `store_t`
+	ADD COLUMN `bind_qr_code_path`  varchar(256) NULL AFTER `qr_code_path`;
+	
+	ALTER TABLE `dealer_employee_t`
+	ADD COLUMN `bind_qr_code_path`  varchar(256) NULL AFTER `qr_code_path`;
+	
+	
+	
  weixin_pay_details_t 中的`trade_status`  使用说明：0：交易中  1：交易成功 2：交易失败  3:交易撤销（标准流程中自动触发的交易撤销）  4：交易关闭
 
 `weixin_refund_details_t` 的交易撤销当做退款用。  这种交易撤销不用变更weixin_pay_details_t 的`trade_status`  ，但是需要更新它的退款金额字段。

@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.manage.web.action.pay;
+package com.zbsp.wepaysp.manage.web.action.appid;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +23,7 @@ import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
+import com.zbsp.wepaysp.manage.web.vo.ErrResult;
 import com.zbsp.wepaysp.manage.web.vo.appid.CreateOrderResult;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.tencent.WXPay;
@@ -81,18 +82,21 @@ public class AppIDPayAction
     public String wxCallBack() {
         logger.info("微信支付开始回调...");
         if (!checkCallBackParam()) {
-            return ERROR;
+            return "accessDeniedH5";
         }
         
         if (StringUtils.isBlank(partnerOid)) {
         	logger.error("微信支付非法回调，partnerOid为空");
+        	setErrResult(new ErrResult("param_miss", "参数缺失"));
+        	return "accessDeniedH5";
         }
         
         // 从内存中获取服务商配置信息
         Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partnerOid);
         if (partnerMap == null || partnerMap.isEmpty()) {
             logger.error("微信支付通知绑定微信账户微信回调访问的服务商不存在，partnerOid：" + partnerOid);
-            return ERROR;
+            setErrResult(new ErrResult("param_invalid", "参数无效"));
+            return "accessDeniedH5";
         }
         
         // 通过code换取网页授权access_token 和 openid
@@ -118,13 +122,15 @@ public class AppIDPayAction
                 如果需要定期同步用户的昵称，则需要考虑刷新access_token*/
             } else {
                 logger.warn("获取网页授权Access_token失败，错误码：" + authResult.getErrcode() + "，错误描述：" + authResult.getErrmsg());
-                return ERROR;
+                setErrResult(new ErrResult("access_token_fail", "授权失败"));
+                return "accessDeniedH5";
             }
         } catch (Exception e) {
             logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
                 "获取网页授权Access_token失败", "，异常信息：" + e.getMessage()));
             logger.error(e.getMessage(), e);
-            return ERROR;
+            setErrResult(new ErrResult("sys_error", "系统异常"));
+            return "accessDeniedH5";
         }
         logger.info("微信支付回调成功.");
         return "wxCallBack";
@@ -268,12 +274,14 @@ public class AppIDPayAction
         // 校验商户等参数
         if (StringUtils.isBlank(partnerOid) || StringUtils.isBlank(dealerOid)) {
             logger.warn("授权链接有误或者回调错误，导致参数缺失，partnerOid：" + partnerOid + ",dealerOid：" + dealerOid);
+            setErrResult(new ErrResult("param_miss", "参数缺失"));
             return false;
         }
         // 获取并校验商户信息，回显到页面
         DealerVO accessDealer = dealerService.doJoinTransQueryDealerByOid(dealerOid);
         if (accessDealer == null) {
             logger.warn("微信支付回调访问的商户不存在，dealerOid：" + dealerOid);
+            setErrResult(new ErrResult("param_invalid", "参数无效"));
             return false;
         } else {
             dealerName = accessDealer.getCompany();

@@ -12,12 +12,15 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.constant.WxApiUrl;
+import com.zbsp.wepaysp.common.constant.EnumDefine.PayClientType;
 
 /**
  * 生成器工具类
@@ -28,25 +31,93 @@ public final class Generator {
     public static void main(String[] args) {
         System.out.println(generateSequenceYYYYMMddNum(1, 10000000000L));
         System.out.println(generateRandomNumber(32));
+        Map<String, String> paramMap =  new HashMap<String, String> ();
+        paramMap.put("partnerOid", "afaefaegaeg");
+        paramMap.put("dealerOid", "a4gskgopkpo");
+        System.out.println(generatePayURL("1", "1234143143143", "https://api.payqianyan.com/nostate/pay/appidpay!wxCallBack.action", paramMap));
+        System.out.println(generatePayURL("1", "1234143143143", "https://api.payqianyan.com/nostate/pay/appidpay!wxCallBack.action?appid=1431daf", paramMap));
     }
     
     /**
-     * 生成微信二维码
-     * 
-     * @param qrType 二维码类型，1 为支付二维码，2为 微信支付通知绑定二维码
-     * @param appId
-     * @param redirectURL 微信网页授权回调地址
+     * 生成支付二维码URL 
+     * @param clientType 支付客户端类型
+     * @param appId 公众号ID
+     * @param redirectURL
+     * @param paramMap 附加参数Map
      * @return
      */
-    public static String generateQRURL(int qrType, String appId, String redirectURL) {
+    public static String generatePayURL(String clientType, String appId, String redirectURL, Map<String, String> paramMap) {
+        Validator.checkArgument(StringUtils.isBlank(clientType), "clientType不能为空！");
         Validator.checkArgument(StringUtils.isBlank(appId), "appId不能为空！");
         Validator.checkArgument(StringUtils.isBlank(redirectURL), "redirectURL不能为空！");
+
+        String paramTemp = "";
+        if (paramMap != null && !paramMap.isEmpty()) {
+            for (String key : paramMap.keySet()) {
+                paramTemp += "&" + key + "=" + paramMap.get(key);
+            }
+        }
+
+        if (redirectURL.indexOf("?") == -1) {
+            redirectURL += "?" + paramTemp.substring(1);
+        } else {
+            redirectURL += paramTemp;
+        }
+        String url = "";
+        try {
+            if (PayClientType.APP_WEIXIN.getValue().equals(clientType)) {
+                url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+            } else if (PayClientType.APP_ALI.getValue().equals(clientType)) {
+                
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+    
+    /**
+     * 生成业务二维码
+     * 
+     * @param qrType 二维码类型，1 为支付二维码，2为 微信支付通知绑定二维码
+     * @param appId qrType=2时必填
+     * @param redirectURL qrType=2时必填 微信网页授权回调地址
+     * @param payClientCheckURL qrType=1时 必填 支付客户端检查URL
+     * @param paramMap 附加参数Map
+     * @return
+     */
+    public static String generateQRURL(int qrType, String appId, String redirectURL, String payClientCheckURL, Map<String, String> paramMap) {
+        if (qrType == 1) {
+            Validator.checkArgument(StringUtils.isBlank(payClientCheckURL), "payClientCheckURL不能为空！");
+        } else if (qrType ==2) {
+            Validator.checkArgument(StringUtils.isBlank(appId), "appId不能为空！");
+            Validator.checkArgument(StringUtils.isBlank(redirectURL), "redirectURL不能为空！");
+        }
+        
+        String paramTemp = "";
+        if (paramMap != null && !paramMap.isEmpty()) {
+            for (String key : paramMap.keySet()) {
+                paramTemp += "&" + key + "=" + paramMap.get(key);
+            }
+        }
         
         String url = "";
         try {
             if (qrType == 1) {
-                url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+                if (payClientCheckURL.indexOf("?") == -1) {
+                    payClientCheckURL += "?" + paramTemp.substring(1);
+                } else {
+                    payClientCheckURL += paramTemp;
+                }
+                url = payClientCheckURL;
+                // 原先支付二维码直接微信支付，现在改为先检查再跳转具体的支付URL
+                //url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
             } else if (qrType == 2) { 
+                if (redirectURL.indexOf("?") == -1) {
+                    redirectURL += "?" + paramTemp.substring(1);
+                } else {
+                    redirectURL += paramTemp;
+                }
                 url = WxApiUrl.JSAPI_AUTH_SNSAPI_USERINFO.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
             }
         } catch (UnsupportedEncodingException e) {

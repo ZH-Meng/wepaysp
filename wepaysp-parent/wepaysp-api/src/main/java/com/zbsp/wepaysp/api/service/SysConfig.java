@@ -10,8 +10,11 @@ import java.util.Map;
  */
 public class SysConfig {
     
+    /**支付客户端检查地址*/
+    public static String payClientCheckURL;
+    
     /**公众号支付：扫码后微信回调系统地址*/
-    public static String payCallBackURL;
+    public static String wxPayCallBackURL;
     
     /**微信支付统一下单通知URL*/
     public static String wxPayNotifyURL;

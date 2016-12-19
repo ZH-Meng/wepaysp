@@ -19,7 +19,7 @@
 	</head>
 </head>
 <body>
-		<form id="orderForm" action="<%=request.getContextPath()%>/nostate/pay/appidpay!createOrder.action"  method="post">
+		<form id="orderForm" action="<%=request.getContextPath()%>/nostate/appid/pay!createOrder.action"  method="post">
 			<%-- <s:hidden name="partnerOid"/> --%>
 			<s:hidden name="dealerOid"/>
 			<s:hidden name="storeOid"/>
@@ -58,6 +58,20 @@
 				var input1 = document.getElementById('money');
 				new KeyBoard(input1);
 				$("#ok-btn").attr("disabled", true);
+				
+				
+				pushHistory();
+			    window.addEventListener("popstate", function(e) { 
+			        //alert("我监听到了浏览器的返回按钮事件啦");//根据自己的需求实现自己的功能 
+			        WeixinJSBridge.call('closeWindow');
+			    }, false); 
+			    function pushHistory() { 
+			        var state = { 
+			            title: "title", 
+			            url: "#"
+			        }; 
+			        window.history.pushState(state, "title", "#"); 
+			    } 
 			});
  
 			function submitOrder() {
@@ -76,17 +90,14 @@
 					return;
 				}
 				
-				$.post("<%=request.getContextPath()%>/nostate/pay/appidpay!createOrder.action",
+				$.post("<%=request.getContextPath()%>/nostate/appid/pay!createOrder.action",
 					  {
 						"dealerOid":dealerOid,"openid":openid,"money":money,
 					  	"storeOid":$.trim($("#storeOid").val()),
 					  	"dealerEmployeeOid":$.trim($("#dealerEmployeeOid").val())
 					  },
 					  function(data,status){
-					    console.log(data.result);
-					    console.log(data.weixinPayDetailOid);
 					    if (status == "success" || status == "SUCCESS") {
-					    	console.log(data);
 					    	if (data.result == "success" || data.result == "SUCCESS") {
 						    	callPay(data.jSPayReqData, data.weixinPayDetailOid);
 					    	} else {
@@ -118,13 +129,13 @@
 			            if (res.err_msg == "get_brand_wcpay_request:ok" ) {// 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
 			           		//TODO 请求系统，根据真实返回结果来响应
 		        			//alert("支付成功");
-		                	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=ok";
+		                	window.location.href="<%=request.getContextPath()%>/nostate/appid/pay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=ok";
 			            } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
 				           	//alert("支付过程中用户取消");
-				           	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=cancel";
+				           	window.location.href="<%=request.getContextPath()%>/nostate/appid/pay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=cancel";
 			            } else {
 			            	alert('支付失败');
-				           	window.location.href="<%=request.getContextPath()%>/nostate/pay/appidpay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=error";
+				           	window.location.href="<%=request.getContextPath()%>/nostate/appid/pay!jsPayResult.action?weixinPayDetailOid="+payDetailOid+"&payResult=error";
 			            }
 			        }
 			   ); 

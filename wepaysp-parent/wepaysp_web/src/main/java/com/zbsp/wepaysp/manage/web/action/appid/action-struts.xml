@@ -7,5 +7,27 @@
 		<action name="paynoticebind" class="payNoticeBindAction">
 			<result name="payNoticeBindResult">/resources/appid/payNoticeBindResult.jsp</result>
 		</action>
+		
+		<!-- 公众号支付 -->
+		<action name="pay" class="appidPayAction">
+			<result name="wxCallBack">/resources/appid/wxCallBack.jsp</result>
+			<!-- <result name="JSPAY">/resources/appid/JSPay.jsp</result> -->
+			<result name="jsPayResult">/resources/appid/JSPayResult.jsp</result>
+		</action>
+		
+		<action name="mobliePayIndex" class="mobliePayIndexAction">
+			<result name="payClientCheckResult">/resources/appid/payClientCheckResult.jsp</result>
+		</action>
+		
 	</package>
+	
+	<package name="appidtest" namespace="/nostate/appidtest" extends="global-default">
+		<!-- 公众号支付测试 -->
+		<action name="pay" class="appidPayAction">
+			<result name="wxCallBack">/resources/appid/wxCallBack.jsp</result>
+			<!-- <result name="JSPAY">/resources/appid/JSPayTest.jsp</result> -->
+			<result name="jsPayResult">/resources/appid/JSPayResult.jsp</result>
+		</action>
+	</package>
+			
 </struts>

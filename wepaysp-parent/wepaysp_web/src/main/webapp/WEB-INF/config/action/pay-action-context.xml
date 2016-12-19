@@ -27,8 +27,4 @@
 		<property name="weixinRefundDetailsMainService" ref="weixinRefundDetailsMainService" />
 	</bean>
 	
-	<bean id="appidPayAction" class="com.zbsp.wepaysp.manage.web.action.pay.AppIDPayAction" scope="prototype">
-		<property name="dealerService" ref="dealerService" />
-		<property name="weixinPayDetailsMainService" ref="weixinPayDetailsMainService" />
-	</bean>
 </beans>

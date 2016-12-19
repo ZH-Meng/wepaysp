@@ -9,6 +9,7 @@ import org.apache.struts2.interceptor.RequestAware;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.zbsp.wepaysp.common.bean.MessageBean;
+import com.zbsp.wepaysp.manage.web.vo.ErrResult;
 
 /**
  * 所有的Action必须强制继承 BaseAction
@@ -22,6 +23,8 @@ public abstract class BaseAction extends ActionSupport implements RequestAware {
 
     // 日志对象
     protected Logger logger = LogManager.getLogger(getClass());
+    
+    private ErrResult errResult;
     
     @SuppressWarnings({ "rawtypes" })
     private Map requestMap;
@@ -90,5 +93,14 @@ public abstract class BaseAction extends ActionSupport implements RequestAware {
     public void setMessage(String message){
         getMessageBean().setMessage(message);
     }
+
+    public ErrResult getErrResult() {
+        return errResult;
+    }
+    
+    public void setErrResult(ErrResult errResult) {
+        this.errResult = errResult;
+    }
+    
 }
 

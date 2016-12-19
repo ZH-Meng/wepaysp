@@ -13,6 +13,22 @@
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/main.css"/>
 		<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				pushHistory();
+			    window.addEventListener("popstate", function(e) { 
+			        //alert("我监听到了浏览器的返回按钮事件啦");//根据自己的需求实现自己的功能 
+			        WeixinJSBridge.call('closeWindow');
+			    }, false); 
+			    function pushHistory() { 
+			        var state = { 
+			            title: "title", 
+			            url: "#"
+			        }; 
+			        window.history.pushState(state, "title", "#"); 
+			    } 
+			});		
+		</script>
 	</head>
 	<body>
 	
@@ -22,7 +38,7 @@
 			</p>
 			<div class="succ-info">
 				<p class="info1">${weixinPayDetailsVO.dealerName }</p>
-				<p class="info2">&yen;<fmt:formatNumber value="${weixinPayDetailsVO.totalFee/100}" pattern="###,###,###,##0.00"/></p>
+				<p class="info2">&yen;<fmt:formatNumber value="${weixinPayDetailsVO.totalFee/100}" pattern="###,###,###,##0.00"/>元</p>
 				<div class="break-line"></div>			
 		</s:if>
 		<s:elseif test="tradeStatus == 0">	
@@ -40,7 +56,7 @@
 				</div>	
 				<div class="break-line"></div>
 				<div class="succ-item">
-					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}</span>
+					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}元</span>
 				</div>				
 		</s:elseif>
 		
@@ -59,7 +75,7 @@
 				</div>	
 				<div class="break-line"></div>
 				<div class="succ-item">
-					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}</span>
+					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}元</span>
 				</div>		
 		</s:elseif>
 		<s:elseif test="tradeStatus == 2">
@@ -76,7 +92,7 @@
 				</div>	
 				<div class="break-line"></div>				
 				<div class="succ-item">
-					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}</span>
+					金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额<span class="fr">${weixinPayDetailsVO.totalFee/100}元</span>
 				</div>	
 		</s:elseif>
 			

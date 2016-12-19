@@ -16,4 +16,12 @@
 		<property name="storeService" ref="storeService" />
 		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
+	
+	<bean id="appidPayAction" class="com.zbsp.wepaysp.manage.web.action.appid.AppIDPayAction" scope="prototype">
+		<property name="dealerService" ref="dealerService" />
+		<property name="weixinPayDetailsMainService" ref="weixinPayDetailsMainService" />
+	</bean>
+	
+	<bean id="mobliePayIndexAction" class="com.zbsp.wepaysp.manage.web.action.appid.MobliePayIndexAction" scope="prototype">
+	</bean>	
 </beans>

@@ -242,8 +242,29 @@ public class EnumDefine {
             this.value = value;
         }
     }
-    
-    
+
+    /**
+     * 支付客户端
+     * 
+     * @author 孟郑宏
+     */
+    public static enum PayClientType {
+        /** 1 微信APP（浏览器）*/                                  APP_WEIXIN("1"),
+        /** 2 支付宝APP */                                             APP_ALI("2"),
+        /** 3 百度APP */                                                APP_BAIDU("3"),        
+        /** 4 系统业务APP */                                          APP_SELF("4"),
+        /** 5 未知（不同浏览器以及其他扫码客户端）*/       UN_KNOWN("5");
+        
+        private String value;
+        
+        public String getValue() {
+            return value;
+        }
+        
+        private PayClientType(String value) {
+            this.value = value;
+        }
+    }
     
     /**
      * 是否可以退款标识

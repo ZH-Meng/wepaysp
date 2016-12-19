@@ -1,6 +1,5 @@
 package com.zbsp.wepaysp.timer.task;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,6 +11,7 @@ import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.util.StringHelper;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 
 /**
  * 刷新基本支持的AccessToken作业
@@ -41,7 +41,7 @@ public class RefreshBaseAccessTokenTask
         	// 检查和设置开关
         	if (StringUtils.isBlank(accessToken)) {// 首次启动
         		REFRESHF_RUN = true;
-        	} else if (expireTime == null || new Date().getTime() >= (expireTime.longValue() - 60 * 60 * 2)) {// access_token过期 提前两分钟刷新
+        	} else if (expireTime == null || TimeUtil.plusSeconds(120).getTime() >= expireTime.longValue()) {// access_token过期 提前两分钟刷新
         		REFRESHF_RUN = true;
         	} else {
         		REFRESHF_RUN = false;

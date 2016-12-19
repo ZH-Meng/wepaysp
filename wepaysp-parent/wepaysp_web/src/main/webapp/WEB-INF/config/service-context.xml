@@ -14,11 +14,13 @@
 	
 	<bean id="sysConfigService" class="com.zbsp.wepaysp.api.service.main.init.impl.SysConfigServiceImpl" parent="baseService" init-method="init">
 		<property name="partnerService" ref="partnerService" />
-		<property name="payCallBackURL" value="${payCallBackURL}" />
+		<property name="payClientCheckURL" value="${payClientCheckURL}" />
+		<property name="wxPayCallBackURL" value="${wxPayCallBackURL}" />
 		<property name="wxPayNotifyURL" value="${wxPayNotifyURL}" />
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
+		
 	</bean>
 	
 	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />

@@ -258,17 +258,19 @@ public class StoreServiceImpl
             String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
             
             String qrURL = null;
-            String callBackTemp = null;
+            Map<String, String> urlParamMap = new HashMap<String, String>();
+            urlParamMap.put("partnerOid", partnerOid);
+            urlParamMap.put("dealerOid", dealer.getIwoid());
+            urlParamMap.put("storeOid", store.getIwoid());
             if (QRCodeType.PAY.getValue() == qRCodeType) {
-            	Validator.checkArgument(StringUtils.isBlank(SysConfig.payCallBackURL), "未配置微信公众号支付扫码回调地址无法生成支付二维码");
-            	callBackTemp = SysConfig.payCallBackURL;
+                Validator.checkArgument(StringUtils.isBlank(SysConfig.payClientCheckURL), "未配置支付客户端检查地址无法生成支付二维码");
             } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
                 Validator.checkArgument(StringUtils.isBlank(SysConfig.bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
-                callBackTemp = SysConfig.bindCallBackURL;
             }
-            qrURL = Generator.generateQRURL(qRCodeType, appid, callBackTemp + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid() + "&storeOid=" + store.getIwoid() + (QRCodeType.PAY.getValue() == qRCodeType ? "&showwxpaytitle=1" : ""));
+            qrURL = Generator.generateQRURL(qRCodeType, appid, SysConfig.bindCallBackURL, SysConfig.payClientCheckURL, urlParamMap);
+            
             // 生成二维码对应链接
-            logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成二维码，类型：" + qRCodeType + "，URL：" + qrURL);
+            logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成业务二维码，类型：" + qRCodeType + "，URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID/门店ID
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId() + File.separator + store.getStoreId();

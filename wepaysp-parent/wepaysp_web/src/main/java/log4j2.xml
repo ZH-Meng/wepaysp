@@ -1,21 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="error">
+<configuration status="WARN" monitorInterval="3">
+	<properties>
+		<property name="LOG_HOME">/var/wepay/web</property>
+		<property name="ALL_FILE_NAME">all/ALL</property>
+		<property name="TIMER_FILE_NAME">timer/TIMER</property>
+		<property name="API_FILE_NAME">api/API</property>
+		<property name="WX_FILE_NAME">weixin/WX</property>
+		<property name="COMMON_PATTERN">[%5level] [%date{yyyy-MM-dd HH:mm:ss.SSS}] [%F : %L] - %msg%n</property>
+	</properties>
 	<appenders>
-		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="[%5level] [%date{yyyy-MM-dd HH:mm:ss.SSS}] [%F : %L] - %msg%n" />
+		<!-- 定义 控制台 输出 -->
+		<Console name="Console" target="SYSTEM_OUT" follow="true">
+			<PatternLayout pattern="${COMMON_PATTERN}"/>
 		</Console>
-		<File name="testFile" fileName="target/test.log">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n" />
-		</File>
-		<RollingFile name="RollingFile" fileName="logs/app.log"	filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
-			<PatternLayout pattern="[%5level] [%date{yyyy-MM-dd HH:mm:ss.SSS}] [%F : %L] - %msg%n" />
-			<SizeBasedTriggeringPolicy size="50 MB" />
-		</RollingFile>
+		<!-- 定义 All 日志输出 -->
+		<RollingRandomAccessFile name="AllFile" fileName="${LOG_HOME}/${ALL_FILE_NAME}" filePattern="${LOG_HOME}/${ALL_FILE_NAME}.%d{yyyy-MM-dd-HH}.log" immediateFlush="false">
+			<PatternLayout pattern="${COMMON_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile name="TimerFile" fileName="${LOG_HOME}/${TIMER_FILE_NAME}" filePattern="${LOG_HOME}/${TIMER_FILE_NAME}.%d{yyyy-MM-dd-HH}.log" immediateFlush="false">
+			<PatternLayout pattern="${COMMON_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile name="ApiFile" fileName="${LOG_HOME}/${API_FILE_NAME}" filePattern="${LOG_HOME}/${API_FILE_NAME}.%d{yyyy-MM-dd-HH}.log" immediateFlush="false">
+			<PatternLayout pattern="${COMMON_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile name="wxFile" fileName="${LOG_HOME}/${WX_FILE_NAME}" filePattern="${LOG_HOME}/${WX_FILE_NAME}.%d{yyyy-MM-dd-HH}.log" immediateFlush="false">
+			<PatternLayout pattern="${COMMON_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+		</RollingRandomAccessFile>
 	</appenders>
 	<loggers>
-		<root level="info">
-			<appender-ref ref="RollingFile" />
-			<appender-ref ref="Console" />
-		</root>
+		<!-- Root Logger -->
+		<AsyncRoot level="INFO" includeLocation="true">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="AllFile"/>
+		</AsyncRoot>
+		<!-- Timer logger -->
+		<AsyncLogger name="com.zbsp.wepaysp.timer" level="INFO" includeLocation="true" additivity="false">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="TimerFile"/>
+		</AsyncLogger>
+		<!-- Api logger -->
+		<AsyncLogger name="com.zbsp.wepaysp.api" level="INFO" includeLocation="true" additivity="false">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="ApiFile"/>
+		</AsyncLogger>
+		<!-- Weixin logger -->
+		<AsyncLogger name="com.tencent" level="INFO" includeLocation="true" additivity="false">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="wxFile"/>
+		</AsyncLogger>
 	</loggers>
 </configuration>   

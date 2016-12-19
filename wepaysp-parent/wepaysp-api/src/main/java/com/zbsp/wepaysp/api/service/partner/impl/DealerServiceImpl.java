@@ -493,10 +493,15 @@ public class DealerServiceImpl
             String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
             
             // 生成二维码对应链接
-            Validator.checkArgument(StringUtils.isBlank(SysConfig.payCallBackURL), "未配置微信公众号支付扫码回调地址无法生成支付二维码");
-            Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
-            String qrURL = Generator.generateQRURL(QRCodeType.PAY.getValue(), appid, SysConfig.payCallBackURL + "?partnerOid=" + dealer.getPartner1Oid() + "&dealerOid=" + dealer.getIwoid());
-            logger.info("商户-" + dealer.getCompany() + "生成微信支付二维码URL：" + qrURL);
+            String qrURL = null;
+            Map<String, String> urlParamMap = new HashMap<String, String>();
+            urlParamMap.put("partnerOid", partnerOid);
+            urlParamMap.put("dealerOid", dealer.getIwoid());
+            Validator.checkArgument(StringUtils.isBlank(SysConfig.payClientCheckURL), "未配置支付客户端检查地址无法生成支付二维码");
+            
+            qrURL = Generator.generateQRURL(QRCodeType.PAY.getValue(), appid, SysConfig.bindCallBackURL, SysConfig.payClientCheckURL, urlParamMap);
+            
+            logger.info("商户-" + dealer.getCompany() + "生成支付客户端检查二维码URL：" + qrURL);
 
             // 路径生成规则：服务商ID/商户ID
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId();

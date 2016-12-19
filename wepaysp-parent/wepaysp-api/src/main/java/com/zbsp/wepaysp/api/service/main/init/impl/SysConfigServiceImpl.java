@@ -21,7 +21,8 @@ public class SysConfigServiceImpl
     extends BaseService
     implements SysConfigService {
 
-    private String payCallBackURL;
+    private String payClientCheckURL;
+    private String wxPayCallBackURL;
     private String wxPayNotifyURL;
     private String bindCallBackURL;
     private String qRCodeRootPath;
@@ -39,10 +40,16 @@ public class SysConfigServiceImpl
      */
     public void init() throws SystemInitException {
         // 检查注入参数完整性
-        if (StringUtils.isBlank(payCallBackURL)) {
-            throw new SystemInitException("初始化系统配置信息失败，参数缺失：payCallBackURL");
+        
+        if (StringUtils.isBlank(payClientCheckURL)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：payClientCheckURL");
         } else {
-            logger.info("初始化系统配置信息：payCallBackURL=" + payCallBackURL);
+            logger.info("初始化系统配置信息：payClientCheckURL=" + payClientCheckURL);
+        }
+        if (StringUtils.isBlank(wxPayCallBackURL)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：wxPayCallBackURL");
+        } else {
+            logger.info("初始化系统配置信息：wxPayCallBackURL=" + wxPayCallBackURL);
         }
         if (StringUtils.isBlank(wxPayNotifyURL)) {
             throw new SystemInitException("初始化系统配置信息失败，参数缺失：wxPayNotifyURL");
@@ -74,7 +81,8 @@ public class SysConfigServiceImpl
         }
         
         // 初始化系统静态配置
-        SysConfig.payCallBackURL = payCallBackURL;
+        SysConfig.payClientCheckURL= payClientCheckURL;
+        SysConfig.wxPayCallBackURL = wxPayCallBackURL;
         SysConfig.wxPayNotifyURL = wxPayNotifyURL;
         SysConfig.bindCallBackURL = bindCallBackURL;
         SysConfig.qRCodeRootPath = qRCodeRootPath;
@@ -107,7 +115,7 @@ public class SysConfigServiceImpl
             SysConfig.partnerConfigMap2.put(topPartner.getAppId(), pMap);
             
             // 启动获取Base_acction_token
-            //new WeixinUtil().refreshBaseAccessToken(topPartner.getIwoid());
+            new WeixinUtil().refreshBaseAccessToken(topPartner.getIwoid());
         }
         
     }
@@ -176,10 +184,14 @@ public class SysConfigServiceImpl
         }
 	}
 
-    public void setPayCallBackURL(String payCallBackURL) {
-        this.payCallBackURL = payCallBackURL;
+    public void setPayClientCheckURL(String payClientCheckURL) {
+        this.payClientCheckURL = payClientCheckURL;
     }
     
+    public void setWxPayCallBackURL(String wxPayCallBackURL) {
+        this.wxPayCallBackURL = wxPayCallBackURL;
+    }
+
     public void setWxPayNotifyURL(String wxPayNotifyURL) {
         this.wxPayNotifyURL = wxPayNotifyURL;
     }

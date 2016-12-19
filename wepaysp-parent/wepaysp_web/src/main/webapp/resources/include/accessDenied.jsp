@@ -1,13 +1,3 @@
-<%--
-/*
-* 
-* 创建者：杨帆
-* 创建日期：2015年7月10日
-*
-* 版权所有(C) 2011-2014。英泰伟业科技(北京)有限公司。
-* 保留所有权利。
-*/
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -15,7 +5,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link href="<%=request.getContextPath()%>/css/zxstyle.css" rel="stylesheet" />
-	<title>中彩宝后台管理系统</title>
+	<title>移动支付服务管理系统</title>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript">
 		$(function(){

@@ -13,6 +13,22 @@
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/main.css"/>
 		<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				pushHistory();
+			    window.addEventListener("popstate", function(e) { 
+			        //alert("我监听到了浏览器的返回按钮事件啦");//根据自己的需求实现自己的功能 
+			        WeixinJSBridge.call('closeWindow');
+			    }, false); 
+			    function pushHistory() { 
+			        var state = { 
+			            title: "title", 
+			            url: "#"
+			        }; 
+			        window.history.pushState(state, "title", "#"); 
+			    } 
+			});		
+		</script>
 	</head>
 	<body>
 	    <s:if test="bindResult.result == 'success' ">
