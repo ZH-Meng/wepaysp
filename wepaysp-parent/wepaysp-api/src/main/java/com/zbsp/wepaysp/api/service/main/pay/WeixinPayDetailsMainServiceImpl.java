@@ -435,6 +435,14 @@ public class WeixinPayDetailsMainServiceImpl
     			}
     		}
     		logger.info("订单（ID=" + payDetailsVO.getOutTradeNo() + "）成功向（" + count + "人）发送支付成功通知");
+    	} else {
+    	    String temp = "";
+    	    if (StringUtils.isNotBlank(payDetailsVO.getDealerEmployeeOid())) {
+    	        temp = "收银员-" + payDetailsVO.getDealerEmployeeName() + "（ID=" + payDetailsVO.getDealerEmployeeId() + "）"; 
+    	    } else {
+    	        temp = "门店-" + payDetailsVO.getStoreName() + "（ID=" + payDetailsVO.getStoreId() + "）";
+    	    }
+    	    logger.info(temp + "没有启用的支付通知绑定人"+"，订单（ID=" + payDetailsVO.getOutTradeNo() + "）不需要发送支付成功通知");
     	}
 	}
     

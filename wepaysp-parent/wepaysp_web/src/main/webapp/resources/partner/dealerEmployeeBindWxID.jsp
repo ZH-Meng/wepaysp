@@ -104,11 +104,12 @@
 	                    	</tbody>
 	               		</table>
 	                </li>
-	                <s:if test="#hasUpdateBindWxIDPermission eq 'yes' && payNoticeBindWeixinVoList != null && payNoticeBindWeixinVoList.size() > 0">
-		                <li class="bg_button">
+	                <li class="bg_button">
+		                <s:if test="#hasUpdateBindWxIDPermission eq 'yes' && payNoticeBindWeixinVoList != null && payNoticeBindWeixinVoList.size() > 0">
 		                    <a href="javascript:void(0);" onclick="toBatchUpdate();return false;">保存</a>
-		                </li>
-	                </s:if>
+		                </s:if>
+	                    <a href="javascript:void(0);" onclick="refreshBind();return false;">刷新</a>
+	                </li>
 	            </ul>
 	            <ul>
 	            	<li class="t-center">
@@ -143,6 +144,10 @@
 			if (flag) {
 				invokeAction('batchUpdateBindWxID');
 			}
+		}
+		
+		function refreshBind() {
+			invokeAction('goToBindWxID');
 		}
 	</script>
 </body>
