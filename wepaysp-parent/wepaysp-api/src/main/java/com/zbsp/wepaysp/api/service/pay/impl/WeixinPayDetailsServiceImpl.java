@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.api.service.pay.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +12,12 @@ import javax.persistence.LockModeType;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
+import com.zbsp.wepaysp.api.service.manage.SysLogService;
+import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.EnumDefine.OrderClosedErr;
 import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
@@ -21,6 +25,7 @@ import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
 import com.zbsp.wepaysp.common.constant.EnumDefine.TradeState;
 import com.zbsp.wepaysp.common.constant.EnumDefine.TradeType;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -36,10 +41,6 @@ import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
-import com.zbsp.wepaysp.api.service.BaseService;
-import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
-import com.zbsp.wepaysp.api.service.manage.SysLogService;
-import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
@@ -76,7 +77,7 @@ public class WeixinPayDetailsServiceImpl
 
         //StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p and w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
-        
+       
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -149,8 +150,17 @@ public class WeixinPayDetailsServiceImpl
         sql.append(" order by w.transBeginTime desc");
         List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
+//		int size = weixinTotalList.size();
+// 
+//		Object first = weixinTotalList.get(0);
+//		for ( int i=1; i<size; i++ ) {
+//			if ( list.get(i)!=first ) {
+//				throw new NonUniqueResultException( list.size() );
+//			}
+//		}
         Long totalAmount = 0L;
         Long totalMoney = 0L;
+        
         // 总笔数为记录总数，总金额为交易成功的总金额
         if(weixinPayDetailsList != null && !weixinPayDetailsList.isEmpty()) {
         	for (WeixinPayDetails weixinPayDetails : weixinPayDetailsList) {
@@ -188,13 +198,94 @@ public class WeixinPayDetailsServiceImpl
                 vo.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
                 
         		vo.setPayType(weixinPayDetails.getPayType());
+        		vo.setTransactionId(weixinPayDetails.getTransactionId());
         		vo.setTotalFee(weixinPayDetails.getTotalFee());
         		vo.setResultCode(weixinPayDetails.getResultCode());
         		vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
         		
+        		
         		resultList.add(vo);
         	}
         }
+        
+        //计算合计信息
+        sql = new StringBuffer("select sum(case when w.tradeStatus=1 then w.totalFee else 0 end),count(w.totalFee) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
+        
+
+        if (StringUtils.isNotBlank(partner1Oid)) {
+        	sql.append(" and w.partner1Oid = :PARTNER1OID");
+        	sqlMap.put("PARTNER1OID", partner1Oid);
+        }
+        if (StringUtils.isNotBlank(partner2Oid)) {
+        	sql.append(" and w.partner2Oid = :PARTNER2OID");
+        	sqlMap.put("PARTNER2OID", partner2Oid);
+        }
+        if (StringUtils.isNotBlank(partner3Oid)) {
+        	sql.append(" and w.partner3Oid = :PARTNER3OID");
+        	sqlMap.put("PARTNER3OID", partner3Oid);
+        }
+        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
+            sql.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
+            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
+        }
+        if (StringUtils.isNotBlank(dealerOid)) {
+            sql.append(" and w.dealer.iwoid = :DEALEROID");
+            sqlMap.put("DEALEROID", dealerOid);
+        }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.store.iwoid = :STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+            sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
+            sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
+        }
+        
+        if (StringUtils.isNotBlank(partnerEmployeeId)) {
+            sql.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
+            sqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
+        }
+        if (StringUtils.isNotBlank(dealerId)) {
+            sql.append(" and w.dealer.dealerId like :DEALERID");
+            sqlMap.put("DEALERID", "%" + dealerId + "%");
+        }
+        if (StringUtils.isNotBlank(storeId)) {
+            sql.append(" and w.store.storeId like :STOREID");
+            sqlMap.put("STOREID", "%" + storeId + "%");
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeId)) {
+            sql.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
+            sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
+        }
+        
+        if (beginTime != null ) {
+            sql.append(" and w.transBeginTime >=:BEGINTIME ");
+            sqlMap.put("BEGINTIME", beginTime);
+        }
+        if (endTime != null ) {
+            sql.append(" and w.transBeginTime <=:ENDTIME ");
+            sqlMap.put("ENDTIME", endTime);
+        }
+        if (StringUtils.isNotBlank(payType)) {// 支付类型
+            sql.append(" and w.payType = :PAYTYPE");
+            sqlMap.put("PAYTYPE", payType);
+        }
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            sql.append(" and w.outTradeNo = :OUTTRADENO");
+            sqlMap.put("OUTTRADENO", outTradeNo);
+        }
+        if (StringUtils.isNotBlank(transactionId)) {
+            sql.append(" and w.transactionId = :TRANSACTIONID");
+            sqlMap.put("TRANSACTIONID", transactionId);
+        }
+        
+        List<?> weixinTotalList = (List<?>) commonDAO.findObjectList(sql.toString(), sqlMap, false);
+        for (Iterator<?> it = weixinTotalList.iterator(); it.hasNext();) {
+        	Object[] curRow = (Object[]) it.next();
+        	 totalMoney= (Long)curRow[0];
+        	 totalAmount = (Long)curRow[1];
+        }
+        
         WeixinPayTotalVO totalVO = new WeixinPayTotalVO();
         totalVO.setTotalAmount(totalAmount);
         totalVO.setTotalMoney(totalMoney);
