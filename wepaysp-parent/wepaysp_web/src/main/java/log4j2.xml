@@ -48,16 +48,19 @@
 		<!-- Timer logger -->
 		<AsyncLogger name="com.zbsp.wepaysp.timer" level="INFO" includeLocation="true" additivity="false">
 			<AppenderRef ref="Console"/>
+			<AppenderRef ref="AllFile"/>
 			<AppenderRef ref="TimerFile"/>
 		</AsyncLogger>
 		<!-- Api logger -->
 		<AsyncLogger name="com.zbsp.wepaysp.api" level="INFO" includeLocation="true" additivity="false">
 			<AppenderRef ref="Console"/>
+			<AppenderRef ref="AllFile"/>
 			<AppenderRef ref="ApiFile"/>
 		</AsyncLogger>
 		<!-- Weixin logger -->
 		<AsyncLogger name="com.tencent" level="INFO" includeLocation="true" additivity="false">
 			<AppenderRef ref="Console"/>
+			<AppenderRef ref="AllFile"/>
 			<AppenderRef ref="wxFile"/>
 		</AsyncLogger>
 	</loggers>

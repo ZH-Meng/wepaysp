@@ -85,7 +85,7 @@ public interface WeixinPayDetailsService {
      * @param returnCode 业务结果 SUCCESS/FAIL，FAIL时错误信息详见errCode
      * @param resultCode 业务结果码
      * @param payResultVO 封装的支付结果VO
-     * @return 保存成功返回保存后的支付明细VO
+     * @return 更新成功返回更新后的支付明细VO
      */
     public WeixinPayDetailsVO doTransUpdatePayResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO);
 
@@ -114,8 +114,9 @@ public interface WeixinPayDetailsService {
     /**
      * 更新微信支付订单查询结果，只支持查询成功更新
      * @param orderQueryResultVO
+     * @return 更新成功返回更新后的支付明细VO
      */
-    public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO);
+    public WeixinPayDetailsVO doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO);
 
     /**
      * 根据交易状态和交易开始时间在当前时间-间隔时间之前的记录

@@ -187,6 +187,9 @@
 									<s:elseif test="#weixinPayDetailsVo.payType == 4">
 										<s:set var="payTypeStr">微信买单</s:set>
 									</s:elseif>
+									<s:else>
+										<s:set var="payTypeStr">未知</s:set>
+									</s:else>
 						  			<td title="<s:property value="#payTypeStr" />">
 						  				<s:property value="#payTypeStr" />
 						  			</td>
@@ -208,6 +211,13 @@
 						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 4">
 						  				<s:set var="tradeStatusStr">交易关闭</s:set>
 									</s:elseif>
+									<s:elseif test="#weixinPayDetailsVo.tradeStatus == 5">
+										<%--待关闭 --%>
+						  				<s:set var="tradeStatusStr">交易取消</s:set>
+									</s:elseif>
+									<s:else>
+										<s:set var="tradeStatusStr">未知</s:set>
+									</s:else>
 						  			<td title="<s:property value="tradeStatusStr" />">
 						  				<s:property value="#tradeStatusStr" />
 						  			</td>

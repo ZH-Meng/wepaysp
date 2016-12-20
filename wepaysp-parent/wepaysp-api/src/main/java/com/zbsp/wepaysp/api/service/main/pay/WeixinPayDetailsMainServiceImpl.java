@@ -183,7 +183,7 @@ public class WeixinPayDetailsMainServiceImpl
 						try {
 							payResultVO = weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, WeixinPackConverter.payNotify2weixinPayDetailsVO(wxNotify));
 							if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {
-								logger.info("扫码支付成功，向收银员/商户发送支付成功通知");
+								logger.info("微信异步通知支付成功，向收银员/商户发送支付成功通知");
 								// 发送支付结果公众号信息（支付成功）
 								try {
 									sendPayResultNotice(payResultVO);
@@ -314,7 +314,17 @@ public class WeixinPayDetailsMainServiceImpl
         
         if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {// 查询成功
             logger.info("调用订单查询API结果成功，更新系统订单状态");
-            weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
+            WeixinPayDetailsVO payResultVO = weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
+            
+            if (payResultVO != null && WeixinPayDetails.TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
+                logger.info("订单查询结果为支付成功，向收银员/商户发送支付成功通知");
+                try {
+                    sendPayResultNotice(payResultVO);
+                } catch (Exception e) {
+                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
+                            "发送支付成功通知错误，异常信息：" + e.getMessage()));
+                }
+            }
         } else {
             if (StringUtils.equalsIgnoreCase(OrderQueryErr.ORDERNOTEXIST.toString(), queryResultVO.getErrCode())) {// 订单不存在
                 logger.info("调用订单查询API结果【订单不存在】，调用关闭订单API");

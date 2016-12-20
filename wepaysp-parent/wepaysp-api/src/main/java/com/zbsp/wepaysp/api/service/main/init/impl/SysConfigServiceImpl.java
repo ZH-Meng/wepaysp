@@ -115,7 +115,7 @@ public class SysConfigServiceImpl
             SysConfig.partnerConfigMap2.put(topPartner.getAppId(), pMap);
             
             // 启动获取Base_acction_token
-            new WeixinUtil().refreshBaseAccessToken(topPartner.getIwoid());
+            new WeixinUtil().getBaseAccessToken(topPartner.getIwoid());
         }
         
     }

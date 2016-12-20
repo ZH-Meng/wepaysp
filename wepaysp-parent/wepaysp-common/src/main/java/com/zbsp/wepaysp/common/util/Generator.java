@@ -54,7 +54,9 @@ public final class Generator {
         String paramTemp = "";
         if (paramMap != null && !paramMap.isEmpty()) {
             for (String key : paramMap.keySet()) {
-                paramTemp += "&" + key + "=" + paramMap.get(key);
+                if (StringUtils.isNotBlank(paramMap.get(key))) {
+                    paramTemp += "&" + key + "=" + paramMap.get(key);
+                }
             }
         }
 
@@ -97,7 +99,9 @@ public final class Generator {
         String paramTemp = "";
         if (paramMap != null && !paramMap.isEmpty()) {
             for (String key : paramMap.keySet()) {
-                paramTemp += "&" + key + "=" + paramMap.get(key);
+                if (StringUtils.isNotBlank(paramMap.get(key))) {
+                    paramTemp += "&" + key + "=" + paramMap.get(key);
+                }
             }
         }
         

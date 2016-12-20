@@ -677,7 +677,7 @@ public class WeixinPayDetailsServiceImpl
     }
 
     @Override
-    public void doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO) {
+    public WeixinPayDetailsVO doTransUpdateOrderQueryResult(WeixinPayDetailsVO orderQueryResultVO) {
         /*查询结果result_code=SUCCESS才更新结果；trade_state=SUCCESS时，比对total_fee与系统订单total_fee是否一致，不一致则更新结果为交易失败；*/ 
         // 关键信息 result_code trade_state total_fee mch_id；其他非关键字段由SDK 通过验签完成校验
         
@@ -703,6 +703,7 @@ public class WeixinPayDetailsServiceImpl
         
         logger.info("系统支付订单（ID=" +orderQueryResultVO.getOutTradeNo() + "）查询结果成功，订单状态：" + tradeState);
         
+        WeixinPayDetailsVO returnPayDetailVO = null;
         // 非处理中，代表系统已收到微信支付结果通知并处理
         if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) {
         	logger.info("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
@@ -775,10 +776,23 @@ public class WeixinPayDetailsServiceImpl
             logDescTemp += "，交易状态：" + tradeState +"]";
             
             commonDAO.update(payDetails);
-            
             // 记录日志-修改微信支付结果
             sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, logDescTemp, processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+            
+            // 支付成功，组装发送消息的VO
+            if (StringUtils.equalsIgnoreCase(tradeState, TradeState.SUCCESS.toString())) {
+                // 组装返回结果
+                returnPayDetailVO = new WeixinPayDetailsVO();
+                BeanCopierUtil.copyProperties(payDetails, returnPayDetailVO);
+                returnPayDetailVO.setStoreOid(payDetails.getStore() != null ? payDetails.getStore().getIwoid() : "");
+                returnPayDetailVO.setDealerEmployeeOid(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getIwoid() : "");
+                returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");
+                returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
+            }
+            
         }
+        
+        return returnPayDetailVO;
     }
     
     @Override

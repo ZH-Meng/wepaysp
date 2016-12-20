@@ -23,6 +23,7 @@ import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -105,11 +106,14 @@ public class WeixinUtil {
     	Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid); 
     	String accessToken = MapUtils.getString(partnerMap, SysEnvKey.WX_BASE_ACCESS_TOKEN);
 		Long expireTime = MapUtils.getLong(partnerMap, SysEnvKey.WX_BASE_EXPIRE_TIME);
+		String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
 		// 检查和设置开关
 		boolean flag = false;
     	if (StringUtils.isBlank(accessToken)) {// 首次启动
+    	    logger.info("系统启动，服务商（"+ appid +"）首次获取access_token");
     		flag = true;
-    	} else if (expireTime == null || new Date().getTime() >= (expireTime.longValue() - 60 * 60 * 2)) {// access_token过期 提前两分钟刷新
+        } else if (expireTime == null || TimeUtil.plusSeconds(120).getTime() >= expireTime.longValue()) {// access_token过期 提前两分钟刷新
+            logger.info("服务商（"+ appid +"）access_token过期，准备刷新");
     		flag = true;
     	}
     	if (flag) {
