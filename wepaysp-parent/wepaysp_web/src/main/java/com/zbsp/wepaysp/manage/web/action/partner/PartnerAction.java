@@ -189,7 +189,8 @@ public class PartnerAction
                 partnerService.doTransUpdatePartner(partnerVO, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 logger.info("代理商" + partnerVO.getCompany() + "修改成功");
                 setAlertMessage("代理商" + partnerVO.getCompany() + "修改成功");
-                partnerVO = null;
+                // 赋值为null的意义？
+//                partnerVO = null;
             } else {
                 logger.warn("修改代理商失败，参数partnerVO或者partnerVO.getIwoid()为空！");
                 setAlertMessage("修改代理商失败！");

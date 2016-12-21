@@ -114,18 +114,14 @@
 	                            <tr>
 	                                <th class="six">序号</th>
 	                                <th>商户订单号</th>
+	                                <th>微信订单号</th>
 	                                <s:if test="userLevel  < 3">
-		                                <th>服务商ID</th>
-		                                <th>服务商名称</th>
-		                                <th>业务员ID</th>
-		                                <th>业务员名称</th>
+		                                <th>服务商</th>
+		                                <th>业务员</th>
 		                            </s:if>
-		                            <th>商家ID</th>
-	                                <th>商家名称</th>
-	                                <th>门店ID</th>
-	                                <th>门店名称</th>
-	                                <th>收银员ID</th>
-	                                <th>收银员姓名</th>
+		                            <th>商家</th>
+	                                <th>门店</th>
+	                                <th>收银员</th>
 	                                <th>支付类型</th>
 	                                <th>订单金额</th>
 	                                <th>状态</th>
@@ -142,39 +138,31 @@
 						  			<td title="<s:property value="#weixinPayDetailsVo.outTradeNo" />">
 						  				<s:property value="#weixinPayDetailsVo.outTradeNo" />
 						  			</td>
+						  			<td title="<s:property value="#weixinPayDetailsVo.transactionId" />">
+						  				<s:property value="#weixinPayDetailsVo.transactionId" />
+						  			</td>						  			
 						  			<s:if test="userLevel  < 3">
 						  				<td title="<s:property value="#weixinPayDetailsVo.partnerId" />">
-							  				<s:property value="#weixinPayDetailsVo.partnerId" />
-							  			</td>
-							  			<td title="<s:property value="#weixinPayDetailsVo.partnerName" />">
+							  				<s:property value="#weixinPayDetailsVo.partnerId" /><br />
 							  				<s:property value="#weixinPayDetailsVo.partnerName" />
-							  			</td>
+							  			</td>		
 							  			<td title="<s:property value="#weixinPayDetailsVo.partnerEmployeeId" />">
-							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeId" />
-							  			</td>
-							  			<td title="<s:property value="#weixinPayDetailsVo.partnerEmployeeName" />">
+							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeId" /><br />
 							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeName" />
 							  			</td>
 							  		</s:if>
 							  		<td title="<s:property value="#weixinPayDetailsVo.dealerId" />">
-						  				<s:property value="#weixinPayDetailsVo.dealerId" />
-						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.dealerName" />">
+						  				<s:property value="#weixinPayDetailsVo.dealerId" /><br />
 						  				<s:property value="#weixinPayDetailsVo.dealerName" />
 						  			</td>
 						  			<td title="<s:property value="#weixinPayDetailsVo.storeId" />">
-						  				<s:property value="#weixinPayDetailsVo.storeId" />
-						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.storeName" />">
+						  				<s:property value="#weixinPayDetailsVo.storeId" /><br />
 						  				<s:property value="#weixinPayDetailsVo.storeName" />
 						  			</td>
 						  			<td title="<s:property value="#weixinPayDetailsVo.dealerEmployeeId" />">
-						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeId" />
-						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.dealerEmployeeName" />">
+						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeId" /><br />
 						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeName" />
-						  			</td>
-						  			
+						  			</td>						  			
 						  			<s:if test="#weixinPayDetailsVo.payType == 1">
 						  				<s:set var="payTypeStr">刷卡支付</s:set>
 						  			</s:if>
