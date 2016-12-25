@@ -216,7 +216,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="<s:property value='userLevel<3?16:12'/>">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="<s:property value='userLevel<3?12:10'/>">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>
