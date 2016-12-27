@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,14 +66,8 @@ public class StoreAction
             }
             paramMap.put("storeName", storeVO.getStoreName());
             paramMap.put("storeTel", storeVO.getStoreTel());
-            // 所属商户
-            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (manageUser.getUserLevel() == null || manageUser.getUserLevel().intValue() > SysUser.UserLevel.dealer.getValue()) {// 系统用户或者商户级别以下的应用用户
-                logger.warn("商户级别以下用户不能查看门店列表");
-                setAlertMessage("商户级别以下用户不能查看门店列表");
-                return "accessDenied";
-            }
             
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (manageUser.getUserLevel().intValue() < SysUser.UserLevel.dealer.getValue()) {// 服务商、业务员在 商户页面查看门店信息
                 if (StringUtils.isBlank(dealerOid)) {
                     logger.warn("门店查询列表失败：商户级别以上用户需要提供商户Oid才能查看门店列表");
@@ -80,16 +75,19 @@ public class StoreAction
                     return "accessDenied";
                 }
                 paramMap.put("dealerOid", dealerOid);
+                storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
+            } else if (SysUserUtil.isDealer(manageUser)) {// 商户
+                paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+                storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
+            } else if (SysUserUtil.isStoreManager(manageUser)) {// 店长
+                storeOid = manageUser.getDataDealerEmployee().getStore().getIwoid();
+                storeVoList = new ArrayList<StoreVO>();
+                storeVoList.add(storeService.doJoinTransQueryStoreByOid(storeOid));
             } else {// 商户
-                if (!SysUserUtil.isDealer(manageUser)) {
-                    logger.warn("门店查询列表失败：当前用户属于商户级别，但是没有关联商户信息");
-                    setAlertMessage("门店查询列表失败：当前用户属于商户级别，但是没有关联商户信息");
-                    return "accessDenied";
-                } else {
-                    paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
-                }
+                logger.warn("无权查看门店列表");
+                setAlertMessage("无权查看门店列表");
+                return "accessDenied";
             }
-            storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
             //rowCount = storeService.doJoinTransQueryStoreCount(paramMap);
         } catch (Exception e) {
             logger.error("门店查询列表错误：" + e.getMessage());
@@ -223,8 +221,8 @@ public class StoreAction
         logger.info("下载门店级别支付二维码图片.");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // 代理商、业务员、商户能下载门店级别二维码
-            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser)) {
+            // 代理商、业务员、商户、店长能下载门店级别二维码
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser)) {
                 if (StringUtils.isNotBlank(storeOid)) {
                 	storeVO = storeService.doTransGetQRCode(QRCodeType.PAY.getValue(), storeOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
@@ -273,8 +271,8 @@ public class StoreAction
         logger.info("跳转微信支付通知绑定微信账户页面");
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            
-            if (SysUserUtil.isDealer(manageUser)) {// 商户
+            // 代理商、业务员、商户、店长能绑定
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser)) {
                 if (StringUtils.isNotBlank(storeOid)) {
                     // 查询已绑定的信息
                     Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -376,7 +374,8 @@ public class StoreAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             
-            if (SysUserUtil.isDealer(manageUser)) {// 商户
+            // 代理商、业务员、商户、店长能删除绑定
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser)) {
                 if (StringUtils.isNotBlank(payNoticeBindWeixinOid) && StringUtils.isNotBlank(storeOid)) {
                     // 删除绑定
                     payNoticeBindWeixinService.doTransDeletePayNoticeBindWeixin(payNoticeBindWeixinOid);
@@ -405,7 +404,8 @@ public class StoreAction
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             
-            if (SysUserUtil.isDealer(manageUser)) {// 商户
+            // 代理商、业务员、商户、店长能更新绑定
+            if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser)) {
                 if (payNoticeBindWeixinVoList != null && !payNoticeBindWeixinVoList.isEmpty() && StringUtils.isNotBlank(storeOid)) {
                     // 更新绑定
                 	payNoticeBindWeixinService.doTransUpdatePayNoticeBindWeixinList(payNoticeBindWeixinVoList, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));

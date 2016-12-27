@@ -47,14 +47,6 @@
 				        			<s:set var="hasUpdatePermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
-				            <manage:permission validateUrl="/resources/partner/storemanage!goToBindWxID.action">
-				        		<manage:pass>
-				        			<s:set var="hasBindWxIDPermission">yes</s:set>
-				        		</manage:pass>
-				        		<manage:notPass>
-				        			<s:set var="hasBindWxIDPermission">no</s:set>
-				        		</manage:notPass>
-				            </manage:permission>
 			             </s:if>
 			            <s:elseif test="dealerOid != null && dealerOid != '' ">
 							<%-- 查看商户员工按钮权限 --%>
@@ -69,6 +61,17 @@
 							<s:set name="backFlag" value="true"/>
 						</s:elseif>
 						
+						<%--绑定支付通知按钮权限验证 --%>
+			            <manage:permission validateUrl="/resources/partner/storemanage!goToBindWxID.action">
+			        		<manage:pass>
+			        			<s:set var="hasBindWxIDPermission">yes</s:set>
+			        		</manage:pass>
+			        		<manage:notPass>
+			        			<s:set var="hasBindWxIDPermission">no</s:set>
+			        		</manage:notPass>
+			            </manage:permission>
+			            
+		        		<%--下载门店级支付二维码按钮权限验证 --%>
      				    <manage:permission validateUrl="/resources/partner/storemanage!downloadPayQRCode.action">
 			        		<manage:pass>
 			        			<s:set var="hasDownQrCodePermission">yes</s:set>

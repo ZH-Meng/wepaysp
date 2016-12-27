@@ -68,7 +68,7 @@ public class DealerEmployeeAction
             
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
            
-            // 只有商户可以重置退款权限密码
+            // 只有商户/店长可以重置退款权限密码
             //if (!checkUser(manageUser, "yes".equals(resetFlag) ? "reset" :"query")) {
             if ("yes".equals(resetFlag)) {
                 if (!checkUser(manageUser, "reset")) {
@@ -189,7 +189,7 @@ public class DealerEmployeeAction
             dealerEmployeeVO = dealerEmployeeService.doJoinTransQueryDealerEmployeeByOid(dealerEmployeeVO.getIwoid());
             // 获取当前用户关联的商户下所有门店
     		Map<String, Object> paramMap = new HashMap<String, Object>();
-    		paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+    		paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());// FIXME 店长修改时需要修改
     		storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
         } else {
             logger.warn("非法修改商户员工，参数dealerEmployeeVO为空，dealerEmployeeVO.getIwoid()或者！");
@@ -564,11 +564,11 @@ public class DealerEmployeeAction
     	}
     	
     	boolean result = false;
-    	if ("downloadPayQRCode".equals(operCode)) {
+    	if ("downloadPayQRCode".equals(operCode) || "bindWxID".equals(operCode) || "deleteBindWxID".equals(operCode) || "batchUpdateBindWxID".equals(operCode)) {
     		if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser) || SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser))  {
     			result = true;
     		}
-    	} else if ("add".equals(operCode) || "update".equals(operCode) || "reset".equals(operCode) || "bindWxID".equals(operCode) || "deleteBindWxID".equals(operCode) || "batchUpdateBindWxID".equals(operCode)) {
+    	} else if ("add".equals(operCode) || "update".equals(operCode) || "reset".equals(operCode)) {
     		if (SysUserUtil.isDealer(manageUser) || SysUserUtil.isStoreManager(manageUser)) {
     			result = true;
     		}

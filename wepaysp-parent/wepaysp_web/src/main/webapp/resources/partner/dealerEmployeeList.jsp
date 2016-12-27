@@ -57,18 +57,22 @@
 					        			<s:set var="hasUpdatePermission">no</s:set>
 					        		</manage:notPass>
 					            </manage:permission>
-					            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToBindWxID.action">
-					        		<manage:pass>
-					        			<s:set var="hasBindWxIDPermission">yes</s:set>
-					        		</manage:pass>
-					        		<manage:notPass>
-					        			<s:set var="hasBindWxIDPermission">no</s:set>
-					        		</manage:notPass>
-					            </manage:permission>
 							</s:if>
 							<s:else>
 								<s:set name="backFlag" value="true"/>
 							</s:else>
+							
+							<%--绑定支付通知按钮权限验证 --%>
+							<manage:permission validateUrl="/resources/partner/dealeremployeemanage!goToBindWxID.action">
+				        		<manage:pass>
+				        			<s:set var="hasBindWxIDPermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasBindWxIDPermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
+					            
+				            <%--下载收银员级支付二维码按钮权限验证 --%>
 				            <manage:permission validateUrl="/resources/partner/dealeremployeemanage!downloadPayQRCode.action">
 				        		<manage:pass>
 				        			<s:set var="hasDownQrCodePermission">yes</s:set>
