@@ -149,15 +149,7 @@ public class WeixinPayDetailsServiceImpl
 
         sql.append(" order by w.transBeginTime desc");
         List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
-        
-//		int size = weixinTotalList.size();
-// 
-//		Object first = weixinTotalList.get(0);
-//		for ( int i=1; i<size; i++ ) {
-//			if ( list.get(i)!=first ) {
-//				throw new NonUniqueResultException( list.size() );
-//			}
-//		}
+  
         Long totalAmount = 0L;
         Long totalMoney = 0L;
         
@@ -282,8 +274,8 @@ public class WeixinPayDetailsServiceImpl
         List<?> weixinTotalList = (List<?>) commonDAO.findObjectList(sql.toString(), sqlMap, false);
         for (Iterator<?> it = weixinTotalList.iterator(); it.hasNext();) {
         	Object[] curRow = (Object[]) it.next();
-        	 totalMoney= (Long)curRow[0];
-        	 totalAmount = (Long)curRow[1];
+        	 totalMoney= curRow[0]==null?0L:(Long)curRow[0];
+        	 totalAmount = curRow[1]==null?0L:(Long)curRow[1];  
         }
         
         WeixinPayTotalVO totalVO = new WeixinPayTotalVO();
