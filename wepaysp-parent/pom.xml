@@ -17,13 +17,14 @@
 		<log4j.version>2.7</log4j.version>
 		<disruptor.version>3.3.5</disruptor.version>
 		<httpcomponents.version>4.4.1</httpcomponents.version>
+		<junit-version>4.12</junit-version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>${junit-version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -79,5 +80,6 @@
 		<module>wepaysp-po</module>
 		<module>wepaysp_web</module>
 		<module>wepaysp-api</module>
+		<module>wepaysp-rest</module>
 	</modules>
 </project>
