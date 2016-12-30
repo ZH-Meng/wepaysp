@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+				http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				http://www.springframework.org/schema/context
+				http://www.springframework.org/schema/context/spring-context-3.0.xsd
+				http://www.springframework.org/schema/aop
+				http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+				http://www.springframework.org/schema/tx
+				http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+				
+	
+	<bean id="sysConfigService" class="com.zbsp.wepaysp.api.service.main.init.impl.SysConfigServiceImpl" parent="baseService" init-method="init">
+		<property name="partnerService" ref="partnerService" />
+		<property name="payClientCheckURL" value="${payClientCheckURL}" />
+		<property name="wxPayCallBackURL" value="${wxPayCallBackURL}" />
+		<property name="wxPayNotifyURL" value="${wxPayNotifyURL}" />
+		<property name="bindCallBackURL" value="${bindCallBackURL}" />
+		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
+		<property name="appidQrCodePath" value="${appidQrCodePath}" />
+		
+	</bean>
+	
+	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />
+	<bean id="sysFunctionService" class="com.zbsp.wepaysp.api.service.manage.impl.SysFunctionServiceImpl" parent="baseService" />
+	<bean id="sysPermissionService" class="com.zbsp.wepaysp.api.service.manage.impl.SysPermissionServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	<bean id="sysRoleService" class="com.zbsp.wepaysp.api.service.manage.impl.SysRoleServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	<bean id="sysUserService" class="com.zbsp.wepaysp.api.service.manage.impl.SysUserServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	<bean id="sysLogService" class="com.zbsp.wepaysp.api.service.manage.impl.SysLogServiceImpl" parent="baseService" />
+	
+	<bean id="partnerService" class="com.zbsp.wepaysp.api.service.partner.impl.PartnerServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="dealerService" class="com.zbsp.wepaysp.api.service.partner.impl.DealerServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+		<property name="sysConfigService" ref="sysConfigService" />
+	</bean>
+	
+	<bean id="storeService" class="com.zbsp.wepaysp.api.service.partner.impl.StoreServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+		<property name="sysConfigService" ref="sysConfigService" />
+	</bean>
+	
+	<bean id="partnerEmployeeService" class="com.zbsp.wepaysp.api.service.partner.impl.PartnerEmployeeServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="dealerEmployeeService" class="com.zbsp.wepaysp.api.service.partner.impl.DealerEmployeeServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+		<property name="sysConfigService" ref="sysConfigService" />
+	</bean>
+	
+	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+		<property name="sysConfigService" ref="sysConfigService" />
+	</bean>
+    
+	<bean id="weixinRefundDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinRefundDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="rptDealerStatService" class="com.zbsp.wepaysp.api.service.report.impl.RptDealerStatServiceImpl" parent="baseService" >
+		<property name="dealerStatDayQueyName" value="queryDealerStatDay" />
+		<property name="dealerEmployeeStatDayQueyName" value="queryDealerEmployeeStatDay" />
+		<property name="storeStatDayQueyName" value="queryStoreStatDay" />
+	</bean>
+	
+	<bean id="weixinPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainServiceImpl" parent="baseService" >
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="sysConfigService" ref="sysConfigService" />
+		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
+	</bean>
+	
+	<bean id="weixinRefundDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainServiceImpl" parent="baseService" >
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="weixinRefundDetailsService" ref="weixinRefundDetailsService" />
+	</bean>
+	
+	<bean id="payNoticeBindWeixinService" class="com.zbsp.wepaysp.api.service.weixin.impl.PayNoticeBindWeixinServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>	
+	
+</beans>
