@@ -9,9 +9,12 @@
         http://www.springframework.org/schema/tx           http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
           
  	 <!-- 防止@ResponseBody中文乱码 -->
-    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+    <!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 	    <property name="messageConverters">
 	        <list>
+	        	<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+	        	</bean>  
+            	
 	            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
 	                <property name="supportedMediaTypes">
 	                    <list>
@@ -20,12 +23,17 @@
 	                            <constructor-arg index="1" value="plain" />
 	                            <constructor-arg index="2" value="UTF-8" />
 	                        </bean>
+	                        <bean class="org.springframework.http.MediaType">
+	                            <constructor-arg index="0" value="application" />
+	                            <constructor-arg index="1" value="json" />
+	                            <constructor-arg index="2" value="UTF-8" />
+	                        </bean>
 	                    </list>
 	                </property>
 	            </bean>
 	        </list>
 	    </property>
-	</bean>
+	</bean> -->
   	<!-- 启用MVC注解 -->
     <mvc:annotation-driven />
 
