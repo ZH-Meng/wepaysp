@@ -33,7 +33,7 @@ public class UserLoginRequest extends MobileRequest {
     }
 
     @Override
-	protected UserLoginRequest build(String key) {
+    public UserLoginRequest build(String key) {
 	    try {
             setSignature(Signature.getSign(this, key));
         } catch (IllegalAccessException e) {

@@ -29,6 +29,8 @@ import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.manage.SysRole;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.manage.SysUserLoginToken;
+import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.manage.SysUserService;
@@ -645,6 +647,45 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         
         return result;
     }
+    
+	@Override
+	public Map<String, String> doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalAccessException, IllegalStateException, NotExistsException {
+		Validator.checkArgument(StringUtils.isBlank(dealerEmployeeId), "收银员ID不能为空");
+        Validator.checkArgument(StringUtils.isBlank(password), "登录密码不能为空");
+
+        String sql = "select u from SysUser u left join fetch u.dealerEmployee where u.dealerEmployee.dealerEmployeeId = :DEALEREMPLOYEEID and u.loginPwd = :LOGINPWD"
+        		+ " and u.state <> :DELETESTATE and u.userLevel in (:SHOPMANAGER, :CASHIER)";
+        
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("DEALEREMPLOYEEID", dealerEmployeeId);
+        paramMap.put("LOGINPWD", DigestHelper.md5Hex(password));
+        paramMap.put("DELETESTATE", SysUser.State.canceled.getValue());
+        paramMap.put("SHOPMANAGER", SysUser.UserLevel.shopManager.getValue());
+        paramMap.put("CASHIER", SysUser.UserLevel.cashier.getValue());
+
+        SysUser sysUser = commonDAO.findObject(sql, paramMap, false);
+
+        if (sysUser == null) {
+            throw new IllegalAccessException("收银员ID或密码不正确！");
+        } else if (sysUser.getState() == SysUser.State.frozen.getValue()) {
+            throw new IllegalStateException("该用户已冻结，不允许登录！");
+        }
+        DealerEmployee dealerE = sysUser.getDealerEmployee(); 
+        if (dealerE == null || StringUtils.isBlank(dealerE.getIwoid())) {
+        	throw new NotExistsException("收银员不存在！");
+        }
+        
+        Store store = sysUser.getDealerEmployee().getStore();
+        
+        Map<String, String> resultMap = new HashMap<String, String>();
+        resultMap.put("dealerCompany", dealerE.getDealer() == null ? "" : dealerE.getDealer().getCompany());
+        resultMap.put("storeName", store == null ? "" : store.getStoreName());
+        resultMap.put("dealerEmployeeName", dealerE.getEmployeeName());
+        resultMap.put("dealerEmployeeId", dealerE.getDealerEmployeeId());
+        resultMap.put("dealerEmployeeOid", dealerE.getIwoid());
+        
+        return resultMap;
+	}
 
     public SysLogService getSysLogService() {
         return sysLogService;
@@ -653,4 +694,5 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }
+
 }

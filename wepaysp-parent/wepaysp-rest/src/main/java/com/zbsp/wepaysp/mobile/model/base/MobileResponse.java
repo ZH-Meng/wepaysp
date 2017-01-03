@@ -5,8 +5,8 @@ package com.zbsp.wepaysp.mobile.model.base;
  */
 public abstract class MobileResponse {
 
-    /** 请求唯一码 */
-    protected String requestId = "";
+    /** 响应唯一码 */
+    protected String responseId = "";
     
     /** 操作结果 */
     protected int result;
@@ -17,15 +17,15 @@ public abstract class MobileResponse {
     /** 签名 */
     protected String signature = "";
 
-    public String getRequestId() {
-        return requestId;
-    }
+    public String getResponseId() {
+		return responseId;
+	}
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
+	public void setResponseId(String responseId) {
+		this.responseId = responseId;
+	}
 
-    public int getResult() {
+	public int getResult() {
         return result;
     }
 
@@ -51,7 +51,7 @@ public abstract class MobileResponse {
 
     @Override
     public String toString() {
-        return "MobileResponse [requestId=" + requestId + ", result=" + result + ", message=" + message + ", signature=" + signature + "]";
+        return "MobileResponse [responseId=" + responseId + ", result=" + result + ", message=" + message + ", signature=" + signature + "]";
     }
     
     protected abstract MobileResponse build(String key);

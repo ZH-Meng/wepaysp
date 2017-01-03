@@ -180,4 +180,15 @@ public interface SysUserService {
      * @return 刷新成功返回true，如果用户令牌不存在或登录超时返回false
      */
     public boolean doTransRefreshLoginToken(String sysUserOid, String loginToken);
+
+    /**
+     * 收银员客户端登陆
+     * 
+     * @param dealerEmployeeId 收银员ID
+     * @param password 
+     * @return
+     * @throws IllegalAccessException
+     * @throws IllegalStateException
+     */
+	public Map<String, String> doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalAccessException, IllegalStateException, NotExistsException;
 }

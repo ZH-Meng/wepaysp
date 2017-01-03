@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zbsp.wepaysp.api.service.manage.SysUserService;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.mobile.common.CommonResultCode;
@@ -22,51 +23,54 @@ import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.base.MobileRequest;
 import com.zbsp.wepaysp.mobile.model.userlogin.v1_0.UserLoginRequest;
 import com.zbsp.wepaysp.mobile.model.userlogin.v1_0.UserLoginResponse;
-import com.zbsp.wepaysp.po.manage.SysUser;
-import com.zbsp.wepaysp.po.partner.DealerEmployee;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/user/v1/")
 public class UserRestController
     extends BaseController {
     
     private final String key = "11111111111111111111111111111111";// FIXME
+    
     @Autowired
     private SysUserService sysUserService;
 
     @RequestMapping(value = "login", method = RequestMethod.POST)
     @ResponseBody
     public UserLoginResponse login(@RequestBody UserLoginRequest request, HttpServletRequest httpRequest) {
+    	//FIXME 模拟设置sign
+    	request.build(key);
+    	
         logger.info("处理用户登录请求 - 开始");
         logger.debug("request Data is " + request.toString());
         UserLoginResponse response = null;
-        
+        String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, key)) {
-            response = new UserLoginResponse(CommonResultCode.parseError.getValue(), "数据包解析错误");
-        } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getPasswd())) {
-            response = new UserLoginResponse(CommonResultCode.verifyError.getValue(), "数据包不完整");
+            response = new UserLoginResponse(CommonResultCode.parseError.getValue(), "数据包解析错误", responseId);
+        } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getPasswd()) || StringUtils.isBlank(request.getRequestId())) {
+            response = new UserLoginResponse(CommonResultCode.verifyError.getValue(), "数据包不完整", responseId);
         } else {
             try {
-                response = new UserLoginResponse(CommonResultCode.success.getValue(), "处理成功");
+                response = new UserLoginResponse(CommonResultCode.success.getValue(), "登陆成功", responseId);
                 
-                Map<String, Object> resMap = sysUserService.doTransUserLogin(request.getUserId(), DigestHelper.sha512Hex(request.getPasswd()), httpRequest.getRemoteAddr());
-                SysUser user = (SysUser) MapUtils.getObject(resMap, "sysUser");
+                Map<String, String> resultMap = sysUserService.doTransUserLogin4Client(request.getUserId(), DigestHelper.sha512Hex(request.getPasswd()));
                 
-                DealerEmployee dealerE = user.getDealerEmployee();
-                if (user.getDealerEmployee() == null) {
-                    return response;
-                }
-                response.setDealerEmployeeName(dealerE.getEmployeeName());
-                response.setDealerEmployeeId(dealerE.getDealerEmployeeId());
-                // FIXME
-                response.setSignature(Signature.getSign(response, key));
-                // response.setDealerCompany();
+                response.setDealerCompany(MapUtils.getString(resultMap, "dealerCompany"));
+                response.setStoreName(MapUtils.getString(resultMap, "storeName"));
+                response.setDealerEmployeeName(MapUtils.getString(resultMap, "dealerEmployeeName"));
+                response.setDealerEmployeeId(MapUtils.getString(resultMap, "dealerEmployeeId"));
+                response.setDealerEmployeeOid(MapUtils.getString(resultMap, "dealerEmployeeOid"));
                 
-                logger.error("用户登录 - 成功");
+                logger.info("用户登录 - 成功");
+            } catch (IllegalAccessException | IllegalStateException e) {
+            	logger.warn("用户登录失败：" + e.getMessage());
+            	response = new UserLoginResponse(CommonResultCode.sysError.getValue(), "登陆失败", responseId);
+            } catch (NotExistsException e) {
+            	logger.warn("用户登录失败："+e.getMessage());
+            	response = new UserLoginResponse(CommonResultCode.sysError.getValue(), "登陆失败", responseId);
             } catch (Exception e) {
                 logger.error("处理用户登录请求 - 错误");
                 logger.error(e.getMessage(), e);
-                response = new UserLoginResponse(CommonResultCode.sysError.getValue(), "系統錯誤");
+                response = new UserLoginResponse(CommonResultCode.sysError.getValue(), "系統錯誤", responseId);
             }
         }
         response = response.build(key);
@@ -92,12 +96,13 @@ public class UserRestController
         System.out.println(request.toString());
         
         UserLoginResponse response = null;
+        String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, key)) {
-            response = new UserLoginResponse(CommonResultCode.parseError.getValue(), "数据包解析错误");
+            response = new UserLoginResponse(CommonResultCode.parseError.getValue(), "数据包解析错误", responseId);
         } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getPasswd())) {
-            response = new UserLoginResponse(CommonResultCode.verifyError.getValue(), "数据包不完整");
+            response = new UserLoginResponse(CommonResultCode.verifyError.getValue(), "数据包不完整", responseId);
         } else {
-            response = new UserLoginResponse(CommonResultCode.success.getValue(), "处理成功");
+            response = new UserLoginResponse(CommonResultCode.success.getValue(), "处理成功", responseId);
         }
         response = response.build(key);
         System.out.println("response Data is " + response.toString());

@@ -25,10 +25,11 @@ public class UserLoginResponse extends MobileResponse {
 	
 	public UserLoginResponse() {}
 	
-    public UserLoginResponse(int result, String message) {
+    public UserLoginResponse(int result, String message, String responseId) {
         super();
         this.result = result;
         this.message = message;
+        this.responseId = responseId;
     }
 
 	public String getDealerCompany() {
