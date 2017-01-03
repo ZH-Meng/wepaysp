@@ -1,11 +1,11 @@
 package com.zbsp.wepaysp.mobile.controller.rest;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.collections.MapUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tencent.common.Signature;
 import com.zbsp.wepaysp.api.service.manage.SysUserService;
+import com.zbsp.wepaysp.common.security.DigestHelper;
+import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.mobile.common.CommonResultCode;
+import com.zbsp.wepaysp.mobile.common.Signature;
+import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.base.MobileRequest;
-import com.zbsp.wepaysp.mobile.model.base.MobileResponse;
 import com.zbsp.wepaysp.mobile.model.userlogin.v1_0.UserLoginRequest;
 import com.zbsp.wepaysp.mobile.model.userlogin.v1_0.UserLoginResponse;
 import com.zbsp.wepaysp.po.manage.SysUser;
@@ -24,92 +27,80 @@ import com.zbsp.wepaysp.po.partner.DealerEmployee;
 
 @RestController
 @RequestMapping("/user")
-public class UserRestController {
-    protected Logger logger = LogManager.getLogger(getClass());
-    private final String key = "11111111111111111111111111111111";
-    @Autowired
-	private SysUserService sysUserService;
+public class UserRestController
+    extends BaseController {
     
+    private final String key = "11111111111111111111111111111111";// FIXME
+    @Autowired
+    private SysUserService sysUserService;
+
     @RequestMapping(value = "login", method = RequestMethod.POST)
     @ResponseBody
-    public UserLoginResponse login(@RequestBody UserLoginRequest request) {
-    	// FIXME check
-    	logger.debug("request Data is " + request.toString());
-    	String ip = "127.0.0.1";
-    	UserLoginResponse response = null;
-    	try {
-			Map<String, Object> resMap = sysUserService.doTransUserLogin(request.getUserId(), request.getPasswd(), ip);
-			SysUser user = (SysUser) MapUtils.getObject(resMap, "sysUser");
-			String token = MapUtils.getString(resMap, "loginToken");
-			DealerEmployee dealerE = user.getDealerEmployee();
-			if (user.getDealerEmployee() == null) {
-				return response;
-			}
-			response = new UserLoginResponse();
-			response.setDealerEmployeeName(dealerE.getEmployeeName());
-			response.setDealerEmployeeId(dealerE.getDealerEmployeeId());
-			response.setSessionId(token);
-			// FIXME
-			response.setSignature(Signature.getSign(response, key));
-			//response.setDealerCompany();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		} finally {
-			if (response == null) {
-				response = new UserLoginResponse();
-				response.setResult(999);
-				response.setMessage("登陆失败");
-				try {
-					response.setSignature(Signature.getSign(response, key));
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-    	logger.debug("response Data is " + response.toString());
+    public UserLoginResponse login(@RequestBody UserLoginRequest request, HttpServletRequest httpRequest) {
+        logger.info("处理用户登录请求 - 开始");
+        logger.debug("request Data is " + request.toString());
+        UserLoginResponse response = null;
+        
+        if (!Signature.checkIsSignValidFromRequest(request, key)) {
+            response = new UserLoginResponse(CommonResultCode.parseError.getValue(), "数据包解析错误");
+        } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getPasswd())) {
+            response = new UserLoginResponse(CommonResultCode.verifyError.getValue(), "数据包不完整");
+        } else {
+            try {
+                response = new UserLoginResponse(CommonResultCode.success.getValue(), "处理成功");
+                
+                Map<String, Object> resMap = sysUserService.doTransUserLogin(request.getUserId(), DigestHelper.sha512Hex(request.getPasswd()), httpRequest.getRemoteAddr());
+                SysUser user = (SysUser) MapUtils.getObject(resMap, "sysUser");
+                
+                DealerEmployee dealerE = user.getDealerEmployee();
+                if (user.getDealerEmployee() == null) {
+                    return response;
+                }
+                response.setDealerEmployeeName(dealerE.getEmployeeName());
+                response.setDealerEmployeeId(dealerE.getDealerEmployeeId());
+                // FIXME
+                response.setSignature(Signature.getSign(response, key));
+                // response.setDealerCompany();
+                
+                logger.error("用户登录 - 成功");
+            } catch (Exception e) {
+                logger.error("处理用户登录请求 - 错误");
+                logger.error(e.getMessage(), e);
+                response = new UserLoginResponse(CommonResultCode.sysError.getValue(), "系統錯誤");
+            }
+        }
+        response = response.build(key);
+        logger.debug("response Data is " + response.toString());
+        logger.info("处理用户登录请求 - 结束");
         return response;
     }
     
-    @RequestMapping("login1")
-    public String testLogin1(@RequestBody String requestBody) {
-        return requestBody;
+    public static void main(String[] args) {
+        String key = "11111111111111111111";
+        UserLoginRequest request = new UserLoginRequest();
+        request.setUserId("dealerE1");
+        request.setPasswd("111111");
+        String reqId = Generator.generateIwoid();
+        request.setRequestId(reqId);
+        System.out.println(reqId);
+        request.setAppType(MobileRequest.AppType.pc.getValue());
+        try {
+            request.setSignature(Signature.getSign(request, key));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        System.out.println(request.toString());
+        
+        UserLoginResponse response = null;
+        if (!Signature.checkIsSignValidFromRequest(request, key)) {
+            response = new UserLoginResponse(CommonResultCode.parseError.getValue(), "数据包解析错误");
+        } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getPasswd())) {
+            response = new UserLoginResponse(CommonResultCode.verifyError.getValue(), "数据包不完整");
+        } else {
+            response = new UserLoginResponse(CommonResultCode.success.getValue(), "处理成功");
+        }
+        response = response.build(key);
+        System.out.println("response Data is " + response.toString());
     }
-    
-    @RequestMapping(value = "login2", consumes = {"text/plain","application/json;charset=UTF-8"}, produces="application/json; charset=UTF-8")
-    public String testLogin2(@RequestBody String requestBody) {
-        return requestBody;
-    }
-    
-    @RequestMapping(value = "login3", method = RequestMethod.POST)
-    @ResponseBody
-    public UserLoginResponse testLogin3(@RequestBody UserLoginRequest requestBody) {
-    	System.out.println(requestBody.toString());
-    	UserLoginResponse res = new UserLoginResponse();
-    	res.setDealerCompany("火烧铺");
-        return res;
-    }
-      
-    @SuppressWarnings("rawtypes")
-	@RequestMapping(value = "login4", consumes = {"text/plain","application/json"})
-    @ResponseBody
-    public Map testLogin4(@RequestBody Map map) {
-    	Map<String, Object> map2 = new HashMap<String, Object>();
-    	map2.put("success", true);
-    	map2.put("data", "your data");
-        return map;
-    }
-    
-    @RequestMapping(value = "login5", method = RequestMethod.POST)
-    @ResponseBody
-    public MobileResponse testLogin5(@RequestBody MobileRequest request) {
-    	UserLoginRequest req = (UserLoginRequest) request.getBody();
-    	System.out.println(req.toString());
-    	MobileResponse res = new MobileResponse();
-    	UserLoginResponse u = new UserLoginResponse();
-    	u.setDealerCompany("火烧铺");
-    	res.setBody(u);
-    	sysUserService.doJoinTransQuerySysUserList(new HashMap<String, Object>(), 0, -1);
-        return res;
-    }
-    
+
 }

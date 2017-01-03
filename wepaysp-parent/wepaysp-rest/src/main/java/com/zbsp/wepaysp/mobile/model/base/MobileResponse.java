@@ -1,99 +1,59 @@
 package com.zbsp.wepaysp.mobile.model.base;
 
-import java.io.Serializable;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.zbsp.wepaysp.common.security.AesHelper;
-import com.zbsp.wepaysp.common.security.DigestHelper;
-import com.zbsp.wepaysp.common.security.exception.AesEncryptException;
-import com.zbsp.wepaysp.common.util.JSONUtil;
-
 /**
  * 通讯响应对象
  */
-public class MobileResponse implements Serializable {
+public abstract class MobileResponse {
 
-    private static final long serialVersionUID = -2307405305476497344L;
+    /** 请求唯一码 */
+    protected String requestId = "";
     
-    private final Logger logger = LogManager.getLogger();
-    private static final String LOG_PREFIX = "[MobileResponse]-";
-
-    private ResponseHead head;
-
-    private Object body;
+    /** 操作结果 */
+    protected int result;
     
-    public MobileResponse() {
+    /** 响应消息 */
+    protected String message = "";
+    
+    /** 签名 */
+    protected String signature = "";
+
+    public String getRequestId() {
+        return requestId;
     }
 
-    public MobileResponse(ResponseHead head, Object body) {
-        this.head = head;
-        this.body = body;
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
-    public ResponseHead getHead() {
-        return head;
+    public int getResult() {
+        return result;
     }
 
-    public void setHead(ResponseHead head) {
-        this.head = head;
+    public void setResult(int result) {
+        this.result = result;
     }
 
-    public Object getBody() {
-        return body;
+    public String getMessage() {
+        return message;
     }
 
-    public void setBody(Object body) {
-        this.body = body;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    /**
-     * 构造响应头，生成签名
-     * 
-     * @return
-     */
-    public MobileResponse buildHead() {
-        if (body == null) {
-            throw new IllegalArgumentException("响应Body未设置");
-        }
-
-        if (head == null) {
-            throw new IllegalArgumentException("响应头未设置");
-        }
-
-        head.setSignature(DigestHelper.md5Hex("prvnterminalapp" + JSONUtil.toJSONString(this, true)));
-
-        return this;
+    public String getSignature() {
+        return signature;
     }
 
-    /**
-     * 构造响应体.
-     * 
-     * @param aesKey
-     * @return
-     */
-    public MobileResponse buildBody(String aesKey, String deviceId) {
-        if (body == null) {
-            throw new IllegalArgumentException("响应Body未设置");
-        }
-
-        if (head == null) {
-            throw new IllegalArgumentException("响应头未设置");
-        }
-
-        if (StringUtils.isBlank(head.getSignature())) {
-            throw new IllegalArgumentException("响应头签名未设置");
-        }
-
-        try {
-            body = AesHelper.encryptBase64(DigestHelper.md5Hex(aesKey + StringUtils.right(deviceId, 15)).substring(8, 24),
-                JSONUtil.toJSONString(body, true), 0);
-        } catch (AesEncryptException e) {
-            logger.error(LOG_PREFIX + "[构造通讯响应体错误]", e);
-        }
-
-        return this;
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
+
+    @Override
+    public String toString() {
+        return "MobileResponse [requestId=" + requestId + ", result=" + result + ", message=" + message + ", signature=" + signature + "]";
+    }
+    
+    protected abstract MobileResponse build(String key);
+
 }

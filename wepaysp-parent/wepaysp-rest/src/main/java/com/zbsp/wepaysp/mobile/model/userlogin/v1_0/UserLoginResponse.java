@@ -1,60 +1,35 @@
 package com.zbsp.wepaysp.mobile.model.userlogin.v1_0;
 
-public class UserLoginResponse {
+import com.zbsp.wepaysp.mobile.common.Signature;
+import com.zbsp.wepaysp.mobile.model.base.MobileResponse;
 
-    /** 请求唯一码 */
-    private String requestId = "";
-    /** 操作结果 */
-    private int result;
-    /** 响应消息 */
-    private String message = "";
-    /** 内容体签名 */
-    private String signature = "";
+/**
+ * 用户登录响应
+ */
+public class UserLoginResponse extends MobileResponse {
 	
 	/** 商户公司名称 */
 	private String dealerCompany = "";
+	
 	/** 门店名称 */
 	private String storeName = "";
+	
 	/** 收银员姓名 */
 	private String dealerEmployeeName = "";
+	
 	/** 收银员ID */
 	private String dealerEmployeeId = "";
+	
 	/** 收银员Oid */
 	private String dealerEmployeeOid = "";
-	/** 会话id */
-	private String sessionId = "";
 	
-	public String getRequestId() {
-		return requestId;
-	}
-
-	public void setRequestId(String requestId) {
-		this.requestId = requestId;
-	}
-
-	public int getResult() {
-		return result;
-	}
-
-	public void setResult(int result) {
-		this.result = result;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public String getSignature() {
-		return signature;
-	}
-
-	public void setSignature(String signature) {
-		this.signature = signature;
-	}
+	public UserLoginResponse() {}
+	
+    public UserLoginResponse(int result, String message) {
+        super();
+        this.result = result;
+        this.message = message;
+    }
 
 	public String getDealerCompany() {
 		return dealerCompany;
@@ -96,20 +71,20 @@ public class UserLoginResponse {
 		this.dealerEmployeeOid = dealerEmployeeOid;
 	}
 
-	public String getSessionId() {
-		return sessionId;
-	}
-
-	public void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
-	}
-
-	@Override
-	public String toString() {
-		return "UserLoginResponseBody [requestId=" + requestId + ", result=" + result + ", message=" + message
-				+ ", signature=" + signature + ", dealerCompany=" + dealerCompany + ", storeName=" + storeName
-				+ ", dealerEmployeeName=" + dealerEmployeeName + ", dealerEmployeeId=" + dealerEmployeeId
-				+ ", dealerEmployeeOid=" + dealerEmployeeOid + ", sessionId=" + sessionId + "]";
-	}
+    @Override
+    public String toString() {
+        return "UserLoginResponse [dealerCompany=" + dealerCompany + ", storeName=" + storeName + ", dealerEmployeeName=" + dealerEmployeeName 
+            + ", dealerEmployeeId=" + dealerEmployeeId + ", dealerEmployeeOid=" + dealerEmployeeOid + ", " + super.toString() + " ]";
+    }
+    
+    @Override
+    public UserLoginResponse build(String key) {
+        try {
+            setSignature(Signature.getSign(this, key));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
 
 }

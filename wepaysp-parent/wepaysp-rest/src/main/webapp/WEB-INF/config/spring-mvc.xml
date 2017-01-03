@@ -46,14 +46,14 @@
     	<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
 
-	<mvc:interceptors>
+<!-- 	<mvc:interceptors>
 		<mvc:interceptor>
-			<!-- 映射路径后缀名 -->
+			映射路径后缀名
 			<mvc:mapping path="/app/*" />
-			<!-- 自定义拦截器 -->
+			自定义拦截器
 			<bean class="com.zbsp.wepaysp.mobile.interceptor.MobileBodyVerifyInterceptor" />
 		</mvc:interceptor>
-	</mvc:interceptors>  
+	</mvc:interceptors>   -->
 	
   	<!-- JSP视图解析器-->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
