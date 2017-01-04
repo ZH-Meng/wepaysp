@@ -4,7 +4,7 @@ import com.zbsp.wepaysp.mobile.common.Signature;
 import com.zbsp.wepaysp.mobile.model.base.MobileResponse;
 
 /**
- * 用户登录响应
+ * 用户登陆响应
  */
 public class UserLoginResponse extends MobileResponse {
 	
@@ -26,10 +26,7 @@ public class UserLoginResponse extends MobileResponse {
 	public UserLoginResponse() {}
 	
     public UserLoginResponse(int result, String message, String responseId) {
-        super();
-        this.result = result;
-        this.message = message;
-        this.responseId = responseId;
+        super(result, message, responseId);
     }
 
 	public String getDealerCompany() {

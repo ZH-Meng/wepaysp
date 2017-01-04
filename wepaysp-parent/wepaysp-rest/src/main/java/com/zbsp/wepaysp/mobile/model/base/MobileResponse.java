@@ -1,9 +1,11 @@
 package com.zbsp.wepaysp.mobile.model.base;
 
+import com.zbsp.wepaysp.mobile.common.Signature;
+
 /**
  * 通讯响应对象
  */
-public abstract class MobileResponse {
+public class MobileResponse {
 
     /** 响应唯一码 */
     protected String responseId = "";
@@ -16,6 +18,15 @@ public abstract class MobileResponse {
     
     /** 签名 */
     protected String signature = "";
+    
+    public MobileResponse() {}
+    
+    public MobileResponse(int result, String message, String responseId) {
+        super();
+        this.responseId = responseId;
+        this.result = result;
+        this.message = message;
+    }
 
     public String getResponseId() {
 		return responseId;
@@ -54,6 +65,13 @@ public abstract class MobileResponse {
         return "MobileResponse [responseId=" + responseId + ", result=" + result + ", message=" + message + ", signature=" + signature + "]";
     }
     
-    protected abstract MobileResponse build(String key);
+    public MobileResponse build(String key) {
+        try {
+            setSignature(Signature.getSign(this, key));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
 
 }

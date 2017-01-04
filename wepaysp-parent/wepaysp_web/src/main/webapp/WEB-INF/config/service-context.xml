@@ -87,6 +87,9 @@
 	
 	<bean id="payNoticeBindWeixinService" class="com.zbsp.wepaysp.api.service.weixin.impl.PayNoticeBindWeixinServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
-	</bean>	
+	</bean>
+	
+	<bean id="appManageService" class="com.zbsp.wepaysp.api.service.app.impl.AppManageServiceImpl" parent="baseService">
+	</bean>
 	
 </beans>

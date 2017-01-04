@@ -89,4 +89,7 @@
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>	
 	
+	<bean id="appManageService" class="com.zbsp.wepaysp.api.service.app.impl.AppManageServiceImpl" parent="baseService">
+	</bean>
+	
 </beans>

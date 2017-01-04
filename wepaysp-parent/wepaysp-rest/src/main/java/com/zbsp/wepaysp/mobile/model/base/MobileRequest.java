@@ -1,9 +1,11 @@
 package com.zbsp.wepaysp.mobile.model.base;
 
+import com.zbsp.wepaysp.mobile.common.Signature;
+
 /**
  * 通讯请求对象
  */
-public abstract class MobileRequest {
+public class MobileRequest {
     
     /** 请求唯一码 */
     protected String requestId = "";
@@ -60,6 +62,13 @@ public abstract class MobileRequest {
         return "MobileRequest [requestId=" + requestId + ", signature=" + signature + ", appType=" + appType + "]";
     }
     
-    protected abstract MobileRequest build(String key);
+    public MobileRequest build(String key) {
+        try {
+            setSignature(Signature.getSign(this, key));
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
 
 }

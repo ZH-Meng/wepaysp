@@ -38,7 +38,7 @@ public class Signature {
 
         for (Field f : fieldList) {
             f.setAccessible(true);
-            if (f.get(o) != null && f.get(o) != "" && !"signature".equals(f.getName())) {
+            if (f.get(o) != null && !"".equals(f.get(o)) && !"signature".equals(f.getName())) {
                 list.add(f.getName() + "=" + f.get(o) + "&");
             }
         }
@@ -66,7 +66,7 @@ public class Signature {
     public static String getSign(Map<String, Object> map, String key) {
         ArrayList<String> list = new ArrayList<String>();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (entry.getValue() != "" && !"signature".equals(entry.getKey())) {
+            if (entry.getValue() != null && !"".equals(entry.getValue()) && !"signature".equals(entry.getKey())) {
                 list.add(entry.getKey() + "=" + entry.getValue() + "&");
             }
         }

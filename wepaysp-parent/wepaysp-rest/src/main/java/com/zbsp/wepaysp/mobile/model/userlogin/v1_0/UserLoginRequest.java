@@ -4,7 +4,7 @@ import com.zbsp.wepaysp.mobile.common.Signature;
 import com.zbsp.wepaysp.mobile.model.base.MobileRequest;
 
 /**
- * 用户登录请求
+ * 用户登陆请求
  */
 public class UserLoginRequest extends MobileRequest {
 	
@@ -29,7 +29,7 @@ public class UserLoginRequest extends MobileRequest {
 
     @Override
     public String toString() {
-        return "UserLoginRequest [userId=" + userId + ", passwd=" + passwd + ", " + super.toString() + " ]";
+        return "UserLoginRequest [userId=" + userId + ", " + super.toString() + " ]";
     }
 
     @Override
