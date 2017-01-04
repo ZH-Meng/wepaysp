@@ -106,9 +106,8 @@ public class Signature {
        }
 
         logger.info("signature is :" + sign);
-        // 清掉返回数据对象里面的Sign数据（不能把这个数据也加进去进行签名），然后用签名算法进行签名
-        map.put("signature", "");
-        // 将API返回的数据根据用签名算法进行计算新的签名，用来跟API返回的签名进行比较
+        
+        // 重新计算签名，比较
         String signFromRequest = Signature.getSign(map, key);
 
         if (!signFromRequest.equals(sign)) {
