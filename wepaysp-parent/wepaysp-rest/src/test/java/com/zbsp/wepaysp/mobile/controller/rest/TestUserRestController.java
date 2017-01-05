@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zbsp.wepaysp.api.service.manage.SysUserService;
-import com.zbsp.wepaysp.mobile.model.base.MobileRequest;
-import com.zbsp.wepaysp.mobile.model.userlogin.v1_0.UserLoginRequest;
-import com.zbsp.wepaysp.mobile.model.userlogin.v1_0.UserLoginResponse;
+import com.zbsp.wepaysp.mo.base.MobileRequest;
+import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginRequest;
+import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginResponse;
 
 @RestController
 @RequestMapping("/user")

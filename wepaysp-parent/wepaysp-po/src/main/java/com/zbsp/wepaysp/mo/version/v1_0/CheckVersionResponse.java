@@ -1,7 +1,7 @@
-package com.zbsp.wepaysp.mobile.model.version.v1_0;
+package com.zbsp.wepaysp.mo.version.v1_0;
 
-import com.zbsp.wepaysp.mobile.common.Signature;
-import com.zbsp.wepaysp.mobile.model.base.MobileResponse;
+import com.zbsp.wepaysp.common.security.Signature;
+import com.zbsp.wepaysp.mo.base.MobileResponse;
 
 /**
  * 客户端版本检查响应

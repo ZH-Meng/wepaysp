@@ -1,7 +1,7 @@
-package com.zbsp.wepaysp.mobile.model.userlogin.v1_0;
+package com.zbsp.wepaysp.mo.userlogin.v1_0;
 
-import com.zbsp.wepaysp.mobile.common.Signature;
-import com.zbsp.wepaysp.mobile.model.base.MobileRequest;
+import com.zbsp.wepaysp.common.security.Signature;
+import com.zbsp.wepaysp.mo.base.MobileRequest;
 
 /**
  * 用户登陆请求

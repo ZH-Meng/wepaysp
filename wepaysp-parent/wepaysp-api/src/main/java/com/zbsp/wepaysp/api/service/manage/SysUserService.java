@@ -13,6 +13,7 @@ import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginResponse;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.vo.manage.SysUserVO;
 
@@ -186,9 +187,8 @@ public interface SysUserService {
      * 
      * @param dealerEmployeeId 收银员ID
      * @param password 
-     * @return
-     * @throws IllegalAccessException
-     * @throws IllegalStateException
+     * @return UserLoginResponse
+     * @throws IllegalArgumentException
      */
-	public Map<String, String> doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalAccessException, IllegalStateException, NotExistsException;
+	public UserLoginResponse doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalArgumentException;
 }

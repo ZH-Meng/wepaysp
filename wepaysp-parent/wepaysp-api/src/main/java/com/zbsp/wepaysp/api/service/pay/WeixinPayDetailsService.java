@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
+import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -27,9 +28,9 @@ public interface WeixinPayDetailsService {
      *      dealerId:                     String类型，商家ID，根据此参数模糊查询
      *      dealerEmployeeId:       String类型，收银员ID，根据此参数模糊查询
      *      storeId:                      String类型，门店ID，根据此参数模糊查询
-     *      beginTime:                       Date类型，交易开始时间，根据此参数模糊查询
-     *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
-     *      payType:                        支付类型，根据此参数模糊查询
+     *      beginTime:                       Date类型，交易开始时间，根据此参数精确查询
+     *      endTime:                         Date类型，交易截止时间，根据此参数精确查询
+     *      payType:                        支付类型，根据此参数精确查询
      * </pre>
      * 
      * @param paramMap 查询参数
@@ -58,9 +59,9 @@ public interface WeixinPayDetailsService {
      *      dealerId:                     String类型，商家ID，根据此参数模糊查询
      *      dealerEmployeeId:       String类型，收银员ID，根据此参数模糊查询
      *      storeId:                      String类型，门店ID，根据此参数模糊查询
-     *      beginTime:                       Date类型，交易开始时间，根据此参数模糊查询
-     *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
-     *      payType:                        支付类型，根据此参数模糊查询
+     *      beginTime:                       Date类型，交易开始时间，根据此参数精确查询
+     *      endTime:                         Date类型，交易截止时间，根据此参数精确查询
+     *      payType:                        支付类型，根据此参数精确查询
      * </pre>
      * 
      * @param paramMap 查询参数
@@ -132,5 +133,26 @@ public interface WeixinPayDetailsService {
      * @param closeResultVO 关闭订单结果封装的weixinPayDetailsVO
      */
     public void doTransUpdateOrderCloseResult(String resultCode, WeixinPayDetailsVO closeResultVO);
+
+    /**
+     * 
+     * @param dealerEmployeeOid 收银员Oid
+     * @param paramMap  查询参数Map中key的取值如下：
+     * <pre>
+     *      dealerEmployeeOid:         String类型，收银员Oid，根据此参数精确查询
+     *      transactionId:                   String类型，业务员Id，根据此参数模糊查询
+     *      dealerId:                          String类型，商家ID，根据此参数模糊查询
+     *      dealerEmployeeId:            String类型，收银员ID，根据此参数模糊查询
+     *      storeId:                            String类型，门店ID，根据此参数模糊查询
+     *      beginTime:                        Date类型，交易开始时间，根据此参数模糊查询
+     *      endTime:                          Date类型，交易截止时间，根据此参数模糊查询
+     *      payType:                          支付类型，根据此参数模糊查询
+     * </pre>
+     * @param startIndex 记录起始位置
+     * @param maxResult 返回记录最大数
+     * @param pageNum 页码
+     * @return QueryPayDetailResponse
+     */
+    public QueryPayDetailResponse doJoinTransQueryWeixinPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap, int startIndex, int maxResult);
 
 }

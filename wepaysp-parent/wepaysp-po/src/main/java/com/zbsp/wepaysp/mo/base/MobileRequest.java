@@ -1,6 +1,6 @@
-package com.zbsp.wepaysp.mobile.model.base;
+package com.zbsp.wepaysp.mo.base;
 
-import com.zbsp.wepaysp.mobile.common.Signature;
+import com.zbsp.wepaysp.common.security.Signature;
 
 /**
  * 通讯请求对象

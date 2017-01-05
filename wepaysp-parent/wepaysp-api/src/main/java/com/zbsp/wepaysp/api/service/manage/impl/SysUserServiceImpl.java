@@ -20,10 +20,13 @@ import org.joda.time.DateTime;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.mobile.result.CommonResult;
+import com.zbsp.wepaysp.common.mobile.result.LoginResult;
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginResponse;
 import com.zbsp.wepaysp.po.manage.SysAuthority;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.manage.SysRole;
@@ -649,7 +652,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
     }
     
 	@Override
-	public Map<String, String> doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalAccessException, IllegalStateException, NotExistsException {
+	public UserLoginResponse doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalArgumentException {
 		Validator.checkArgument(StringUtils.isBlank(dealerEmployeeId), "收银员ID不能为空");
         Validator.checkArgument(StringUtils.isBlank(password), "登录密码不能为空");
 
@@ -664,27 +667,35 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         paramMap.put("CASHIER", SysUser.UserLevel.cashier.getValue());
 
         SysUser sysUser = commonDAO.findObject(sql, paramMap, false);
-
+        DealerEmployee dealerE = null;
+        
+        UserLoginResponse response = null;
+        String responseId = Generator.generateIwoid();
         if (sysUser == null) {
-            throw new IllegalAccessException("收银员ID或密码不正确！");
+            logger.warn("收银员ID( {} )或密码不正确！", dealerEmployeeId);
+            response = new UserLoginResponse(LoginResult.LOGIN_ID_PASSWD_FAIL.getCode(), LoginResult.LOGIN_ID_PASSWD_FAIL.getDesc(), responseId);
         } else if (sysUser.getState() == SysUser.State.frozen.getValue()) {
-            throw new IllegalStateException("该用户已冻结，不允许登录！");
+            logger.warn("该用户( {} )已冻结，不允许登录！", sysUser.getUserId());
+            response = new UserLoginResponse(LoginResult.USER_FROZEN.getCode(), LoginResult.USER_FROZEN.getDesc(), responseId);
+        } else {
+            dealerE = sysUser.getDealerEmployee(); 
+            if (dealerE == null || StringUtils.isBlank(dealerE.getIwoid())) {
+                logger.warn("收银员( {} )不存在！", dealerEmployeeId);
+                response = new UserLoginResponse(CommonResult.DATA_NOT_EXIST.getCode(), "收银员信息" + CommonResult.DATA_NOT_EXIST.getDesc(), responseId);
+            } else {
+                Store store = sysUser.getDealerEmployee().getStore();
+                
+                response = new UserLoginResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);
+                
+                response.setDealerCompany(dealerE.getDealer() == null ? "" : dealerE.getDealer().getCompany());
+                response.setStoreName(store == null ? "" : store.getStoreName());
+                response.setDealerEmployeeName(dealerE.getEmployeeName());
+                response.setDealerEmployeeId(dealerE.getDealerEmployeeId());
+                response.setDealerEmployeeOid(dealerE.getIwoid());
+            }
         }
-        DealerEmployee dealerE = sysUser.getDealerEmployee(); 
-        if (dealerE == null || StringUtils.isBlank(dealerE.getIwoid())) {
-        	throw new NotExistsException("收银员不存在！");
-        }
         
-        Store store = sysUser.getDealerEmployee().getStore();
-        
-        Map<String, String> resultMap = new HashMap<String, String>();
-        resultMap.put("dealerCompany", dealerE.getDealer() == null ? "" : dealerE.getDealer().getCompany());
-        resultMap.put("storeName", store == null ? "" : store.getStoreName());
-        resultMap.put("dealerEmployeeName", dealerE.getEmployeeName());
-        resultMap.put("dealerEmployeeId", dealerE.getDealerEmployeeId());
-        resultMap.put("dealerEmployeeOid", dealerE.getIwoid());
-        
-        return resultMap;
+        return response;
 	}
 
     public SysLogService getSysLogService() {

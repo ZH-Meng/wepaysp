@@ -1,7 +1,7 @@
-package com.zbsp.wepaysp.mobile.model.paydetail.v1_0;
+package com.zbsp.wepaysp.mo.paydetail.v1_0;
 
-import com.zbsp.wepaysp.mobile.common.Signature;
-import com.zbsp.wepaysp.mobile.model.base.MobileRequest;
+import com.zbsp.wepaysp.common.security.Signature;
+import com.zbsp.wepaysp.mo.base.MobileRequest;
 
 /**
  * 支付明细查询请求 
@@ -27,10 +27,10 @@ public class QueryPayDetailRequest extends MobileRequest {
 	private String endTime;
 	
 	/**支付方式*/
-	private int payType;
+	private String payType;
 	
 	/**订单状态*/
-	private int tradeStatus;
+	private String tradeStatus;
 	
 	/** 页码 */
 	private int pageNum;
@@ -99,23 +99,23 @@ public class QueryPayDetailRequest extends MobileRequest {
 		this.endTime = endTime;
 	}
 
-	public int getPayType() {
-		return payType;
-	}
+    public String getPayType() {
+        return payType;
+    }
+    
+    public void setPayType(String payType) {
+        this.payType = payType;
+    }
+    
+    public String getTradeStatus() {
+        return tradeStatus;
+    }
+    
+    public void setTradeStatus(String tradeStatus) {
+        this.tradeStatus = tradeStatus;
+    }
 
-	public void setPayType(int payType) {
-		this.payType = payType;
-	}
-
-	public int getTradeStatus() {
-		return tradeStatus;
-	}
-
-	public void setTradeStatus(int tradeStatus) {
-		this.tradeStatus = tradeStatus;
-	}
-
-	public int getPageNum() {
+    public int getPageNum() {
 		return pageNum;
 	}
 

@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.mobile.common;
+package com.zbsp.wepaysp.common.security;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;

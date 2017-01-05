@@ -1,9 +1,9 @@
-package com.zbsp.wepaysp.mobile.model.paydetail.v1_0;
+package com.zbsp.wepaysp.mo.paydetail.v1_0;
 
 /**
  * 支付数据
  * */
-public class PayData {
+public class PayDetailData {
 	
 	/**商户订单号*/
 	private String outTradeNo;
@@ -23,11 +23,10 @@ public class PayData {
 	/**交易时间 yyyy-MM-dd HH:mm:ss*/
 	private String transTime;
 	
-	public PayData() {
+	public PayDetailData() {
 	}
 	
-	public PayData(String outTradeNo, int payType, int tradeStatus, long collectionMoney, long refundMoney,
-			String transTime) {
+	public PayDetailData(String outTradeNo, int payType, int tradeStatus, long collectionMoney, long refundMoney, String transTime) {
 		super();
 		this.outTradeNo = outTradeNo;
 		this.payType = payType;

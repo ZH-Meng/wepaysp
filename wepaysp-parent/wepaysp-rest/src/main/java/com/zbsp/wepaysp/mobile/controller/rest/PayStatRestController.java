@@ -23,8 +23,8 @@ import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.result.CommonResult;
 
 @RestController
-@RequestMapping("/paydetail/v1")
-public class PayDetailRestController extends BaseController {
+@RequestMapping("/paystat/v1")
+public class PayStatRestController extends BaseController {
     
 	@Autowired
 	private WeixinPayDetailsService weixinPayDetailsService;
