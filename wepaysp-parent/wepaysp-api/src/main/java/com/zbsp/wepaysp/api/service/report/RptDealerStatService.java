@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.api.service.report;
 import java.util.List;
 import java.util.Map;
 
+import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatResponse;
 import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 
 /**
@@ -206,5 +207,19 @@ public interface RptDealerStatService {
      * @return 符合条件的信息列表
      */
     public List<RptDealerStatVO> doJoinTransQueryRptDealerStatTodayList4DealerE(Map<String, Object> paramMap, int startIndex, int maxResult);
+
+    /**
+     * 
+     * @param dealerEmployeeOid 商户员工Oid,根据此参数精确查询
+     * @param paramMap
+     * <pre>
+     *      beginTime:                      Date类型，交易开始时间，根据此参数模糊查询
+     *      endTime:                         Date类型，交易截止时间，根据此参数模糊查询
+     *      queryType:					  int，查询类型
+     * </pre>
+     * @return QueryPayStatResponse
+     * @throws IllegalArgumentException
+     */
+	public QueryPayStatResponse doJoinTransQueryPayStat4DealerE(String dealerEmployeeOid, Map<String, Object> paramMap) throws IllegalArgumentException;
 
 }

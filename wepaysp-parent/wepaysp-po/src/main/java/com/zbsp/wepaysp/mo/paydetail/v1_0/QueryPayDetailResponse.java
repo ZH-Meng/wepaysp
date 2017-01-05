@@ -9,7 +9,7 @@ import com.zbsp.wepaysp.mo.base.MobileResponse;
 public class QueryPayDetailResponse extends MobileResponse {
 	
 	/** 支付明细 集合 List<PayData> 的 JSON串*/
-	private String payDetailLisJSON;
+	private String payDetailListJSON;
 	
 	/** 金额合计 */
 	private long totalMoney;
@@ -22,16 +22,16 @@ public class QueryPayDetailResponse extends MobileResponse {
 	public QueryPayDetailResponse(int result, String message, String responseId) {
 		super(result, message, responseId);
 	}
+	
+    public String getPayDetailListJSON() {
+		return payDetailListJSON;
+	}
 
-    public String getPayDetailLisJSON() {
-        return payDetailLisJSON;
-    }
-    
-    public void setPayDetailLisJSON(String payDetailLisJSON) {
-        this.payDetailLisJSON = payDetailLisJSON;
-    }
+	public void setPayDetailListJSON(String payDetailListJSON) {
+		this.payDetailListJSON = payDetailListJSON;
+	}
 
-    public long getTotalMoney() {
+	public long getTotalMoney() {
 		return totalMoney;
 	}
 
@@ -49,7 +49,7 @@ public class QueryPayDetailResponse extends MobileResponse {
 
     @Override
 	public String toString() {
-		return "QueryPayDetailResponse [totalMoney=" + totalMoney + ", totalAmount=" + totalAmount + ", payDetailLisJSON=" + payDetailLisJSON + "]";
+		return "QueryPayDetailResponse [totalMoney=" + totalMoney + ", totalAmount=" + totalAmount + ", payDetailListJSON=" + payDetailListJSON + "]";
 	}
 
 	@Override

@@ -4,21 +4,15 @@ import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mo.base.MobileRequest;
 
 /**
- * 支付明细查询请求 
+ * 统计结算查询请求 
  */
 public class QueryPayStatRequest extends MobileRequest {
 	
 	/**收银员Oid*/
 	private String dealerEmployeeOid;
 	
-	/**查询方式：1：收款查询，2：账单查询*/
+	/**查询类型：1：当班结算；2：分类统计*/
 	private int queryType;
-	
-	/** 商户订单号 */
-	private String outTradeNo;
-	
-	/**支付订单号 */
-	private String transactionId;
 	
 	/** 查询开始时间 */
 	private String beginTime;
@@ -26,20 +20,11 @@ public class QueryPayStatRequest extends MobileRequest {
 	/** 查询截止时间 */
 	private String endTime;
 	
-	/**支付方式*/
-	private String payType;
-	
-	/**订单状态*/
-	private String tradeStatus;
-	
-	/** 页码 */
-	private int pageNum;
-	
 	public static enum QueryType {
-		/**收款查询*/
-		collection(1),
-		/**账单查询*/
-		bill(2);
+		/**当班结算*/
+		ON_DUTY_STAT(1),
+		/**分类统计*/
+		CLASS_STAT(2);
 		private int value;
 		
 		private QueryType(int value) {
@@ -67,22 +52,6 @@ public class QueryPayStatRequest extends MobileRequest {
 		this.queryType = queryType;
 	}
 
-	public String getOutTradeNo() {
-		return outTradeNo;
-	}
-
-	public void setOutTradeNo(String outTradeNo) {
-		this.outTradeNo = outTradeNo;
-	}
-
-	public String getTransactionId() {
-		return transactionId;
-	}
-
-	public void setTransactionId(String transactionId) {
-		this.transactionId = transactionId;
-	}
-
 	public String getBeginTime() {
 		return beginTime;
 	}
@@ -99,35 +68,10 @@ public class QueryPayStatRequest extends MobileRequest {
 		this.endTime = endTime;
 	}
 
-    public String getPayType() {
-        return payType;
-    }
-    
-    public void setPayType(String payType) {
-        this.payType = payType;
-    }
-    
-    public String getTradeStatus() {
-        return tradeStatus;
-    }
-    
-    public void setTradeStatus(String tradeStatus) {
-        this.tradeStatus = tradeStatus;
-    }
-
-    public int getPageNum() {
-		return pageNum;
-	}
-
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
-	}
-	
     @Override
 	public String toString() {
 		return "QueryPayDetailRequest [dealerEmployeeOid=" + dealerEmployeeOid + ", queryType=" + queryType
-				+ ", outTradeNo=" + outTradeNo + ", transactionId=" + transactionId + ", beginTime=" + beginTime + ", endTime=" 
-				+ endTime + ", payType=" + payType + ", tradeStatus=" + tradeStatus + ", pageNum=" + pageNum + ", " + super.toString() +" ]";
+				+ ", beginTime=" + beginTime + ", endTime=" + endTime + ", " + super.toString() +" ]"; 
 	}
 
 	@Override

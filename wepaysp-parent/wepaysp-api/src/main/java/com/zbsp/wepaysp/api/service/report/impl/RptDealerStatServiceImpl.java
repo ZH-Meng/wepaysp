@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.ArrayUtil;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatResponse;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
@@ -848,6 +849,12 @@ public class RptDealerStatServiceImpl
         }
         return resultList;
     }
+
+	@Override
+	public QueryPayStatResponse doJoinTransQueryPayStat4DealerE(String dealerEmployeeOid, Map<String, Object> paramMap) throws IllegalArgumentException {
+
+		return null;
+	}
 
     public void setDealerStatDayQueyName(String dealerStatDayQueyName) {
         this.dealerStatDayQueyName = dealerStatDayQueyName;

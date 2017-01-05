@@ -990,7 +990,7 @@ public class WeixinPayDetailsServiceImpl
     }
     
     @Override
-    public QueryPayDetailResponse doJoinTransQueryWeixinPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap, int startIndex, int maxResult) {
+    public QueryPayDetailResponse doJoinTransQueryWeixinPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap, int startIndex, int maxResult) throws IllegalArgumentException {
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerEmployeeOid不能为空");
         
         QueryPayDetailResponse response = new QueryPayDetailResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), Generator.generateIwoid());
@@ -1089,7 +1089,7 @@ public class WeixinPayDetailsServiceImpl
             response.setTotalAmount(totalArr[1] == null ? 0L : (Long) totalArr[1]);
         }
         
-        response.setPayDetailLisJSON(JSONUtil.toJSONString(payDetailList, true));
+        response.setPayDetailListJSON(JSONUtil.toJSONString(payDetailList, true));
         return response;
     }
     

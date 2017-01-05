@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zbsp.wepaysp.api.service.app.AppManageService;
+import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.mo.base.MobileRequest;
 import com.zbsp.wepaysp.mo.version.v1_0.CheckVersionResponse;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
-import com.zbsp.wepaysp.mobile.result.CommonResult;
 
 @RestController
 @RequestMapping("/version/v1")

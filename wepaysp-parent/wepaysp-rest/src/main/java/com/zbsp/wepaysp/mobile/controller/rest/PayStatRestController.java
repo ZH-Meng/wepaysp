@@ -11,79 +11,65 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
+import com.zbsp.wepaysp.api.service.report.RptDealerStatService;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailRequest;
-import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
+import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatRequest;
+import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatResponse;
+import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
-import com.zbsp.wepaysp.mobile.result.CommonResult;
+import com.zbsp.wepaysp.po.report.RptDealerStatDay;
 
 @RestController
 @RequestMapping("/paystat/v1")
 public class PayStatRestController extends BaseController {
     
 	@Autowired
-	private WeixinPayDetailsService weixinPayDetailsService;
+	private RptDealerStatService rptDealerStatService;
 	
 	@RequestMapping(value = "query", method = RequestMethod.POST)
 	@ResponseBody
-    public QueryPayDetailResponse query(@RequestBody QueryPayDetailRequest request) {
+    public QueryPayStatResponse query(@RequestBody QueryPayStatRequest request) {
 		
 		if (DEV_FLAG) {// 开发阶段：模拟设置sign
             request.build(KEY);
         }
 
-        logger.info("处理查询支付明细请求 - 开始");
+        logger.info("处理查询支付结算请求 - 开始");
         logger.debug("request Data is {}", request.toString());
-        QueryPayDetailResponse response = null;
+        QueryPayStatResponse response = null;
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
-            response = new QueryPayDetailResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+            response = new QueryPayStatResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getRequestId()) || StringUtils.isBlank(request.getDealerEmployeeOid())) {
-            response = new QueryPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
-        } else if (!Validator.contains(QueryPayDetailRequest.QueryType.class, request.getQueryType())) {
-        	response = new QueryPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(queryType)", responseId);
-        } else if (request.getQueryType() == QueryPayDetailRequest.QueryType.bill.getValue() 
-            && (StringUtils.isBlank(request.getTradeStatus()) || StringUtils.isBlank(request.getPayType()) || StringUtils.isBlank(request.getBeginTime()) || StringUtils.isBlank(request.getEndTime()))) {
-        	response = new QueryPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
+            response = new QueryPayStatResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
+        } else if (!Validator.contains(QueryPayStatRequest.QueryType.class, request.getQueryType())) {
+        	response = new QueryPayStatResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(queryType)", responseId);
+        } else if (StringUtils.isBlank(request.getBeginTime()) || StringUtils.isBlank(request.getEndTime())) {
+        	response = new QueryPayStatResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
             try {
                 Map<String, Object> paramMap = new HashMap<String, Object>();
-                paramMap.put("outTradeNo", request.getOutTradeNo());
-                paramMap.put("transactionId", request.getTransactionId());
-                if (request.getQueryType() == QueryPayDetailRequest.QueryType.bill.getValue()) {
-                	paramMap.put("beginTime", DateUtil.getDate(request.getBeginTime(), "yyyy-MM-dd HH:mm:ss"));
-                	paramMap.put("endTime", DateUtil.getDate(request.getEndTime(), "yyyy-MM-dd HH:mm:ss"));
-                	paramMap.put("payType", request.getPayType());
-                	paramMap.put("tradeStatus", request.getTradeStatus());
-                	paramMap.put("totalFlag", true);
-                } else {
-                	// 当天
-                	Date today = new Date();
-                	paramMap.put("beginTime", TimeUtil.getDayStart(today));
-                	paramMap.put("endTime", TimeUtil.getDayEnd(today));
-                	paramMap.put("totalFlag", false);
-                }
+                paramMap.put("beginTime", DateUtil.getDate(request.getBeginTime(), "yyyy-MM-dd HH:mm:ss"));
+                paramMap.put("endTime", DateUtil.getDate(request.getEndTime(), "yyyy-MM-dd HH:mm:ss"));
+                paramMap.put("queryType", request.getQueryType());
+
+                response = rptDealerStatService.doJoinTransQueryPayStat4DealerE(request.getDealerEmployeeOid(), paramMap);
                 
-                int payNum = request.getPageNum();
-                int paySize = 10;
-                response = weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(request.getDealerEmployeeOid(), paramMap, (payNum - 1) * paySize, paySize);
-                
-                logger.info("处理查询支付明细请求 - 成功");
+                logger.info("处理查询支付结算请求 - 成功");
             } catch (IllegalArgumentException e) {
-                response = new QueryPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
+                response = new QueryPayStatResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
             } catch (Exception e) {
-                logger.error("处理查询支付明细请求 - 异常：{}", e.getMessage(), e);
-                response = new QueryPayDetailResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
+                logger.error("处理查询支付结算请求 - 异常：{}", e.getMessage(), e);
+                response = new QueryPayStatResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
             }
         }
         response = response.build(KEY);
         logger.debug("response Data is {}", response.toString());
-        logger.info("处理查询支付明细请求 - 结束");
+        logger.info("处理查询支付结算请求 - 结束");
         return response;
     }
 	

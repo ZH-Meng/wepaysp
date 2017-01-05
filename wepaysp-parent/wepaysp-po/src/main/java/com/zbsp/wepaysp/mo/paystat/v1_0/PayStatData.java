@@ -1,47 +1,39 @@
 package com.zbsp.wepaysp.mo.paystat.v1_0;
 
 /**
- * 支付数据
+ * 支付结算数据
  * */
 public class PayStatData {
-	
-	/**商户订单号*/
-	private String outTradeNo;
 	
 	/**支付方式*/
 	private int payType;
 	
-	/**订单状态*/
-	private int tradeStatus;
+	/**收款总金额，单位：分*/
+	private long totalCollectionMoney;
 	
-	/**实收金额，单位：分*/
-	private long collectionMoney;
+	/**退款总金额，单位：分*/
+	private long totalRefundMoney;
 	
-	/**退款金额，单位：分*/
-	private long refundMoney;
+	/**净收款，单位：分*/
+	private long totalNetCollectionMoney;
 	
-	/**交易时间 yyyy-MM-dd HH:mm:ss*/
-	private String transTime;
+	/**交易笔数*/
+	private long totalTradeCount;
+	
+	/**退款笔数*/
+	private long totalRefundCount;
 	
 	public PayStatData() {
 	}
 	
-	public PayStatData(String outTradeNo, int payType, int tradeStatus, long collectionMoney, long refundMoney, String transTime) {
+	public PayStatData(int payType, long totalCollectionMoney, long totalRefundMoney, long totalNetCollectionMoney, long totalTradeCount, long totalRefundCount) {
 		super();
-		this.outTradeNo = outTradeNo;
 		this.payType = payType;
-		this.tradeStatus = tradeStatus;
-		this.collectionMoney = collectionMoney;
-		this.refundMoney = refundMoney;
-		this.transTime = transTime;
-	}
-
-	public String getOutTradeNo() {
-		return outTradeNo;
-	}
-
-	public void setOutTradeNo(String outTradeNo) {
-		this.outTradeNo = outTradeNo;
+		this.totalCollectionMoney = totalCollectionMoney;
+		this.totalRefundMoney = totalRefundMoney;
+		this.totalNetCollectionMoney = totalNetCollectionMoney;
+		this.totalTradeCount = totalTradeCount;
+		this.totalRefundCount = totalRefundCount;
 	}
 
 	public int getPayType() {
@@ -52,36 +44,44 @@ public class PayStatData {
 		this.payType = payType;
 	}
 
-	public int getTradeStatus() {
-		return tradeStatus;
+	public long getTotalCollectionMoney() {
+		return totalCollectionMoney;
 	}
 
-	public void setTradeStatus(int tradeStatus) {
-		this.tradeStatus = tradeStatus;
+	public void setTotalCollectionMoney(long totalCollectionMoney) {
+		this.totalCollectionMoney = totalCollectionMoney;
 	}
 
-	public long getCollectionMoney() {
-		return collectionMoney;
+	public long getTotalRefundMoney() {
+		return totalRefundMoney;
 	}
 
-	public void setCollectionMoney(long collectionMoney) {
-		this.collectionMoney = collectionMoney;
+	public void setTotalRefundMoney(long totalRefundMoney) {
+		this.totalRefundMoney = totalRefundMoney;
 	}
 
-	public long getRefundMoney() {
-		return refundMoney;
+	public long getTotalNetCollectionMoney() {
+		return totalNetCollectionMoney;
 	}
 
-	public void setRefundMoney(long refundMoney) {
-		this.refundMoney = refundMoney;
+	public void setTotalNetCollectionMoney(long totalNetCollectionMoney) {
+		this.totalNetCollectionMoney = totalNetCollectionMoney;
 	}
 
-	public String getTransTime() {
-		return transTime;
+	public long getTotalTradeCount() {
+		return totalTradeCount;
 	}
 
-	public void setTransTime(String transTime) {
-		this.transTime = transTime;
+	public void setTotalTradeCount(long totalTradeCount) {
+		this.totalTradeCount = totalTradeCount;
+	}
+
+	public long getTotalRefundCount() {
+		return totalRefundCount;
+	}
+
+	public void setTotalRefundCount(long totalRefundCount) {
+		this.totalRefundCount = totalRefundCount;
 	}
 	
 }

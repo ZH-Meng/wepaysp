@@ -18,9 +18,9 @@ import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailRequest;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
+import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
-import com.zbsp.wepaysp.mobile.result.CommonResult;
 
 @RestController
 @RequestMapping("/paydetail/v1")

@@ -153,6 +153,6 @@ public interface WeixinPayDetailsService {
      * @param pageNum 页码
      * @return QueryPayDetailResponse
      */
-    public QueryPayDetailResponse doJoinTransQueryWeixinPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap, int startIndex, int maxResult);
+    public QueryPayDetailResponse doJoinTransQueryWeixinPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap, int startIndex, int maxResult) throws IllegalArgumentException;
 
 }
