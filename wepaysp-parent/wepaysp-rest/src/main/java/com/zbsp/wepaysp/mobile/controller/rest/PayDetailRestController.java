@@ -26,6 +26,8 @@ import com.zbsp.wepaysp.mobile.controller.BaseController;
 @RequestMapping("/paydetail/v1")
 public class PayDetailRestController extends BaseController {
     
+    private final static int PAGE_SIZE = 10;
+    
 	@Autowired
 	private WeixinPayDetailsService weixinPayDetailsService;
 	
@@ -70,7 +72,10 @@ public class PayDetailRestController extends BaseController {
                 }
                 
                 int payNum = request.getPageNum();
-                int paySize = 10;
+                int paySize = PAGE_SIZE;
+                if (StringUtils.isNotBlank(request.getPageSize())) {
+                    paySize = Integer.valueOf(request.getPageSize());
+                }
                 response = weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(request.getDealerEmployeeOid(), paramMap, (payNum - 1) * paySize, paySize);
                 
                 logger.info("处理查询支付明细请求 - 成功");
