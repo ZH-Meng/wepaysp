@@ -1077,7 +1077,7 @@ public class WeixinPayDetailsServiceImpl
                 data.setPayType(Integer.valueOf(weixinPayDetails.getPayType()));
                 data.setTradeStatus(weixinPayDetails.getTradeStatus());
                 data.setTransTime(DateUtil.getDate(weixinPayDetails.getTransBeginTime(), "yyyy-MM-dd HH:mm:ss"));
-                data.setCollectionMoney(weixinPayDetails.getTotalFee());// FIXME　实收金额
+                data.setCollectionMoney(weixinPayDetails.getTotalFee());// 实收金额 = 总金额
                 data.setRefundMoney(weixinPayDetails.getRefundFee() == null ? 0L : weixinPayDetails.getRefundFee());
                 payDetailList.add(data);
             }

@@ -35,6 +35,9 @@ public class QueryPayDetailRequest extends MobileRequest {
 	/** 页码 */
 	private int pageNum;
 	
+	/** 每页行数 */
+	private String pageSize;
+	
 	public static enum QueryType {
 		/**收款查询*/
 		collection(1),
@@ -123,11 +126,19 @@ public class QueryPayDetailRequest extends MobileRequest {
 		this.pageNum = pageNum;
 	}
 	
+    public String getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(String pageSize) {
+        this.pageSize = pageSize;
+    }
+
     @Override
 	public String toString() {
 		return "QueryPayDetailRequest [dealerEmployeeOid=" + dealerEmployeeOid + ", queryType=" + queryType
 				+ ", outTradeNo=" + outTradeNo + ", transactionId=" + transactionId + ", beginTime=" + beginTime + ", endTime=" 
-				+ endTime + ", payType=" + payType + ", tradeStatus=" + tradeStatus + ", pageNum=" + pageNum + ", " + super.toString() +" ]";
+				+ endTime + ", payType=" + payType + ", tradeStatus=" + tradeStatus + ", pageNum=" + pageNum + ", pageSize=" + pageSize + ", " + super.toString() +" ]";
 	}
 
 	@Override
