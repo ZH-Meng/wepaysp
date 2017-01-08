@@ -1,6 +1,5 @@
 package com.zbsp.wepaysp.api.service.pay.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,15 +29,10 @@ import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
-import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
-import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
-import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.mo.paydetail.v1_0.PayDetailData;
-import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
@@ -47,7 +41,6 @@ import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
-import com.zbsp.wepaysp.po.view.ViewPayDetailId;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
@@ -392,7 +385,7 @@ public class WeixinPayDetailsServiceImpl
     @Override
     public WeixinPayDetailsVO doTransCreatePayDetails(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid) {
         Validator.checkArgument(weixinPayDetailsVO == null, "支付明细对象不能为空");
-        Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
+        // Validator.checkArgument(StringUtils.isBlank(creator), "创建人不能为空");
 
         Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getPayType()), "交易类型不能为空");
         Validator.checkArgument(weixinPayDetailsVO.getTotalFee() == null, "订单金额不能为空");
@@ -421,8 +414,8 @@ public class WeixinPayDetailsServiceImpl
             }
         } else if (WeixinPayDetails.PayType.MICROPAY.getValue().equals(weixinPayDetailsVO.getPayType())) {// 刷卡支付
             microPay = true;
-            Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
-            Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
+            /*Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
+            Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");*/
             
             Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getDealerEmployeeOid()), "收银员Oid不能为空");
             Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getAuthCode()), "authCode不能为空");
@@ -990,109 +983,53 @@ public class WeixinPayDetailsServiceImpl
     }
     
     @Override
-    public QueryPayDetailResponse doJoinTransQueryWeixinPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap, int startIndex, int maxResult) throws IllegalArgumentException {
-        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerEmployeeOid不能为空");
-        
-        QueryPayDetailResponse response = new QueryPayDetailResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), Generator.generateIwoid());
-        List<PayDetailData> payDetailList = new ArrayList<PayDetailData>();
-        
-        Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
-        Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
-        String payType = MapUtils.getString(paramMap, "payType");
-        String tradeStatus = MapUtils.getString(paramMap, "tradeStatus");
-        String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
-        String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
-        boolean totalFlag = MapUtils.getBoolean(paramMap, "totalFlag");
-
-        //String listJpql = "from ViewPayDetail w where 1=1 ";
-        
-        String listJpql = "select w.id.dealerEmployeeOid, w.id.payType, w.id.transactionId, w.id.outTradeNo, w.id.transBeginTime, w.id.transEndTime, w.id.tradeStatus, "
-            + "w.id.totalFee, w.id.cashFee, w.id.couponFee, w.id.refundFee  from ViewPayDetail w where 1=1 ";
-        String totalJpql = "select sum(case when w.id.tradeStatus=1 then w.id.totalFee else 0 end),count(w.id.totalFee) from ViewPayDetail w where 1=1 ";
-        StringBuffer sql = new StringBuffer("");
-        Map<String, Object> sqlMap = new HashMap<String, Object>();
-
-        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
-            sql.append(" and w.id.dealerEmployeeOid = :DEALEREMPLOYEEOID");
-            sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
-        }
-        
-        if (beginTime != null ) {
-            sql.append(" and w.id.transBeginTime >=:BEGINTIME ");
-            sqlMap.put("BEGINTIME", beginTime);
-        }
-        if (endTime != null ) {
-            sql.append(" and w.id.transBeginTime <=:ENDTIME ");
-            sqlMap.put("ENDTIME", endTime);
-        }
-        
-        if (StringUtils.isNotBlank(payType)) {
-            sql.append(" and w.id.payType = :PAYTYPE");
-            sqlMap.put("PAYTYPE", payType);
-        }
-        
-        if (StringUtils.isNotBlank(tradeStatus)) {
-            sql.append(" and w.id.tradeStatus = :TRADESTATUS");
-            sqlMap.put("TRADESTATUS", Integer.valueOf(tradeStatus));
-        }
-        
-        if (StringUtils.isNotBlank(outTradeNo)) {
-            sql.append(" and w.id.outTradeNo = :OUTTRADENO");
-            sqlMap.put("OUTTRADENO", outTradeNo);
-        }
-        if (StringUtils.isNotBlank(transactionId)) {
-            sql.append(" and w.id.transactionId = :TRANSACTIONID");
-            sqlMap.put("TRANSACTIONID", transactionId);
-        }
-
-        sql.append(" order by w.id.transBeginTime desc");
-        //List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(listJpql + sql.toString(), sqlMap, false, startIndex, maxResult);
-        
-        // List<ViewPayDetail> weixinPayDetailsList = (List<ViewPayDetail>) commonDAO.findObjectList(listJpql + sql.toString(), sqlMap, false, startIndex, maxResult);
-        
-        List<?> weixinPayDetailsList = (List<?>) commonDAO.findObjectList(listJpql + sql.toString(), sqlMap, false, startIndex, maxResult);
-  
-        // 总笔数为记录总数，总金额为交易成功的总金额
-        if(weixinPayDetailsList != null && !weixinPayDetailsList.isEmpty()) {
-            Iterator<?> it = weixinPayDetailsList.iterator();
-            while (it.hasNext()) { 
-                Object[] curRow = (Object[]) it.next();
-                ViewPayDetailId weixinPayDetails = new ViewPayDetailId();
-                weixinPayDetails.setDealerEmployeeOid((String) curRow[0]);
-                weixinPayDetails.setPayType((String) curRow[1]);
-                weixinPayDetails.setTransactionId((String) curRow[2]);
-                weixinPayDetails.setOutTradeNo((String) curRow[3]);
-                weixinPayDetails.setTransBeginTime((Timestamp) curRow[4]);
-                weixinPayDetails.setTransEndTime((Timestamp) curRow[5]);
-                weixinPayDetails.setTradeStatus((Integer) curRow[6]);
-                
-                weixinPayDetails.setTotalFee((Integer) curRow[7]);
-                weixinPayDetails.setCashFee((Long) curRow[8]);
-                weixinPayDetails.setCouponFee((Integer) curRow[9]);
-                weixinPayDetails.setRefundFee((Integer) curRow[10]);
-                
-                
-                PayDetailData data = new PayDetailData();
-                data.setOutTradeNo(weixinPayDetails.getOutTradeNo());
-                data.setPayType(Integer.valueOf(weixinPayDetails.getPayType()));
-                data.setTradeStatus(weixinPayDetails.getTradeStatus());
-                data.setTransTime(DateUtil.getDate(weixinPayDetails.getTransBeginTime(), "yyyy-MM-dd HH:mm:ss"));
-                data.setCollectionMoney(weixinPayDetails.getTotalFee());// 实收金额 = 总金额
-                data.setRefundMoney(weixinPayDetails.getRefundFee() == null ? 0L : weixinPayDetails.getRefundFee());
-                payDetailList.add(data);
-            }
-        }
-        if (totalFlag) {
-            Object total = commonDAO.findObject(totalJpql + sql.toString(), sqlMap, false);
-            Object[] totalArr = (Object[]) total;
-            response.setTotalMoney(totalArr[0] == null ? 0L : (Long) totalArr[0]);
-            response.setTotalAmount(totalArr[1] == null ? 0L : (Long) totalArr[1]);
-        }
-        
-        response.setPayDetailListJSON(JSONUtil.toJSONString(payDetailList, true));
-        return response;
-    }
-    
+	public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetail(String outTradeNo) {
+		Validator.checkArgument(StringUtils.isBlank(outTradeNo), "查询状态不能为空");
+		
+		Map<String, Object> jpqlMap = new HashMap<String, Object>(); 
+		StringBuffer jpql = new StringBuffer("from WeixinPayDetails w where 1=1 ");
+		jpql.append(" and w.outTradeNo=:OUTTRADENO");
+		jpqlMap.put("OUTTRADENO", outTradeNo);
+		
+		WeixinPayDetails weixinPayDetails = commonDAO.findObject(jpql.toString(), jpqlMap, false);
+		WeixinPayDetailsVO vo = null;
+		if (weixinPayDetails != null) {
+			vo = new WeixinPayDetailsVO();
+			vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
+			vo.setDeviceInfo(weixinPayDetails.getDeviceInfo());
+			vo.setOutTradeNo(weixinPayDetails.getOutTradeNo());
+			vo.setTradeStatus(weixinPayDetails.getTradeStatus());
+			vo.setRefundFee(weixinPayDetails.getRefundFee());
+			
+	        DealerEmployee de = weixinPayDetails.getDealerEmployee();
+	        vo.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
+	        vo.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
+	        
+	        Store store = weixinPayDetails.getStore();
+	        vo.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
+	        vo.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
+	        
+	        Dealer dealer = weixinPayDetails.getDealer();
+	        vo.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
+	        vo.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+	        
+	        PartnerEmployee pe = weixinPayDetails.getPartnerEmployee();
+	        vo.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
+	        vo.setPartnerEmployeeId(pe != null ? pe.getPartnerEmployeeId() : (dealer != null ? dealer.getPartnerEmployee().getPartnerEmployeeId() : ""));
+	        
+	        Partner p = weixinPayDetails.getPartner();
+	        vo.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
+	        vo.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
+	        
+			vo.setPayType(weixinPayDetails.getPayType());
+			vo.setTransactionId(weixinPayDetails.getTransactionId());
+			vo.setTotalFee(weixinPayDetails.getTotalFee());
+			vo.setResultCode(weixinPayDetails.getResultCode());
+			vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
+		}
+		
+		return vo;
+	}
     
     public void setSysConfigService(SysConfigService sysConfigService) {
 		this.sysConfigService = sysConfigService;
@@ -1101,6 +1038,5 @@ public class WeixinPayDetailsServiceImpl
 	public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }
-
 
 }

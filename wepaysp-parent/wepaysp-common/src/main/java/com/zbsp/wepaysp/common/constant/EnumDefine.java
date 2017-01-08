@@ -267,6 +267,54 @@ public class EnumDefine {
     }
     
     /**
+     * 支付类型
+     */
+    public static enum PayType {
+        /** 1：微信-刷卡支付*/                                  WEIXIN_MICROPAY(1),
+        /** 2：微信-公众号支付 */								 WEIXIN_JSAPI(2),
+        /** 3：微信-扫码支付 */								 WEIXIN_NATIVE(3),
+        /** 4：微信-微信买单 */								 WEIXIN_PAY(4),
+        
+        /** 6：支付宝-当面付 */                                  ALI_FACE(6),
+        /** 7：支付宝-扫码付 */								  ALI_SCAN(7),
+        /** 8：支付宝-手机网站支付 */						  ALI_H5(8);
+        
+        private int value;
+        
+        
+        public int getValue() {
+            return value;
+        }
+        
+        private PayType(int value) {
+            this.value = value;
+        }
+        
+    }
+    
+    /**
+     * 交易状态
+     */
+    public static enum TradeStatus {
+        /** 0：交易中 */        TRADEING(0),
+        /** 1：交易成功 */     TRADE_SUCCESS(1),
+        /** 2：交易失败 */     TRADE_FAIL(2),
+        /** 3：交易撤销 */     TRADE_REVERSED(3),
+        /** 4：交易关闭 */     TRADE_CLOSED(4),
+        /** 5：交易待关闭 */     TRADE_TO_BE_CLOSED(5);
+        
+        private int value;
+
+        public int getValue() {
+            return value;
+        }
+
+        private TradeStatus(int value) {
+            this.value = value;
+        }
+    }
+    
+    /**
      * 是否可以退款标识
      */
     public static enum RefundFlag {

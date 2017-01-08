@@ -11,13 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
+
+import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailRequest;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
+import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailRequest;
+import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailResponse;
+import com.zbsp.wepaysp.common.constant.EnumDefine;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
@@ -29,17 +33,17 @@ public class PayDetailRestController extends BaseController {
     private final static int PAGE_SIZE = 10;
     
 	@Autowired
-	private WeixinPayDetailsService weixinPayDetailsService;
+	private PayDetailsService payDetailsService; 
 	
 	@RequestMapping(value = "query", method = RequestMethod.POST)
 	@ResponseBody
     public QueryPayDetailResponse query(@RequestBody QueryPayDetailRequest request) {
-		
+		String logPrefix = "处理查询支付明细请求 - ";
 		if (DEV_FLAG) {// 开发阶段：模拟设置sign
             request.build(KEY);
         }
 
-        logger.info("处理查询支付明细请求 - 开始");
+        logger.info(logPrefix + "开始");
         logger.debug("request Data is {}", request.toString());
         QueryPayDetailResponse response = null;
         String responseId = Generator.generateIwoid();
@@ -76,20 +80,55 @@ public class PayDetailRestController extends BaseController {
                 if (StringUtils.isNotBlank(request.getPageSize())) {
                     paySize = Integer.valueOf(request.getPageSize());
                 }
-                response = weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(request.getDealerEmployeeOid(), paramMap, (payNum - 1) * paySize, paySize);
+                response = payDetailsService.doJoinTransQueryPayDetails(request.getDealerEmployeeOid(), paramMap, (payNum - 1) * paySize, paySize);
                 
-                logger.info("处理查询支付明细请求 - 成功");
+                logger.info(logPrefix + "成功");
             } catch (IllegalArgumentException e) {
                 response = new QueryPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
             } catch (Exception e) {
-                logger.error("处理查询支付明细请求 - 异常：{}", e.getMessage(), e);
+                logger.error(logPrefix + "异常：{}", e.getMessage(), e);
                 response = new QueryPayDetailResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
             }
         }
         response = response.build(KEY);
         logger.debug("response Data is {}", response.toString());
-        logger.info("处理查询支付明细请求 - 结束");
+        logger.info(logPrefix + "结束");
         return response;
     }
+	
+	@RequestMapping(value = "print", method = RequestMethod.POST)
+	@ResponseBody
+    public QueryPrintPayDetailResponse query(@RequestBody QueryPrintPayDetailRequest request) {
+		String logPrefix = "处理查询打印支付明细请求 - ";
+		if (DEV_FLAG) {// 开发阶段：模拟设置sign
+            request.build(KEY);
+        }
+
+        logger.info(logPrefix + "开始");
+        logger.debug("request Data is {}", request.toString());
+        QueryPrintPayDetailResponse response = null;
+        String responseId = Generator.generateIwoid();
+        if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
+            response = new QueryPrintPayDetailResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+        } else if (StringUtils.isBlank(request.getRequestId()) || StringUtils.isBlank(request.getOutTradeNo())) {
+            response = new QueryPrintPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
+        } else if (!Validator.contains(EnumDefine.PayType.class, request.getPayType())) {
+        	response = new QueryPrintPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
+        } else {
+            try {
+                response = payDetailsService.doJoinTransQueryPayDetail(request.getOutTradeNo(), request.getPayType());
+                logger.info(logPrefix + "成功");
+            } catch (IllegalArgumentException e) {
+                response = new QueryPrintPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
+            } catch (Exception e) {
+            	logger.info(logPrefix + "异常：{}", e.getMessage(), e);
+                response = new QueryPrintPayDetailResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
+            }
+        }
+        response = response.build(KEY);
+        logger.debug("response Data is {}", response.toString());
+        logger.info(logPrefix + "结束");
+        return response;
+	}
 	
 }

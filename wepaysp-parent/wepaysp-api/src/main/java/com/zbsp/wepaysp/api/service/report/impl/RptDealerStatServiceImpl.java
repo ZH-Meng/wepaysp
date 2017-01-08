@@ -10,8 +10,13 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.ArrayUtil;
+import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.mo.paystat.v1_0.PayStatData;
+import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatRequest;
 import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatResponse;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
@@ -852,8 +857,95 @@ public class RptDealerStatServiceImpl
 
 	@Override
 	public QueryPayStatResponse doJoinTransQueryPayStat4DealerE(String dealerEmployeeOid, Map<String, Object> paramMap) throws IllegalArgumentException {
+		Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerEmployeeOid不能为空");
+		Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
+        Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        int queryType = MapUtils.getIntValue(paramMap, "queryType", 0);
+        
+        Validator.checkArgument(!Validator.contains(QueryPayStatRequest.QueryType.class, queryType), "查询方式无效");
+        Validator.checkArgument(beginTime == null, "开始时间不能为空");
+        Validator.checkArgument(endTime == null, "结束时间不能为空");
+        
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
+        sqlMap.put("BEGINTIME", beginTime);
+        sqlMap.put("ENDTIME", endTime);
+        
+        List<PayStatData> payStatList = new ArrayList<PayStatData>();
+        
+        List<?> queryStatList = null;
+        if (queryType == QueryPayStatRequest.QueryType.ON_DUTY_STAT.getValue()) {// 当班查看当天的
+            
+        	queryStatList  = commonDAO.findObjectListByNamedQuery(dealerEmployeeStatDayQueyName, sqlMap);
 
-		return null;
+            if (queryStatList != null && !queryStatList.isEmpty()) {
+                for (Object o : queryStatList) {
+                    RptDealerStatVO vo = new RptDealerStatVO();
+                    
+                    Object[] oArr = (Object[]) o;
+                    vo.setPayAmount(ArrayUtil.getBigDecimal(oArr, 0, 0).longValue());
+                    vo.setPayMoney(ArrayUtil.getBigDecimal(oArr, 1, 0).longValue());
+                    vo.setRefundAmount(ArrayUtil.getBigDecimal(oArr, 2, 0).longValue());
+                    vo.setRefundMoney(ArrayUtil.getBigDecimal(oArr, 3, 0).longValue());
+                    vo.setTotalMoney(ArrayUtil.getBigDecimal(oArr, 4, 0).longValue());
+                    vo.setDealerId(StringUtils.defaultString((String) oArr[5]));
+                    vo.setDealerName(StringUtils.defaultString((String) oArr[6]));
+                    vo.setStoreId(StringUtils.defaultString((String) oArr[7]));
+                    vo.setStoreName(StringUtils.defaultString((String) oArr[8]));
+                    vo.setDealerEmployeeId(StringUtils.defaultString((String) oArr[9]));
+                    vo.setDealerEmployeeName(StringUtils.defaultString((String) oArr[10]));
+                    
+                    PayStatData statData = new PayStatData();
+                    statData.setPayType(1);// FIXME 微信支付
+                    statData.setTotalCollectionMoney(vo.getPayMoney());
+                    statData.setTotalRefundMoney(vo.getRefundMoney());
+                    statData.setTotalNetCollectionMoney(vo.getTotalMoney());
+                    statData.setTotalRefundAmount(vo.getRefundAmount());
+                    statData.setTotalTradeAmount(vo.getTotalAmount());
+                    payStatList.add(statData);
+                }
+            }
+        } else {
+        	StringBuffer sql = new StringBuffer();
+        	sql.append("select max(d.dealerId), max(d.dealerName), max(d.storeId), max(d.storeName), max(d.dealerEmployeeId), max(d.dealerEmployeeName), sum(d.totalAmount), sum(d.totalMoney), sum(d.refundAmount), sum(d.refundMoney), sum(d.payAmount), sum(d.payMoney) from RptDealerStatDay d where 1=1");
+            sql.append(" and d.dealerEmployeeOid =:DEALEREMPLOYEEOID ");
+            sql.append(" and d.startTime >=:BEGINTIME");
+            sql.append(" and d.startTime <=:ENDTIME");
+            
+            queryStatList = commonDAO.findObjectList(sql.toString(), sqlMap, false, 0, -1);
+
+            if (queryStatList != null && !queryStatList.isEmpty()) {
+                for (Object o : queryStatList) {
+                    RptDealerStatVO vo = new RptDealerStatVO();
+                    Object[] oArr = (Object[]) o;
+                    vo.setDealerId(String.valueOf(oArr[0]));
+                    vo.setDealerName(String.valueOf(oArr[1]));
+                    vo.setStoreId(String.valueOf(oArr[2]));
+                    vo.setStoreName(String.valueOf(oArr[3]));
+                    vo.setDealerEmployeeId(String.valueOf(oArr[4]));
+                    vo.setDealerEmployeeName(String.valueOf(oArr[5]));
+                    vo.setTotalAmount(ArrayUtil.getLong(oArr, 6, 0));
+                    vo.setTotalMoney(ArrayUtil.getLong(oArr, 7, 0));
+                    vo.setRefundAmount(ArrayUtil.getLong(oArr, 8, 0));
+                    vo.setRefundMoney(ArrayUtil.getLong(oArr, 9, 0));
+                    vo.setPayAmount(ArrayUtil.getLong(oArr, 10, 0));
+                    vo.setPayMoney(ArrayUtil.getLong(oArr, 11, 0));
+                    
+                    PayStatData statData = new PayStatData();
+                    statData.setPayType(1);// FIXME 微信支付
+                    statData.setTotalCollectionMoney(vo.getPayMoney());
+                    statData.setTotalRefundMoney(vo.getRefundMoney());
+                    statData.setTotalNetCollectionMoney(vo.getTotalMoney());
+                    statData.setTotalRefundAmount(vo.getRefundAmount());
+                    statData.setTotalTradeAmount(vo.getTotalAmount());
+                    payStatList.add(statData);
+                }
+            }
+        }
+        
+        QueryPayStatResponse response = new QueryPayStatResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), Generator.generateIwoid());
+        response.setPayStatListJSON(JSONUtil.toJSONString(payStatList, true));
+        return response;
 	}
 
     public void setDealerStatDayQueyName(String dealerStatDayQueyName) {

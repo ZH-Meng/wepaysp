@@ -18,22 +18,22 @@ public class PayStatData {
 	private long totalNetCollectionMoney;
 	
 	/**交易笔数*/
-	private long totalTradeCount;
+	private long totalTradeAmount;
 	
 	/**退款笔数*/
-	private long totalRefundCount;
+	private long totalRefundAmount;
 	
 	public PayStatData() {
 	}
-	
-	public PayStatData(int payType, long totalCollectionMoney, long totalRefundMoney, long totalNetCollectionMoney, long totalTradeCount, long totalRefundCount) {
+
+	public PayStatData(int payType, long totalCollectionMoney, long totalRefundMoney, long totalNetCollectionMoney, long totalTradeAmount, long totalRefundAmount) {
 		super();
 		this.payType = payType;
 		this.totalCollectionMoney = totalCollectionMoney;
 		this.totalRefundMoney = totalRefundMoney;
 		this.totalNetCollectionMoney = totalNetCollectionMoney;
-		this.totalTradeCount = totalTradeCount;
-		this.totalRefundCount = totalRefundCount;
+		this.totalTradeAmount = totalTradeAmount;
+		this.totalRefundAmount = totalRefundAmount;
 	}
 
 	public int getPayType() {
@@ -68,20 +68,20 @@ public class PayStatData {
 		this.totalNetCollectionMoney = totalNetCollectionMoney;
 	}
 
-	public long getTotalTradeCount() {
-		return totalTradeCount;
+	public long getTotalTradeAmount() {
+		return totalTradeAmount;
 	}
 
-	public void setTotalTradeCount(long totalTradeCount) {
-		this.totalTradeCount = totalTradeCount;
+	public void setTotalTradeAmount(long totalTradeAmount) {
+		this.totalTradeAmount = totalTradeAmount;
 	}
 
-	public long getTotalRefundCount() {
-		return totalRefundCount;
+	public long getTotalRefundAmount() {
+		return totalRefundAmount;
 	}
 
-	public void setTotalRefundCount(long totalRefundCount) {
-		this.totalRefundCount = totalRefundCount;
+	public void setTotalRefundAmount(long totalRefundAmount) {
+		this.totalRefundAmount = totalRefundAmount;
 	}
 	
 }

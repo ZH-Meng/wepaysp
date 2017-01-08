@@ -49,7 +49,7 @@ public class QueryPayDetailResponse extends MobileResponse {
 
     @Override
 	public String toString() {
-		return "QueryPayDetailResponse [totalMoney=" + totalMoney + ", totalAmount=" + totalAmount + ", payDetailListJSON=" + payDetailListJSON + "]";
+		return "QueryPayDetailResponse [totalMoney=" + totalMoney + ", totalAmount=" + totalAmount + ", payDetailListJSON=" + payDetailListJSON + ", " + super.toString() + " ]";
 	}
 
 	@Override

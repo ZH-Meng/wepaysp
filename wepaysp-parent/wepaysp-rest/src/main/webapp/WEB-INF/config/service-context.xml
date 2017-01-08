@@ -92,4 +92,8 @@
 	<bean id="appManageService" class="com.zbsp.wepaysp.api.service.app.impl.AppManageServiceImpl" parent="baseService">
 	</bean>
 	
+	<bean id="payDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.PayDetailsServiceImpl" parent="baseService">
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+	</bean>
+	
 </beans>

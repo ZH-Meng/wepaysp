@@ -17,10 +17,17 @@ public class QueryPayStatResponse extends MobileResponse {
 		super(result, message, responseId);
 	}
 
+    public String getPayStatListJSON() {
+		return payStatListJSON;
+	}
 
-    @Override
+	public void setPayStatListJSON(String payStatListJSON) {
+		this.payStatListJSON = payStatListJSON;
+	}
+
+	@Override
 	public String toString() {
-		return "QueryPayDetailResponse [payStatListJSON=" + payStatListJSON + "]";
+		return "QueryPayDetailResponse [payStatListJSON=" + payStatListJSON + ", " + super.toString() + " ]";
 	}
 
 	@Override
