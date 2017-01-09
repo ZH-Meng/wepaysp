@@ -20,7 +20,7 @@ public class ScanPayResponse extends MobileResponse {
 	/**实收金额，单位：分*/
 	private long collectionMoney;
 	
-	/**交易时间 yyyy-MM-dd HH:mm:ss*/
+	/**交易时间 yyyy/MM/dd HH:mm:ss*/
 	private String transTime;
 	
     public ScanPayResponse() {}

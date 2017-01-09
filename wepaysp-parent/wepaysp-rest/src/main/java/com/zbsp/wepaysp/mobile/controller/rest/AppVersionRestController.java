@@ -12,6 +12,7 @@ import com.zbsp.wepaysp.api.service.app.AppManageService;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.mo.base.MobileRequest;
 import com.zbsp.wepaysp.mo.version.v1_0.CheckVersionResponse;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
@@ -36,6 +37,8 @@ public class AppVersionRestController extends BaseController {
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
             response = new CheckVersionResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+        } else if (!Validator.contains(MobileRequest.AppType.class, request.getAppType())) {
+            response = new CheckVersionResponse(CommonResult.INVALID_APPTYPE.getCode(), CommonResult.INVALID_APPTYPE.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getRequestId())) {
             response = new CheckVersionResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {

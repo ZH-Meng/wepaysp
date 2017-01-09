@@ -16,11 +16,11 @@ public class MobileRequest {
 
     public static enum AppType {
         /** 客户端类型：IOS */
-        ios(0),
+        ios(1),
         /** 客户端类型：Android */
-        android(1),
+        android(2),
         /** 客户端类型：PC */
-        pc(2);
+        pc(3);
 
         private int value;
 

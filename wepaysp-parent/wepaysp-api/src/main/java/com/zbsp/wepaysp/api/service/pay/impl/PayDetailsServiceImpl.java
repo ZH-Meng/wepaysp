@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
@@ -116,7 +117,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
                 data.setOutTradeNo(weixinPayDetails.getOutTradeNo());
                 data.setPayType(Integer.valueOf(weixinPayDetails.getPayType()));
                 data.setTradeStatus(weixinPayDetails.getTradeStatus());
-                data.setTransTime(DateUtil.getDate(weixinPayDetails.getTransBeginTime(), "yyyy-MM-dd HH:mm:ss"));
+                data.setTransTime(DateUtil.getDate(weixinPayDetails.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                 data.setCollectionMoney(weixinPayDetails.getTotalFee());// 实收金额 = 总金额
                 data.setRefundMoney(weixinPayDetails.getRefundFee() == null ? 0L : weixinPayDetails.getRefundFee());
                 payDetailList.add(data);
@@ -153,7 +154,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 				response.setPayType(Integer.valueOf(payDetailVO.getPayType()));
 				response.setTransactionId(payDetailVO.getTransactionId());
 				response.setTradeStatus(payDetailVO.getTradeStatus());
-				response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), "yyyy/MM/dd HH:mm:ss"));
+				response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
 				response.setPayBank(payDetailVO.getBankType());
 			}
 		} else if (6 <= payType && payType <= 10) {// 支付宝支付

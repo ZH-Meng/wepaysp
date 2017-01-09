@@ -22,4 +22,10 @@ public class SysEnvKey {
     public static final String WX_OPEN_ID = "wx_open_id";
     public static final String WX_CODE = "wx_code";
     
+    /** 时间格式：yyyy/MM/dd HH:mm:ss */
+    public static final String TIME_PATTERN_YMD_SLASH_HMS_COLON  = "yyyy/MM/dd HH:mm:ss";
+    
+    /** 时间格式：yyyy-MM-dd HH:mm:ss */
+    public static final String TIME_PATTERN_YMD_HYPHEN_HMS_COLON  = "yyyy-MM-dd HH:mm:ss";
+    
 }

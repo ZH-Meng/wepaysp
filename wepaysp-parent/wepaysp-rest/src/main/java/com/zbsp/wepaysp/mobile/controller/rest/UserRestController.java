@@ -12,6 +12,8 @@ import com.zbsp.wepaysp.api.service.manage.SysUserService;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.DigestHelper;
 import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.mo.base.MobileRequest;
 import com.zbsp.wepaysp.mo.base.MobileResponse;
 import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginRequest;
 import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginResponse;
@@ -39,6 +41,8 @@ public class UserRestController
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
             response = new UserLoginResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+        } else if (!Validator.contains(MobileRequest.AppType.class, request.getAppType())) {
+            response = new UserLoginResponse(CommonResult.INVALID_APPTYPE.getCode(), CommonResult.INVALID_APPTYPE.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getPasswd()) || StringUtils.isBlank(request.getRequestId())) {
             response = new UserLoginResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
@@ -77,6 +81,8 @@ public class UserRestController
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
             response = new MobileResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+        } else if (!Validator.contains(MobileRequest.AppType.class, request.getAppType())) {
+            response = new UserLoginResponse(CommonResult.INVALID_APPTYPE.getCode(), CommonResult.INVALID_APPTYPE.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getUserId()) || StringUtils.isBlank(request.getRequestId())) {
             response = new MobileResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {

@@ -109,6 +109,9 @@ public class WeixinPayDetailsMainServiceImpl
                 logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
                     "系统支付订单(ID=" + outTradeNo + "）支付错误", "，异常信息：" + e.getMessage()));
             }
+            
+            // 查询支付结果
+            weixinPayDetailsVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailsVO.getIwoid());
         } else if (StringUtils.equals(PayType.JSAPI.getValue(), payType)) {// 公众号支付
             logger.info("开始微信公众号下单！");
             String prepayId = null;

@@ -901,7 +901,7 @@ public class RptDealerStatServiceImpl
                     statData.setTotalRefundMoney(vo.getRefundMoney());
                     statData.setTotalNetCollectionMoney(vo.getTotalMoney());
                     statData.setTotalRefundAmount(vo.getRefundAmount());
-                    statData.setTotalTradeAmount(vo.getTotalAmount());
+                    statData.setTotalTradeAmount(vo.getPayAmount());
                     payStatList.add(statData);
                 }
             }
@@ -937,7 +937,7 @@ public class RptDealerStatServiceImpl
                     statData.setTotalRefundMoney(vo.getRefundMoney());
                     statData.setTotalNetCollectionMoney(vo.getTotalMoney());
                     statData.setTotalRefundAmount(vo.getRefundAmount());
-                    statData.setTotalTradeAmount(vo.getTotalAmount());
+                    statData.setTotalTradeAmount(vo.getPayAmount());
                     payStatList.add(statData);
                 }
             }

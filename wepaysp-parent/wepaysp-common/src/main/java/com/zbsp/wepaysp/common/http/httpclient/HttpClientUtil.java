@@ -44,8 +44,11 @@ import com.zbsp.wepaysp.common.http.httpclient.builder.HCB;
  */
 public class HttpClientUtil {
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws HttpProcessException {
         System.out.println(1);
+        HttpConfig httpConfig = HttpConfig.custom(ParamType.NONE);// 参数在URL拼接完成
+        String result = HttpClientUtil.get(httpConfig.url("https://www.baidu.com").encoding("UTF-8"));
+        System.out.println(result);
     }
 
     private static final Logger LOGGER = LogManager.getLogger();

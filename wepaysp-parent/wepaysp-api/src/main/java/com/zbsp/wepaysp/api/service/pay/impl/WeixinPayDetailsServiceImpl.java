@@ -993,13 +993,11 @@ public class WeixinPayDetailsServiceImpl
 		
 		WeixinPayDetails weixinPayDetails = commonDAO.findObject(jpql.toString(), jpqlMap, false);
 		WeixinPayDetailsVO vo = null;
+		
 		if (weixinPayDetails != null) {
 			vo = new WeixinPayDetailsVO();
-			vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
-			vo.setDeviceInfo(weixinPayDetails.getDeviceInfo());
-			vo.setOutTradeNo(weixinPayDetails.getOutTradeNo());
-			vo.setTradeStatus(weixinPayDetails.getTradeStatus());
-			vo.setRefundFee(weixinPayDetails.getRefundFee());
+			BeanCopierUtil.copyProperties(weixinPayDetails, vo);
+			//vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
 			
 	        DealerEmployee de = weixinPayDetails.getDealerEmployee();
 	        vo.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
@@ -1020,12 +1018,6 @@ public class WeixinPayDetailsServiceImpl
 	        Partner p = weixinPayDetails.getPartner();
 	        vo.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
 	        vo.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
-	        
-			vo.setPayType(weixinPayDetails.getPayType());
-			vo.setTransactionId(weixinPayDetails.getTransactionId());
-			vo.setTotalFee(weixinPayDetails.getTotalFee());
-			vo.setResultCode(weixinPayDetails.getResultCode());
-			vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
 		}
 		
 		return vo;

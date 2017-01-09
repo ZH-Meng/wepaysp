@@ -20,7 +20,7 @@ public class PayDetailData {
 	/**退款金额，单位：分*/
 	private long refundMoney;
 	
-	/**交易时间 yyyy-MM-dd HH:mm:ss*/
+	/**交易时间 yyyy/MM/dd HH:mm:ss*/
 	private String transTime;
 	
 	public PayDetailData() {

@@ -14,8 +14,10 @@ import com.zbsp.wepaysp.api.service.report.RptDealerStatService;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.mo.base.MobileRequest;
 import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatRequest;
 import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatResponse;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
@@ -41,6 +43,8 @@ public class PayStatRestController extends BaseController {
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
             response = new QueryPayStatResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+        } else if (!Validator.contains(MobileRequest.AppType.class, request.getAppType())) {
+            response = new QueryPayStatResponse(CommonResult.INVALID_APPTYPE.getCode(), CommonResult.INVALID_APPTYPE.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getRequestId()) || StringUtils.isBlank(request.getDealerEmployeeOid())) {
             response = new QueryPayStatResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else if (!Validator.contains(QueryPayStatRequest.QueryType.class, request.getQueryType())) {
@@ -50,8 +54,8 @@ public class PayStatRestController extends BaseController {
         } else {
             try {
                 Map<String, Object> paramMap = new HashMap<String, Object>();
-                paramMap.put("beginTime", DateUtil.getDate(request.getBeginTime(), "yyyy-MM-dd HH:mm:ss"));
-                paramMap.put("endTime", DateUtil.getDate(request.getEndTime(), "yyyy-MM-dd HH:mm:ss"));
+                paramMap.put("beginTime", DateUtil.getDate(request.getBeginTime(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
+                paramMap.put("endTime", DateUtil.getDate(request.getEndTime(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
                 paramMap.put("queryType", request.getQueryType());
 
                 response = rptDealerStatService.doJoinTransQueryPayStat4DealerE(request.getDealerEmployeeOid(), paramMap);
