@@ -1,6 +1,6 @@
 package com.zbsp.wepaysp.po.pay;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -65,14 +65,14 @@ public class WeixinRefundDetails
     private String couponRefundBatchId;
     private String couponRefundId;
     private Integer couponRefundFeeSingle;
-    private Timestamp transBeginTime;
-    private Timestamp transEndTime;
-    private Timestamp endTime;
+    private Date transBeginTime;
+    private Date transEndTime;
+    private Date endTime;
     private Integer tradeStatus;
     private String creator;
-    private Timestamp createTime;
+    private Date createTime;
     private String modifier;
-    private Timestamp modifyTime;
+    private Date modifyTime;
     private String remark;
 
     public WeixinRefundDetails() {
@@ -454,29 +454,29 @@ public class WeixinRefundDetails
     }
 
     @Column(name = "TRANS_BEGIN_TIME", nullable = false, length = 0)
-    public Timestamp getTransBeginTime() {
+    public Date getTransBeginTime() {
         return this.transBeginTime;
     }
 
-    public void setTransBeginTime(Timestamp transBeginTime) {
+    public void setTransBeginTime(Date transBeginTime) {
         this.transBeginTime = transBeginTime;
     }
     
     @Column(name = "TRANS_END_TIME", length = 0)
-    public Timestamp getTransEndTime() {
+    public Date getTransEndTime() {
         return this.transEndTime;
     }
 
-    public void setTransEndTime(Timestamp transEndTime) {
+    public void setTransEndTime(Date transEndTime) {
         this.transEndTime = transEndTime;
     }
     
     @Column(name = "END_TIME", length = 0)
-    public Timestamp getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
     
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
     
@@ -499,11 +499,11 @@ public class WeixinRefundDetails
     }
 
     @Column(name = "CREATE_TIME", nullable = false, length = 0)
-    public Timestamp getCreateTime() {
+    public Date getCreateTime() {
         return this.createTime;
     }
 
-    public void setCreateTime(Timestamp createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
@@ -517,11 +517,11 @@ public class WeixinRefundDetails
     }
 
     @Column(name = "MODIFY_TIME", length = 0)
-    public Timestamp getModifyTime() {
+    public Date getModifyTime() {
         return this.modifyTime;
     }
 
-    public void setModifyTime(Timestamp modifyTime) {
+    public void setModifyTime(Date modifyTime) {
         this.modifyTime = modifyTime;
     }
 

@@ -20,6 +20,10 @@ import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
+import com.zbsp.wepaysp.common.config.SysSequenceCode;
+import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.util.Generator;
+import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
@@ -272,7 +276,39 @@ public class WeixinRefundDetailsServiceImpl
 	@Override
 	public WeixinRefundDetailsVO doTransCreateRefundDetails(WeixinPayDetails weixinPayDetails, String creator,
 			String operatorUserOid, String logFunctionOid) {
-		// TODO Auto-generated method stub
+        Validator.checkArgument(weixinPayDetails == null, "weixinPayDetails不能为空");
+        Validator.checkArgument(StringUtils.isBlank(weixinPayDetails.getIwoid()), "weixinPayDetails.iwoid不能为空");
+
+        WeixinRefundDetails refundDetail = new WeixinRefundDetails();
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        // 获取 服务商员工ID下一个序列值
+        String sql = "select nextval('" + SysSequenceCode.PAY_ORDER + "') as sequence_value";
+        Object seqObj = commonDAO.findObject(sql, sqlMap, true);
+        if (seqObj == null) {
+            throw new IllegalArgumentException("支付订单Id对应序列记录不存在");
+        }
+        refundDetail.setOutTradeNo(Generator.generateSequenceYYYYMMddNum((Integer) seqObj, SysSequenceMultiple.PAY_ORDER));// 商户订单号
+
+        /*--------系统服务商、业务员、商户、门店、收银员-------*/
+        refundDetail.setWeixinPayDetailsOid(weixinPayDetails.getIwoid());
+        refundDetail.setPartner1Oid(weixinPayDetails.getPartner1Oid());
+        refundDetail.setPartner2Oid(weixinPayDetails.getPartner2Oid());
+        refundDetail.setPartner3Oid(weixinPayDetails.getPartner3Oid());
+        refundDetail.setPartnerLevel(weixinPayDetails.getPartnerLevel());
+        refundDetail.setPartner(weixinPayDetails.getPartner());
+        refundDetail.setDealer(weixinPayDetails.getDealer());
+        refundDetail.setStore(weixinPayDetails.getStore());
+        refundDetail.setDealerEmployee(weixinPayDetails.getDealerEmployee());
+        refundDetail.setTradeStatus(TradeStatus.TRADEING.getValue());
+        refundDetail.setTransBeginTime(new Date());
+        refundDetail.setCreator(creator);
+
+        refundDetail.setIwoid(Generator.generateIwoid());
+        refundDetail.setAppid(weixinPayDetails.getAppid());
+        refundDetail.setMchId(weixinPayDetails.getMchId());
+        refundDetail.setSubMchId(weixinPayDetails.getSubMchId());
+
+        refundDetail.setDeviceInfo(weixinPayDetails.getDeviceInfo());
 		return null;
 	}
 

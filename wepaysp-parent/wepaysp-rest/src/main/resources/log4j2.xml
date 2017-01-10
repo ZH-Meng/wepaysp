@@ -41,7 +41,7 @@
 	</appenders>
 	<loggers>
 		<!-- Root Logger -->
-		<AsyncRoot level="DEBUG" includeLocation="true">
+		<AsyncRoot level="INFO" includeLocation="true">
 			<AppenderRef ref="Console"/>
 			<AppenderRef ref="AllFile"/>
 		</AsyncRoot>

@@ -102,7 +102,7 @@ public class PayDetailRestController extends BaseController {
 	
 	@RequestMapping(value = "print", method = RequestMethod.POST)
 	@ResponseBody
-    public QueryPrintPayDetailResponse query(@RequestBody QueryPrintPayDetailRequest request) {
+    public QueryPrintPayDetailResponse printQuery(@RequestBody QueryPrintPayDetailRequest request) {
 		String logPrefix = "处理查询打印支付明细请求 - ";
 		if (DEV_FLAG) {// 开发阶段：模拟设置sign
             request.build(KEY);
