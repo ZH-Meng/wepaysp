@@ -29,6 +29,11 @@ import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
+/**
+ * 被扫支付（微信刷卡支付/支付宝当面付-条码支付）、退款控制器
+ * 
+ * @author 孟郑宏
+ */
 @RestController
 @RequestMapping("/pay/v1")
 public class ScanPayController extends BaseController {
@@ -47,7 +52,7 @@ public class ScanPayController extends BaseController {
         }
 
         logger.info(logPrefix + "开始");
-        logger.debug("request Data is {}", request.toString());
+        logger.info("request Data is {}", request.toString());
         ScanPayResponse response = null;
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
@@ -92,19 +97,22 @@ public class ScanPayController extends BaseController {
                     response.setTradeStatus(payDetailsVO.getTradeStatus());
                     response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                 } else if (request.getAuthCode().startsWith("28")) {// 支付宝-当面付-条码支付
+                    logger.warn(logPrefix + "警告：{}, 授权码：{}", "发现支付宝支付请求", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
                 } else {
+                    logger.warn(logPrefix + "警告：{}, 授权码：{}", "发现不能识别的支付请求", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
                 }
             } catch (IllegalArgumentException e) {
+                logger.warn(logPrefix + "警告：{}", e.getMessage());
                 response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
             } catch (Exception e) {
-            	logger.info(logPrefix + "异常：{}", e.getMessage(), e);
+            	logger.error(logPrefix + "异常：{}", e.getMessage(), e);
                 response = new ScanPayResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
             }
         }
         response = response.build(KEY);
-        logger.debug("response Data is {}", response.toString());
+        logger.info("response Data is {}", response.toString());
         logger.info(logPrefix + "结束");
         return response;
     }
@@ -118,7 +126,7 @@ public class ScanPayController extends BaseController {
         }
 
         logger.info(logPrefix + "开始");
-        logger.debug("request Data is {}", request.toString());
+        logger.info("request Data is {}", request.toString());
         ScanPayResponse response = null;
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
@@ -129,17 +137,17 @@ public class ScanPayController extends BaseController {
             response = new ScanPayResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
             try {
-                // 根据AuthCode 判断微信或者支付宝支付
-                // 微信刷卡授权码以13开头，例：130772863047391648
+                
             } catch (IllegalArgumentException e) {
+                logger.warn(logPrefix + "警告：{}", e.getMessage());
                 response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
             } catch (Exception e) {
-                logger.info(logPrefix + "异常：{}", e.getMessage(), e);
+                logger.error(logPrefix + "异常：{}", e.getMessage(), e);
                 response = new ScanPayResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
             }
         }
         response = response.build(KEY);
-        logger.debug("response Data is {}", response.toString());
+        logger.info("response Data is {}", response.toString());
         logger.info(logPrefix + "结束");
         return response;
     }

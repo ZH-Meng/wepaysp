@@ -20,6 +20,11 @@ import com.zbsp.wepaysp.mo.userlogin.v1_0.UserLoginResponse;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 
+/**
+ * 用户（收银台->收银员）登录、退出、修改登录密码、修改退款密码控制器
+ * 
+ * @author 孟郑宏
+ */
 @RestController
 @RequestMapping("/user/v1")
 public class UserRestController
@@ -31,12 +36,13 @@ public class UserRestController
     @RequestMapping(value = "login", method = RequestMethod.POST)
     @ResponseBody
     public UserLoginResponse login(@RequestBody UserLoginRequest request) {
+        String logPrefix = "处理用户登陆请求 - ";
         if (DEV_FLAG) {// 开发阶段：模拟设置sign
             request.build(KEY);
         }
 
-        logger.info("处理用户登陆请求 - 开始");
-        logger.debug("request Data is {}", request.toString());
+        logger.info(logPrefix + "开始");
+        logger.info("request Data is {}", request.toString());
         UserLoginResponse response = null;
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
@@ -49,11 +55,10 @@ public class UserRestController
             try {
                 response = sysUserService.doTransUserLogin4Client(request.getUserId(), DigestHelper.sha512Hex(request.getPasswd()));
             } catch (IllegalArgumentException e) {
-                logger.warn("用户登陆失败：" + e.getMessage());
+                logger.warn(logPrefix + "警告：{}", e.getMessage());
                 response = new UserLoginResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
             } catch (Exception e) {
-                logger.error("处理用户登陆请求 - 错误");
-                logger.error(e.getMessage(), e);
+                logger.error(logPrefix + "异常：{}", e.getMessage(), e);
                 response = new UserLoginResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
             }
         }
@@ -63,20 +68,21 @@ public class UserRestController
             logger.info("用户( {} )登陆 - 失败，原因：{}", request.getUserId(), response.getMessage());
         }
         response = response.build(KEY);
-        logger.debug("response Data is {}", response.toString());
-        logger.info("处理用户登陆请求 - 结束");
+        logger.info("response Data is {}", response.toString());
+        logger.info(logPrefix + "结束");
         return response;
     }
 
     @RequestMapping(value = "logout", method = RequestMethod.POST)
     @ResponseBody
     public MobileResponse logout(@RequestBody UserLoginRequest request) {
+        String logPrefix = "处理用户登陆请求 - ";
         if (DEV_FLAG) {// 开发阶段：模拟设置sign
             request.build(KEY);
         }
 
-        logger.info("处理用户登出请求 - 开始");
-        logger.debug("request Data is {}", request.toString());
+        logger.info(logPrefix + "开始");
+        logger.info("request Data is {}", request.toString());
         MobileResponse response = null;
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
@@ -90,8 +96,8 @@ public class UserRestController
             logger.info("用户( {} )登出 - 成功", request.getUserId());
         }
         response = response.build(KEY);
-        logger.debug("response Data is {}", response.toString());
-        logger.info("处理用户登出请求 - 结束");
+        logger.info("response Data is {}", response.toString());
+        logger.info(logPrefix + "结束");
         return response;
     }
 

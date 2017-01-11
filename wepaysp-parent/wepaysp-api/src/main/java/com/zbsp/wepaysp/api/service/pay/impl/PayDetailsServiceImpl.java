@@ -15,6 +15,7 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.constant.WxPayBank;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
@@ -148,14 +149,20 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 				response.setDealerCompany(payDetailVO.getDealerEmployeeName());
 				response.setDealerId(payDetailVO.getDealerId());
 				response.setDealerEmployeeId(payDetailVO.getDealerEmployeeId());
-				response.setDeviceId(payDetailVO.getDeviceInfo());//FIXME
+				response.setDeviceId(payDetailVO.getDeviceInfo());// FIXME
 				response.setMoney(payDetailVO.getTotalFee());
 				response.setOutTradeNo(payDetailVO.getOutTradeNo());
 				response.setPayType(Integer.valueOf(payDetailVO.getPayType()));
 				response.setTransactionId(payDetailVO.getTransactionId());
 				response.setTradeStatus(payDetailVO.getTradeStatus());
 				response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
-				response.setPayBank(payDetailVO.getBankType());
+				try {
+				    //if (Validator.contains(WxPayBank.class, payDetailVO.getBankType())) {
+				    //} else {}
+				    response.setPayBank(WxPayBank.valueOf(payDetailVO.getBankType()).getName());
+                } catch (Exception e) {
+                    response.setPayBank(payDetailVO.getBankType());
+		        }
 			}
 		} else if (6 <= payType && payType <= 10) {// 支付宝支付
 			response = new QueryPrintPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), Generator.generateIwoid());

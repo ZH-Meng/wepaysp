@@ -22,6 +22,11 @@ import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 
+/**
+ * 支付统计结算查询控制器
+ * 
+ * @author 孟郑宏
+ */
 @RestController
 @RequestMapping("/paystat/v1")
 public class PayStatRestController extends BaseController {
@@ -38,7 +43,7 @@ public class PayStatRestController extends BaseController {
         }
 
 		logger.info(logPrefix + "开始");
-        logger.debug("request Data is {}", request.toString());
+        logger.info("request Data is {}", request.toString());
         QueryPayStatResponse response = null;
         String responseId = Generator.generateIwoid();
         if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
@@ -62,6 +67,7 @@ public class PayStatRestController extends BaseController {
                 
                 logger.info(logPrefix + "成功");
             } catch (IllegalArgumentException e) {
+                logger.warn(logPrefix + "警告：{}", e.getMessage());
                 response = new QueryPayStatResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
             } catch (Exception e) {
                 logger.error(logPrefix + "异常：{}", e.getMessage(), e);
@@ -69,7 +75,7 @@ public class PayStatRestController extends BaseController {
             }
         }
         response = response.build(KEY);
-        logger.debug("response Data is {}", response.toString());
+        logger.info("response Data is {}", response.toString());
         logger.info(logPrefix + "结束");
         return response;
     }

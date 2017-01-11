@@ -6,7 +6,7 @@ package com.zbsp.wepaysp.mo.paystat.v1_0;
 public class PayStatData {
 	
 	/**支付方式*/
-	private int payType;
+	private String payType;
 	
 	/**收款总金额，单位：分*/
 	private long totalCollectionMoney;
@@ -26,7 +26,7 @@ public class PayStatData {
 	public PayStatData() {
 	}
 
-	public PayStatData(int payType, long totalCollectionMoney, long totalRefundMoney, long totalNetCollectionMoney, long totalTradeAmount, long totalRefundAmount) {
+	public PayStatData(String payType, long totalCollectionMoney, long totalRefundMoney, long totalNetCollectionMoney, long totalTradeAmount, long totalRefundAmount) {
 		super();
 		this.payType = payType;
 		this.totalCollectionMoney = totalCollectionMoney;
@@ -36,11 +36,11 @@ public class PayStatData {
 		this.totalRefundAmount = totalRefundAmount;
 	}
 
-	public int getPayType() {
+	public String getPayType() {
 		return payType;
 	}
 
-	public void setPayType(int payType) {
+	public void setPayType(String payType) {
 		this.payType = payType;
 	}
 

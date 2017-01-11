@@ -896,7 +896,7 @@ public class RptDealerStatServiceImpl
                     vo.setDealerEmployeeName(StringUtils.defaultString((String) oArr[10]));
                     
                     PayStatData statData = new PayStatData();
-                    statData.setPayType(1);// FIXME 微信支付
+                    statData.setPayType("微信支付");// FIXME
                     statData.setTotalCollectionMoney(vo.getPayMoney());
                     statData.setTotalRefundMoney(vo.getRefundMoney());
                     statData.setTotalNetCollectionMoney(vo.getTotalMoney());
@@ -932,7 +932,7 @@ public class RptDealerStatServiceImpl
                     vo.setPayMoney(ArrayUtil.getLong(oArr, 11, 0));
                     
                     PayStatData statData = new PayStatData();
-                    statData.setPayType(1);// FIXME 微信支付
+                    statData.setPayType("微信支付"); 
                     statData.setTotalCollectionMoney(vo.getPayMoney());
                     statData.setTotalRefundMoney(vo.getRefundMoney());
                     statData.setTotalNetCollectionMoney(vo.getTotalMoney());
