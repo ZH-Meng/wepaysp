@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>绑定结果</title>
+		<title>支付通知绑定结果</title>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
@@ -58,7 +58,7 @@
 				</p>		
 				<div class="succ-info">
 					<div class="error-bottom">
-						<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+						<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 					</div>			
 					<p class="info2">${bindResult.desc }</p>
 				</div>
@@ -69,7 +69,7 @@
 				</p>		
 				<div class="succ-info">
 					<div class="error-bottom">
-						<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+						<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 					</div>			
 					<p class="info2">绑定失败请重试</p>
 				</div>

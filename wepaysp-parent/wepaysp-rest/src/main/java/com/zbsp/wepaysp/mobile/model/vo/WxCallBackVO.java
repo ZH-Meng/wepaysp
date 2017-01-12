@@ -11,8 +11,11 @@ public class WxCallBackVO {
     private String dealerOid;
     private String storeOid;
     private String dealerEmployeeOid;
+    
+    /** 授权回调回传-用户同意才有值*/
     private String code;
     // private String state;
+    
     /** 用户在公众号的标识 */
     private String openid;
 

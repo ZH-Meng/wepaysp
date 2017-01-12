@@ -8,9 +8,9 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<c:if test="payClient != 1">
-			<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/weui.min.css"/>
-			<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/font/iconfont.css"/>
-			<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/main.css"/>
+			<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
+			<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
+			<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
 		</c:if>
 		<title>安全支付</title>
 		<script type="text/javascript">
@@ -33,7 +33,7 @@
 		<c:when test="${payClient == 2}">
 			<div class="succ-info">
 				<div class="error-bottom">
-					<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 				</div>			
 				<p class="info2">支付宝支付正在研发中，敬请期待!</p>
 			</div>
@@ -41,7 +41,7 @@
 		<c:otherwise>   
 			<div class="succ-info">
 				<div class="error-bottom">
-					<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 				</div>			
 				<p class="info2">请使用微信支付！</p>
 			</div>

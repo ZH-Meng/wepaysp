@@ -36,6 +36,7 @@ import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
+import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
@@ -69,7 +70,7 @@ public class AppIDPayController extends BaseController {
     @SuppressWarnings("finally")
     @RequestMapping(value="wxCallBack", method=RequestMethod.GET)
     public ModelAndView wxCallBack(WxCallBackVO callBackVO) {
-        String logPrefix = "处理微信网页授权回调请求 - ";
+        String logPrefix = "处理微信扫码公众号下单网页授权回调请求 - ";
         logger.info(logPrefix + "开始");
         ModelAndView modelAndView = null;
         
@@ -78,7 +79,7 @@ public class AppIDPayController extends BaseController {
         boolean checkFlag = false;
         try {
             // 检查参数
-            Map<String, Object> checkResultMap = checkCallBackParam(callBackVO);
+            Map<String, Object> checkResultMap = checkScanCreateOrderCallBackParam(callBackVO);
             
             if (!MapUtils.getBooleanValue(checkResultMap, "result", false)) {
                 modelAndView = new ModelAndView("accessDeniedH5", "errResult", MapUtils.getObject(checkResultMap, "errResult"));
@@ -86,8 +87,8 @@ public class AppIDPayController extends BaseController {
                 // 从内存中获取服务商配置信息
                 partnerMap = SysConfig.partnerConfigMap.get(callBackVO.getPartnerOid());
                 if (partnerMap == null || partnerMap.isEmpty()) {
-                    logger.error(logPrefix + "参数检查 - 失败：{}, partnerOid：{}", "微信支付通知绑定微信账户微信回调访问的服务商不存在", callBackVO.getPartnerOid());
-                    modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()));
+                    logger.error(logPrefix + "参数检查 - 失败：{}, partnerOid：{}", "服务商不存在", callBackVO.getPartnerOid());
+                    modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc() + "(partner)"));
                 } else {
                     checkFlag = true;
                 }
@@ -104,9 +105,8 @@ public class AppIDPayController extends BaseController {
         }
         
         
+        logger.info(logPrefix + "获取网页授权access_token 和 openid - 开始");
         try {
-            logger.info(logPrefix + "获取网页授权access_token 和 openid - 开始");
-            
             // 通过code换取网页授权access_token 和 openid
             GetAuthAccessTokenReqData authReqData = new GetAuthAccessTokenReqData(GrantType.AUTHORIZATION_CODE.getValue(), 
                 MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID), MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET), callBackVO.getCode(), null);
@@ -119,7 +119,7 @@ public class AppIDPayController extends BaseController {
             logger.info(logPrefix + "获取网页授权access_token 和 openid，response Data : {}", authResult.toString());
             
             // 校验获取access_token
-            if (checkAccessTokenResult(authResult)) {
+            if (WeixinUtil.checkAuthAccessTokenResult(authResult)) {
                 logger.info(logPrefix + "获取网页授权access_token 和 openid - 成功, auth_access_token：{}, expires_in：{} " + "auth_access_token：{}, openid：{}", authResult.getAccess_token(), authResult.getExpires_in(), authResult.getOpenid());
             	// 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
                 callBackVO.setOpenid(authResult.getOpenid());
@@ -137,7 +137,7 @@ public class AppIDPayController extends BaseController {
                 modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ACCESS_TOKEN_FAIL.getCode(), H5CommonResult.ACCESS_TOKEN_FAIL.getDesc()));
             }
         } catch (Exception e) {
-            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), "获取网页授权access_token 和 openid - 异常：{}"), e.getMessage(), e);
+            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), logPrefix, "获取网页授权access_token 和 openid - 异常：{}"), e.getMessage(), e);
             modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.SYS_ERROR.getCode(), H5CommonResult.SYS_ERROR.getDesc()));
         } finally {
             logger.info(logPrefix + "结束");
@@ -279,22 +279,22 @@ public class AppIDPayController extends BaseController {
     }
     
     /**
-     * 检查微信网页授权回调的系统URL中参数是否完整和正确
+     * 检查微信扫码下单时微信网页授权回调的系统URL中参数是否完整和正确
      * 
      * @return
      */
-    private Map<String, Object> checkCallBackParam(WxCallBackVO callBack) {
+    private Map<String, Object> checkScanCreateOrderCallBackParam(WxCallBackVO callBack) {
         Map<String, Object> checkResutMap = new HashMap<String, Object>();
         boolean result = false;
         if (callBack == null) {
             logger.error("微信网页授权回调 - 参数检查 - 失败：{}", "callBack is null");
-            checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()));
+            checkResutMap.put("errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc()));
         } else if (StringUtils.isBlank(callBack.getCode())) {
             logger.warn("微信网页授权回调 - 参数检查 - 失败：{}", "用户访问公众号，选择禁止授权.");
             // 因为scope 选择snsapi_base，不弹出授权页面，直接跳转，所以暂不处理此情况
-            checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()));
+            checkResutMap.put("errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc() + "(网页授权失败)"));
         } else if (StringUtils.isBlank(callBack.getPartnerOid()) || StringUtils.isBlank(callBack.getDealerOid())) {// 校验商户等参数
-            logger.warn("微信网页授权回调 - 参数检查 - 失败：{}", "参数缺失：partnerOid：" + callBack.getPartnerOid() + ",dealerOid：" + callBack.getDealerOid());
+            logger.warn("微信网页授权回调 - 参数检查 - 失败：{}", "参数缺失（partnerOid：" + callBack.getPartnerOid() + ",dealerOid：" + callBack.getDealerOid() + ")");
             checkResutMap.put("errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc()));
         } else {
             // 获取并校验商户信息，回显到页面
@@ -310,26 +310,6 @@ public class AppIDPayController extends BaseController {
         }
         checkResutMap.put("result", result);
         return checkResutMap;
-    }
-    
-    /**
-     * 校验http get 获取access_token的结果
-     * 
-     * @param getAuthAccessTokenResData
-     * @return
-     */
-    private boolean checkAccessTokenResult(GetAuthAccessTokenResData getAuthAccessTokenResData) {
-        boolean result = false;
-        if (getAuthAccessTokenResData == null) {
-            logger.warn("getBaseAccessTokenResData为空");
-        } else if (StringUtils.isNotBlank(getAuthAccessTokenResData.getAccess_token()) && StringUtils.isNotBlank(getAuthAccessTokenResData.getOpenid())) {
-            result = true;
-        } else if (StringUtils.isNotBlank(getAuthAccessTokenResData.getErrcode())) {
-            result = false;
-        } else {
-            logger.warn("get auth access_token result invalid");
-        }
-        return result;
     }
 
 }

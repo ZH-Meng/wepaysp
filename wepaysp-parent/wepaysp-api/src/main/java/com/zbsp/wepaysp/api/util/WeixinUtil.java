@@ -17,6 +17,8 @@ import com.tencent.protocol.appid.base_access_token_protocol.GetBaseAccessTokenR
 import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgReqData;
 import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgResData;
 import com.tencent.protocol.appid.send_template_msg_protocol.TemplateData;
+import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
+import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
@@ -35,7 +37,7 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 public class WeixinUtil {
     
     /**日志对象*/
-    protected Logger logger = LogManager.getLogger(WeixinUtil.class);
+    protected static final Logger logger = LogManager.getLogger(WeixinUtil.class);
     
     private int refreshLimitErrorCount = 3;
     private long expire_time;
@@ -138,7 +140,7 @@ public class WeixinUtil {
 		String certPassword= MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD);
 		boolean result = false;
 		for (int i = 1; i <= refreshLimitErrorCount; i++) {
-			if (getAccessToken(appid, secret, certLocalPath, certPassword)) {
+			if (getBaseAccessToken(appid, secret, certLocalPath, certPassword)) {
 				logger.info("服务商（"+ appid  +"）获取/刷新Access_token成功");
 				result = true;
 				// 缓存access_token 和 expire_time
@@ -165,13 +167,21 @@ public class WeixinUtil {
 		return null;
     }
     
-    private boolean getAccessToken(String appid, String secret, String certLocalPath, String certPassword) {
+    /**
+     * 根据服务商信息获取基础接口access_token
+     * @param appid
+     * @param secret
+     * @param certLocalPath
+     * @param certPassword
+     * @return
+     */
+    private boolean getBaseAccessToken(String appid, String secret, String certLocalPath, String certPassword) {
         try {
             String jsonResult = WXPay.requestGetBaseAccessTokenService(new GetBaseAccessTokenReqData(appid, secret), certLocalPath, certPassword);
             // 转化JSON结果
             GetBaseAccessTokenResData accessTokenResult = JSONUtil.parseObject(jsonResult, GetBaseAccessTokenResData.class);
             // 校验获取access_token
-            if (checkAccessTokenResult(accessTokenResult)) {
+            if (checkBaseAccessTokenResult(accessTokenResult)) {
                 access_token = accessTokenResult.getAccess_token();
                 logger.info("access_token：" + accessTokenResult.getAccess_token() + "，expires_in：" + accessTokenResult.getExpires_in());
                 // 设置过期时间
@@ -190,24 +200,73 @@ public class WeixinUtil {
     }
     
     /**
-     * 校验http get 获取access_token的结果
+     * 校验http get获取基础接口access_token的结果
      * 
      * @param getBaseAccessTokenResData
      * @return
      */
-    private boolean checkAccessTokenResult(GetBaseAccessTokenResData getBaseAccessTokenResData) {
+    public static boolean checkBaseAccessTokenResult(GetBaseAccessTokenResData getBaseAccessTokenResData) {
         boolean result = false;
         if (getBaseAccessTokenResData == null) {
             logger.warn("getBaseAccessTokenResData为空");
         } else {
-            logger.debug(getBaseAccessTokenResData.toString());
+            logger.info(getBaseAccessTokenResData.toString());
+            
+            if (StringUtils.isNotBlank(getBaseAccessTokenResData.getAccess_token())) {
+                result = true;
+            } else if (StringUtils.isNotBlank(getBaseAccessTokenResData.getErrcode())) {
+                result = false;
+            } else {
+                logger.warn("get or refresh base access_token result invalid");
+            }
         }
-        if (StringUtils.isNotBlank(getBaseAccessTokenResData.getAccess_token())) {
-            result = true;
-        } else if (StringUtils.isNotBlank(getBaseAccessTokenResData.getErrcode())) {
-            result = false;
+        return result;
+    }
+    
+    /**
+     * 校验http get获取网页授权access_token的结果
+     * 
+     * @param getAuthAccessTokenResData
+     * @return
+     */
+    public static boolean checkAuthAccessTokenResult(GetAuthAccessTokenResData getAuthAccessTokenResData) {
+        boolean result = false;
+        if (getAuthAccessTokenResData == null) {
+            logger.warn("getAuthAccessTokenResData为空");
         } else {
-            logger.warn("get or refresh access_token result invalid");
+            logger.info(getAuthAccessTokenResData.toString());
+            
+            if (StringUtils.isNotBlank(getAuthAccessTokenResData.getAccess_token()) && StringUtils.isNotBlank(getAuthAccessTokenResData.getOpenid())) {
+                result = true;
+            } else if (StringUtils.isNotBlank(getAuthAccessTokenResData.getErrcode())) {
+                result = false;
+            } else {
+                logger.warn("get auth access_token result invalid");
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * 校验http get 网页授权通过后拉取用户信息的结果
+     * 
+     * @param getUserinfoResData
+     * @return
+     */
+    public static boolean checkUserinfoResult(GetUserinfoResData getUserinfoResData) {
+        boolean result = false;
+        if (getUserinfoResData == null) {
+            logger.warn("getUserinfoResData为空");
+        } else {
+            logger.info(getUserinfoResData.toString());
+            
+            if (StringUtils.isNotBlank(getUserinfoResData.getOpenid())) {
+                result = true;
+            } else if (StringUtils.isNotBlank(getUserinfoResData.getErrcode())) {
+                result = false;
+            } else {
+                logger.warn("get userinfo result invalid");
+            }
         }
         return result;
     }
