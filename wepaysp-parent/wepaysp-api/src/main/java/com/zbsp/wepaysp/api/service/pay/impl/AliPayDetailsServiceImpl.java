@@ -34,33 +34,28 @@ public class AliPayDetailsServiceImpl
     
     private SysLogService sysLogService;
 
+    public static void main(String[] args) {
+    	PayType payType = Enum.valueOf(PayType.class, "6");
+    	System.out.println(payType);
+	}
+    
     @Override
     public AliPayDetailsVO doTransCreatePayDetails(AliPayDetailsVO payDetailsVO) {
         // 校验参数
         Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
         Validator.checkArgument(payDetailsVO.getTotalAmount() == null, "totalAmount为空");
         Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getPayType()), "payType为空");
-        Validator.checkArgument(!NumberUtils.isCreatable(payDetailsVO.getPayType()), "payType为空");
+        Validator.checkArgument(!NumberUtils.isCreatable(payDetailsVO.getPayType()), "payType应该是数字");
+        final int payType = Integer.valueOf(payDetailsVO.getPayType());
+        Validator.checkArgument(10 < payType || payType < 6, "payType超出范围");
         
         AliPayDetailsVO returnVO = null;
-        
-        PayType payType = null;
-        try {
-            payType = PayType.valueOf(payDetailsVO.getPayType());
-        } catch (Exception e) {
-            throw new IllegalArgumentException(" payType(" + payDetailsVO.getPayType() + ")无效");
-        }
-        
-        switch (payType) {
-            case ALI_FACE_BAR:
-                logger.info("创建订单，支付方式：支付宝-当面付-条码支付");
-                returnVO = createF2FBarPayDetail(payDetailsVO);
-                break;
-
-            default:
-                logger.warn("创建订单失败，不支持当前支付，payType={}", payType);
-                break;
-        }
+        if (PayType.ALI_FACE_BAR.getValue() == payType) {
+        	logger.info("创建订单，支付方式：支付宝-当面付-条码支付");
+            returnVO = createF2FBarPayDetail(payDetailsVO);
+        } else {
+        	logger.warn("创建订单失败，不支持当前支付，payType={}", payType);
+        } 
 
         return returnVO;
     }
@@ -89,7 +84,7 @@ public class AliPayDetailsServiceImpl
         newPayOrder.setSubject(newPayOrder.getDealer().getCompany() + (newPayOrder.getStore() == null ? "" : "-" + newPayOrder.getStore().getStoreName()));
         
         newPayOrder.setBody(newPayOrder.getSubject());
-        newPayOrder.setPayType(PayType.ALI_FACE_BAR + "");
+        newPayOrder.setPayType(PayType.ALI_FACE_BAR.getValue() + "");
         newPayOrder.setTotalAmount(payDetailsVO.getTotalAmount());
         newPayOrder.setAuthCode(payDetailsVO.getAuthCode());
         commonDAO.save(newPayOrder, false);
