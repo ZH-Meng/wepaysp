@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
-import com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainService;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -27,6 +27,7 @@ import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.mobile.result.PayResult;
 import com.zbsp.wepaysp.common.security.Signature;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
+import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -41,7 +42,8 @@ public class ScanPayController extends BaseController {
 	@Autowired
 	private WeixinPayDetailsMainService weixinPayDetailsMainService;
 	
-	private WeixinRefundDetailsMainService weixinRefundDetailsMainService;
+	@Autowired
+	private AliPayDetailsMainService aliPayDetailsMainService;
 	
 	@RequestMapping(value = "scanPay", method = RequestMethod.POST)
 	@ResponseBody
@@ -69,6 +71,7 @@ public class ScanPayController extends BaseController {
                 // 微信刷卡授权码以13开头，例：130772863047391648
             	// 支付宝授权码以28开头，   例：280409337332958977
                 if (request.getAuthCode().startsWith("13")) {// 微信-刷卡支付
+                    logger.info("检测支付方式：微信-刷卡支付, 授权码：{}", request.getAuthCode());
                     // 保存交易明细
                     WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
                     payDetailsVO.setPayType(EnumDefine.PayType.WEIXIN_MICROPAY.getValue() + "");
@@ -96,9 +99,23 @@ public class ScanPayController extends BaseController {
                     response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
                     response.setTradeStatus(payDetailsVO.getTradeStatus());
                     response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
+                    
                 } else if (request.getAuthCode().startsWith("28")) {// 支付宝-当面付-条码支付
-                    logger.warn(logPrefix + "警告：{}, 授权码：{}", "发现支付宝支付请求", request.getAuthCode());
+                    logger.info("检测支付方式：支付宝-当面付-条码支付, 授权码：{}", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
+                    AliPayDetailsVO payDetailsVO = new AliPayDetailsVO();
+                    
+                    payDetailsVO.setPayType(EnumDefine.PayType.ALI_FACE_BAR.getValue() + "");
+                    payDetailsVO.setDealerEmployeeOid(request.getDealerEmployeeOid());
+                    payDetailsVO.setTotalAmount(new Long(request.getPayMoney()).intValue());
+                    payDetailsVO.setAuthCode(request.getAuthCode());
+                    
+                    Map<String, Object> resultMap = aliPayDetailsMainService.face2FaceBarPay(payDetailsVO);
+                    String resCode = MapUtils.getString(resultMap, "resultCode");
+                    String resDesc = MapUtils.getString(resultMap, "resultDesc");
+                    payDetailsVO = (AliPayDetailsVO) MapUtils.getObject(resultMap, "aliPayDetailsVO");
+                    System.out.println(payDetailsVO);
+                    // TODO
                 } else {
                     logger.warn(logPrefix + "警告：{}, 授权码：{}", "发现不能识别的支付请求", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
