@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.common.constant;
 
+import java.math.BigDecimal;
 
 /**
  * 系统环境变量Key，保证唯一，Map、session等作用域存值都可使用
@@ -27,5 +28,8 @@ public class SysEnvKey {
     
     /** 时间格式：yyyy-MM-dd HH:mm:ss */
     public static final String TIME_PATTERN_YMD_HYPHEN_HMS_COLON  = "yyyy-MM-dd HH:mm:ss";
+    
+    /**金额：分和元的倍数*/
+    public static final BigDecimal BIG_100 = new BigDecimal(100);
     
 }

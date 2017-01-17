@@ -10,7 +10,7 @@ public class AliPayDetailsVO
     private String iwoid;
     private String dealerOid;
     private String storeOid;
-    private String dealerEmployeeOid;    
+    private String dealerEmployeeOid;  
     private String payType;
     private String isvPid;
     private String dealerPid;
@@ -48,6 +48,14 @@ public class AliPayDetailsVO
     private Timestamp transEndTime;
     private Integer refundFee;
     private Integer tradeStatus;
+    
+    /**支付宝分配的系统商编号*/
+    private String SysServiceProviderId;
+    
+    private String dealerName;
+    //private String storeName;
+    private String dealerEmployeeName;
+    private String dealerEmployeeId;
     
     public String getIwoid() {
         return iwoid;
@@ -375,6 +383,38 @@ public class AliPayDetailsVO
     
     public void setTradeStatus(Integer tradeStatus) {
         this.tradeStatus = tradeStatus;
+    }
+
+    public String getSysServiceProviderId() {
+        return SysServiceProviderId;
+    }
+    
+    public void setSysServiceProviderId(String sysServiceProviderId) {
+        SysServiceProviderId = sysServiceProviderId;
+    }
+    
+    public String getDealerName() {
+        return dealerName;
+    }
+    
+    public void setDealerName(String dealerName) {
+        this.dealerName = dealerName;
+    }
+    
+    public String getDealerEmployeeName() {
+        return dealerEmployeeName;
+    }
+    
+    public void setDealerEmployeeName(String dealerEmployeeName) {
+        this.dealerEmployeeName = dealerEmployeeName;
+    }
+
+    public String getDealerEmployeeId() {
+        return dealerEmployeeId;
+    }
+    
+    public void setDealerEmployeeId(String dealerEmployeeId) {
+        this.dealerEmployeeId = dealerEmployeeId;
     }
     
 }

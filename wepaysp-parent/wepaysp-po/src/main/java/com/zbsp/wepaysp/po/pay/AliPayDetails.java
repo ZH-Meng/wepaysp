@@ -436,7 +436,7 @@ public class AliPayDetails
         this.invoiceAmount = invoiceAmount;
     }
 
-    @Column(name = "GMT_PAYMENT", nullable = false, length = 0)
+    @Column(name = "GMT_PAYMENT", length = 0)
     public Timestamp getGmtPayment() {
         return this.gmtPayment;
     }
