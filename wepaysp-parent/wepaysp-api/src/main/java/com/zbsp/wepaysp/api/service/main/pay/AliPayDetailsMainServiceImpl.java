@@ -99,6 +99,7 @@ public class AliPayDetailsMainServiceImpl
         try {
             logger.info(logPrefix + "支付响应转换支付明细 - 开始");
             
+            //FIXME 连接超时，payResult.getResponse()为空
             payResultVO = AliPayPackConverter.alipayTradePayResponse2AliPayDetailsVO(payResult.getResponse());
             
             logger.info(logPrefix + "支付响应转换支付明细 - 成功");

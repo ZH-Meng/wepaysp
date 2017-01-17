@@ -83,6 +83,10 @@ public class EnumDefine {
         private String state;
         private String cause;
 
+        public String getValue() {
+        	return code;
+        }
+        
         public String getCode() {
             return code;
         }

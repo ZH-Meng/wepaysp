@@ -6,6 +6,8 @@
 		<property name="TIMER_FILE_NAME">timer/TIMER</property>
 		<property name="API_FILE_NAME">api/API</property>
 		<property name="WX_FILE_NAME">weixin/WX</property>
+		<property name="ALI_FILE_NAME">alipay/alipay</property>
+		
 		<property name="COMMON_PATTERN">[%5level] [%date{yyyy-MM-dd HH:mm:ss.SSS}] [%F : %L] - %msg%n</property>
 	</properties>
 	<appenders>
@@ -38,6 +40,13 @@
 				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
 			</Policies>
 		</RollingRandomAccessFile>
+		<RollingRandomAccessFile name="ALiFile" fileName="${LOG_HOME}/${ALI_FILE_NAME}" filePattern="${LOG_HOME}/${ALI_FILE_NAME}.%d{yyyy-MM-dd-HH}.log" immediateFlush="false">
+			<PatternLayout pattern="${COMMON_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+			</Policies>
+		</RollingRandomAccessFile>
+		
 	</appenders>
 	<loggers>
 		<!-- Root Logger -->
@@ -62,6 +71,20 @@
 			<AppenderRef ref="Console"/>
 			<AppenderRef ref="AllFile"/>
 			<AppenderRef ref="wxFile"/>
+		</AsyncLogger>
+		
+		<!-- AliPay logger -->
+		<AsyncLogger name="com.alipay" level="INFO" includeLocation="true" additivity="false">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="AllFile"/>
+			<AppenderRef ref="ALiFile"/>
+		</AsyncLogger>
+		
+		<!-- AliPay logger -->
+		<AsyncLogger name="com.zbsp.alipay" level="INFO" includeLocation="true" additivity="false">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="AllFile"/>
+			<AppenderRef ref="ALiFile"/>
 		</AsyncLogger>
 	</loggers>
 </configuration>   

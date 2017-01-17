@@ -86,6 +86,10 @@ public class AliPayEnums {
             this.todo = todo;
         }
         
+        public String getValue() {
+        	return code;
+        }
+        
         public String getCode() {
             return code;
         }

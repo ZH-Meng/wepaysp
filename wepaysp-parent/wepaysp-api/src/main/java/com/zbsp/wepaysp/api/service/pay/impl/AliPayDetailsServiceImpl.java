@@ -120,17 +120,6 @@ public class AliPayDetailsServiceImpl
             
             if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
                 logDescTemp += "支付结果：交易成功" + "，支付宝支付订单号：" + payResultVO.getTradeNo() + "，交易状态：" + tradeStatus + "，支付金额：" + payResultVO.getTotalAmount();
-                
-                // 组装返回结果
-                returnPayDetailVO = new AliPayDetailsVO();
-                BeanCopierUtil.copyProperties(payDetails, returnPayDetailVO);
-                returnPayDetailVO.setStoreOid(payDetails.getStore() != null ? payDetails.getStore().getIwoid() : "");
-                returnPayDetailVO.setStoreId(payDetails.getStore() != null ? payDetails.getStore().getStoreId() : "");
-                returnPayDetailVO.setDealerEmployeeOid(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getIwoid() : "");
-                returnPayDetailVO.setDealerEmployeeId(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getDealerEmployeeId() : "");
-                returnPayDetailVO.setDealerEmployeeName(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getEmployeeName() : "");
-                returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");// FIXME storeName
-                returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
             } else {
                 logDescTemp += "，支付结果：交易失败，" + payDetails.getRemark() + "，支付宝支付订单号：" + payResultVO.getTradeNo() + "，交易状态：" + tradeStatus;
             }
@@ -158,6 +147,19 @@ public class AliPayDetailsServiceImpl
         // 记录修改日志
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细[" + logDescTemp + "]", 
             processBeginTime, endTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+        
+        // 组装返回结果
+        returnPayDetailVO = new AliPayDetailsVO();
+        BeanCopierUtil.copyProperties(payDetails, returnPayDetailVO);
+        if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
+	        returnPayDetailVO.setStoreOid(payDetails.getStore() != null ? payDetails.getStore().getIwoid() : "");
+	        returnPayDetailVO.setStoreId(payDetails.getStore() != null ? payDetails.getStore().getStoreId() : "");
+	        returnPayDetailVO.setDealerEmployeeOid(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getIwoid() : "");
+	        returnPayDetailVO.setDealerEmployeeId(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getDealerEmployeeId() : "");
+	        returnPayDetailVO.setDealerEmployeeName(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getEmployeeName() : "");
+	        returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");// FIXME storeName
+	        returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
+        }
         
         return returnPayDetailVO;
     }
