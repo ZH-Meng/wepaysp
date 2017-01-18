@@ -12,7 +12,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.TimeUtil;
@@ -20,7 +21,6 @@ import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.PayType;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
@@ -98,7 +98,7 @@ public class PaymentAction
 
         // 保存交易明细
         WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
-        payDetailsVO.setPayType(WeixinPayDetails.PayType.MICROPAY.getValue());// 刷卡支付
+        payDetailsVO.setPayType(PayType.WEIXIN_MICROPAY.getValue());// 刷卡支付
         payDetailsVO.setDealerEmployeeOid(dealerEmployeeOid);
         payDetailsVO.setTotalFee(money1.multiply(new BigDecimal(100)).intValue());// 元转化为分
         payDetailsVO.setAuthCode(authCode);
@@ -184,7 +184,7 @@ public class PaymentAction
         paramMap.put("beginTime", TimeUtil.getDayStart(today));
         paramMap.put("endTime", TimeUtil.getDayEnd(today));
         paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
-        paramMap.put("payType", PayType.MICROPAY.toString());// 收银台刷卡支付
+        paramMap.put("payType", PayType.WEIXIN_MICROPAY.getValue());// 收银台刷卡支付
         return (List<WeixinPayDetailsVO>) MapUtils.getObject(weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(paramMap, 0, -1), "payList");
     }
     

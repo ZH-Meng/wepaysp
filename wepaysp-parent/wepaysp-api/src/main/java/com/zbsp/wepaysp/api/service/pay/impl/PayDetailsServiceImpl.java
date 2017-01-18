@@ -14,10 +14,14 @@ import org.apache.commons.lang.StringUtils;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxPayBank;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.DateUtil;
+import com.zbsp.wepaysp.common.util.EnumUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -43,11 +47,12 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         String payType = MapUtils.getString(paramMap, "payType");
         String tradeStatus = MapUtils.getString(paramMap, "tradeStatus");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
-        String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
+        String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号或支付宝单号
         boolean totalFlag = MapUtils.getBoolean(paramMap, "totalFlag");
 
         //String listJpql = "from ViewPayDetail w where 1=1 ";
         
+        // 从视图ViewPayDetail中查询支付明细
         String listJpql = "select w.id.dealerEmployeeOid, w.id.payType, w.id.transactionId, w.id.outTradeNo, w.id.transBeginTime, w.id.transEndTime, w.id.tradeStatus, "
             + "w.id.totalFee, w.id.cashFee, w.id.couponFee, w.id.refundFee  from ViewPayDetail w where 1=1 ";
         String totalJpql = "select sum(case when w.id.tradeStatus=1 then w.id.totalFee else 0 end),count(w.id.totalFee) from ViewPayDetail w where 1=1 ";
@@ -88,6 +93,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         }
 
         sql.append(" order by w.id.transBeginTime desc");
+        
         //List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(listJpql + sql.toString(), sqlMap, false, startIndex, maxResult);
         
         // List<ViewPayDetail> weixinPayDetailsList = (List<ViewPayDetail>) commonDAO.findObjectList(listJpql + sql.toString(), sqlMap, false, startIndex, maxResult);
@@ -113,11 +119,10 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
                 weixinPayDetails.setCouponFee((Integer) curRow[9]);
                 weixinPayDetails.setRefundFee((Integer) curRow[10]);
                 
-                
                 PayDetailData data = new PayDetailData();
                 data.setOutTradeNo(weixinPayDetails.getOutTradeNo());
-                data.setPayType(Integer.valueOf(weixinPayDetails.getPayType()));
-                data.setTradeStatus(weixinPayDetails.getTradeStatus());
+                data.setPayType(EnumUtil.getEnumByGetValueMethod(PayPlatform.class, weixinPayDetails.getPayType()).getDesc());
+                data.setTradeStatus(EnumUtil.getEnumByGetValueMethod(TradeStatusShow.class, weixinPayDetails.getTradeStatus()).getDesc());
                 data.setTransTime(DateUtil.getDate(weixinPayDetails.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                 data.setCollectionMoney(weixinPayDetails.getTotalFee());// 实收金额 = 总金额
                 data.setRefundMoney(weixinPayDetails.getRefundFee() == null ? 0L : weixinPayDetails.getRefundFee());
@@ -136,13 +141,14 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 	}
 
 	@Override
-	public QueryPrintPayDetailResponse doJoinTransQueryPayDetail(String outTradeNo, int payType) {
+	public QueryPrintPayDetailResponse doJoinTransQueryPaySuccessDetail(String outTradeNo, int payType) {
 		Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo不能为空");
         
 		QueryPrintPayDetailResponse response = null;
-		if (1 <= payType && payType <= 5) {// 微信支付
+		//if (1 <= payType && payType <= 5) {// 微信支付
+		if (payType == Integer.valueOf(PayPlatform.WEIXIN.getValue())) {// 微信支付
 			WeixinPayDetailsVO payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetail(outTradeNo);
-			if (payDetailVO == null) {
+			if (payDetailVO == null || payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {// 没有支付成功的暂不允许查询
 				response = new QueryPrintPayDetailResponse(CommonResult.DATA_NOT_EXIST.getCode(), CommonResult.DATA_NOT_EXIST.getDesc(), Generator.generateIwoid());
 			} else {
 				response = new QueryPrintPayDetailResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), Generator.generateIwoid());
@@ -152,9 +158,9 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 				response.setDeviceId(payDetailVO.getDeviceInfo());// FIXME
 				response.setMoney(payDetailVO.getTotalFee());
 				response.setOutTradeNo(payDetailVO.getOutTradeNo());
-				response.setPayType(Integer.valueOf(payDetailVO.getPayType()));
+				response.setPayType(EnumUtil.getEnumByGetValueMethod(PayPlatform.class, payDetailVO.getPayType()).getDesc());
+				response.setTradeStatus(EnumUtil.getEnumByGetValueMethod(TradeStatusShow.class, payDetailVO.getTradeStatus()).getDesc());
 				response.setTransactionId(payDetailVO.getTransactionId());
-				response.setTradeStatus(payDetailVO.getTradeStatus());
 				response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
 				try {
 				    //if (Validator.contains(WxPayBank.class, payDetailVO.getBankType())) {
@@ -164,7 +170,8 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
                     response.setPayBank(payDetailVO.getBankType());
 		        }
 			}
-		} else if (6 <= payType && payType <= 10) {// 支付宝支付
+		//} else if (6 <= payType && payType <= 10) {// 支付宝支付
+		} else if (payType == Integer.valueOf(PayPlatform.ALI.getValue())) {// 支付宝支付
 			response = new QueryPrintPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), Generator.generateIwoid());
 			
 		} else {

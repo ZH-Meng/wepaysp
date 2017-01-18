@@ -20,7 +20,7 @@
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
-		
+		<property name="serverType" value="${serverType}" />
 	</bean>
 	
 	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />
@@ -87,9 +87,21 @@
 	
 	<bean id="payNoticeBindWeixinService" class="com.zbsp.wepaysp.api.service.weixin.impl.PayNoticeBindWeixinServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
-	</bean>
+	</bean>	
 	
 	<bean id="appManageService" class="com.zbsp.wepaysp.api.service.app.impl.AppManageServiceImpl" parent="baseService">
+	</bean>
+	
+	<bean id="payDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.PayDetailsServiceImpl" parent="baseService">
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+	</bean>
+
+	<bean id="aliPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.AliPayDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="aliPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainServiceImpl" parent="baseService">
+		<property name="aliPayDetailsService" ref="aliPayDetailsService" />
 	</bean>
 	
 </beans>

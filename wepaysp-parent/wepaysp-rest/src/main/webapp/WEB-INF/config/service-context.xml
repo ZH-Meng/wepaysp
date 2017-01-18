@@ -20,7 +20,7 @@
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
-		
+		<property name="serverType" value="${serverType}" />
 	</bean>
 	
 	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />

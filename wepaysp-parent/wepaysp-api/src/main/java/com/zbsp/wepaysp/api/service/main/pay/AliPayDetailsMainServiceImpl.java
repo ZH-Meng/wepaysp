@@ -11,9 +11,9 @@ import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayPackConverter;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 public class AliPayDetailsMainServiceImpl

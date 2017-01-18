@@ -20,7 +20,7 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.constant.WxApiUrl;
-import com.zbsp.wepaysp.common.constant.EnumDefine.PayClientType;
+import com.zbsp.wepaysp.common.constant.SysEnums.ScanCodeClient;
 
 /**
  * 生成器工具类
@@ -67,9 +67,9 @@ public final class Generator {
         }
         String url = "";
         try {
-            if (PayClientType.APP_WEIXIN.getValue().equals(clientType)) {
+            if (ScanCodeClient.APP_WEIXIN.getValue().equals(clientType)) {
                 url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
-            } else if (PayClientType.APP_ALI.getValue().equals(clientType)) {
+            } else if (ScanCodeClient.APP_ALI.getValue().equals(clientType)) {
                 
             }
         } catch (UnsupportedEncodingException e) {

@@ -34,11 +34,11 @@ public interface PayDetailsService {
 
 	
     /**
-     * 根据商户订单号查找支付明细
+     * 根据商户订单号查找支付成功明细
      * 
      * @param outTradeNo 商户订单号
      * @param payType 支付类型
      * @return QueryPrintPayDetailResponse
      */
-	public QueryPrintPayDetailResponse doJoinTransQueryPayDetail(String outTradeNo, int payType);
+	public QueryPrintPayDetailResponse doJoinTransQueryPaySuccessDetail(String outTradeNo, int payType);
 }

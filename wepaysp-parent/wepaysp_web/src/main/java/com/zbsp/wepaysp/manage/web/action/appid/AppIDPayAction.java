@@ -15,9 +15,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
 
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.EnumDefine.GrantType;
-import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
@@ -25,7 +26,6 @@ import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.vo.ErrResult;
 import com.zbsp.wepaysp.manage.web.vo.appid.CreateOrderResult;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.tencent.WXPay;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenReqData;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
@@ -170,7 +170,7 @@ public class AppIDPayAction
 
         // 保存交易明细
         WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
-        payDetailsVO.setPayType(WeixinPayDetails.PayType.JSAPI.getValue());// 交易类型公众号
+        payDetailsVO.setPayType(PayType.WEIXIN_JSAPI.getValue());// 交易类型公众号
         payDetailsVO.setDealerOid(dealerOid);
         payDetailsVO.setOpenid(openid);
         payDetailsVO.setStoreOid(storeOid);// 一店一码时，不为空

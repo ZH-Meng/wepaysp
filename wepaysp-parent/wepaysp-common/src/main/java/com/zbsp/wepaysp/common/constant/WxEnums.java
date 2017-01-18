@@ -1,29 +1,28 @@
 package com.zbsp.wepaysp.common.constant;
 
-
 /**
- * 枚举定义类
+ * 微信支付相关枚举定义类
  * 
  * @author 孟郑宏
  */
-public class EnumDefine {
-
+public class WxEnums {
+    
     /**
-     * 通信标识 
+     * 微信支付-通信标识 
      */
     public static enum ReturnCode {
         SUCCESS, FAIL;
     }
     
     /**
-     * 交易标识 
+     * 微信支付-交易标识 
      */
     public static enum ResultCode {
         SUCCESS, FAIL;
     }
     
     /**
-     * 微信支付交易类型
+     * 微信支付-交易类型
      */
     public static enum TradeType {
         /** 统一下单接口trade_type -- 公众号支付*/           JSAPI,
@@ -34,7 +33,7 @@ public class EnumDefine {
     }
     
     /**
-     * 支付交易状态 
+     * 微信支付-交易状态 
      */
     public static enum TradeState {
         /** 支付成功 */                                                 SUCCESS,
@@ -48,7 +47,7 @@ public class EnumDefine {
     }
     
     /**
-     * 微信支付结果
+     * 微信支付-支付结果
      */
     public static enum WxPayResult {
         ERROR("error", "支付错误", null, null),
@@ -84,7 +83,7 @@ public class EnumDefine {
         private String cause;
 
         public String getValue() {
-        	return code;
+            return code;
         }
         
         public String getCode() {
@@ -125,104 +124,7 @@ public class EnumDefine {
             this.state = state;
             this.cause = cause;
         }
-
-    }
-    
-    /**
-     * 系统报警枚举
-     * 
-     * @author 孟郑宏
-     */
-    public enum AlarmLogPrefix {
-        wxPayAPIMoneyException("【微信支付金额异常，系统报警】"),
-        /** 调用微信支付API失败 */
-        invokeWxPayAPIErr("【调用微信支付API失败，系统报警】"),
-        /** 调用微信公众号API失败 */
-        invokeWxJSAPIErr("【调用微信公众号接口API失败，系统报警】"),
-        /** 发送微信支付请求失败 */
-        sendWxPayRequestException("【发送微信支付请求失败，系统报警】"),
-        /** 受理微信支付结果异常 */
-        handleWxPayResultException("【处理微信支付结果异常，系统报警】"),
-        /** 受理微信支付结果失败 */
-        handleWxPayResultErr("【处理微信支付结果失败，系统报警】"),
         
-        aliPayAPIMoneyException("【支付宝支付金额异常，系统报警】"),
-        /** 调用支付宝支付API失败 */
-        invokeAliPayAPIErr("【调用支付宝支付API失败，系统报警】"),
-        /** 发送支付宝支付请求失败 */
-        sendAliPayRequestException("【发送支付宝支付请求失败，系统报警】"),
-        /** 受理支付宝支付结果异常 */
-        handleAliPayResultException("【处理支付宝支付结果异常，系统报警】"),
-        /** 受理支付宝支付结果失败 */
-        handleAliPayResultErr("【处理支付宝支付结果失败，系统报警】");
-
-        private String value;
-
-        public String getValue() {
-            return value;
-        }
-
-        private AlarmLogPrefix(String value) {
-            this.value = value;
-        }
-    }
-    
-    /**微信订单查询错误码*/
-    public static enum OrderQueryErr {
-        /**订单不存在*/                      ORDERNOTEXIST,
-        /**系统错误，建议重新查询*/    SYSTEMERROR;
-    }
-    
-    /**微信订单关闭错误码*/
-    public static enum OrderClosedErr {
-        /** 订单已支付，不能发起关单，请当作已支付的正常交易 */
-        ORDERPAID,
-        /** 系统异常，请重新调用该API */
-        SYSTEMERROR,
-        /** 订单不存在，不需要关单，当作未提交的支付的订单 */
-        ORDERNOTEXIST,
-        /** 订单已关闭，无法重复关闭 */
-        ORDERCLOSED,
-        /** 参数签名结果不正确 */
-        SIGNERROR,
-        /** 未使用post传递参数 */
-        REQUIRE_POST_METHOD,
-        /** XML格式错误 */
-        XML_FORMAT_ERROR;
-    }
-    
-    /**发送模板消息结果码*/
-    public static enum SendTempMsgErr {
-        /**成功*/                      SUCCESS("0");
-    	private String value;
-    	
-    	public String getValue() {
-    		return value;
-    	}
-    	
-    	private SendTempMsgErr(String value) {
-    		this.value = value;
-		}
-    }
-    
-    /**
-     * 二维码类型
-     * @author mengzh
-     *
-     */
-    public static enum QRCodeType {
-    	/** 支付二维码*/ 				PAY(1),
-    	/** 绑定支付通知二维码*/ 	BIND_PAY_NOTICE(2);
-    	
-    	private int value;
-    	
-    	public int getValue() {
-    		return value;
-    	}
-    	
-    	private QRCodeType(int value) {
-    		this.value = value;
-		}
     }
     
     /**
@@ -246,109 +148,55 @@ public class EnumDefine {
             this.value = value;
         }
     }
-
+    
     /**
-     * 支付客户端
+     * 微信支付-发送模板消息结果码
      * 
      * @author 孟郑宏
      */
-    public static enum PayClientType {
-        /** 1 微信APP（浏览器）*/                                  APP_WEIXIN("1"),
-        /** 2 支付宝APP */                                             APP_ALI("2"),
-        /** 3 百度APP */                                                APP_BAIDU("3"),        
-        /** 4 系统业务APP */                                          APP_SELF("4"),
-        /** 5 未知（不同浏览器以及其他扫码客户端）*/       UN_KNOWN("5");
-        
+    public static enum SendTempMsgErr {
+        /**成功*/                      SUCCESS("0");
         private String value;
         
         public String getValue() {
             return value;
         }
         
-        private PayClientType(String value) {
+        private SendTempMsgErr(String value) {
             this.value = value;
         }
     }
     
     /**
-     * 支付类型
+     * 微信支付-订单查询错误码
+     * 
+     * @author 孟郑宏
      */
-    public static enum PayType {
-        /** 1：微信-刷卡支付*/                                  WEIXIN_MICROPAY(1),
-        /** 2：微信-公众号支付 */								 WEIXIN_JSAPI(2),
-        /** 3：微信-扫码支付 */								 WEIXIN_NATIVE(3),
-        /** 4：微信-微信买单 */								 WEIXIN_PAY(4),
-        
-        /** 6：支付宝-当面付-条码支付 */                    ALI_FACE_BAR(6),
-        /** 7：支付宝-扫码付 */								  ALI_SCAN(7),
-        /** 8：支付宝-手机网站支付 */						  ALI_H5(8);
-        
-        private int value;
-        
-        
-        public int getValue() {
-            return value;
-        }
-        
-        private PayType(int value) {
-            this.value = value;
-        }
-        
+    public static enum OrderQueryErr {
+        /**订单不存在*/                      ORDERNOTEXIST,
+        /**系统错误，建议重新查询*/    SYSTEMERROR;
     }
     
     /**
-     * 交易状态
+     * 微信支付-订单关闭错误码
+     * 
+     * @author 孟郑宏
      */
-    public static enum TradeStatus {
-        /** 0：交易中 */        TRADEING(0),
-        /** 1：交易成功 */     TRADE_SUCCESS(1),
-        /** 2：交易失败 */     TRADE_FAIL(2),
-        /** 3：交易撤销 */     TRADE_REVERSED(3),
-        /** 4：交易关闭 */     TRADE_CLOSED(4),
-        /** 5：交易待关闭 */     TRADE_TO_BE_CLOSED(5);
-        
-        private int value;
-
-        public int getValue() {
-            return value;
-        }
-
-        private TradeStatus(int value) {
-            this.value = value;
-        }
-    }
-    
-    /**
-     * 是否可以退款标识
-     */
-    public static enum RefundFlag {
-        YES,NO;
-    }
-    
-    /**
-     * 开发过程使用参数
-     */
-    public static enum DevParam {
-        APPID("wx8a60a03a3b75acf7"),
-        APPSECRET("0f7dbf1be06f76af581f5a17058d09d6"),
-        MCHID("1337800201"),
-        KEY("402881c6014672d801014672ef300001"),
-        CERT_LOCAL_PATH ("C:/apiclient_cert.p12"),
-        CERT_PASSWORD ("1337800201");
-        
-        private String value;
-        
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        private DevParam(String value) {
-            this.value = value;
-        }
+    public static enum OrderClosedErr {
+        /** 订单已支付，不能发起关单，请当作已支付的正常交易 */
+        ORDERPAID,
+        /** 系统异常，请重新调用该API */
+        SYSTEMERROR,
+        /** 订单不存在，不需要关单，当作未提交的支付的订单 */
+        ORDERNOTEXIST,
+        /** 订单已关闭，无法重复关闭 */
+        ORDERCLOSED,
+        /** 参数签名结果不正确 */
+        SIGNERROR,
+        /** 未使用post传递参数 */
+        REQUIRE_POST_METHOD,
+        /** XML格式错误 */
+        XML_FORMAT_ERROR;
     }
     
 }

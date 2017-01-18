@@ -30,10 +30,10 @@ public class QueryPrintPayDetailResponse extends MobileResponse {
 	private String tradeTime;
 
 	/** 交易方式 */
-	private int payType;
+	private String payType;
 
 	/** 交易状态 */
-	private int tradeStatus;
+	private String tradeStatus;
 
 	/** 交易银行 */
 	private String payBank;
@@ -110,19 +110,19 @@ public class QueryPrintPayDetailResponse extends MobileResponse {
 		this.tradeTime = tradeTime;
 	}
 
-	public int getPayType() {
+	public String getPayType() {
 		return payType;
 	}
 
-	public void setPayType(int payType) {
+	public void setPayType(String payType) {
 		this.payType = payType;
 	}
 
-	public int getTradeStatus() {
+	public String getTradeStatus() {
 		return tradeStatus;
 	}
 
-	public void setTradeStatus(int tradeStatus) {
+	public void setTradeStatus(String tradeStatus) {
 		this.tradeStatus = tradeStatus;
 	}
 

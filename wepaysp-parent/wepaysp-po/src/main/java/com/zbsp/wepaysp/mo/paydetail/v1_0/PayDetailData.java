@@ -9,10 +9,10 @@ public class PayDetailData {
 	private String outTradeNo;
 	
 	/**支付方式*/
-	private int payType;
+	private String payType;
 	
 	/**订单状态*/
-	private int tradeStatus;
+	private String tradeStatus;
 	
 	/**实收金额，单位：分*/
 	private long collectionMoney;
@@ -26,7 +26,7 @@ public class PayDetailData {
 	public PayDetailData() {
 	}
 	
-	public PayDetailData(String outTradeNo, int payType, int tradeStatus, long collectionMoney, long refundMoney, String transTime) {
+	public PayDetailData(String outTradeNo, String payType, String tradeStatus, long collectionMoney, long refundMoney, String transTime) {
 		super();
 		this.outTradeNo = outTradeNo;
 		this.payType = payType;
@@ -44,19 +44,19 @@ public class PayDetailData {
 		this.outTradeNo = outTradeNo;
 	}
 
-	public int getPayType() {
+	public String getPayType() {
 		return payType;
 	}
 
-	public void setPayType(int payType) {
+	public void setPayType(String payType) {
 		this.payType = payType;
 	}
 
-	public int getTradeStatus() {
+	public String getTradeStatus() {
 		return tradeStatus;
 	}
 
-	public void setTradeStatus(int tradeStatus) {
+	public void setTradeStatus(String tradeStatus) {
 		this.tradeStatus = tradeStatus;
 	}
 

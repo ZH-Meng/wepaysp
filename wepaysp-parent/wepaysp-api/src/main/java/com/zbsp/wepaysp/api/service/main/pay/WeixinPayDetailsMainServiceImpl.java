@@ -18,12 +18,14 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.EnumDefine.OrderQueryErr;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
-import com.zbsp.wepaysp.common.constant.EnumDefine.SendTempMsgErr;
-import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.WxEnums.OrderQueryErr;
+import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.SendTempMsgErr;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.StringHelper;
@@ -35,8 +37,6 @@ import com.zbsp.wepaysp.api.listener.DefaultOrderQueryBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.PayType;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
@@ -72,7 +72,7 @@ public class WeixinPayDetailsMainServiceImpl
         
         String payType = weixinPayDetailsVO.getPayType();
         
-        if (StringUtils.equals(PayType.MICROPAY.getValue(), payType)) {// 刷卡支付
+        if (StringUtils.equals(PayType.WEIXIN_MICROPAY.getValue(), payType)) {// 刷卡支付
             logger.info("开始微信刷卡支付！");
             String transactionId = null;
             try {
@@ -112,7 +112,7 @@ public class WeixinPayDetailsMainServiceImpl
             
             // 查询支付结果
             weixinPayDetailsVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailsVO.getIwoid());
-        } else if (StringUtils.equals(PayType.JSAPI.getValue(), payType)) {// 公众号支付
+        } else if (StringUtils.equals(PayType.WEIXIN_JSAPI.getValue(), payType)) {// 公众号支付
             logger.info("开始微信公众号下单！");
             String prepayId = null;
             try {
@@ -319,7 +319,7 @@ public class WeixinPayDetailsMainServiceImpl
             logger.info("调用订单查询API结果成功，更新系统订单状态");
             WeixinPayDetailsVO payResultVO = weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
             
-            if (payResultVO != null && WeixinPayDetails.TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
+            if (payResultVO != null && TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
                 logger.info("订单查询结果为支付成功，向收银员/商户发送支付成功通知");
                 try {
                     sendPayResultNotice(payResultVO);

@@ -11,7 +11,7 @@ import org.apache.struts2.ServletActionContext;
 
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.PayClientType;
+import com.zbsp.wepaysp.common.constant.SysEnums.ScanCodeClient;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.manage.web.action.BaseAction;
 import com.zbsp.wepaysp.manage.web.vo.ErrResult;
@@ -67,14 +67,14 @@ public class MobliePayIndexAction
             urlParamMap.put("dealerEmployeeOid", dealerEmployeeOid);
             urlParamMap.put("showwxpaytitle", "1");
             
-            payClient = PayClientType.APP_WEIXIN.getValue();
+            payClient = ScanCodeClient.APP_WEIXIN.getValue();
             payUrl = Generator.generatePayURL(payClient, appid, SysConfig.wxPayCallBackURL, urlParamMap);
         } else if (userAgent.indexOf("alipayclient") != -1) {
             logger.info("支付客户端为支付宝");
-            payClient = PayClientType.APP_ALI.getValue();
+            payClient = ScanCodeClient.APP_ALI.getValue();
             
         } else {// 未知客户端
-            payClient = PayClientType.UN_KNOWN.getValue();
+            payClient = ScanCodeClient.UN_KNOWN.getValue();
         }
         logger.info("检查支付客户端结束.");
         return "payClientCheckResult";

@@ -21,9 +21,9 @@ import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayRequest;
 import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayResponse;
 import com.zbsp.wepaysp.mo.refund.v1_0.ScanRefundRequest;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
-import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.mobile.result.PayResult;
 import com.zbsp.wepaysp.common.security.Signature;
@@ -75,7 +75,7 @@ public class ScanPayController extends BaseController {
                     logger.info("检测支付方式：微信-刷卡支付, 授权码：{}", request.getAuthCode());
                     // 保存交易明细
                     WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
-                    payDetailsVO.setPayType(EnumDefine.PayType.WEIXIN_MICROPAY.getValue() + "");
+                    payDetailsVO.setPayType(SysEnums.PayType.WEIXIN_MICROPAY.getValue() + "");
                     payDetailsVO.setDealerEmployeeOid(request.getDealerEmployeeOid());
                     payDetailsVO.setTotalFee(new Long(request.getPayMoney()).intValue());
                     payDetailsVO.setAuthCode(request.getAuthCode());
@@ -108,7 +108,7 @@ public class ScanPayController extends BaseController {
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
                     AliPayDetailsVO payDetailsVO = new AliPayDetailsVO();
                     
-                    payDetailsVO.setPayType(EnumDefine.PayType.ALI_FACE_BAR.getValue() + "");
+                    payDetailsVO.setPayType(SysEnums.PayType.ALI_FACE_BAR.getValue() + "");
                     payDetailsVO.setDealerEmployeeOid(request.getDealerEmployeeOid());
                     payDetailsVO.setTotalAmount(new Long(request.getPayMoney()).intValue());
                     payDetailsVO.setAuthCode(request.getAuthCode());

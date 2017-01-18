@@ -78,47 +78,6 @@ public class WeixinPayDetails
     private String modifier;
     private Date modifyTime;
     private String remark;
-
-    /**
-     * 交易类型 
-     */
-    public static enum PayType {
-        /** 1：刷卡支付 */        MICROPAY("1"),
-        /** 2：公众号支付 */     JSAPI("2"),
-        /** 3：扫码支付 */        NATIVE("3"),
-        /** 4：微信买单 */        WEIXINPAY("4");
-        private String value;
-
-        public String getValue() {
-            return value;
-        }
-
-        private PayType(String value) {
-            this.value = value;
-        }
-    }
-    
-    /**
-     * 交易状态
-     */
-    public static enum TradeStatus {
-        /** 0：交易中 */        TRADEING(0),
-        /** 1：交易成功 */     TRADE_SUCCESS(1),
-        /** 2：交易失败 */     TRADE_FAIL(2),
-        /** 3：交易撤销 */     TRADE_REVERSED(3),
-        /** 4：交易关闭 */     TRADE_CLOSED(4),
-        /** 5：交易待关闭 */     TRADE_TO_BE_CLOSED(5); 
-        
-        private int value;
-
-        public int getValue() {
-            return value;
-        }
-
-        private TradeStatus(int value) {
-            this.value = value;
-        }
-    }
     
     public WeixinPayDetails() {
     }

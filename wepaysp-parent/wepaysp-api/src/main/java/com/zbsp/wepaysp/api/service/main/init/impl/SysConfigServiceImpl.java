@@ -16,6 +16,7 @@ import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
+import com.zbsp.wepaysp.common.constant.SysEnums.ServerType;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.SystemInitException;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -31,6 +32,7 @@ public class SysConfigServiceImpl
     private String bindCallBackURL;
     private String qRCodeRootPath;
     private String appidQrCodePath;
+    private String serverType;
 
     private PartnerService partnerService;
     
@@ -44,6 +46,18 @@ public class SysConfigServiceImpl
      */
     public void init() throws SystemInitException {
         // 检查注入参数完整性
+        ServerType serType = null;
+        if (StringUtils.isBlank(serverType)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：serverType");
+        } else {
+            try {
+                serType = Enum.valueOf(ServerType.class, serverType);
+                logger.info("初始化系统配置信息：serverType=" + serType);
+            } catch (Exception e) {
+                throw new SystemInitException("初始化系统配置信息失败" + e.getMessage());
+            }
+        }
+        
         
         if (StringUtils.isBlank(payClientCheckURL)) {
             throw new SystemInitException("初始化系统配置信息失败，参数缺失：payClientCheckURL");
@@ -122,8 +136,10 @@ public class SysConfigServiceImpl
             //new WeixinUtil().getBaseAccessToken(topPartner.getIwoid());
         }
         
-        initAliPayConfig();
-        
+        if (ServerType.REST.equals(serType)) {
+            initAliPayConfig();
+            //FIXME WEB中的公众号支付迁移后，需要将微信的也添加
+        }
     }
 
     /**
@@ -229,15 +245,19 @@ public class SysConfigServiceImpl
         this.bindCallBackURL = bindCallBackURL;
     }
 
-    public void setqRCodeRootPath(String qRCodeRootPath) {
+    public void setQRCodeRootPath(String qRCodeRootPath) {
         this.qRCodeRootPath = qRCodeRootPath;
     }
     
     public void setAppidQrCodePath(String appidQrCodePath) {
 		this.appidQrCodePath = appidQrCodePath;
 	}
+    
+    public void setServerType(String serverType) {
+        this.serverType = serverType;
+    }
 
-	public void setPartnerService(PartnerService partnerService) {
+    public void setPartnerService(PartnerService partnerService) {
         this.partnerService = partnerService;
     }
 

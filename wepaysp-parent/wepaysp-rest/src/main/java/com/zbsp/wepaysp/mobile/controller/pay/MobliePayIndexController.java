@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.PayClientType;
+import com.zbsp.wepaysp.common.constant.SysEnums.ScanCodeClient;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
@@ -67,15 +67,15 @@ public class MobliePayIndexController extends BaseController {
                 urlParamMap.put("dealerEmployeeOid", indexVO.getDealerEmployeeOid());
                 urlParamMap.put("showwxpaytitle", "1");
                 
-                indexVO.setPayClient(PayClientType.APP_WEIXIN.getValue());
+                indexVO.setPayClient(ScanCodeClient.APP_WEIXIN.getValue());
                 indexVO.setPayUrl(Generator.generatePayURL(indexVO.getPayClient(), appid, SysConfig.wxPayCallBackURL, urlParamMap));
             }
         } else if (userAgent.indexOf("alipayclient") != -1) {
         	logger.info(logPrefix + "支付客户端为支付宝");
-            indexVO.setPayClient(PayClientType.APP_ALI.getValue());
+            indexVO.setPayClient(ScanCodeClient.APP_ALI.getValue());
         } else {// 未知客户端
         	logger.info(logPrefix + "支付客户端未知");
-        	indexVO.setPayClient(PayClientType.UN_KNOWN.getValue());
+        	indexVO.setPayClient(ScanCodeClient.UN_KNOWN.getValue());
         }
         
         model.addAttribute("indexVO", indexVO);

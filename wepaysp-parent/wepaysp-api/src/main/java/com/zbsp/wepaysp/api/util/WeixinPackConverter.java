@@ -11,8 +11,8 @@ import com.tencent.protocol.pay_query_protocol.ScanPayQueryResData;
 import com.tencent.protocol.unified_order_protocol.UnifiedOrderReqData;
 import com.tencent.protocol.unified_order_protocol.UnifiedOrderResData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyData;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 

@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.EnumDefine.GrantType;
-import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
@@ -28,7 +29,6 @@ import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.result.CreateOrderResult;
 import com.zbsp.wepaysp.mobile.model.result.ErrResult;
 import com.zbsp.wepaysp.mobile.model.vo.WxCallBackVO;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.tencent.WXPay;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenReqData;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
@@ -161,7 +161,7 @@ public class AppIDPayController extends BaseController {
         logger.info(logPrefix + "参数检查 - 开始");
         boolean checkFlag = false;
         try {
-            if (StringUtils.isBlank(money) && NumberUtils.isNumber(money)) {
+            if (StringUtils.isBlank(money) && NumberUtils.isCreatable(money)) {
                 logger.warn(logPrefix + "参数检查 - 失败：{}", "金额无效，请重新输入，单位为元！");
                 result = new CreateOrderResult(H5CommonResult.INVALID_ARGUMENT.getCode(), "金额无效，请重新输入，单位为元！", null, null);
             } else if (StringUtils.isBlank(callBackVO.getDealerOid()) || StringUtils.isBlank(callBackVO.getOpenid())) {
@@ -185,7 +185,7 @@ public class AppIDPayController extends BaseController {
 
         // 保存交易明细
         WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
-        payDetailsVO.setPayType(WeixinPayDetails.PayType.JSAPI.getValue());// 交易类型公众号
+        payDetailsVO.setPayType(PayType.WEIXIN_JSAPI.getValue());// 公众号支付
         payDetailsVO.setDealerOid(callBackVO.getDealerOid());
         payDetailsVO.setOpenid(callBackVO.getOpenid());
         payDetailsVO.setStoreOid(callBackVO.getStoreOid());// 一店一码时，不为空

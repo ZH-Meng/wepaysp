@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
-import com.zbsp.wepaysp.common.constant.EnumDefine.QRCodeType;
+import com.zbsp.wepaysp.common.constant.SysEnums.QRCodeType;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;

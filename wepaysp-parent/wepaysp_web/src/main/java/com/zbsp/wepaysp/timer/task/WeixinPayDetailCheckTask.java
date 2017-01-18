@@ -19,11 +19,11 @@ import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 
 /**
  * 微信支付交易明细状态检查作业，状态处理中的需要处理
@@ -49,7 +49,7 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[开始]"));
         // 查出前intervalTime毫秒的交易处理中和待关闭的记录
         List<WeixinPayDetails> tradingList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByState(
-            new int[] { WeixinPayDetails.TradeStatus.TRADEING.getValue(), WeixinPayDetails.TradeStatus.TRADE_TO_BE_CLOSED.getValue() }, intervalTime);
+            new int[] { TradeStatus.TRADEING.getValue(), TradeStatus.TRADE_TO_BE_CLOSED.getValue() }, intervalTime);
         
         // 开始时间限制时间
         Date minDate = new Date(new Date().getTime() - maxQueryIntervaltime);

@@ -40,9 +40,9 @@ public class QueryPayDetailRequest extends MobileRequest {
 	
 	public static enum QueryType {
 		/**收款查询*/
-		collection(1),
+		COLLECTION(1),
 		/**账单查询*/
-		bill(2);
+		BILL(2);
 		private int value;
 		
 		private QueryType(int value) {

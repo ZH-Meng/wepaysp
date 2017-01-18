@@ -22,7 +22,7 @@ import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailRequest;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
 import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailRequest;
 import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailResponse;
-import com.zbsp.wepaysp.common.constant.EnumDefine;
+import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.security.Signature;
@@ -63,7 +63,7 @@ public class PayDetailRestController extends BaseController {
             response = new QueryPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else if (!Validator.contains(QueryPayDetailRequest.QueryType.class, request.getQueryType())) {
             response = new QueryPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(queryType)", responseId);
-        } else if (request.getQueryType() == QueryPayDetailRequest.QueryType.bill.getValue() 
+        } else if (request.getQueryType() == QueryPayDetailRequest.QueryType.BILL.getValue() 
             && (StringUtils.isBlank(request.getTradeStatus()) || StringUtils.isBlank(request.getPayType()) || StringUtils.isBlank(request.getBeginTime()) || StringUtils.isBlank(request.getEndTime()))) {
         	response = new QueryPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
@@ -71,7 +71,7 @@ public class PayDetailRestController extends BaseController {
                 Map<String, Object> paramMap = new HashMap<String, Object>();
                 paramMap.put("outTradeNo", request.getOutTradeNo());
                 paramMap.put("transactionId", request.getTransactionId());
-                if (request.getQueryType() == QueryPayDetailRequest.QueryType.bill.getValue()) {
+                if (request.getQueryType() == QueryPayDetailRequest.QueryType.BILL.getValue()) {
                     paramMap.put("beginTime", DateUtil.getDate(request.getBeginTime(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
                     paramMap.put("endTime", DateUtil.getDate(request.getEndTime(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
                     paramMap.put("payType", request.getPayType());
@@ -123,11 +123,11 @@ public class PayDetailRestController extends BaseController {
             response = new QueryPrintPayDetailResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getRequestId()) || StringUtils.isBlank(request.getOutTradeNo())) {
             response = new QueryPrintPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
-        } else if (!Validator.contains(EnumDefine.PayType.class, request.getPayType())) {
+        } else if (!Validator.contains(SysEnums.PayType.class, request.getPayType() + "")) {
             response = new QueryPrintPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
             try {
-                response = payDetailsService.doJoinTransQueryPayDetail(request.getOutTradeNo(), request.getPayType());
+                response = payDetailsService.doJoinTransQueryPaySuccessDetail(request.getOutTradeNo(), request.getPayType());
                 logger.info(logPrefix + "成功");
             } catch (IllegalArgumentException e) {
                 logger.warn(logPrefix + "警告：{}", e.getMessage());

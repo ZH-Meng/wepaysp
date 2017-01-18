@@ -18,13 +18,15 @@ import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.EnumDefine.OrderClosedErr;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ResultCode;
-import com.zbsp.wepaysp.common.constant.EnumDefine.ReturnCode;
-import com.zbsp.wepaysp.common.constant.EnumDefine.TradeState;
-import com.zbsp.wepaysp.common.constant.EnumDefine.TradeType;
-import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.WxEnums.OrderClosedErr;
+import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.TradeState;
+import com.zbsp.wepaysp.common.constant.WxEnums.TradeType;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
@@ -40,7 +42,6 @@ import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
 
@@ -395,7 +396,7 @@ public class WeixinPayDetailsServiceImpl
         Dealer dealer = null;
         Store store = null;
         DealerEmployee dealerEmployee = null;
-        if (WeixinPayDetails.PayType.JSAPI.getValue().equals(weixinPayDetailsVO.getPayType())) {// 统一下单-公众号支付
+        if (StringUtils.equals(PayType.WEIXIN_JSAPI.getValue(), weixinPayDetailsVO.getPayType())) {// 统一下单-公众号支付
             unifyOrder = true;
             jsapiPay = true;
             Validator.checkArgument(StringUtils.isBlank(weixinPayDetailsVO.getDealerOid()), "商户Oid不能为空");
@@ -412,7 +413,7 @@ public class WeixinPayDetailsServiceImpl
                     }
                 }
             }
-        } else if (WeixinPayDetails.PayType.MICROPAY.getValue().equals(weixinPayDetailsVO.getPayType())) {// 刷卡支付
+        } else if (StringUtils.equals(PayType.WEIXIN_MICROPAY.getValue(), weixinPayDetailsVO.getPayType())) {// 刷卡支付
             microPay = true;
             /*Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
             Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");*/
@@ -560,7 +561,7 @@ public class WeixinPayDetailsServiceImpl
             payDetails.setReturnCode(returnCode);
             payDetails.setReturnMsg(payResultVO.getReturnMsg());
 
-            if (!WeixinPayDetails.PayType.MICROPAY.getValue().equals(payDetails.getPayType())) {
+            if (!StringUtils.equals(PayType.WEIXIN_MICROPAY.getValue(), payDetails.getPayType())) {// 非刷卡支付
                 // 统一下单- 微信结果通知，需要校验是否重复返回结果
                 if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) {
                     // 非处理中，直接返回

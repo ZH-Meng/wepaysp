@@ -17,8 +17,9 @@ import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.GateWayResponse;
-import com.zbsp.wepaysp.common.constant.EnumDefine.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.EnumDefine.PayType;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
@@ -31,7 +32,6 @@ import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.AliPayDetails;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails.TradeStatus;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 public class AliPayDetailsServiceImpl
@@ -51,7 +51,7 @@ public class AliPayDetailsServiceImpl
         Validator.checkArgument(10 < payType || payType < 6, "payType超出范围");
         
         AliPayDetailsVO returnVO = null;
-        if (PayType.ALI_FACE_BAR.getValue() == payType) {
+        if (StringUtils.equals(PayType.ALI_FACE_BAR.getValue(), payDetailsVO.getPayType())) {
         	logger.info("创建订单，支付方式：支付宝-当面付-条码支付");
             returnVO = createF2FBarPayDetail(payDetailsVO);
         } else {
