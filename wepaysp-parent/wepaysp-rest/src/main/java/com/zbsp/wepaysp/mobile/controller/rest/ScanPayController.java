@@ -20,6 +20,7 @@ import com.zbsp.wepaysp.mo.base.MobileRequest;
 import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayRequest;
 import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayResponse;
 import com.zbsp.wepaysp.mo.refund.v1_0.ScanRefundRequest;
+import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.EnumDefine;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.EnumDefine.WxPayResult;
@@ -79,6 +80,7 @@ public class ScanPayController extends BaseController {
                     payDetailsVO.setTotalFee(new Long(request.getPayMoney()).intValue());
                     payDetailsVO.setAuthCode(request.getAuthCode());
                     
+                    // 刷卡支付
                     Map<String, Object> resultMap = weixinPayDetailsMainService.createPayAndInvokeWxPay(payDetailsVO, null, null, null);
                     String resCode = MapUtils.getString(resultMap, "resultCode");
                     String resDesc = MapUtils.getString(resultMap, "resultDesc");
@@ -91,6 +93,7 @@ public class ScanPayController extends BaseController {
                         logger.info(logPrefix + "微信刷卡支付成功");
                         response = new ScanPayResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);
                     }
+                    // 收银客户端直接展示支付结果，所以支付成功失败都判断非空
                     if (payDetailsVO == null) {
                         throw new RuntimeException("wexinPayDetailsVO不能为空");
                     }
@@ -110,12 +113,30 @@ public class ScanPayController extends BaseController {
                     payDetailsVO.setTotalAmount(new Long(request.getPayMoney()).intValue());
                     payDetailsVO.setAuthCode(request.getAuthCode());
                     
+                    // 当面付-条码支付
                     Map<String, Object> resultMap = aliPayDetailsMainService.face2FaceBarPay(payDetailsVO);
                     String resCode = MapUtils.getString(resultMap, "resultCode");
                     String resDesc = MapUtils.getString(resultMap, "resultDesc");
                     payDetailsVO = (AliPayDetailsVO) MapUtils.getObject(resultMap, "aliPayDetailsVO");
-                    System.out.println(payDetailsVO);
-                    // TODO
+                    
+                    if (!StringUtils.equalsIgnoreCase(AliPayResult.SUCCESS.getCode(), resCode)) {// 支付失败
+                        logger.warn(logPrefix + "支付宝条码支付失败，错误码：" + resCode + "，错误描述：" + resDesc);
+                        response = new ScanPayResponse(PayResult.PAY_FAIL.getCode(), PayResult.PAY_FAIL.getDesc(), responseId);
+                    } else {
+                        logger.info(logPrefix + "支付宝条码支付成功");
+                        response = new ScanPayResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);
+                    }
+                    
+                    // FIXME 收银客户端直接展示支付结果，所以支付成功失败都判断非空
+                    if (payDetailsVO == null) {
+                        throw new RuntimeException("aliPayDetailsVO不能为空");
+                    }
+                    
+                    response.setCollectionMoney(payDetailsVO.getTotalAmount());
+                    response.setOutTradeNo(payDetailsVO.getOutTradeNo());
+                    response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
+                    response.setTradeStatus(payDetailsVO.getTradeStatus());
+                    response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                 } else {
                     logger.warn(logPrefix + "警告：{}, 授权码：{}", "发现不能识别的支付请求", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
