@@ -38,6 +38,15 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<compilerArgs>
+						<arg>-verbose</arg>
+						<arg>-Xlint:unchecked</arg>
+						<arg>-Xlint:deprecation</arg>
+						<arg>-bootclasspath</arg>
+						<arg>${env.JAVA_HOME}/jre/lib/rt.jar</arg>
+						<arg>-extdirs</arg> 
+						<arg>${project.basedir}/lib</arg>
+					</compilerArgs> 
 				</configuration>
 			</plugin>
 			<plugin>
