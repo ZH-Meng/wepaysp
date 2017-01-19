@@ -59,12 +59,18 @@ public class SysEnums {
      * 交易状态
      */
     public static enum TradeStatus {
-        /** 0：交易中 */        TRADEING(0),
-        /** 1：交易成功 */     TRADE_SUCCESS(1),
-        /** 2：交易失败 */     TRADE_FAIL(2),
-        /** 3：交易撤销 */     TRADE_REVERSED(3),
-        /** 4：交易关闭 */     TRADE_CLOSED(4),
-        /** 5：交易待关闭 */     TRADE_TO_BE_CLOSED(5);
+        /** 0：交易中 */                                        
+        TRADEING(0),
+        /** 1：交易成功 */
+        TRADE_SUCCESS(1),
+        /** 2：交易失败 */     
+        TRADE_FAIL(2),
+        /** 3：交易撤销 */     
+        TRADE_REVERSED(3),
+        /** 4：未付款交易超时关闭，或支付完成后全额退款 */     
+        TRADE_CLOSED(4),
+        /** 5：交易待关闭 */  
+        TRADE_TO_BE_CLOSED(5);
         
         private int value;
 

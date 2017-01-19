@@ -67,15 +67,16 @@ public class AliPayDetailsMainServiceImpl
             
             // 调用tradePay方法获取当面付应答
             payResult = service.tradePay(builder);
-            // FIXME 验签、未知交易结果处理、支付中轮询修改
+            // 同步返回暂不验签 FIXME 支付中轮询修改
+            // 未知交易结果处理
             switch (payResult.getTradeStatus()) {
                 case SUCCESS:
                     logger.info(logPrefix + "调用当面付接口-条码支付结果 - 支付成功(ouTradeNo={})", outTradeNo);
                     break;
-                case FAILED:
+                case FAILED:// 支付失败或者撤销成功、撤销失败
                     logger.error(logPrefix + "调用当面付接口-条码支付结果 - 支付失败(ouTradeNo={})", outTradeNo);
                     break;
-                case UNKNOWN:
+                case UNKNOWN: // 撤销结果异常
                     logger.error(logPrefix + "调用当面付接口-条码支付结果 - 系统异常，订单状态未知(ouTradeNo={})", outTradeNo);
                     break;
                 default:

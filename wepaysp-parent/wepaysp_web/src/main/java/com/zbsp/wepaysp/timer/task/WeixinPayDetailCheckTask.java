@@ -105,8 +105,7 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
                         closeSuccTimes++;
                     } catch (Exception e) {
                         logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
-                            "系统支付订单(ID=" + payDetail.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
-                        logger.error(e.getMessage(), e);
+                            "系统支付订单(ID=" + payDetail.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()), e);
                         closeErrTimes++;
                     }
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 调用关闭订单API结束 ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
@@ -126,9 +125,7 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
                         querySuccTimes++;
                     } catch (Exception e) {
                         logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
-                            "系统支付订单(ID=" + payDetail.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
-                        logger.error(e.getMessage(), e);
-                        e.printStackTrace();
+                            "系统支付订单(ID=" + payDetail.getOutTradeNo() + "）查询错误", "，异常信息：" + e.getMessage()), e);
                         queryErrTimes++;
                     }
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 调用查询订单API结束 ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));

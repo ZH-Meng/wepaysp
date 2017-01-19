@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.persistence.LockModeType;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.zbsp.wepaysp.api.service.BaseService;
@@ -128,15 +128,19 @@ public class AliPayDetailsServiceImpl
             String errCodeDes = payResultVO.getSubMsg();
             
             if (StringUtils.isBlank(errCodeDes)) {
-                if (Validator.contains(AliPayResult.class, errCode)) {
-                    errCodeDes = Enum.valueOf(AliPayResult.class, errCode).getDesc();
+                String codeTemp = errCode;
+                if (StringUtils.startsWithIgnoreCase(errCode, "ACQ.")) {
+                    codeTemp = StringUtils.substring(errCode, 4);
+                }
+                if (Validator.contains(AliPayResult.class, codeTemp)) {
+                    errCodeDes = Enum.valueOf(AliPayResult.class, codeTemp).getDesc();
                 }
             }
             payDetails.setSubCode(errCode);
             payDetails.setSubMsg(errCodeDes);
             payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
             if (!StringUtils.equals(GateWayResponse.FAIL.getCode(), code)) {// 支付失败
-                logger.error(AlarmLogPrefix.handleAliPayResultException.getValue() + "支付宝当面条码支付(ouTradeNo={})网关返回结果 - 错误 : {}", outTradeNo);
+                logger.error(AlarmLogPrefix.handleAliPayResultException.getValue() + "支付宝当面条码支付(ouTradeNo={})网关返回结果码 : {}", outTradeNo, code);
             }
             logDescTemp += "支付结果：交易失败，错误码：" + errCode + "，错误描述：" + errCodeDes;
         }
