@@ -62,14 +62,14 @@ public class AliPayDetailsServiceImpl
     }
     
     @Override
-    public AliPayDetailsVO doTransUpdateFace2FacePayResult(String code, String subCode, AliPayDetailsVO payResultVO) {
+    public AliPayDetailsVO doTransUpdateFace2FacePayResult(String code, String subCode, AliPayDetailsVO payResultVO, Integer updateTradeStatus) {
         // 校验参数
         Validator.checkArgument(payResultVO == null, "payResultVO为空");
         Validator.checkArgument(StringUtils.isBlank(code), "code为空");
         
         Validator.checkArgument(StringUtils.isBlank(payResultVO.getOutTradeNo()),"outTradeNo为空");
         String outTradeNo = payResultVO.getOutTradeNo();
-        logger.info("支付宝条码支付结果：outTradeNo : {}, code : {}, subCode : {}", outTradeNo, code, subCode);
+        logger.info("支付宝条码支付结果：outTradeNo : {}, code : {}, msg : {}, subCode : {}, subMsg : {}", outTradeNo, code, payResultVO.getMsg(), subCode, payResultVO.getSubMsg());
         
         Date processBeginTime = new Date();
         
@@ -85,45 +85,35 @@ public class AliPayDetailsServiceImpl
         
         AliPayDetailsVO returnPayDetailVO = null;
         
-        String oldPayDetailStr = payDetails.toString();        
         payDetails.setCode(code);
         payDetails.setMsg(payResultVO.getMsg());
-        String logDescTemp = "";
+        
+        String oldPayDetailStr = payDetails.toString();        
+        StringBuffer logDescBuffer = new StringBuffer("修改支付宝支付明细[");
+        logDescBuffer.append("，code：");
+        logDescBuffer.append(code);
+        logDescBuffer.append("，msg：");
+        logDescBuffer.append(payResultVO.getMsg());
+        
+        int tradeStatus = payDetails.getTradeStatus();
+        
         if (StringUtils.equals(GateWayResponse.SUCCESS.getCode(), code)) {// 支付成功
             Validator.checkArgument(StringUtils.isBlank(payResultVO.getTradeNo()), "支付宝支付订单ID(tradeNo)为空");
             Validator.checkArgument(payResultVO.getTotalAmount() == null, "订单金额(totalAmount)为空");
             
-            int tradeStatus = TradeStatus.TRADE_SUCCESS.getValue();
+            tradeStatus = updateTradeStatus == null ? TradeStatus.TRADE_SUCCESS.getValue() : updateTradeStatus;
             // 校验金额
-            if (payDetails.getTotalAmount().intValue() != payResultVO.getTotalAmount().intValue()) {
+            if (TradeStatus.TRADE_SUCCESS.getValue() == tradeStatus && payDetails.getTotalAmount().intValue() != payResultVO.getTotalAmount().intValue()) {
                 logger.error(StringHelper.combinedString(AlarmLogPrefix.aliPayAPIMoneyException.getValue(), 
-                    "金额不一致，系统订单ID=" + payResultVO.getOutTradeNo(), 
+                    "金额不一致，需要人工处理，系统订单ID=" + payResultVO.getOutTradeNo(), 
                     "支付请求总金额："+ payDetails.getTotalAmount().intValue() + "，响应总金额：" + payResultVO.getTotalAmount().intValue()));
-                tradeStatus = TradeStatus.TRADE_FAIL.getValue();
+                tradeStatus = TradeStatus.MANUAL_HANDLING.getValue();
                 payDetails.setRemark((StringUtils.isBlank(payDetails.getRemark()) ? "支付宝响应成功，但" : (payDetails.getRemark() +",")) + "金额不一致");
             }
             //TODO 其他金额校验
-            
-            payDetails.setTradeNo(payResultVO.getTradeNo());
-            payDetails.setBuyerLogonId(payResultVO.getBuyerLogonId());
-            payDetails.setBuyerUserId(payResultVO.getBuyerUserId());
-            payDetails.setTotalAmount(payResultVO.getTotalAmount());
-            payDetails.setReceiptAmount(payResultVO.getReceiptAmount());
-            payDetails.setPointAmount(payResultVO.getPointAmount());
-            payDetails.setInvoiceAmount(payResultVO.getInvoiceAmount());
-            payDetails.setGmtPayment(payResultVO.getGmtPayment());
-            //TODO fund_bill_list voucher_detail_list
-            payDetails.setCardBalance(payResultVO.getCardBalance());
-            payDetails.setStoreName(payResultVO.getStoreName());
-            payDetails.setDiscountGoodsDetail(payResultVO.getDiscountGoodsDetail());
-            payDetails.setTradeStatus(tradeStatus);
-            
-            if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
-                logDescTemp += "支付结果：交易成功" + "，支付宝支付订单号：" + payResultVO.getTradeNo() + "，交易状态：" + tradeStatus + "，支付金额：" + payResultVO.getTotalAmount();
-            } else {
-                logDescTemp += "，支付结果：交易失败，" + payDetails.getRemark() + "，支付宝支付订单号：" + payResultVO.getTradeNo() + "，交易状态：" + tradeStatus;
-            }
         } else {
+            tradeStatus = updateTradeStatus == null ? TradeStatus.TRADE_FAIL.getValue() : updateTradeStatus;
+            
             String errCode = StringUtils.isNotBlank(payResultVO.getSubCode()) ? payResultVO.getSubCode() : AliPayResult.FAIL.getCode();// 错误码
             String errCodeDes = payResultVO.getSubMsg();
             
@@ -138,18 +128,66 @@ public class AliPayDetailsServiceImpl
             }
             payDetails.setSubCode(errCode);
             payDetails.setSubMsg(errCodeDes);
-            payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
-            if (!StringUtils.equals(GateWayResponse.FAIL.getCode(), code)) {// 支付失败
-                logger.error(AlarmLogPrefix.handleAliPayResultException.getValue() + "支付宝当面条码支付(ouTradeNo={})网关返回结果码 : {}", outTradeNo, code);
+            
+            if (tradeStatus == TradeStatus.MANUAL_HANDLING.getValue()) {
+                logger.error(AlarmLogPrefix.handleAliPayResultException.getValue() + "支付宝条码支付(ouTradeNo={})，需要人工处理", outTradeNo);
             }
-            logDescTemp += "支付结果：交易失败，错误码：" + errCode + "，错误描述：" + errCodeDes;
+            
+            logDescBuffer.append("，subCode：");
+            logDescBuffer.append(payDetails.getSubCode());
+            logDescBuffer.append("，subMsg：");
+            logDescBuffer.append(payDetails.getSubMsg());
         }
+        payDetails.setTradeStatus(tradeStatus);
+        
+        // 无论支付成功或失败、未知都更新结果信息
+        payDetails.setTradeNo(payResultVO.getTradeNo());
+        payDetails.setBuyerLogonId(payResultVO.getBuyerLogonId());
+        payDetails.setBuyerUserId(payResultVO.getBuyerUserId());
+        payDetails.setTotalAmount(payResultVO.getTotalAmount());
+        payDetails.setReceiptAmount(payResultVO.getReceiptAmount());
+        payDetails.setPointAmount(payResultVO.getPointAmount());
+        payDetails.setInvoiceAmount(payResultVO.getInvoiceAmount());
+        payDetails.setGmtPayment(payResultVO.getGmtPayment());
+        //TODO fund_bill_list voucher_detail_list
+        payDetails.setCardBalance(payResultVO.getCardBalance());
+        payDetails.setStoreName(payResultVO.getStoreName());
+        payDetails.setDiscountGoodsDetail(payResultVO.getDiscountGoodsDetail());
+        
+        
+        logDescBuffer.append("tradeNo：");
+        logDescBuffer.append(payResultVO.getTradeNo());
+        logDescBuffer.append("，tradeStatus：");
+        logDescBuffer.append(payDetails.getTradeStatus());
+        logDescBuffer.append("，totalAmount：");
+        logDescBuffer.append(payResultVO.getTotalAmount());
+        logDescBuffer.append("，buyerLogonId：");
+        logDescBuffer.append(payResultVO.getBuyerLogonId());
+        logDescBuffer.append("，buyerUserId：");
+        logDescBuffer.append(payResultVO.getBuyerUserId());
+        logDescBuffer.append("，gmtPayment：");
+        logDescBuffer.append(payResultVO.getGmtPayment());
+        if (StringUtils.isNotBlank(payDetails.getRemark())) {
+            logDescBuffer.append("，remark：");
+            logDescBuffer.append(payDetails.getRemark());
+        }
+        logDescBuffer.append("]");
+        
+        /*logDescBuffer.append("，receiptAmount：");
+        logDescBuffer.append(payResultVO.getReceiptAmount());
+        logDescBuffer.append("，pointAmount：");
+        logDescBuffer.append(payResultVO.getPointAmount());
+        logDescBuffer.append("，invoiceAmount：");
+        logDescBuffer.append(payResultVO.getInvoiceAmount());
+        logDescBuffer.append("，invoiceAmount：");
+        logDescBuffer.append(payResultVO.getInvoiceAmount());*/
+        
         Date endTime = new Date();
         payDetails.setTransEndTime(new Timestamp(endTime.getTime()));
         commonDAO.update(payDetails);
         
         // 记录修改日志
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细[" + logDescTemp + "]", 
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细[" + logDescBuffer.toString() + "]", 
             processBeginTime, endTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
         
         // 组装返回结果
@@ -185,7 +223,7 @@ public class AliPayDetailsServiceImpl
         //newPayOrder.setAppid();// 应用ID
         //newPayOrder.setDealerPid(dealerPid);        
         //newPayOrder.setOperatorId(operatorId);
-        newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());//FIXME
+        //newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());//FIXME
         //newPayOrder.setSellerId
         //newPayOrder.providerId
         // terminal_id
@@ -285,6 +323,28 @@ public class AliPayDetailsServiceImpl
         return aliPayDetails;
     }
 
+    @Override
+    public void doTransUpdatePayDetailState(String outTradeNo, int tradeStatus) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "payType为空");
+        
+        // 查找支付明细
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AliPayDetails w where w.outTradeNo=:OUTTRADENO";
+        jpqlMap.put("OUTTRADENO", outTradeNo);
+        
+        AliPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
+        if (payDetails == null) {
+            throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + outTradeNo);
+        }
+        String oldPayDetailStr = payDetails.toString();
+        payDetails.setTradeStatus(tradeStatus);
+        commonDAO.update(payDetails);
+        Date logTime = new Date();
+        // 记录修改日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细状态[" + tradeStatus + "]", 
+            logTime, logTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+    }
+    
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }

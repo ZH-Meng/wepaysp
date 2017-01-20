@@ -32,4 +32,7 @@ public class SysEnvKey {
     /**金额：分和元的倍数*/
     public static final BigDecimal BIG_100 = new BigDecimal(100);
     
+    /**支付宝支付超时时间 1分钟*/
+    public static final String EXPIRE_TIME_ALI_PAY_1M = "1m";
+    
 }

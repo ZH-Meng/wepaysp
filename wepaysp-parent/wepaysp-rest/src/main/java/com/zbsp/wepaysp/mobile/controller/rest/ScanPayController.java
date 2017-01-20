@@ -92,17 +92,16 @@ public class ScanPayController extends BaseController {
                     } else {
                         logger.info(logPrefix + "微信刷卡支付成功");
                         response = new ScanPayResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);
+                        // 支付成功，收银客户端直接展示支付结果，支付失败不展示
+                        if (payDetailsVO == null) {
+                            throw new RuntimeException("wexinPayDetailsVO不能为空");
+                        }
+                        response.setCollectionMoney(payDetailsVO.getTotalFee());// 总金额实际收款金额
+                        response.setOutTradeNo(payDetailsVO.getOutTradeNo());
+                        response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
+                        response.setTradeStatus(payDetailsVO.getTradeStatus());
+                        response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
-                    // 收银客户端直接展示支付结果，所以支付成功失败都判断非空
-                    if (payDetailsVO == null) {
-                        throw new RuntimeException("wexinPayDetailsVO不能为空");
-                    }
-                    response.setCollectionMoney(payDetailsVO.getTotalFee());// 总金额实际收款金额
-                    response.setOutTradeNo(payDetailsVO.getOutTradeNo());
-                    response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
-                    response.setTradeStatus(payDetailsVO.getTradeStatus());
-                    response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
-                    
                 } else if (request.getAuthCode().startsWith("28")) {// 支付宝-当面付-条码支付
                     logger.info("检测支付方式：支付宝-当面付-条码支付, 授权码：{}", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
@@ -125,18 +124,16 @@ public class ScanPayController extends BaseController {
                     } else {
                         logger.info(logPrefix + "支付宝条码支付成功");
                         response = new ScanPayResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);
+                        if (payDetailsVO == null) {
+                            throw new RuntimeException("aliPayDetailsVO不能为空");
+                        }
+                        
+                        response.setCollectionMoney(payDetailsVO.getTotalAmount());
+                        response.setOutTradeNo(payDetailsVO.getOutTradeNo());
+                        response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
+                        response.setTradeStatus(payDetailsVO.getTradeStatus());
+                        response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
-                    
-                    // FIXME 收银客户端直接展示支付结果，所以支付成功失败都判断非空
-                    if (payDetailsVO == null) {
-                        throw new RuntimeException("aliPayDetailsVO不能为空");
-                    }
-                    
-                    response.setCollectionMoney(payDetailsVO.getTotalAmount());
-                    response.setOutTradeNo(payDetailsVO.getOutTradeNo());
-                    response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
-                    response.setTradeStatus(payDetailsVO.getTradeStatus());
-                    response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                 } else {
                     logger.warn(logPrefix + "警告：{}, 授权码：{}", "发现不能识别的支付请求", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);

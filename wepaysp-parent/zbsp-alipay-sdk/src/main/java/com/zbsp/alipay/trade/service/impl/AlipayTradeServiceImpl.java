@@ -188,8 +188,14 @@ public class AlipayTradeServiceImpl extends AbsAlipayTradeService {
                                                             .setAppAuthToken(appAuthToken)
                                                             .setOutTradeNo(outTradeNo);
             AlipayTradeQueryResponse queryResponse = tradeQuery(queryBuiler);
-            return checkQueryAndCancel(outTradeNo, appAuthToken, result, queryResponse);
-
+            
+            // 2017/1/20 add 查询的交易不存在，重新支付
+            if (queryResponse != null && "ACQ.TRADE_NOT_EXIST".equals(queryResponse.getSubCode())) {
+                tradePay(builder);
+            } else {
+                // 检查 如果交易没有支付成功，则调用撤销
+                return checkQueryAndCancel(outTradeNo, appAuthToken, result, queryResponse);
+            }
         } else {
             // 其他情况表明该订单支付明确失败
             result.setTradeStatus(TradeStatus.FAILED);

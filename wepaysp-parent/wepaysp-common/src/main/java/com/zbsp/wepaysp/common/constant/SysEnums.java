@@ -65,12 +65,15 @@ public class SysEnums {
         TRADE_SUCCESS(1),
         /** 2：交易失败 */     
         TRADE_FAIL(2),
-        /** 3：交易撤销 */     
+        /** 3：交易撤销 */
         TRADE_REVERSED(3),
         /** 4：未付款交易超时关闭，或支付完成后全额退款 */     
         TRADE_CLOSED(4),
         /** 5：交易待关闭 */  
-        TRADE_TO_BE_CLOSED(5);
+        TRADE_TO_BE_CLOSED(5),
+        
+        /** 99 人工处理*/
+        MANUAL_HANDLING(99);
         
         private int value;
 

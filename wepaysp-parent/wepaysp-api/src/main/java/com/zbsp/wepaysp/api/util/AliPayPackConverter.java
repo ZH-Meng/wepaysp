@@ -40,7 +40,8 @@ public class AliPayPackConverter {
             ExtendParams extendParams = new ExtendParams();
             extendParams.setSysServiceProviderId(providerId);
             
-            String timeoutExpress = "5m"; // 支付超时，线下扫码交易定义为5分钟
+            // FIXME 条码支付超时
+            String timeoutExpress = SysEnvKey.EXPIRE_TIME_ALI_PAY_1M;
             String appAuthToken = payDetailsVO.getAppAuthToken(); // 应用授权令牌
 
             // 创建条码支付请求builder，设置请求参数
