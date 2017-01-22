@@ -234,8 +234,8 @@ abstract class AbsAlipayTradeService extends AbsAlipayService implements AlipayT
         payResponse.setBody(response.getBody());
         payResponse.setParams(response.getParams());
 
-        // payResponse应该是交易支付时间，但是response里是本次交易打款给卖家的时间,是否有问题
-        // payResponse.setGmtPayment(response.getSendPayDate());
+        // FIXME payResponse应该是交易支付时间，但是response里是本次交易打款给卖家的时间,是否有问题
+        payResponse.setGmtPayment(response.getSendPayDate());
         payResponse.setBuyerLogonId(response.getBuyerLogonId());
         payResponse.setFundBillList(response.getFundBillList());
         payResponse.setOpenId(response.getOpenId());
@@ -243,6 +243,15 @@ abstract class AbsAlipayTradeService extends AbsAlipayService implements AlipayT
         payResponse.setReceiptAmount(response.getReceiptAmount());
         payResponse.setTotalAmount(response.getTotalAmount());
         payResponse.setTradeNo(response.getTradeNo());
+        
+        //2017/1/22
+        payResponse.setBuyerUserId(response.getBuyerUserId());
+        payResponse.setBuyerPayAmount(response.getBuyerPayAmount());
+        payResponse.setPointAmount(response.getPointAmount());
+        payResponse.setInvoiceAmount(response.getInvoiceAmount());
+        payResponse.setDiscountGoodsDetail(response.getDiscountGoodsDetail());
+        payResponse.setVoucherDetailList(response.getVoucherDetailList());
+        payResponse.setStoreName(response.getStoreName());
         return payResponse;
     }
 

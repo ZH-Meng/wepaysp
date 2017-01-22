@@ -95,47 +95,47 @@ public class AliPayDetailsMainServiceImpl
         Integer updateTradeStatus = null;
         logger.info(logPrefix + "处理支付宝当面条码支付结果 - 开始");
         try {
-            // 同步返回暂不验签 FIXME 支付中轮询修改
-            // FIXME 支付处理中，撤销结果未知，再查询结果
+            // 同步返回SDK已验签 支付中，轮询使用官方推荐3ms * 10 次
+            // FIXME 支付异常，撤销异常，交易直接关闭 
+            // 支付处理中，撤销结果未知，再查询结果
             switch (payResult.getTradeStatus()) {
                 case SUCCESS:
-                    logger.info(logPrefix + "- SDK支付成功(ouTradeNo={}), 准备更新支付结果", outTradeNo);
+                    logger.info(logPrefix + "- SDK支付成功, ouTradeNo={}, 准备更新支付结果", outTradeNo);
                     updateFlag = true;
                     break;
                 case FAILED:
                     if (payResult.getResponse() == null) {// 支付异常->撤销成功/失败
-                        logger.warn(logPrefix + "SDK支付异常，撤销成功/失败(ouTradeNo={}, 支付结果信息为空，支付状态置为待关闭)", outTradeNo);
+                        logger.warn(logPrefix + "SDK支付异常，撤销成功/失败, ouTradeNo={}, 支付结果信息为空，支付状态置为待关闭)", outTradeNo);
                         
                         aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.TRADE_TO_BE_CLOSED.getValue());
                     } else {
                         String code = payResult.getResponse().getCode();
                         if (StringUtils.equals(code, GateWayResponse.UNKNOW.getCode())) {// 支付异常->撤销成功/失败 
-                            logger.warn(logPrefix + "SDK支付异常，撤销成功/失败(ouTradeNo={}), 准备更新支付结果信息，支付状态置为待关闭", outTradeNo);
+                            logger.warn(logPrefix + "SDK支付异常，撤销成功/失败, ouTradeNo={}, 准备更新支付结果信息，支付状态置为待关闭", outTradeNo);
                             
                             aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.TRADE_TO_BE_CLOSED.getValue());
                         } else if (StringUtils.equals(code, GateWayResponse.ORDER_SUCCESS_PAY_INPROCESS.getCode())) {// 支付处理中->查询超时->撤销成功/失败
-                            logger.info(logPrefix + "SDK支付查询超时，撤销结果未知(ouTradeNo={}), 再次查询", outTradeNo);
-                            updateTradeStatus = queryTradeStatus(payDetailsVO);
+                            logger.info(logPrefix + "SDK支付查询超时，撤销结果未知, ouTradeNo={},  再次查询", outTradeNo);
+                            updateTradeStatus = queryTradeStatusAfterCancelUnknown(payDetailsVO);
                             if (updateTradeStatus == TradeStatus.MANUAL_HANDLING.getValue()) {
-                                logger.error(logPrefix + "SDK支付状态异常(ouTradeNo={}), 支付状态置为人工处理", outTradeNo);
+                                logger.error(logPrefix + "SDK支付状态异常, ouTradeNo={}, 支付状态置为人工处理", outTradeNo);
                             }
-                            
                             updateFlag = true;
                         } else {// 支付失败
-                            logger.warn(logPrefix + "SDK支付明确失败(ouTradeNo={}), 准备更新支付结果", outTradeNo);
+                            logger.warn(logPrefix + "SDK支付明确失败, ouTradeNo={},  准备更新支付结果", outTradeNo);
                             updateFlag = true;
                         }
                     }
                     break;
                 case UNKNOWN: 
                     if (payResult.getResponse() == null) {// 支付异常->撤销异常
-                        logger.warn(logPrefix + "SDK支付异常，撤销异常(ouTradeNo={}), 支付结果信息为空，支付状态置为待关闭", outTradeNo);
+                        logger.warn(logPrefix + "SDK支付异常，撤销异常, ouTradeNo={}, 支付结果信息为空，支付状态置为待关闭", outTradeNo);
                         aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.TRADE_TO_BE_CLOSED.getValue());
                     } else {// 支付处理中->查询超时->撤销异常
-                        logger.info(logPrefix + "SDK支付查询超时，撤销异常(ouTradeNo={}), 再次查询", outTradeNo);
-                        updateTradeStatus = queryTradeStatus(payDetailsVO);
+                        logger.info(logPrefix + "SDK支付查询超时，撤销结果未知, ouTradeNo={},  再次查询", outTradeNo);
+                        updateTradeStatus = queryTradeStatusAfterCancelUnknown(payDetailsVO);
                         if (updateTradeStatus == TradeStatus.MANUAL_HANDLING.getValue()) {
-                            logger.error(logPrefix + "SDK支付状态异常(ouTradeNo={}), 支付状态置为人工处理", outTradeNo);
+                            logger.error(logPrefix + "SDK支付状态异常, ouTradeNo={}, 支付状态置为人工处理", outTradeNo);
                         }
                         updateFlag = true;
                     }
@@ -146,6 +146,8 @@ public class AliPayDetailsMainServiceImpl
             }
             
             if (updateFlag) {
+                // 回置订单号，支付失败时结果中outTradeNo为空
+                payResult.getResponse().setOutTradeNo(outTradeNo);
                 logger.info(logPrefix + "支付响应转换支付明细 - 开始");
                 
                 payResultVO = AliPayPackConverter.alipayTradePayResponse2AliPayDetailsVO(payResult.getResponse());
@@ -160,12 +162,12 @@ public class AliPayDetailsMainServiceImpl
                 if (payResultVO.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
                     resultMap.put("resultCode", AliPayResult.SUCCESS.getCode());
                     resultMap.put("resultDesc", AliPayResult.SUCCESS.getDesc());
-                    logger.info("系统订单ID=" + payResultVO.getOutTradeNo() + "支付宝条码支付成功，支付宝订单ID=" + payResultVO.getTradeNo());
+                    logger.info("支付宝条码支付成功，outTradeNo : {}, tradeNo : {}", payResultVO.getOutTradeNo(), payResultVO.getTradeNo());
                 } else {
                     if (payResultVO.getTradeStatus().intValue() == TradeStatus.MANUAL_HANDLING.getValue()) {
-                        logger.warn("系统订单ID : {}，支付宝条码支付结果需要人工处理，错误码 : {}，错误描述 : {}", payResultVO.getOutTradeNo(), payResultVO.getSubCode(), payResultVO.getSubMsg());
+                        logger.warn("支付宝条码支付结果需要人工处理，outTradeNo : {}，错误码 : {}，错误描述 : {}", payResultVO.getOutTradeNo(), payResultVO.getSubCode(), payResultVO.getSubMsg());
                     } else {
-                        logger.warn("系统订单ID : {}，支付宝条码支付失败，错误码 : {}，错误描述 : {}", payResultVO.getOutTradeNo(), payResultVO.getSubCode(), payResultVO.getSubMsg());
+                        logger.warn("支付宝条码支付失败，outTradeNo : {}，错误码 : {}，错误描述 : {}", payResultVO.getOutTradeNo(), payResultVO.getSubCode(), payResultVO.getSubMsg());
                     }
                     resultMap.put("resultCode", payResultVO.getSubCode());
                     resultMap.put("resultDesc", payResultVO.getSubMsg());
@@ -185,22 +187,35 @@ public class AliPayDetailsMainServiceImpl
         return resultMap;
     }
 
-    private Integer queryTradeStatus(AliPayDetailsVO payDetailsVO) {
+    
+    /**
+     * 在撤销结果未知或异常后再次调用支付宝支付查询结果查询交易状态，返回状态用于直接更新系统支付订单状态
+     * 
+     * @param payDetailsVO
+     * @return 支付订单状态
+     */
+    private Integer queryTradeStatusAfterCancelUnknown(AliPayDetailsVO payDetailsVO) {
+        logger.info("调用支付宝支付查询接口 - 开始");
         AlipayTradeQueryRequestBuilder queryBuilder = new AlipayTradeQueryRequestBuilder()
             .setAppAuthToken(payDetailsVO.getAppAuthToken())
             .setOutTradeNo(payDetailsVO.getOutTradeNo());
-        
-        AlipayF2FQueryResult queryTradeResult = AliPayUtil.getDefaultAlipayTradeService().queryTradeResult(queryBuilder);
-        if (queryTradeResult.isTradeSuccess()) {
+        try {
+            AlipayF2FQueryResult queryTradeResult = AliPayUtil.getDefaultAlipayTradeService().queryTradeResult(queryBuilder);
+            logger.info("调用支付宝支付查询接口 - 结果 - 订单支付结果 : {}, outTradeNo : {}", queryTradeResult.getTradeStatus(), payDetailsVO.getOutTradeNo());
             if (queryTradeResult.getResponse() != null) {
                 String queryTradeStatus = queryTradeResult.getResponse().getTradeStatus();
-                logger.info("SDK支付查询超时，撤销结果未知(ouTradeNo={}), 再次查询结果交易状态 : {}", payDetailsVO.getOutTradeNo(), queryTradeStatus);
+                logger.info("调用支付宝支付查询接口 - 结果 - 交易状态 : {}, outTradeNo : {}", queryTradeStatus, payDetailsVO.getOutTradeNo());
                 if (StringUtils.equalsIgnoreCase(TradeState4AliPay.TRADE_CLOSED.toString(), queryTradeStatus)) {
                     return TradeStatus.TRADE_CLOSED.getValue();
                 }
             }
+            return TradeStatus.MANUAL_HANDLING.getValue();
+        } catch (Exception e) {
+            logger.info("调用支付宝支付查询接口 - 异常 : {}", e.getMessage(), e);
+            return TradeStatus.MANUAL_HANDLING.getValue();
+        } finally {
+            logger.info("调用支付宝支付查询接口 - 结束");
         }
-        return TradeStatus.MANUAL_HANDLING.getValue();
     }
     
     public void setAliPayDetailsService(AliPayDetailsService aliPayDetailsService) {

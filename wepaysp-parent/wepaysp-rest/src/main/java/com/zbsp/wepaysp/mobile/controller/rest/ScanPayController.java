@@ -22,6 +22,8 @@ import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayResponse;
 import com.zbsp.wepaysp.mo.refund.v1_0.ScanRefundRequest;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.SysEnums;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
@@ -98,8 +100,8 @@ public class ScanPayController extends BaseController {
                         }
                         response.setCollectionMoney(payDetailsVO.getTotalFee());// 总金额实际收款金额
                         response.setOutTradeNo(payDetailsVO.getOutTradeNo());
-                        response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
-                        response.setTradeStatus(payDetailsVO.getTradeStatus());
+                        response.setPayType(PayPlatform.WEIXIN.getDesc());
+                        response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getDesc());
                         response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
                 } else if (request.getAuthCode().startsWith("28")) {// 支付宝-当面付-条码支付
@@ -130,8 +132,8 @@ public class ScanPayController extends BaseController {
                         
                         response.setCollectionMoney(payDetailsVO.getTotalAmount());
                         response.setOutTradeNo(payDetailsVO.getOutTradeNo());
-                        response.setPayType(Integer.valueOf(payDetailsVO.getPayType()));
-                        response.setTradeStatus(payDetailsVO.getTradeStatus());
+                        response.setPayType(PayPlatform.ALI.getDesc());
+                        response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getDesc());
                         response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
                 } else {

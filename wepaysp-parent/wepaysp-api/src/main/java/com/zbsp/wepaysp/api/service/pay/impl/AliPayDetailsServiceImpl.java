@@ -90,7 +90,7 @@ public class AliPayDetailsServiceImpl
         
         String oldPayDetailStr = payDetails.toString();        
         StringBuffer logDescBuffer = new StringBuffer("修改支付宝支付明细[");
-        logDescBuffer.append("，code：");
+        logDescBuffer.append("code：");
         logDescBuffer.append(code);
         logDescBuffer.append("，msg：");
         logDescBuffer.append(payResultVO.getMsg());
