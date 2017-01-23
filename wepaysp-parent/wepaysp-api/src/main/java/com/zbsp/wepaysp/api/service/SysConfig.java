@@ -3,9 +3,6 @@ package com.zbsp.wepaysp.api.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.zbsp.alipay.trade.service.AlipayMonitorService;
-import com.zbsp.alipay.trade.service.AlipayTradeService;
-
 /**
  * 系统静态配置，由SysConfigService 接口将配置初始化
  * 
@@ -62,14 +59,5 @@ public class SysConfig {
 	 * </pre>
 	 */
     public static Map<String, Map<String, Object>> partnerConfigMap2 = new HashMap<String, Map<String, Object>>();
-    
-    /**支付宝当面付2.0服务*/
-    public static AlipayTradeService tradeService;
-
-    /**支付宝当面付2.0服务（集成了交易保障接口逻辑）*/
-    public static AlipayTradeService tradeWithHBService;
-
-    /**支付宝交易保障接口服务，供测试接口api使用，请先阅读readme.txt*/
-    public static AlipayMonitorService monitorService;
 
 }

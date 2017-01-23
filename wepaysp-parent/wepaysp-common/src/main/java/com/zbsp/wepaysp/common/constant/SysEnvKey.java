@@ -35,4 +35,8 @@ public class SysEnvKey {
     /**支付宝支付超时时间 1分钟*/
     public static final String EXPIRE_TIME_ALI_PAY_1M = "1m";
     
+    /**蚂蚁开放平台第三方应用授权URL，服务窗链接或者二维码对应链接，获取app_auth_code，需要替换参数 APPID、REDIRECT_URI*/
+    public static final String ALIPAY_AUTH_APP_URL= "https://openauth.alipay.com/oauth2/appToAppAuth.htm?app_id=APPID&redirect_uri=REDIRECT_URI";
+
+    
 }

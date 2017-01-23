@@ -7,14 +7,11 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.zbsp.alipay.trade.config.Configs;
-import com.zbsp.alipay.trade.service.impl.AlipayMonitorServiceImpl;
-import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
-import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
+import com.zbsp.wepaysp.api.util.AliPayUtil;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.common.constant.SysEnums.ServerType;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
@@ -137,32 +134,10 @@ public class SysConfigServiceImpl
         }
         
         if (ServerType.REST.equals(serType)) {
-            initAliPayConfig();
+            AliPayUtil.init();
+            
             //FIXME WEB中的公众号支付迁移后，需要将微信的也添加
         }
-    }
-
-    /**
-     * 初始化支付宝支付配置
-     */
-    private void initAliPayConfig() {
-        /** 一定要在创建AlipayTradeService之前调用Configs.init()设置默认参数
-         *  Configs会读取classpath下的zfbinfo.properties文件配置信息，如果找不到该文件则确认该文件是否在classpath目录
-         */
-        Configs.init("zfbinfo.properties");
-
-        /** 使用Configs提供的默认参数
-         *  AlipayTradeService可以使用单例或者为静态成员对象，不需要反复new
-         */
-        SysConfig.tradeService = new AlipayTradeServiceImpl.ClientBuilder().build();
-
-        // 支付宝当面付2.0服务（集成了交易保障接口逻辑）
-        SysConfig.tradeWithHBService = new AlipayTradeWithHBServiceImpl.ClientBuilder().build();
-
-        /** 如果需要在程序中覆盖Configs提供的默认参数, 可以使用ClientBuilder类的setXXX方法修改默认参数 否则使用代码中的默认设置 */
-        SysConfig.monitorService = new AlipayMonitorServiceImpl.ClientBuilder()
-            .setGatewayUrl("http://mcloudmonitor.com/gateway.do").setCharset("GBK")
-            .setFormat("json").build();
     }
 
     @Override
