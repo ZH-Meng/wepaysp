@@ -12,6 +12,7 @@ import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.zbsp.alipay.trade.config.Configs;
+import com.zbsp.alipay.trade.config.Constants;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
 import com.zbsp.alipay.trade.service.AlipayMonitorService;
@@ -19,6 +20,7 @@ import com.zbsp.alipay.trade.service.AlipayTradeService;
 import com.zbsp.alipay.trade.service.impl.AlipayMonitorServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
+import com.zbsp.wepaysp.common.util.JSONUtil;
 
 /**
  * 支付宝支付接口工具类
@@ -70,8 +72,19 @@ public class AliPayUtil {
         // 设置业务参数
         request.setBizContent(builder.toJsonString());
         logger.info("AuthTokenAppRequest bizContent:" + request.getBizContent());
+        AlipayOpenAuthTokenAppResponse response = null;
+        for (int i = 1; i < 3; i++) {
+            response = getResponse(client, request);
+            logger.info("AuthTokenAppResponse :" + response == null ? null : JSONUtil.toJSONString(response, true));
+            if (response != null && Constants.SUCCESS.equals(response.getCode())) {
+                logger.info("应用授权使用app_auth_code换取app_auth_token成功");
+                break;
+            } else {
+                logger.info("应用授权使用app_auth_code换取app_auth_token失败");
+            }
+        }
         
-        return getResponse(client, request);
+        return response;
     }
     
     /**查询授权信息，接口名称：alipay.open.auth.token.app.query<br>
