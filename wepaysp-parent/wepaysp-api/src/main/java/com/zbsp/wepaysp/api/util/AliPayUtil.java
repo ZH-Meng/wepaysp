@@ -8,6 +8,7 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayRequest;
 import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
@@ -68,7 +69,7 @@ public class AliPayUtil {
     public static AlipayOpenAuthTokenAppResponse authTokenApp(AlipayOpenAuthTokenAppRequestBuilder builder) {
         AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
         // 设置平台参数
-
+        
         // 设置业务参数
         request.setBizContent(builder.toJsonString());
         logger.info("AuthTokenAppRequest bizContent:" + request.getBizContent());
@@ -79,8 +80,11 @@ public class AliPayUtil {
             if (response != null && Constants.SUCCESS.equals(response.getCode())) {
                 logger.info("应用授权使用app_auth_code换取app_auth_token成功");
                 break;
+            } else if (response != null && Constants.FAILED.equals(response.getCode())) {
+                logger.warn("应用授权使用app_auth_code换取app_auth_token失败");
+                break;
             } else {
-                logger.info("应用授权使用app_auth_code换取app_auth_token失败");
+                logger.warn("应用授权使用app_auth_code换取app_auth_token异常");
             }
         }
         
@@ -91,8 +95,29 @@ public class AliPayUtil {
      * 当商户把服务窗、店铺等接口的权限授权给ISV之后，支付宝会给ISV颁发一个app_auth_token。
      * 如若授权成功之后，ISV想知道用户的授权信息，如授权者、授权接口列表等信息，可以调用本接口查询某个app_auth_token对应的授权信息。
      */
-    public AlipayOpenAuthTokenAppQueryResponse  authTokenAppQuery(AlipayOpenAuthTokenAppQueryRequestBuilder builder) {
-        return null;
+    public static AlipayOpenAuthTokenAppQueryResponse  authTokenAppQuery(AlipayOpenAuthTokenAppQueryRequestBuilder builder) {
+        AlipayOpenAuthTokenAppQueryRequest request = new AlipayOpenAuthTokenAppQueryRequest();
+        // 设置平台参数
+
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AuthTokenAppRequest bizContent:" + request.getBizContent());
+        AlipayOpenAuthTokenAppQueryResponse response = null;
+        for (int i = 1; i < 3; i++) {
+            response = getResponse(client, request);
+            logger.info("AuthTokenAppResponse :" + response == null ? null : JSONUtil.toJSONString(response, true));
+            if (response != null && Constants.SUCCESS.equals(response.getCode())) {
+                logger.info("查询授权信息（app_auth_token={}）成功", builder.getAppAuthToken());
+                break;
+            } else if (response != null && Constants.FAILED.equals(response.getCode())) {
+                logger.warn("查询授权信息（app_auth_token={}）失败", builder.getAppAuthToken());
+                break;
+            } else {
+                logger.warn("查询授权信息（app_auth_token={}）异常", builder.getAppAuthToken());
+            }
+        }
+        
+        return response;
     }
 
     public static void init() {

@@ -29,8 +29,9 @@ public class ErrResult {
         return titleDesc;
     }
 
-    public void setTitleDesc(String titleDesc) {
+    public ErrResult setTitleDesc(String titleDesc) {
         this.titleDesc = titleDesc;
+        return this;
     }
 
     public String getErrCode() {

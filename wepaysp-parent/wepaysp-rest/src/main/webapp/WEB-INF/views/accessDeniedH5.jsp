@@ -15,7 +15,15 @@
 	</head>
 	<body>
 		<p class="error-title">
-			 <i class="weui_icon_warn"></i>访问失败
+			 <i class="weui_icon_warn"></i>
+			 <c:choose> 
+				<c:when test="${errResult != null && errResult.titleDesc !=  '' }">
+					${errResult.titleDesc  }
+				</c:when> 
+				<c:otherwise>   
+					访问失败  
+				</c:otherwise> 
+			</c:choose> 
 		</p>		
 		<div class="succ-info">
 			<div class="error-bottom">
@@ -26,7 +34,7 @@
 					<c:when test="${errResult != null && errResult.errDesc !=  '' }">   
 						${errResult.errDesc  }  
 					</c:when> 
-					<c:otherwise>   
+					<c:otherwise>
 						访问失败  
 					</c:otherwise> 
 				</c:choose> 

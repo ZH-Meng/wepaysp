@@ -58,7 +58,8 @@ public class Partner
     private String keyPath;
     private String keyPassword;
     private String appSecret;
-
+    private String isvPartnerId;
+    
     public static enum State {
         /** 状态:未使用 */        nouse("1"),
         /** 状态:使用 */        using("2"),
@@ -407,6 +408,15 @@ public class Partner
     public void setAppSecret(String appSecret) {
         this.appSecret = appSecret;
     }
+    
+    @Column(name = "isv_partner_id", length = 16)
+    public String getIsvPartnerId() {
+        return this.isvPartnerId;
+    }
+
+    public void setIsvPartnerId(String isvPartnerId) {
+        this.isvPartnerId = isvPartnerId;
+    }
 
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
@@ -455,7 +465,90 @@ public class Partner
 
     @Override
     public String toString() {
-        return "Partner [iwoid=" + iwoid + ", level=" + level + ", parentPartner=" + parentPartner + ", contractBegin=" + contractBegin + ", contractEnd=" + contractEnd + ", feeRate=" + feeRate + ", balance=" + balance + ", state=" + state + ", contactor=" + contactor + ", moblieNumber=" + moblieNumber + ", email=" + email + ", company=" + company + ", address=" + address + ", telephone=" + telephone + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("Partner [");
+        if (iwoid != null)
+            builder.append("iwoid=").append(iwoid).append(", ");
+        if (level != null)
+            builder.append("level=").append(level).append(", ");
+        if (parentPartner != null)
+            builder.append("parentPartnerOid=").append(parentPartner.getIwoid()).append(", ");
+        if (partnerId != null)
+            builder.append("partnerId=").append(partnerId).append(", ");
+        if (contractBegin != null)
+            builder.append("contractBegin=").append(contractBegin).append(", ");
+        if (contractEnd != null)
+            builder.append("contractEnd=").append(contractEnd).append(", ");
+        if (feeRate != null)
+            builder.append("feeRate=").append(feeRate).append(", ");
+        if (balance != null)
+            builder.append("balance=").append(balance).append(", ");
+        if (state != null)
+            builder.append("state=").append(state).append(", ");
+        if (contactor != null)
+            builder.append("contactor=").append(contactor).append(", ");
+        if (moblieNumber != null)
+            builder.append("moblieNumber=").append(moblieNumber).append(", ");
+        if (email != null)
+            builder.append("email=").append(email).append(", ");
+        if (company != null)
+            builder.append("company=").append(company).append(", ");
+        if (address != null)
+            builder.append("address=").append(address).append(", ");
+        if (telephone != null)
+            builder.append("telephone=").append(telephone).append(", ");
+        if (logo != null)
+            builder.append("logo=").append(logo).append(", ");
+        if (copyright != null)
+            builder.append("copyright=").append(copyright).append(", ");
+        if (copyrightUrl != null)
+            builder.append("copyrightUrl=").append(copyrightUrl).append(", ");
+        if (techSupportCompany != null)
+            builder.append("techSupportCompany=").append(techSupportCompany).append(", ");
+        if (techSupportUrl != null)
+            builder.append("techSupportUrl=").append(techSupportUrl).append(", ");
+        if (techSupportPerson != null)
+            builder.append("techSupportPerson=").append(techSupportPerson).append(", ");
+        if (techSupportPhone != null)
+            builder.append("techSupportPhone=").append(techSupportPhone).append(", ");
+        if (bankAccountName != null)
+            builder.append("bankAccountName=").append(bankAccountName).append(", ");
+        if (bankAccountType != null)
+            builder.append("bankAccountType=").append(bankAccountType).append(", ");
+        if (bankName != null)
+            builder.append("bankName=").append(bankName).append(", ");
+        if (bankAddr != null)
+            builder.append("bankAddr=").append(bankAddr).append(", ");
+        if (bankBranch != null)
+            builder.append("bankBranch=").append(bankBranch).append(", ");
+        if (bankCard != null)
+            builder.append("bankCard=").append(bankCard).append(", ");
+        if (creator != null)
+            builder.append("creator=").append(creator).append(", ");
+        if (createTime != null)
+            builder.append("createTime=").append(createTime).append(", ");
+        if (modifier != null)
+            builder.append("modifier=").append(modifier).append(", ");
+        if (modifyTime != null)
+            builder.append("modifyTime=").append(modifyTime).append(", ");
+        if (remark != null)
+            builder.append("remark=").append(remark).append(", ");
+        if (appId != null)
+            builder.append("appId=").append(appId).append(", ");
+        if (mchId != null)
+            builder.append("mchId=").append(mchId).append(", ");
+        if (partnerKey != null)
+            builder.append("partnerKey=").append(partnerKey).append(", ");
+        if (keyPath != null)
+            builder.append("keyPath=").append(keyPath).append(", ");
+        if (keyPassword != null)
+            builder.append("keyPassword=").append(keyPassword).append(", ");
+        if (appSecret != null)
+            builder.append("appSecret=").append(appSecret).append(", ");
+        if (isvPartnerId != null)
+            builder.append("isvPartnerId=").append(isvPartnerId);
+        builder.append("]");
+        return builder.toString();
     }
-
+    
 }

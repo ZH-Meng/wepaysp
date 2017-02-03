@@ -33,7 +33,7 @@ public class AliPayDetails
     private String partner1Oid;
     private String partner2Oid;
     private String partner3Oid;
-    private String isvPid;
+    private String isvPartnerId;
     private String dealerPid;
     private String appAuthToken;
     private String outTradeNo;
@@ -193,13 +193,13 @@ public class AliPayDetails
         this.partner3Oid = partner3Oid;
     }
 
-    @Column(name = "ISV_PID", length = 32)
-    public String getIsvPid() {
-        return this.isvPid;
+    @Column(name = "isv_partner_id", length = 16)
+    public String getIsvPartnerId() {
+        return this.isvPartnerId;
     }
 
-    public void setIsvPid(String isvPid) {
-        this.isvPid = isvPid;
+    public void setIsvPartnerId(String isvPartnerId) {
+        this.isvPartnerId = isvPartnerId;
     }
 
     @Column(name = "DEALER_PID", length = 32)
@@ -561,13 +561,117 @@ public class AliPayDetails
     public void setRemark(String remark) {
         this.remark = remark;
     }
-    
+
     @Override
     public String toString() {
-        return "AliPayDetails [iwoid=" + iwoid + ", payType=" + payType + ", partnerLevel=" + partnerLevel + ", partner1Oid=" + partner1Oid + ", partner2Oid=" + partner2Oid + ", partner3Oid=" + partner3Oid + ", isvPid=" + isvPid + ", dealerPid=" + dealerPid + ", appAuthToken=" + appAuthToken + ", outTradeNo=" + outTradeNo + ", scene=" + scene + ", authCode=" + authCode + ", subject=" + subject + ", "
-            + "sellerId=" + sellerId + ", totalAmount=" + totalAmount + ", discountableAmount=" + discountableAmount + ", undiscountableAmount=" + undiscountableAmount + ", body=" + body + ", operatorId=" + operatorId + ", storeId=" + storeId + ", terminalId=" + terminalId + ", alipayStoreId=" + alipayStoreId + ", code=" + code + ", msg=" + msg + ", subCode=" + subCode + ", subMsg=" + subMsg + ", "
-            + "sign=" + sign + ", tradeNo=" + tradeNo + ", buyerLogonId=" + buyerLogonId + ", receiptAmount=" + receiptAmount + ", buyerPayAmount=" + buyerPayAmount + ", pointAmount=" + pointAmount + ", invoiceAmount=" + invoiceAmount + ", gmtPayment=" + gmtPayment + ", cardBalance=" + cardBalance + ", storeName=" + storeName + ", buyerUserId=" + buyerUserId + ", discountGoodsDetail=" + discountGoodsDetail
-            + ", transBeginTime=" + transBeginTime + ", transEndTime=" + transEndTime + ", refundFee=" + refundFee + ", tradeStatus=" + tradeStatus + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("AliPayDetails [");
+        if (iwoid != null)
+            builder.append("iwoid=").append(iwoid).append(", ");
+        if (dealer != null)
+            builder.append("dealerOid=").append(dealer.getIwoid()).append(", ");
+        if (dealerEmployee != null)
+            builder.append("dealerEmployeeOid=").append(dealerEmployee.getIwoid()).append(", ");
+        if (store != null)
+            builder.append("storeOid=").append(store.getIwoid()).append(", ");
+        if (partner != null)
+            builder.append("partnerOid=").append(partner.getIwoid()).append(", ");
+        if (partnerEmployee != null)
+            builder.append("partnerEmployeeOid=").append(partnerEmployee.getIwoid()).append(", ");
+        if (payType != null)
+            builder.append("payType=").append(payType).append(", ");
+        if (partnerLevel != null)
+            builder.append("partnerLevel=").append(partnerLevel).append(", ");
+        if (partner1Oid != null)
+            builder.append("partner1Oid=").append(partner1Oid).append(", ");
+        if (partner2Oid != null)
+            builder.append("partner2Oid=").append(partner2Oid).append(", ");
+        if (partner3Oid != null)
+            builder.append("partner3Oid=").append(partner3Oid).append(", ");
+        if (isvPartnerId != null)
+            builder.append("isvPartnerId=").append(isvPartnerId).append(", ");
+        if (dealerPid != null)
+            builder.append("dealerPid=").append(dealerPid).append(", ");
+        if (appAuthToken != null)
+            builder.append("appAuthToken=").append(appAuthToken).append(", ");
+        if (outTradeNo != null)
+            builder.append("outTradeNo=").append(outTradeNo).append(", ");
+        if (scene != null)
+            builder.append("scene=").append(scene).append(", ");
+        if (authCode != null)
+            builder.append("authCode=").append(authCode).append(", ");
+        if (subject != null)
+            builder.append("subject=").append(subject).append(", ");
+        if (sellerId != null)
+            builder.append("sellerId=").append(sellerId).append(", ");
+        if (totalAmount != null)
+            builder.append("totalAmount=").append(totalAmount).append(", ");
+        if (discountableAmount != null)
+            builder.append("discountableAmount=").append(discountableAmount).append(", ");
+        if (undiscountableAmount != null)
+            builder.append("undiscountableAmount=").append(undiscountableAmount).append(", ");
+        if (body != null)
+            builder.append("body=").append(body).append(", ");
+        if (operatorId != null)
+            builder.append("operatorId=").append(operatorId).append(", ");
+        if (storeId != null)
+            builder.append("storeId=").append(storeId).append(", ");
+        if (terminalId != null)
+            builder.append("terminalId=").append(terminalId).append(", ");
+        if (alipayStoreId != null)
+            builder.append("alipayStoreId=").append(alipayStoreId).append(", ");
+        if (code != null)
+            builder.append("code=").append(code).append(", ");
+        if (msg != null)
+            builder.append("msg=").append(msg).append(", ");
+        if (subCode != null)
+            builder.append("subCode=").append(subCode).append(", ");
+        if (subMsg != null)
+            builder.append("subMsg=").append(subMsg).append(", ");
+        if (sign != null)
+            builder.append("sign=").append(sign).append(", ");
+        if (tradeNo != null)
+            builder.append("tradeNo=").append(tradeNo).append(", ");
+        if (buyerLogonId != null)
+            builder.append("buyerLogonId=").append(buyerLogonId).append(", ");
+        if (receiptAmount != null)
+            builder.append("receiptAmount=").append(receiptAmount).append(", ");
+        if (buyerPayAmount != null)
+            builder.append("buyerPayAmount=").append(buyerPayAmount).append(", ");
+        if (pointAmount != null)
+            builder.append("pointAmount=").append(pointAmount).append(", ");
+        if (invoiceAmount != null)
+            builder.append("invoiceAmount=").append(invoiceAmount).append(", ");
+        if (gmtPayment != null)
+            builder.append("gmtPayment=").append(gmtPayment).append(", ");
+        if (cardBalance != null)
+            builder.append("cardBalance=").append(cardBalance).append(", ");
+        if (storeName != null)
+            builder.append("storeName=").append(storeName).append(", ");
+        if (buyerUserId != null)
+            builder.append("buyerUserId=").append(buyerUserId).append(", ");
+        if (discountGoodsDetail != null)
+            builder.append("discountGoodsDetail=").append(discountGoodsDetail).append(", ");
+        if (transBeginTime != null)
+            builder.append("transBeginTime=").append(transBeginTime).append(", ");
+        if (transEndTime != null)
+            builder.append("transEndTime=").append(transEndTime).append(", ");
+        if (refundFee != null)
+            builder.append("refundFee=").append(refundFee).append(", ");
+        if (tradeStatus != null)
+            builder.append("tradeStatus=").append(tradeStatus).append(", ");
+        if (creator != null)
+            builder.append("creator=").append(creator).append(", ");
+        if (createTime != null)
+            builder.append("createTime=").append(createTime).append(", ");
+        if (modifier != null)
+            builder.append("modifier=").append(modifier).append(", ");
+        if (modifyTime != null)
+            builder.append("modifyTime=").append(modifyTime).append(", ");
+        if (remark != null)
+            builder.append("remark=").append(remark);
+        builder.append("]");
+        return builder.toString();
     }
 
 }

@@ -104,4 +104,8 @@
 		<property name="aliPayDetailsService" ref="aliPayDetailsService" />
 	</bean>
 	
+	<bean id="alipayAppAuthDetailsService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppAuthDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
 </beans>

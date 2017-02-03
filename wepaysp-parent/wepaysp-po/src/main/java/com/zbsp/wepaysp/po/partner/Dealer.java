@@ -37,6 +37,7 @@ public class Dealer
     private String subAppid;
     private String subMchId;
     private String qrCodePath;
+    private String alipayUserId;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -248,6 +249,15 @@ public class Dealer
     public void setQrCodePath(String qrCodePath) {
         this.qrCodePath = qrCodePath;
     }
+    
+    @Column(name = "alipay_user_id", length = 16)
+    public String getAlipayUserId() {
+        return this.alipayUserId;
+    }
+
+    public void setAlipayUserId(String alipayUserId) {
+        this.alipayUserId = alipayUserId;
+    }
 
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
@@ -296,7 +306,66 @@ public class Dealer
 
     @Override
     public String toString() {
-        return "Dealer [iwoid=" + iwoid + ", partner=" + partner + ", dealerId=" + dealerId + ", partnerLevel=" + partnerLevel + ", partner1Oid=" + partner1Oid + ", partner2Oid=" + partner2Oid + ", partner3Oid=" + partner3Oid + ", merchant=" + merchant + ", contactor=" + contactor + ", company=" + company + ", address=" + address + ", telephone=" + telephone + ", moblieNumber=" + moblieNumber + ", qqNumber=" + qqNumber + ", email=" + email + ", state=" + state + ", techSupportPerson=" + techSupportPerson + ", techSupportPhone=" + techSupportPhone + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("Dealer [");
+        if (iwoid != null)
+            builder.append("iwoid=").append(iwoid).append(", ");
+        if (partner != null)
+            builder.append("partnerOid=").append(partner.getIwoid()).append(", ");
+        if (dealerId != null)
+            builder.append("dealerId=").append(dealerId).append(", ");
+        if (partnerLevel != null)
+            builder.append("partnerLevel=").append(partnerLevel).append(", ");
+        if (partner1Oid != null)
+            builder.append("partner1Oid=").append(partner1Oid).append(", ");
+        if (partner2Oid != null)
+            builder.append("partner2Oid=").append(partner2Oid).append(", ");
+        if (partner3Oid != null)
+            builder.append("partner3Oid=").append(partner3Oid).append(", ");
+        if (partnerEmployee != null)
+            builder.append("partnerEmployeeOid=").append(partnerEmployee.getIwoid()).append(", ");
+        if (merchant != null)
+            builder.append("merchantOid=").append(merchant.getIwoid()).append(", ");
+        if (contactor != null)
+            builder.append("contactor=").append(contactor).append(", ");
+        if (company != null)
+            builder.append("company=").append(company).append(", ");
+        if (address != null)
+            builder.append("address=").append(address).append(", ");
+        if (telephone != null)
+            builder.append("telephone=").append(telephone).append(", ");
+        if (moblieNumber != null)
+            builder.append("moblieNumber=").append(moblieNumber).append(", ");
+        if (qqNumber != null)
+            builder.append("qqNumber=").append(qqNumber).append(", ");
+        if (email != null)
+            builder.append("email=").append(email).append(", ");
+        if (state != null)
+            builder.append("state=").append(state).append(", ");
+        if (techSupportPerson != null)
+            builder.append("techSupportPerson=").append(techSupportPerson).append(", ");
+        if (techSupportPhone != null)
+            builder.append("techSupportPhone=").append(techSupportPhone).append(", ");
+        if (subAppid != null)
+            builder.append("subAppid=").append(subAppid).append(", ");
+        if (subMchId != null)
+            builder.append("subMchId=").append(subMchId).append(", ");
+        if (qrCodePath != null)
+            builder.append("qrCodePath=").append(qrCodePath).append(", ");
+        if (alipayUserId != null)
+            builder.append("alipayUserId=").append(alipayUserId).append(", ");
+        if (creator != null)
+            builder.append("creator=").append(creator).append(", ");
+        if (createTime != null)
+            builder.append("createTime=").append(createTime).append(", ");
+        if (modifier != null)
+            builder.append("modifier=").append(modifier).append(", ");
+        if (modifyTime != null)
+            builder.append("modifyTime=").append(modifyTime).append(", ");
+        if (remark != null)
+            builder.append("remark=").append(remark);
+        builder.append("]");
+        return builder.toString();
     }
 
 }
