@@ -18,5 +18,10 @@
 			<result name="cashierDesk">/resources/pay/cashierDesk.jsp</result>
 		</action>
 		
+		<!-- 支付宝交易明细 -->
+		<action name="alipaydetails" class="aliPayDetailsAction">
+			<result name="aliPayDetailsList">/resources/pay/aliPayDetailsList.jsp</result>
+		</action>
+		
 	</package>
 </struts>

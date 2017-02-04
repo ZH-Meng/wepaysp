@@ -24,7 +24,7 @@ import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
+import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 
@@ -173,7 +173,7 @@ public class WeixinRefundDetailsServiceImpl
         	}
         }
         
-        WeixinPayTotalVO totalVO = new WeixinPayTotalVO();
+        PayTotalVO totalVO = new PayTotalVO();
         totalVO.setTotalAmount(totalAmount);
         totalVO.setTotalMoney(totalMoney);
         resultMap.put("refundList", resultList);

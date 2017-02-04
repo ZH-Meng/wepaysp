@@ -134,7 +134,7 @@ public class AlipayAppAuthDetails
         this.authAppId = authAppId;
     }
 
-    @Column(name = "AUTH_METHODS", length = 1028)
+    @Column(name = "AUTH_METHODS")
     public String getAuthMethods() {
         return this.authMethods;
     }
@@ -143,7 +143,7 @@ public class AlipayAppAuthDetails
         this.authMethods = authMethods;
     }
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "AUTH_START", length = 0)
     public Date getAuthStart() {
         return this.authStart;
@@ -153,7 +153,7 @@ public class AlipayAppAuthDetails
         this.authStart = authStart;
     }
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "AUTH_END", length = 0)
     public Date getAuthEnd() {
         return this.authEnd;
@@ -239,8 +239,8 @@ public class AlipayAppAuthDetails
             builder.append("reExpiresIn=").append(reExpiresIn).append(", ");
         if (authAppId != null)
             builder.append("authAppId=").append(authAppId).append(", ");
-        if (authMethods != null)
-            builder.append("authMethods=").append(authMethods).append(", ");
+        /*if (authMethods != null)
+            builder.append("authMethods=").append(authMethods).append(", ");*/
         if (authStart != null)
             builder.append("authStart=").append(authStart).append(", ");
         if (authEnd != null)

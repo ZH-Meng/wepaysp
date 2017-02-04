@@ -3,11 +3,11 @@ package com.zbsp.wepaysp.vo.pay;
 import java.io.Serializable;
 
 /**
- * 微信支付合计VO
+ * 支付合计VO
  * 
  * @author 孟郑宏
  */
-public class WeixinPayTotalVO
+public class PayTotalVO
     implements Serializable {
 
     private static final long serialVersionUID = -6648657406583514621L;

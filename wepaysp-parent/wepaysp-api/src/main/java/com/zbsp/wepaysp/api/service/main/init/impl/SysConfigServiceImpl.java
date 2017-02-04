@@ -30,6 +30,8 @@ public class SysConfigServiceImpl
     private String qRCodeRootPath;
     private String appidQrCodePath;
     private String serverType;
+    
+    private String appId4Face2FacePay;
 
     private PartnerService partnerService;
     
@@ -54,7 +56,6 @@ public class SysConfigServiceImpl
                 throw new SystemInitException("初始化系统配置信息失败" + e.getMessage());
             }
         }
-        
         
         if (StringUtils.isBlank(payClientCheckURL)) {
             throw new SystemInitException("初始化系统配置信息失败，参数缺失：payClientCheckURL");
@@ -133,8 +134,18 @@ public class SysConfigServiceImpl
             //new WeixinUtil().getBaseAccessToken(topPartner.getIwoid());
         }
         
+        // REST 后台支持支付宝支付，需要初始化配置
         if (ServerType.REST.equals(serType)) {
+            // 初始化支付宝支付的配置 FIXME 改为从数据库中读取
             AliPayUtil.init();
+
+            // FIXME 初始化支付当面付的应用ID
+            if (StringUtils.isBlank(appId4Face2FacePay)) {
+                throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
+            } else {
+                logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
+            }
+            SysConfig.appId4Face2FacePay = appId4Face2FacePay;
             
             //FIXME WEB中的公众号支付迁移后，需要将微信的也添加
         }
@@ -228,6 +239,10 @@ public class SysConfigServiceImpl
 		this.appidQrCodePath = appidQrCodePath;
 	}
     
+    public void setAppId4Face2FacePay(String appId4Face2FacePay) {
+        this.appId4Face2FacePay = appId4Face2FacePay;
+    }
+
     public void setServerType(String serverType) {
         this.serverType = serverType;
     }

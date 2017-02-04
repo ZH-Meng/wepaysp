@@ -14,7 +14,6 @@ import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
 import com.zbsp.wepaysp.api.service.alipay.AlipayAppAuthDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.result.ErrResult;
@@ -47,7 +46,7 @@ public class AlipayOpenAuthController
         logger.info(logPrefix + "开始");
         ModelAndView modelAndView = null;
         ErrResult errResult = null;
-        String resultTitle = "支付宝授权回调处理结果";
+        String resultTitle = "支付宝授权结果";
         if (callBackVO == null || StringUtils.isBlank(callBackVO.getApp_id())) {
             logger.warn(logPrefix + "callBackVO=null，无效授权回调请求");
             errResult = new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()).setTitleDesc(resultTitle);
@@ -62,8 +61,9 @@ public class AlipayOpenAuthController
             // 使用app_auth_code换取app_auth_token
             AlipayOpenAuthTokenAppResponse authResponse = AliPayUtil.authTokenApp(
                 new AlipayOpenAuthTokenAppRequestBuilder().setCode(callBackVO.getApp_auth_code()).setGrantType(Constants.GRANT_TYPE_AUTHORIZATION_CODE));
+            logger.info("(appid={})换取app_auth_token - 开始", callBackVO.getApp_id());
             if (authResponse != null && Constants.SUCCESS.equals(authResponse.getCode())) {
-                logger.info("换取app_auth_token成功，response : {}", JSONUtil.toJSONString(authResponse, true));
+                logger.info("(appid={})换取app_auth_token - 成功", callBackVO.getApp_id());
 
                 // 保存商户授权应用令牌信息
                 AlipayAppAuthDetailsVO appAuthDetailsVO = new AlipayAppAuthDetailsVO();
@@ -75,17 +75,19 @@ public class AlipayOpenAuthController
                 appAuthDetailsVO.setAuthAppId(authResponse.getAuthAppId());
                 appAuthDetailsVO.setAuthUserId(authResponse.getUserId());
                 
-                // FIXME 查询授权信息
+                //  立即查询授权信息 FIXME 考虑到查询结果的authMethods可能会有用。
+                logger.info("查询授权信息(appid={}, app_auth_token={})  - 开始", callBackVO.getApp_id(), authResponse.getAppAuthToken());
                 AlipayOpenAuthTokenAppQueryResponse authQueryResponse= AliPayUtil.authTokenAppQuery(
                     new AlipayOpenAuthTokenAppQueryRequestBuilder().setAppAuthToken(authResponse.getAppAuthToken()));
                 if (authQueryResponse != null && Constants.SUCCESS.equals(authQueryResponse.getCode())) {
-                    logger.info("查询授权信息，response : {}", JSONUtil.toJSONString(authQueryResponse, true));
-                    appAuthDetailsVO.setAuthMethods(authQueryResponse.getAuthMethods().toString());
+                    logger.info("查询授权信息(appid={}, app_auth_token={})  - 成功", callBackVO.getApp_id(), authResponse.getAppAuthToken());
+                    String authMethods = authQueryResponse.getAuthMethods() == null ? "[]" : authQueryResponse.getAuthMethods().toString();
+                    appAuthDetailsVO.setAuthMethods(authMethods.substring(1, authMethods.length() - 1));
                     appAuthDetailsVO.setAuthStart(authQueryResponse.getAuthStart());
-                    appAuthDetailsVO.setAuthStart(authQueryResponse.getAuthEnd());
+                    appAuthDetailsVO.setAuthEnd(authQueryResponse.getAuthEnd());
                     appAuthDetailsVO.setStatus(authQueryResponse.getStatus());
                 } else {
-                    logger.error(AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "查询授权信息（app_auth_token={}）失败", authResponse.getAppAuthToken());
+                    logger.error(AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "查询授权信息(appid={}, app_auth_token={})  - 失败", callBackVO.getApp_id(), authResponse.getAppAuthToken());
                 }
                 
                 try {
@@ -100,7 +102,7 @@ public class AlipayOpenAuthController
                     logger.info("保存商户授权应用令牌信息 - 结束");
                 }
             } else {
-                logger.error(AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "换取app_auth_token失败");
+                logger.error(AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "(appid={})换取app_auth_token - 失败", callBackVO.getApp_id());
             }
         } else if (StringUtils.isNotBlank(callBackVO.getAuth_code())) {
             logger.info(logPrefix + "同意授权，类型为用户信息授权回调，app_id : {}, auth_code : {}", callBackVO.getApp_id(), callBackVO.getAuth_code());

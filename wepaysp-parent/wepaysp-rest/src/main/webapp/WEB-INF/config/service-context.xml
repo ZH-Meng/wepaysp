@@ -20,6 +20,7 @@
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
+		<property name="appId4Face2FacePay" value="${appId4Face2FacePay}" />
 		<property name="serverType" value="${serverType}" />
 	</bean>
 	

@@ -30,6 +30,8 @@ public interface WeixinPayDetailsService {
      *      beginTime:                       Date类型，交易开始时间，根据此参数精确查询
      *      endTime:                         Date类型，交易截止时间，根据此参数精确查询
      *      payType:                        支付类型，根据此参数精确查询
+     *      outTradeNo                      系统支付订单号，根据此参数精确查询
+     *      transactionId                    微信支付订单号，根据此参数精确查询
      * </pre>
      * 
      * @param paramMap 查询参数
@@ -38,7 +40,7 @@ public interface WeixinPayDetailsService {
      * @return Map
      * <pre>
      *   payList：交易List<WeixinPayDetailsVO>
-     *   total：合计WeixinPayTotalVO
+     *   total：合计 PayTotalVO
      *   <pre>
      */
     public Map<String, Object> doJoinTransQueryWeixinPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult);
@@ -61,6 +63,8 @@ public interface WeixinPayDetailsService {
      *      beginTime:                       Date类型，交易开始时间，根据此参数精确查询
      *      endTime:                         Date类型，交易截止时间，根据此参数精确查询
      *      payType:                        支付类型，根据此参数精确查询
+     *      outTradeNo                      系统支付订单号，根据此参数精确查询
+     *      transactionId                    微信支付订单号，根据此参数精确查询
      * </pre>
      * 
      * @param paramMap 查询参数

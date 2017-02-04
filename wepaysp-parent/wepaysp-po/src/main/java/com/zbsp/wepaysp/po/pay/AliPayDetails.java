@@ -34,7 +34,7 @@ public class AliPayDetails
     private String partner2Oid;
     private String partner3Oid;
     private String isvPartnerId;
-    private String dealerPid;
+    private String appId;
     private String appAuthToken;
     private String outTradeNo;
     private String scene;
@@ -202,13 +202,13 @@ public class AliPayDetails
         this.isvPartnerId = isvPartnerId;
     }
 
-    @Column(name = "DEALER_PID", length = 32)
-    public String getDealerPid() {
-        return this.dealerPid;
+    @Column(name = "APP_ID", length = 32)
+    public String getAppId() {
+        return this.appId;
     }
 
-    public void setDealerPid(String dealerPid) {
-        this.dealerPid = dealerPid;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
     @Column(name = "APP_AUTH_TOKEN", length = 40)
@@ -590,8 +590,6 @@ public class AliPayDetails
             builder.append("partner3Oid=").append(partner3Oid).append(", ");
         if (isvPartnerId != null)
             builder.append("isvPartnerId=").append(isvPartnerId).append(", ");
-        if (dealerPid != null)
-            builder.append("dealerPid=").append(dealerPid).append(", ");
         if (appAuthToken != null)
             builder.append("appAuthToken=").append(appAuthToken).append(", ");
         if (outTradeNo != null)

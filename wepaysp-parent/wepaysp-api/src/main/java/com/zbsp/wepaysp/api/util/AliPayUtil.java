@@ -31,7 +31,7 @@ import com.zbsp.wepaysp.common.util.JSONUtil;
 public class AliPayUtil {
     protected static final Logger logger = LogManager.getLogger(AliPayUtil.class);
     
-    private static AlipayClient client;
+    public static AlipayClient client;
     
     /**支付宝当面付2.0服务*/
     public static AlipayTradeService tradeService;
@@ -43,7 +43,7 @@ public class AliPayUtil {
     public static AlipayMonitorService monitorService;
     
     // 调用AlipayClient的execute方法，进行远程调用
-    private  static <T extends AlipayResponse> T getResponse(AlipayClient client, AlipayRequest<T> request) {
+    public  static <T extends AlipayResponse> T getResponse(AlipayClient client, AlipayRequest<T> request) {
         try {
             T response = client.execute(request);
             if (response != null) {
@@ -130,7 +130,7 @@ public class AliPayUtil {
          *  AlipayTradeService可以使用单例或者为静态成员对象，不需要反复new
          */
         tradeService = new AlipayTradeServiceImpl.ClientBuilder().build();
-
+        
         // 支付宝当面付2.0服务（集成了交易保障接口逻辑）
         tradeWithHBService = new AlipayTradeWithHBServiceImpl.ClientBuilder().build();
 

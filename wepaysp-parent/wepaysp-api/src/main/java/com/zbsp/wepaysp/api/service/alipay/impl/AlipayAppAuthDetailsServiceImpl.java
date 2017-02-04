@@ -34,6 +34,7 @@ public class AlipayAppAuthDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(appAuthDetailsVO.getAuthUserId()), "appAuthDetailsVO.authUserId为空");
         
         // 根据appId查找应用
+        logger.info("查找应用({}) - 开始", appAuthDetailsVO.getAppId());
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         String jpql = "from AlipayApp a where a.appId=:APPID";
         jpqlMap.put("APPID", appAuthDetailsVO.getAppId());
@@ -42,8 +43,10 @@ public class AlipayAppAuthDetailsServiceImpl
         if (app == null) {
             throw new NotExistsException("AlipayApp不存在（appId=" + appAuthDetailsVO.getAppId() + "）");
         }
+        logger.info("查找应用({}) - 结束", appAuthDetailsVO.getAppId());
         
         // 根据authUserId查找商户
+        logger.info("查找商户(支付宝PID={}) - 开始", appAuthDetailsVO.getAuthUserId());
         jpqlMap.clear();
         jpql = "from Dealer d where d.alipayUserId=:ALIPAYUSERID";
         jpqlMap.put("ALIPAYUSERID", appAuthDetailsVO.getAuthUserId());
@@ -52,8 +55,23 @@ public class AlipayAppAuthDetailsServiceImpl
         if (dealer == null) {
             throw new NotExistsException("dealer不存在（alipayUserId=" + appAuthDetailsVO.getAuthUserId() + "）");
         }
+        logger.info("查找商户(支付宝PID={}) - 结束", appAuthDetailsVO.getAuthUserId());
         
-        // 记录授权记录，关联商户、蚂蚁平台应用
+        // 将旧的授权状态置为无效
+        jpqlMap.clear();
+        jpql = "from AlipayAppAuthDetails a where a.dealer=:DEALER and a.alipayApp=:ALIPAYAPP and a.status=:STATUS";
+        jpqlMap.put("DEALER", dealer);
+        jpqlMap.put("ALIPAYAPP", app);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        AlipayAppAuthDetails oldAuths = commonDAO.findObject(jpql, jpqlMap, false);
+        if (oldAuths != null) {
+            logger.info("商户({})曾授权过应用({})，现将令牌({})状态置为invalid", dealer.getDealerId(), app.getAppId(), oldAuths.getAppAuthToken());
+            oldAuths.setStatus(AlipayAppAuthDetails.AppAuthStatus.INVALID.toString());
+            commonDAO.update(oldAuths);
+        }
+        
+        // 记录新的授权记录，关联商户、蚂蚁平台应用
+        logger.info("保存授权令牌(支付宝PID={}，应用{}，令牌{}) - 开始", appAuthDetailsVO.getAuthUserId(), appAuthDetailsVO.getAppId(), appAuthDetailsVO.getAppAuthToken());
         AlipayAppAuthDetails appAuthDetails = new AlipayAppAuthDetails();
         appAuthDetails.setIwoid(Generator.generateIwoid());
         appAuthDetails.setDealer(dealer);
@@ -63,20 +81,23 @@ public class AlipayAppAuthDetailsServiceImpl
         appAuthDetails.setAppRefreshToken(appAuthDetailsVO.getAppRefreshToken());
         appAuthDetails.setExpiresIn(appAuthDetailsVO.getExpiresIn());
         appAuthDetails.setReExpiresIn(appAuthDetailsVO.getReExpiresIn());
-        //FIXME
         appAuthDetails.setAuthStart(appAuthDetailsVO.getAuthStart());
         appAuthDetails.setAuthEnd(appAuthDetailsVO.getAuthEnd());
         appAuthDetails.setAuthMethods(appAuthDetailsVO.getAuthMethods());
         appAuthDetails.setStatus(AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         appAuthDetails.setAuthAppId(appAuthDetailsVO.getAuthAppId());
         commonDAO.save(appAuthDetails, false);
+        logger.info("保存授权令牌(支付宝PID={}，应用{}，令牌{}) - 结束", appAuthDetailsVO.getAuthUserId(), appAuthDetailsVO.getAppId(), appAuthDetailsVO.getAppAuthToken());
         
         // 记录日志
+        logger.info("记录日志 - 新增商户授权应用明细 - 开始");
         Date processTime = new Date();
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, 
-            "新增商户授权应用明细[appId=" + appAuthDetails.getAppId() + "，商户PID=" + appAuthDetails.getDealer().getCompany() + "，商户PID=" + appAuthDetails.getDealer().getAlipayUserId() 
+            "新增商户授权应用明细[appId=" + appAuthDetails.getAppId() + "，商户=" + appAuthDetails.getDealer().getDealerId() + "，商户支付宝PID=" + appAuthDetails.getDealer().getAlipayUserId() 
             + "，授权令牌：" + appAuthDetails.getAppAuthToken() + ", 刷新令牌=" + appAuthDetails.getAppRefreshToken() + "]", 
             processTime, processTime, null, appAuthDetails.toString(), SysLog.State.success.getValue(), appAuthDetails.getIwoid(), null, SysLog.ActionType.create.getValue());
+        
+        logger.info("记录日志 - 新增商户授权应用明细 - 结束");
         
         BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
         appAuthDetailsVO.setDealerName(dealer.getCompany());

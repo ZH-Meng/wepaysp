@@ -48,7 +48,7 @@
 						</div>
 					</c:if>
 					<div class="succ-item">
-						绑定时间<span class="fr"><fmt:parseDate value="${payNoticeBindWeixinVO.createTime}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
+						绑定时间<span class="fr"><fmt:formatDate value="${payNoticeBindWeixinVO.createTime}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
 					</div>
 		     	 </div> 
 			</c:when> 

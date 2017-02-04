@@ -59,5 +59,10 @@ public class SysConfig {
 	 * </pre>
 	 */
     public static Map<String, Map<String, Object>> partnerConfigMap2 = new HashMap<String, Map<String, Object>>();
+    
+    /***
+     * 支付当面付功能的蚂蚁平台应用ID，需要在 alipay_app_t 表中存在
+     */
+    public static String appId4Face2FacePay;
 
 }

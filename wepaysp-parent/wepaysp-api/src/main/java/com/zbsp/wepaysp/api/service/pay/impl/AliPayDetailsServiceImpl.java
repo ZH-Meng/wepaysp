@@ -1,16 +1,21 @@
 package com.zbsp.wepaysp.api.service.pay.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.LockModeType;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
@@ -26,13 +31,17 @@ import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.po.alipay.AlipayApp;
+import com.zbsp.wepaysp.po.alipay.AlipayAppAuthDetails;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.AliPayDetails;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 
 public class AliPayDetailsServiceImpl
     extends BaseService
@@ -218,18 +227,44 @@ public class AliPayDetailsServiceImpl
         // 生成明细
         AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO);
         
+        // 根据系统配置的支持当面付应用ID查找系统维护的蚂蚁平台应用
+        newPayOrder.setAppId(SysConfig.appId4Face2FacePay);
         
-        //newPayOrder.setAppAuthToken(dealer.get);// TODO 授权令牌
-        //newPayOrder.setAppid();// 应用ID
-        //newPayOrder.setDealerPid(dealerPid);        
-        //newPayOrder.setOperatorId(operatorId);
-        //newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());//FIXME
-        //newPayOrder.setSellerId
-        //newPayOrder.providerId
+        logger.info("查找应用({}) - 开始", newPayOrder.getAppId());
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayApp a where a.appId=:APPID";
+        jpqlMap.put("APPID", newPayOrder.getAppId());
+
+        AlipayApp app = commonDAO.findObject(jpql, jpqlMap, false);
+        if (app == null) {
+            throw new NotExistsException("AlipayApp不存在（appId=" + newPayOrder.getAppId() + "）");
+        }
+        logger.info("查找应用({}) - 结束", newPayOrder.getAppId());
+        
+        // 查找商户授权令牌
+        jpqlMap.clear();
+        jpql = "from AlipayAppAuthDetails a where a.dealer=:DEALER and a.alipayApp=:ALIPAYAPP and a.status=:STATUS order by a.createTime desc";
+        jpqlMap.put("DEALER", newPayOrder.getDealer());
+        jpqlMap.put("ALIPAYAPP", app);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        AlipayAppAuthDetails appAuth = commonDAO.findObject(jpql, jpqlMap, false);
+        if (appAuth == null) {
+            throw new NotExistsException("AlipayAppAuthDetails不存在（appId=" + newPayOrder.getAppId() + "，商户ID=" + newPayOrder.getDealer().getDealerId() +"）");
+        }
+        
+        // 代替商户发起当面付，设置商户授权令牌
+        newPayOrder.setAppAuthToken(appAuth.getAppAuthToken());
+
+        // 商户操作员和商户门店，FIXME 接口中描述，这些参数都可以做统计和精准定位
+        newPayOrder.setOperatorId(newPayOrder.getDealerEmployee().getDealerEmployeeId());
+        newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
+        
+        //newPayOrder.setSellerId 默认为空
         // terminal_id
         // alipay_store_id
         // undiscountable_amount
         // discountable_amount
+        
         newPayOrder.setScene(AliPayDetails.Scene.BAR_CODE.toString());
         // 订单标题，暂取 品牌(商户名)-门店
         newPayOrder.setSubject(newPayOrder.getDealer().getCompany() + (newPayOrder.getStore() == null ? "" : "-" + newPayOrder.getStore().getStoreName()));
@@ -242,7 +277,7 @@ public class AliPayDetailsServiceImpl
         // 记录日志
         Date processTime = new Date();
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, 
-            "新增支付宝支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo() + "支付方式=条码支付, 商户PID=" + newPayOrder.getDealerPid() + "，消费金额：" + newPayOrder.getTotalAmount() + ", 商品详情=" + newPayOrder.getBody() + "]", 
+            "新增支付宝支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo() + "支付方式=条码支付, 商户=" + newPayOrder.getDealer().getDealerId() + "，消费金额：" + newPayOrder.getTotalAmount() + ", 商品详情=" + newPayOrder.getBody() + "]", 
             processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), null, SysLog.ActionType.create.getValue());
         
         BeanCopierUtil.copyProperties(newPayOrder, payDetailsVO);
@@ -283,9 +318,9 @@ public class AliPayDetailsServiceImpl
         }
         if (dealer == null) {
             throw new NotExistsException("商户不存在！");
-            /*
-             * } else if (StringUtils.isBlank(dealer.getSubMchId())) { throw new InvalidValueException("商户信息缺失：sub_mch_id为空！");
-             */ // TODO 签约商户的相关信息
+            
+        } else if (StringUtils.isBlank(dealer.getAlipayUserId())) {// 支付宝商户的PID或UID
+            throw new InvalidValueException("商户信息缺失：alipayUserId为空！");
         } else if (StringUtils.isBlank(dealer.getPartner1Oid())) {
             throw new InvalidValueException("商户信息缺失：partner1Oid为空！");
         }
@@ -294,12 +329,14 @@ public class AliPayDetailsServiceImpl
         Partner topPartner = commonDAO.findObject(Partner.class, dealer.getPartner1Oid());
         if (topPartner == null) {
             throw new NotExistsException("服务商不存在！");
+        } else if (StringUtils.isBlank(topPartner.getIsvPartnerId())) {// 支付宝服务商的PID
+            throw new InvalidValueException("服务商信息缺失：isvPartnerId为空！");
         }
         
-        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
         // 获取 服务商员工ID下一个序列值
         String sql = "select nextval('" + SysSequenceCode.PAY_ORDER + "') as sequence_value";
-        Object seqObj = commonDAO.findObject(sql, sqlMap, true);
+        Object seqObj = commonDAO.findObject(sql, jpqlMap, true);
         if (seqObj == null) {
             throw new IllegalArgumentException("支付订单Id对应序列记录不存在");
         }
@@ -319,6 +356,9 @@ public class AliPayDetailsServiceImpl
         aliPayDetails.setTradeStatus(TradeStatus.TRADEING.getValue());
         aliPayDetails.setTransBeginTime(new Timestamp(new Date().getTime()));
         aliPayDetails.setCreator(payDetailsVO.getDealerEmployeeOid());
+        
+        /*返佣必填项*/
+        aliPayDetails.setIsvPartnerId(topPartner.getIsvPartnerId());
         
         return aliPayDetails;
     }
@@ -343,6 +383,261 @@ public class AliPayDetailsServiceImpl
         // 记录修改日志
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细状态[" + tradeStatus + "]", 
             logTime, logTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, Object> doJoinTransQueryAliPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        List<AliPayDetailsVO> resultList = new ArrayList<AliPayDetailsVO>();
+       
+        String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
+        String dealerId = MapUtils.getString(paramMap, "dealerId");
+        String storeId = MapUtils.getString(paramMap, "storeId");
+        String dealerEmployeeId = MapUtils.getString(paramMap, "dealerEmployeeId");
+        
+        String partner1Oid = MapUtils.getString(paramMap, "partner1Oid");
+        String partner2Oid = MapUtils.getString(paramMap, "partner2Oid");
+        String partner3Oid = MapUtils.getString(paramMap, "partner3Oid");
+        String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
+        String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
+        String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
+        Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
+        Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String payType = MapUtils.getString(paramMap, "payType");
+        String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
+        String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
+        
+        String jpqlSelect = "select distinct(w) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
+        
+        StringBuffer conditionSB = new StringBuffer();
+        
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+
+        if (StringUtils.isNotBlank(partner1Oid)) {
+            conditionSB.append(" and w.partner1Oid = :PARTNER1OID");
+            jpqlMap.put("PARTNER1OID", partner1Oid);
+        }
+        if (StringUtils.isNotBlank(partner2Oid)) {
+            conditionSB.append(" and w.partner2Oid = :PARTNER2OID");
+            jpqlMap.put("PARTNER2OID", partner2Oid);
+        }
+        if (StringUtils.isNotBlank(partner3Oid)) {
+            conditionSB.append(" and w.partner3Oid = :PARTNER3OID");
+            jpqlMap.put("PARTNER3OID", partner3Oid);
+        }
+        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
+            conditionSB.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
+            jpqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
+        }
+        if (StringUtils.isNotBlank(dealerOid)) {
+            conditionSB.append(" and w.dealer.iwoid = :DEALEROID");
+            jpqlMap.put("DEALEROID", dealerOid);
+        }
+        if (StringUtils.isNotBlank(storeOid)) {
+            conditionSB.append(" and w.store.iwoid = :STOREOID");
+            jpqlMap.put("STOREOID", storeOid);
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+            conditionSB.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
+            jpqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
+        }
+        
+        if (StringUtils.isNotBlank(partnerEmployeeId)) {
+            conditionSB.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
+            jpqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
+        }
+        if (StringUtils.isNotBlank(dealerId)) {
+            conditionSB.append(" and w.dealer.dealerId like :DEALERID");
+            jpqlMap.put("DEALERID", "%" + dealerId + "%");
+        }
+        if (StringUtils.isNotBlank(storeId)) {
+            conditionSB.append(" and w.store.storeId like :STOREID");
+            jpqlMap.put("STOREID", "%" + storeId + "%");
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeId)) {
+            conditionSB.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
+            jpqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
+        }
+        
+        if (beginTime != null ) {
+            conditionSB.append(" and w.transBeginTime >=:BEGINTIME ");
+            jpqlMap.put("BEGINTIME", beginTime);
+        }
+        if (endTime != null ) {
+            conditionSB.append(" and w.transBeginTime <=:ENDTIME ");
+            jpqlMap.put("ENDTIME", endTime);
+        }
+        if (StringUtils.isNotBlank(payType)) {// 支付类型
+            conditionSB.append(" and w.payType = :PAYTYPE");
+            jpqlMap.put("PAYTYPE", payType);
+        }
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            conditionSB.append(" and w.outTradeNo = :OUTTRADENO");
+            jpqlMap.put("OUTTRADENO", outTradeNo);
+        }
+        if (StringUtils.isNotBlank(tradeNo)) {
+            conditionSB.append(" and w.tradeNo = :TRADENO");
+            jpqlMap.put("TRADENO", tradeNo);
+        }
+
+        conditionSB.append(" order by w.transBeginTime desc");
+        List<AliPayDetails> aliPayDetailsList = (List<AliPayDetails>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
+  
+        // 总笔数为记录总数，总金额为交易成功的总金额
+        if(aliPayDetailsList != null && !aliPayDetailsList.isEmpty()) {
+            for (AliPayDetails aliPayDetails : aliPayDetailsList) {
+                AliPayDetailsVO vo = new AliPayDetailsVO();
+                //BeanCopierUtil.copyProperties(aliPayDetails, vo);
+                
+                vo.setOutTradeNo(aliPayDetails.getOutTradeNo());
+                vo.setTradeStatus(aliPayDetails.getTradeStatus());
+                vo.setRefundFee(aliPayDetails.getRefundFee());
+                
+                DealerEmployee de = aliPayDetails.getDealerEmployee();
+                vo.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
+                vo.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
+                
+                Store store = aliPayDetails.getStore();
+                vo.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
+                vo.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
+                
+                Dealer dealer = aliPayDetails.getDealer();
+                vo.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
+                vo.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+                
+                PartnerEmployee pe = aliPayDetails.getPartnerEmployee();
+                vo.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
+                vo.setPartnerEmployeeId(pe != null ? pe.getPartnerEmployeeId() : (dealer != null ? dealer.getPartnerEmployee().getPartnerEmployeeId() : ""));
+                
+                Partner p = aliPayDetails.getPartner();
+                vo.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
+                vo.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
+                
+                vo.setPayType(aliPayDetails.getPayType());
+                vo.setTradeNo(aliPayDetails.getTradeNo());
+                vo.setTotalAmount(aliPayDetails.getTotalAmount());
+                
+                vo.setTransBeginTime(aliPayDetails.getTransBeginTime());
+                
+                
+                resultList.add(vo);
+            }
+        }
+        
+        //计算合计信息
+        jpqlSelect = "select sum(case when w.tradeStatus=1 then w.totalAmount else 0 end),count(w.totalAmount) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
+        
+        long totalMoney = 0;
+        long totalAmount = 0;
+        List<?> aliTotalList = (List<?>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false);
+        for (Iterator<?> it = aliTotalList.iterator(); it.hasNext();) {
+            Object[] curRow = (Object[]) it.next();
+            totalMoney = curRow[0] == null ? 0L : (Long) curRow[0];
+            totalAmount = curRow[1] == null ? 0L : (Long) curRow[1];
+        }
+
+        PayTotalVO totalVO = new PayTotalVO();
+        totalVO.setTotalAmount(totalAmount);
+        totalVO.setTotalMoney(totalMoney);
+        resultMap.put("payList", resultList);
+        resultMap.put("total", totalVO);
+        return resultMap;
+    }
+
+    @Override
+    public int doJoinTransQueryAliPayDetailsCount(Map<String, Object> paramMap) {
+        String partnerEmployeeId = MapUtils.getString(paramMap, "partnerEmployeeId");
+        String dealerId = MapUtils.getString(paramMap, "dealerId");
+        String storeId = MapUtils.getString(paramMap, "storeId");
+        String dealerEmployeeId = MapUtils.getString(paramMap, "dealerEmployeeId");
+        
+        String partner1Oid = MapUtils.getString(paramMap, "partner1Oid");
+        String partner2Oid = MapUtils.getString(paramMap, "partner2Oid");
+        String partner3Oid = MapUtils.getString(paramMap, "partner3Oid");
+        String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
+        String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
+        String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
+        Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
+        Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
+        String payType = MapUtils.getString(paramMap, "payType");
+        String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
+        String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
+
+        StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
+        
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+
+        if (StringUtils.isNotBlank(partner1Oid)) {
+            sql.append(" and w.partner1Oid = :PARTNER1OID");
+            jpqlMap.put("PARTNER1OID", partner1Oid);
+        }
+        if (StringUtils.isNotBlank(partner2Oid)) {
+            sql.append(" and w.partner2Oid = :PARTNER2OID");
+            jpqlMap.put("PARTNER2OID", partner2Oid);
+        }
+        if (StringUtils.isNotBlank(partner3Oid)) {
+            sql.append(" and w.partner3Oid = :PARTNER3OID");
+            jpqlMap.put("PARTNER3OID", partner3Oid);
+        }
+        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
+            sql.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
+            jpqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
+        }
+        if (StringUtils.isNotBlank(dealerOid)) {
+            sql.append(" and w.dealer.iwoid = :DEALEROID");
+            jpqlMap.put("DEALEROID", dealerOid);
+        }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.store.iwoid = :STOREOID");
+            jpqlMap.put("STOREOID", storeOid);
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+            sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
+            jpqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
+        }
+        
+        if (StringUtils.isNotBlank(partnerEmployeeId)) {
+            sql.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
+            jpqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
+        }
+        if (StringUtils.isNotBlank(dealerId)) {
+            sql.append(" and w.dealer.dealerId like :DEALERID");
+            jpqlMap.put("DEALERID", "%" + dealerId + "%");
+        }
+        if (StringUtils.isNotBlank(storeId)) {
+            sql.append(" and w.store.storeId like :STOREID");
+            jpqlMap.put("STOREID", "%" + storeId + "%");
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeId)) {
+            sql.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
+            jpqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
+        }
+        
+        if (beginTime != null ) {
+            sql.append(" and w.transBeginTime >=:BEGINTIME ");
+            jpqlMap.put("BEGINTIME", beginTime);
+        }
+        if (endTime != null ) {
+            sql.append(" and w.transBeginTime <=:ENDTIME ");
+            jpqlMap.put("ENDTIME", endTime);
+        }
+        if (StringUtils.isNotBlank(payType)) {// 支付类型
+            sql.append(" and w.payType = :PAYTYPE");
+            jpqlMap.put("PAYTYPE", payType);
+        }
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            sql.append(" and w.outTradeNo = :OUTTRADENO");
+            jpqlMap.put("OUTTRADENO", outTradeNo);
+        }
+        if (StringUtils.isNotBlank(tradeNo)) {
+            sql.append(" and w.tradeNo = :TRADENO");
+            jpqlMap.put("TRADENO", tradeNo);
+        }
+        
+        return commonDAO.queryObjectCount(sql.toString(), jpqlMap, false);
     }
     
     public void setSysLogService(SysLogService sysLogService) {

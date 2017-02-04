@@ -10,7 +10,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>应用授权结果</title>
+		<title>支付宝应用授权结果</title>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
@@ -27,10 +27,10 @@
 			授权应用<span class="fr">${appAuthDetailsVO.appName } [${appAuthDetailsVO.appId} ]</span>
 		</div>
 		<div class="succ-item">
-			授权生效时间<span class="fr"><fmt:parseDate value="${appAuthDetailsVO.authStart}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
+			授权生效时间<span class="fr"><fmt:formatDate value="${appAuthDetailsVO.authStart}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
 		</div>
 		<div class="succ-item">
-			授权失效时间<span class="fr"><fmt:parseDate value="${appAuthDetailsVO.authEnd}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
+			授权失效时间<span class="fr"><fmt:formatDate value="${appAuthDetailsVO.authEnd}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
 		</div>
    	 </div> 
 </body>

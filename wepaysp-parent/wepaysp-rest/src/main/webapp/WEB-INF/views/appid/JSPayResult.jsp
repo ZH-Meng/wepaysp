@@ -103,7 +103,7 @@
 				交易单号<span class="fr">${weixinPayDetailsVO.outTradeNo }</span>
 			</div>
 			<div class="succ-item">
-				交易时间<span class="fr"><fmt:parseDate value="${weixinPayDetailsVO.transBeginTime}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
+				交易时间<span class="fr"><fmt:formatDate value="${weixinPayDetailsVO.transBeginTime}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
 			</div>
 			<div class="pay-method">
 				<i class="icon iconfont icon-weixinzhifu"></i>微信支付

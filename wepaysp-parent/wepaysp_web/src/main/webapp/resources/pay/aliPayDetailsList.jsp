@@ -6,18 +6,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>微信交易明细</title>
+	<title>支付宝交易明细</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<%-- <s:if test="userLevel == 1 || userLevel == 2">
-			<s:set name="navTag">分润计算</s:set>
-		</s:if>
-		<s:elseif test="userLevel == 3 || userLevel == 4 || userLevel == 5">
-			<s:set name="navTag">资金结算</s:set>
-		</s:elseif> --%>
-		<div class="bgposition">您现在的位置：交易查询&gt;微信交易明细</div>
+		<div class="bgposition">您现在的位置：交易查询&gt;支付宝交易明细</div>
 		<s:form id="queryForm" method="post">
 			<div class="bgtj">
 				<ul class="tj_title">
@@ -32,35 +26,35 @@
 									<s:if test="partnerVoListLevel == 2">
 										<div class="condition_field">
 											<span class="field_label">服务商</span>
-		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinPayDetailsVO.partner2Oid"  id="partner2Oid" headerKey="" headerValue="全部"/>
+		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="aliPayDetailsVO.partner2Oid"  id="partner2Oid" headerKey="" headerValue="全部"/>
 	                                	</div>
 									</s:if>
 									<s:elseif test="partnerVoListLevel == 3">
 										<div class="condition_field">
 											<span class="field_label">服务商</span>
-		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinPayDetailsVO.partner3Oid"  id="partner3Oid" headerKey="" headerValue="全部"/>
+		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="aliPayDetailsVO.partner3Oid"  id="partner3Oid" headerKey="" headerValue="全部"/>
 	                                	</div>
 									</s:elseif>
 									<div class="condition_field">
 										<span class="field_label">业务员ID</span>
-										<s:textfield name="weixinPayDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
+										<s:textfield name="aliPayDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
 									</div>
 								</s:if>
 								<s:if test="userLevel  == 1 || userLevel  == 2">
 									<div class="condition_field">
 										<span class="field_label">商家ID</span>
-										<s:textfield name="weixinPayDetailsVO.dealerId" id="dealerId" maxlength="9"/>
+										<s:textfield name="aliPayDetailsVO.dealerId" id="dealerId" maxlength="9"/>
 									</div>
 								</s:if>
 								<s:if test="userLevel  == 1 || userLevel  == 2 || userLevel  == 3">
 									<div class="condition_field">
 										<span class="field_label">门店ID</span>
-										<s:textfield name="weixinPayDetailsVO.storeId" id="storeId" maxlength="9"/>
+										<s:textfield name="aliPayDetailsVO.storeId" id="storeId" maxlength="9"/>
 									</div>
 								</s:if>
 								<div class="condition_field">
 									<span class="field_label">收银员ID</span>
-									<s:textfield name="weixinPayDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
+									<s:textfield name="aliPayDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
 								</div>
 							</s:if>
 							<div class="condition_field">
@@ -76,12 +70,12 @@
 								<span class="tj_bt">*</span>
 							</div>
 							<div class="condition_field">
-								<span class="field_label">微信支付单号</span>
-								<s:textfield name="weixinPayDetailsVO.transactionId" id="transactionId" maxlength="28" cssStyle="width:200px;"/>
+								<span class="field_label">支付宝支付单号</span>
+								<s:textfield name="aliPayDetailsVO.tradeNo" id="tradeNo" maxlength="28" cssStyle="width:200px;"/>
 							</div>
 							<div class="condition_field">
 								<span class="field_label">商户订单号</span>
-								<s:textfield name="weixinPayDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
+								<s:textfield name="aliPayDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
 							</div>
 						</div>
 					</li>
@@ -114,7 +108,7 @@
 	                            <tr>
 	                                <th class="six">序号</th>
 	                                <th>商户订单号</th>
-	                                <th>微信订单号</th>
+	                                <th>支付宝订单号</th>
 	                                <s:if test="userLevel  < 3">
 		                                <th>服务商</th>
 		                                <th>业务员</th>
@@ -129,51 +123,49 @@
 	                            </tr>
 	                        </thead>
 	                        <tbody>
-	                        <s:if test="weixinPayDetailsVoList != null && weixinPayDetailsVoList.size() > 0">
-			  					<s:iterator value="weixinPayDetailsVoList" var="weixinPayDetailsVo" status="rowStatus">
+	                        <s:if test="aliPayDetailsVoList != null && aliPayDetailsVoList.size() > 0">
+			  					<s:iterator value="aliPayDetailsVoList" var="aliPayDetailsVo" status="rowStatus">
 						  		<tr>
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.outTradeNo" />">
-						  				<s:property value="#weixinPayDetailsVo.outTradeNo" />
+						  			<td title="<s:property value="#aliPayDetailsVo.outTradeNo" />">
+						  				<s:property value="#aliPayDetailsVo.outTradeNo" />
 						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.transactionId" />">
-						  				<s:property value="#weixinPayDetailsVo.transactionId" />
+						  			<td title="<s:property value="#aliPayDetailsVo.tradeNo" />">
+						  				<s:property value="#aliPayDetailsVo.tradeNo" />
 						  			</td>						  			
 						  			<s:if test="userLevel  < 3">
-						  				<td title="<s:property value="#weixinPayDetailsVo.partnerId" />">
-							  				<s:property value="#weixinPayDetailsVo.partnerId" /><br />
-							  				<s:property value="#weixinPayDetailsVo.partnerName" />
+						  				<td title="<s:property value="#aliPayDetailsVo.partnerId" />">
+							  				<s:property value="#aliPayDetailsVo.partnerId" /><br />
+							  				<s:property value="#aliPayDetailsVo.partnerName" />
 							  			</td>		
-							  			<td title="<s:property value="#weixinPayDetailsVo.partnerEmployeeId" />">
-							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeId" /><br />
-							  				<s:property value="#weixinPayDetailsVo.partnerEmployeeName" />
+							  			<td title="<s:property value="#aliPayDetailsVo.partnerEmployeeId" />">
+							  				<s:property value="#aliPayDetailsVo.partnerEmployeeId" /><br />
+							  				<s:property value="#aliPayDetailsVo.partnerEmployeeName" />
 							  			</td>
 							  		</s:if>
-							  		<td title="<s:property value="#weixinPayDetailsVo.dealerId" />">
-						  				<s:property value="#weixinPayDetailsVo.dealerId" /><br />
-						  				<s:property value="#weixinPayDetailsVo.dealerName" />
+							  		<td title="<s:property value="#aliPayDetailsVo.dealerId" />">
+						  				<s:property value="#aliPayDetailsVo.dealerId" /><br />
+						  				<s:property value="#aliPayDetailsVo.dealerName" />
 						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.storeId" />">
-						  				<s:property value="#weixinPayDetailsVo.storeId" /><br />
-						  				<s:property value="#weixinPayDetailsVo.storeName" />
+						  			<td title="<s:property value="#aliPayDetailsVo.storeId" />">
+						  				<s:property value="#aliPayDetailsVo.storeId" /><br />
+						  				<s:property value="#aliPayDetailsVo.storeName" />
 						  			</td>
-						  			<td title="<s:property value="#weixinPayDetailsVo.dealerEmployeeId" />">
-						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeId" /><br />
-						  				<s:property value="#weixinPayDetailsVo.dealerEmployeeName" />
+						  			<td title="<s:property value="#aliPayDetailsVo.dealerEmployeeId" />">
+						  				<s:property value="#aliPayDetailsVo.dealerEmployeeId" /><br />
+						  				<s:property value="#aliPayDetailsVo.dealerEmployeeName" />
 						  			</td>						  			
-						  			<s:if test="#weixinPayDetailsVo.payType == 1">
-						  				<s:set var="payTypeStr">刷卡支付</s:set>
+						  			<s:if test="#aliPayDetailsVo.payType == 6">
+						  				<s:set var="payTypeStr">当面付-条码支付</s:set>
 						  			</s:if>
-						  			<s:elseif test="#weixinPayDetailsVo.payType == 2">
-						  				<s:set var="payTypeStr">公众号支付</s:set>
-						  			</s:elseif>
-						  			<s:elseif test="#weixinPayDetailsVo.payType == 3">
+						  			<s:elseif test="#aliPayDetailsVo.payType == 7">
 						  				<s:set var="payTypeStr">扫码支付</s:set>
-									</s:elseif>
-									<s:elseif test="#weixinPayDetailsVo.payType == 4">
-										<s:set var="payTypeStr">微信买单</s:set>
+						  			</s:elseif>
+						  			<s:elseif test="#aliPayDetailsVo.payType == 8">
+						  				<%-- <s:set var="payTypeStr">手机网站支付</s:set> --%>
+						  				<s:set var="payTypeStr">H5支付</s:set>
 									</s:elseif>
 									<s:else>
 										<s:set var="payTypeStr">未知</s:set>
@@ -181,27 +173,30 @@
 						  			<td title="<s:property value="#payTypeStr" />">
 						  				<s:property value="#payTypeStr" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
-						  				<fmt:formatNumber value="${weixinPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${aliPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${aliPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-							  		<s:if test="#weixinPayDetailsVo.tradeStatus == 0">
+							  		<s:if test="#aliPayDetailsVo.tradeStatus == 0">
 					  				<s:set var="tradeStatusStr">交易中</s:set>
 						  			</s:if>
-						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 1">
+						  			<s:elseif test="#aliPayDetailsVo.tradeStatus == 1">
 						  				<s:set var="tradeStatusStr">交易成功</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 2">
+						  			<s:elseif test="#aliPayDetailsVo.tradeStatus == 2">
 						  				<s:set var="tradeStatusStr">交易失败</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 3">
+						  			<s:elseif test="#aliPayDetailsVo.tradeStatus == 3">
 						  				<s:set var="tradeStatusStr">交易撤销</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinPayDetailsVo.tradeStatus == 4">
+						  			<s:elseif test="#aliPayDetailsVo.tradeStatus == 4">
 						  				<s:set var="tradeStatusStr">交易关闭</s:set>
 									</s:elseif>
-									<s:elseif test="#weixinPayDetailsVo.tradeStatus == 5">
+									<s:elseif test="#aliPayDetailsVo.tradeStatus == 5">
 										<%--待关闭 --%>
 						  				<s:set var="tradeStatusStr">交易取消</s:set>
+									</s:elseif>
+									<s:elseif test="#aliPayDetailsVo.tradeStatus == 99">
+						  				<s:set var="tradeStatusStr">人工处理中</s:set>
 									</s:elseif>
 									<s:else>
 										<s:set var="tradeStatusStr">未知</s:set>
@@ -209,8 +204,8 @@
 						  			<td title="<s:property value="tradeStatusStr" />">
 						  				<s:property value="#tradeStatusStr" />
 						  			</td>
-						  			<td title="<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
-						  				<s:date name="#weixinPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
+						  			<td title="<s:date name="#aliPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
+						  				<s:date name="#aliPayDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -266,7 +261,7 @@
 			$("#dealerId").val("");
 			$("#storeId").val("");
 			$("#dealerEmployeeId").val("");
-			$("#transactionId").val("");
+			$("#tradeNo").val("");
 			$("#outTradeNo").val("");			
 			//$("#beginTime").val("");
 			//$("#endTime").val("");

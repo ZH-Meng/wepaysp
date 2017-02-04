@@ -43,7 +43,7 @@ import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
-import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
+import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 
 public class WeixinPayDetailsServiceImpl
     extends BaseService
@@ -77,90 +77,84 @@ public class WeixinPayDetailsServiceImpl
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
 
         //StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p and w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
-        StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
-       
-        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        String jpqlSelect = "select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
+        StringBuffer conditionSB = new StringBuffer();
+        
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
-        	sql.append(" and w.partner1Oid = :PARTNER1OID");
-        	sqlMap.put("PARTNER1OID", partner1Oid);
+        	conditionSB.append(" and w.partner1Oid = :PARTNER1OID");
+        	jpqlMap.put("PARTNER1OID", partner1Oid);
         }
         if (StringUtils.isNotBlank(partner2Oid)) {
-        	sql.append(" and w.partner2Oid = :PARTNER2OID");
-        	sqlMap.put("PARTNER2OID", partner2Oid);
+        	conditionSB.append(" and w.partner2Oid = :PARTNER2OID");
+        	jpqlMap.put("PARTNER2OID", partner2Oid);
         }
         if (StringUtils.isNotBlank(partner3Oid)) {
-        	sql.append(" and w.partner3Oid = :PARTNER3OID");
-        	sqlMap.put("PARTNER3OID", partner3Oid);
+        	conditionSB.append(" and w.partner3Oid = :PARTNER3OID");
+        	jpqlMap.put("PARTNER3OID", partner3Oid);
         }
         if (StringUtils.isNotBlank(partnerEmployeeOid)) {
-            sql.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
-            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
+            conditionSB.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
+            jpqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
         }
         if (StringUtils.isNotBlank(dealerOid)) {
-            sql.append(" and w.dealer.iwoid = :DEALEROID");
-            sqlMap.put("DEALEROID", dealerOid);
+            conditionSB.append(" and w.dealer.iwoid = :DEALEROID");
+            jpqlMap.put("DEALEROID", dealerOid);
         }
         if (StringUtils.isNotBlank(storeOid)) {
-            sql.append(" and w.store.iwoid = :STOREOID");
-            sqlMap.put("STOREOID", storeOid);
+            conditionSB.append(" and w.store.iwoid = :STOREOID");
+            jpqlMap.put("STOREOID", storeOid);
         }
         if (StringUtils.isNotBlank(dealerEmployeeOid)) {
-            sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
-            sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
+            conditionSB.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
+            jpqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
         }
         
         if (StringUtils.isNotBlank(partnerEmployeeId)) {
-            sql.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
-            sqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
+            conditionSB.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
+            jpqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
         }
         if (StringUtils.isNotBlank(dealerId)) {
-            sql.append(" and w.dealer.dealerId like :DEALERID");
-            sqlMap.put("DEALERID", "%" + dealerId + "%");
+            conditionSB.append(" and w.dealer.dealerId like :DEALERID");
+            jpqlMap.put("DEALERID", "%" + dealerId + "%");
         }
         if (StringUtils.isNotBlank(storeId)) {
-            sql.append(" and w.store.storeId like :STOREID");
-            sqlMap.put("STOREID", "%" + storeId + "%");
+            conditionSB.append(" and w.store.storeId like :STOREID");
+            jpqlMap.put("STOREID", "%" + storeId + "%");
         }
         if (StringUtils.isNotBlank(dealerEmployeeId)) {
-            sql.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
-            sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
+            conditionSB.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
+            jpqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
         }
         
         if (beginTime != null ) {
-            sql.append(" and w.transBeginTime >=:BEGINTIME ");
-            sqlMap.put("BEGINTIME", beginTime);
+            conditionSB.append(" and w.transBeginTime >=:BEGINTIME ");
+            jpqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-            sql.append(" and w.transBeginTime <=:ENDTIME ");
-            sqlMap.put("ENDTIME", endTime);
+            conditionSB.append(" and w.transBeginTime <=:ENDTIME ");
+            jpqlMap.put("ENDTIME", endTime);
         }
         if (StringUtils.isNotBlank(payType)) {// 支付类型
-            sql.append(" and w.payType = :PAYTYPE");
-            sqlMap.put("PAYTYPE", payType);
+            conditionSB.append(" and w.payType = :PAYTYPE");
+            jpqlMap.put("PAYTYPE", payType);
         }
         if (StringUtils.isNotBlank(outTradeNo)) {
-            sql.append(" and w.outTradeNo = :OUTTRADENO");
-            sqlMap.put("OUTTRADENO", outTradeNo);
+            conditionSB.append(" and w.outTradeNo = :OUTTRADENO");
+            jpqlMap.put("OUTTRADENO", outTradeNo);
         }
         if (StringUtils.isNotBlank(transactionId)) {
-            sql.append(" and w.transactionId = :TRANSACTIONID");
-            sqlMap.put("TRANSACTIONID", transactionId);
+            conditionSB.append(" and w.transactionId = :TRANSACTIONID");
+            jpqlMap.put("TRANSACTIONID", transactionId);
         }
 
-        sql.append(" order by w.transBeginTime desc");
-        List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        conditionSB.append(" order by w.transBeginTime desc");
+        List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
   
-        Long totalAmount = 0L;
-        Long totalMoney = 0L;
-        
         // 总笔数为记录总数，总金额为交易成功的总金额
         if(weixinPayDetailsList != null && !weixinPayDetailsList.isEmpty()) {
         	for (WeixinPayDetails weixinPayDetails : weixinPayDetailsList) {
-        	    totalAmount++;
-                if (weixinPayDetails.getTradeStatus() != null && weixinPayDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
-                    totalMoney += weixinPayDetails.getTotalFee();
-                }
                 
         		WeixinPayDetailsVO vo = new WeixinPayDetailsVO();
         		//BeanCopierUtil.copyProperties(weixinPayDetails, vo);
@@ -193,7 +187,7 @@ public class WeixinPayDetailsServiceImpl
         		vo.setPayType(weixinPayDetails.getPayType());
         		vo.setTransactionId(weixinPayDetails.getTransactionId());
         		vo.setTotalFee(weixinPayDetails.getTotalFee());
-        		vo.setResultCode(weixinPayDetails.getResultCode());
+        		//vo.setResultCode(weixinPayDetails.getResultCode());
         		vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
         		
         		
@@ -202,84 +196,18 @@ public class WeixinPayDetailsServiceImpl
         }
         
         //计算合计信息
-        sql = new StringBuffer("select sum(case when w.tradeStatus=1 then w.totalFee else 0 end),count(w.totalFee) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
+        jpqlSelect = "select sum(case when w.tradeStatus=1 then w.totalFee else 0 end),count(w.totalFee) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         
+        long totalMoney = 0L;
+        long totalAmount = 0L;
+        List<?> aliTotalList = (List<?>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false);
+        for (Iterator<?> it = aliTotalList.iterator(); it.hasNext();) {
+            Object[] curRow = (Object[]) it.next();
+            totalMoney = curRow[0] == null ? 0L : (Long) curRow[0];
+            totalAmount = curRow[1] == null ? 0L : (Long) curRow[1];
+        }
 
-        if (StringUtils.isNotBlank(partner1Oid)) {
-        	sql.append(" and w.partner1Oid = :PARTNER1OID");
-        	sqlMap.put("PARTNER1OID", partner1Oid);
-        }
-        if (StringUtils.isNotBlank(partner2Oid)) {
-        	sql.append(" and w.partner2Oid = :PARTNER2OID");
-        	sqlMap.put("PARTNER2OID", partner2Oid);
-        }
-        if (StringUtils.isNotBlank(partner3Oid)) {
-        	sql.append(" and w.partner3Oid = :PARTNER3OID");
-        	sqlMap.put("PARTNER3OID", partner3Oid);
-        }
-        if (StringUtils.isNotBlank(partnerEmployeeOid)) {
-            sql.append(" and w.partnerEmployee.iwoid = :PARTNEREMPLOYEEOID");
-            sqlMap.put("PARTNEREMPLOYEEOID", partnerEmployeeOid);
-        }
-        if (StringUtils.isNotBlank(dealerOid)) {
-            sql.append(" and w.dealer.iwoid = :DEALEROID");
-            sqlMap.put("DEALEROID", dealerOid);
-        }
-        if (StringUtils.isNotBlank(storeOid)) {
-            sql.append(" and w.store.iwoid = :STOREOID");
-            sqlMap.put("STOREOID", storeOid);
-        }
-        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
-            sql.append(" and w.dealerEmployee.iwoid = :DEALEREMPLOYEEOID");
-            sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
-        }
-        
-        if (StringUtils.isNotBlank(partnerEmployeeId)) {
-            sql.append(" and w.partnerEmployee.partnerEmployeeId like :PARTNEREMPLOYEEID");
-            sqlMap.put("PARTNEREMPLOYEEID", "%" + partnerEmployeeId + "%");
-        }
-        if (StringUtils.isNotBlank(dealerId)) {
-            sql.append(" and w.dealer.dealerId like :DEALERID");
-            sqlMap.put("DEALERID", "%" + dealerId + "%");
-        }
-        if (StringUtils.isNotBlank(storeId)) {
-            sql.append(" and w.store.storeId like :STOREID");
-            sqlMap.put("STOREID", "%" + storeId + "%");
-        }
-        if (StringUtils.isNotBlank(dealerEmployeeId)) {
-            sql.append(" and w.dealerEmployee.dealerEmployeeId like :DEALEREMPLOYEEID");
-            sqlMap.put("DEALEREMPLOYEEID", "%" + dealerEmployeeId + "%");
-        }
-        
-        if (beginTime != null ) {
-            sql.append(" and w.transBeginTime >=:BEGINTIME ");
-            sqlMap.put("BEGINTIME", beginTime);
-        }
-        if (endTime != null ) {
-            sql.append(" and w.transBeginTime <=:ENDTIME ");
-            sqlMap.put("ENDTIME", endTime);
-        }
-        if (StringUtils.isNotBlank(payType)) {// 支付类型
-            sql.append(" and w.payType = :PAYTYPE");
-            sqlMap.put("PAYTYPE", payType);
-        }
-        if (StringUtils.isNotBlank(outTradeNo)) {
-            sql.append(" and w.outTradeNo = :OUTTRADENO");
-            sqlMap.put("OUTTRADENO", outTradeNo);
-        }
-        if (StringUtils.isNotBlank(transactionId)) {
-            sql.append(" and w.transactionId = :TRANSACTIONID");
-            sqlMap.put("TRANSACTIONID", transactionId);
-        }
-        
-        List<?> weixinTotalList = (List<?>) commonDAO.findObjectList(sql.toString(), sqlMap, false);
-        for (Iterator<?> it = weixinTotalList.iterator(); it.hasNext();) {
-        	Object[] curRow = (Object[]) it.next();
-        	 totalMoney= curRow[0]==null?0L:(Long)curRow[0];
-        	 totalAmount = curRow[1]==null?0L:(Long)curRow[1];  
-        }
-        
-        WeixinPayTotalVO totalVO = new WeixinPayTotalVO();
+        PayTotalVO totalVO = new PayTotalVO();
         totalVO.setTotalAmount(totalAmount);
         totalVO.setTotalMoney(totalMoney);
         resultMap.put("payList", resultList);

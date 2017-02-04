@@ -27,4 +27,9 @@
 		<property name="weixinRefundDetailsMainService" ref="weixinRefundDetailsMainService" />
 	</bean>
 	
+	<bean id="aliPayDetailsAction" class="com.zbsp.wepaysp.manage.web.action.pay.AliPayDetailsAction" scope="prototype">
+		<property name="partnerService" ref="partnerService"></property>
+		<property name="weixinPayDetailsService" ref="weixinPayDetailsService"></property>
+	</bean>
+	
 </beans>

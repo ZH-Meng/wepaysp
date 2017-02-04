@@ -35,23 +35,25 @@ public class AliPayPackConverter {
             // 如果该字段为空，则默认为与支付宝签约的商户的PID，也就是appid对应的PID
             String sellerId = payDetailsVO.getSellerId();
 
-            // 业务扩展参数，目前可添加由支付宝分配的系统商编号(通过setSysServiceProviderId方法)，详情请咨询支付宝技术支持
-            String providerId = payDetailsVO.getSysServiceProviderId();
+            // 业务扩展参数
             ExtendParams extendParams = new ExtendParams();
-            extendParams.setSysServiceProviderId(providerId);
+            // 设置返佣帐号，支付宝分配的系统商编号(通过setSysServiceProviderId方法)
+            extendParams.setSysServiceProviderId(payDetailsVO.getIsvPartnerId());
             
             // FIXME 条码支付超时
             String timeoutExpress = SysEnvKey.EXPIRE_TIME_ALI_PAY_1M;
-            String appAuthToken = payDetailsVO.getAppAuthToken(); // 应用授权令牌
+            
+            // 应用授权令牌
+            String appAuthToken = payDetailsVO.getAppAuthToken();
 
             // 创建条码支付请求builder，设置请求参数
             builder.setAppAuthToken(appAuthToken)
-                .setAppAuthToken(appAuthToken)
                 .setOutTradeNo(payDetailsVO.getOutTradeNo())
                 .setAuthCode(payDetailsVO.getAuthCode())
                 .setSubject(payDetailsVO.getSubject())
                 .setBody(payDetailsVO.getBody())
-                .setSellerId(sellerId).setTotalAmount(totalAmount)
+                .setSellerId(sellerId)
+                .setTotalAmount(totalAmount)
                 .setUndiscountableAmount(null)
                 .setStoreId(payDetailsVO.getStoreId())
                 .setOperatorId(payDetailsVO.getOperatorId())

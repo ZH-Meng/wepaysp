@@ -18,7 +18,7 @@ import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
-import com.zbsp.wepaysp.vo.pay.WeixinPayTotalVO;
+import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 
 /**
  * 微信交易明细
@@ -39,7 +39,7 @@ public class WeixinPayDetailsAction
     private int userLevel;
     private int partnerVoListLevel;
     private String listType;
-    private WeixinPayTotalVO totalVO;
+    private PayTotalVO totalVO;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -132,9 +132,9 @@ public class WeixinPayDetailsAction
                 Map<String, Object> resultMap = weixinPayDetailsService.doJoinTransQueryWeixinPayDetails(paramMap, start, size);
                 weixinPayDetailsVoList = (List<WeixinPayDetailsVO>) MapUtils.getObject(resultMap, "payList");
             	// 合计
-            	totalVO = (WeixinPayTotalVO) MapUtils.getObject(resultMap, "total");
+            	totalVO = (PayTotalVO) MapUtils.getObject(resultMap, "total");
             } else {
-                totalVO = new WeixinPayTotalVO();
+                totalVO = new PayTotalVO();
             }
         } catch (Exception e) {
             logger.error("微信交易明细查询列表错误：" + e.getMessage());
@@ -234,7 +234,7 @@ public class WeixinPayDetailsAction
         return listType;
     }
 
-    public WeixinPayTotalVO getTotalVO() {
+    public PayTotalVO getTotalVO() {
         return totalVO;
     }
 
