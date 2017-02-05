@@ -115,7 +115,9 @@ public class SysEnums {
      */
     public static enum QRCodeType {
         /** 支付二维码*/                 PAY(1),
-        /** 绑定支付通知二维码*/     BIND_PAY_NOTICE(2);
+        /** 绑定支付通知二维码*/     BIND_PAY_NOTICE(2),
+        /** 商户支付宝授权二维码*/  ALIPAY_APP_AUTH(3),
+        /** 商户支付宝沙箱授权二维码*/  ALIPAY_APP_AUTH_DEV(4);
         
         private int value;
         

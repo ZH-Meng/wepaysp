@@ -173,8 +173,8 @@
 						  			<td title="<s:property value="#payTypeStr" />">
 						  				<s:property value="#payTypeStr" />
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${aliPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
-						  				<fmt:formatNumber value="${aliPayDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${aliPayDetailsVo.totalAmount/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${aliPayDetailsVo.totalAmount/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 							  		<s:if test="#aliPayDetailsVo.tradeStatus == 0">
 					  				<s:set var="tradeStatusStr">交易中</s:set>

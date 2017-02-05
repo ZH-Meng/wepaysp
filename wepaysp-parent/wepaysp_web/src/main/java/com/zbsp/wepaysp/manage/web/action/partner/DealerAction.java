@@ -14,11 +14,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.constant.SysEnums.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.PartnerEmployeeService;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
@@ -45,6 +48,8 @@ public class DealerAction
     private String qRCodeName;
     private String dealerOid; 
     private String partnerOid;
+    private String devMode;
+    private String alipayAuthUrl;
     
     @Override
     protected String query(int start, int size) {
@@ -393,14 +398,14 @@ public class DealerAction
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             if (SysUserUtil.isPartner(manageUser) || SysUserUtil.isPartnerEmployee(manageUser)) {// 服务商或业务员下载商户二维码
                 if (StringUtils.isNotBlank(dealerOid)) {
-                    dealerVO = dealerService.doTransGetPayQRCode(dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                    dealerVO = dealerService.doTransGetQRCode(QRCodeType.PAY.getValue(), dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
                 } else {
                     logger.warn("非法下载商户级别支付二维码图片，参数dealerOid为空！");
                     setAlertMessage("下载商户级别支付二维码图片失败！");
                     return list();
                 }
             } else if (SysUserUtil.isDealer(manageUser)) {// 商户下载自己二维码
-                dealerVO = dealerService.doTransGetPayQRCode(manageUser.getDataDealer().getIwoid(), manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+                dealerVO = dealerService.doTransGetQRCode(QRCodeType.PAY.getValue(), manageUser.getDataDealer().getIwoid(), manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
             } else {
                 logger.warn("无权下载商户级别支付二维码");
                 setAlertMessage("无权下载商户级别支付二维码");
@@ -430,6 +435,75 @@ public class DealerAction
         }
         return inputStream;
     }
+    
+    /**
+     * 跳转商户管理支付宝页面
+     * <pre>
+     * 		支付宝第三方应用授权；
+     * </pre>
+     * @return
+     */
+    public String goToAlipayManage() {
+        logger.info("跳转商户管理支付宝页面");
+        try {
+        	ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        	 if (!SysUserUtil.isPartner(manageUser)) {
+                 logger.warn("无权操作");
+                 setAlertMessage("无权操作");
+                 return "accessDenied";
+             }
+        	 if (StringUtils.isBlank(dealerOid)) {
+        		 logger.warn("非法操作，参数dealerOid为空！");
+	             setAlertMessage("非法操作！");
+	             return "accessDenied";
+        	 }
+        	 // 拼接支付第三方应用授权链接
+        	 String authUrlTmp = "1".equals(devMode) ? SysEnvKey.ALIPAY_AUTH_APP_URL_DEV : SysEnvKey.ALIPAY_AUTH_APP_URL;
+    		 alipayAuthUrl = authUrlTmp.replace("APPID", SysConfig.appId4Face2FacePay).replace("REDIRECT_URI", SysConfig.alipayAuthCallBackURL);
+        } catch (Exception e) {
+            logger.error("跳转商户管理支付宝页面错误：" + e.getMessage());
+            setAlertMessage("跳转商户管理支付宝页面错误！");
+            return ERROR;
+        }
+        return "dealerAlipayManage";
+    }
+    
+    /**
+     * 加载支付宝授权二维码
+     * @return
+     */
+    public String loadAliapyAppAuthCode() {
+	    try {
+	        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	        if (StringUtils.isNotBlank(dealerOid)) {
+	            // 加载授权二维码
+	        	dealerVO = dealerService.doTransGetQRCode("1".equals(devMode) ? QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() : QRCodeType.ALIPAY_APP_AUTH.getValue(), 
+	        			dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+	        } 
+	    } catch (Exception e) {
+	        logger.error("加载支付宝授权二维码错误：" + e.getMessage());
+	    }
+	return "getAliapyAppAuthCodeImg";
+}
+
+/**
+ * 返回支付宝授权二维码图片流
+ * @return
+ */
+public InputStream getAliapyAppAuthCodeImg() {
+    InputStream inputStream = null;
+    try {
+        File qrFile = new File(dealerVO.getAlipayAuthCodePath());
+        inputStream = new FileInputStream(qrFile);
+        qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+        logger.info("加载支付宝授权二维码图片成功.");
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+    }
+    return inputStream;
+}
 
     @Override
     public void setSession(Map<String, Object> session) {
@@ -467,8 +541,12 @@ public class DealerAction
     public String getQRCodeName() {
         return qRCodeName;
     }
+    
+    public String getDealerOid() {
+		return dealerOid;
+	}
 
-    public void setDealerOid(String dealerOid) {
+	public void setDealerOid(String dealerOid) {
         this.dealerOid = dealerOid;
     }
 
@@ -479,5 +557,17 @@ public class DealerAction
     public String getPartnerOid() {
         return partnerOid;
     }
-    
+
+	public String getDevMode() {
+		return devMode;
+	}
+	
+	public void setDevMode(String devMode) {
+		this.devMode = devMode;
+	}
+
+	public String getAlipayAuthUrl() {
+		return alipayAuthUrl;
+	}
+	
 }

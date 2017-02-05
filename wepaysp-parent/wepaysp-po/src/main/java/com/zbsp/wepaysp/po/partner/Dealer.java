@@ -43,6 +43,8 @@ public class Dealer
     private String modifier;
     private Timestamp modifyTime;
     private String remark;
+    
+    private String alipayAuthCodePath;
 
     public Dealer() {
     }
@@ -258,7 +260,16 @@ public class Dealer
     public void setAlipayUserId(String alipayUserId) {
         this.alipayUserId = alipayUserId;
     }
-
+    
+    @Column(name = "alipay_auth_code_path", length = 256)
+    public String getAlipayAuthCodePath() {
+        return alipayAuthCodePath;
+    }
+    
+    public void setAlipayAuthCodePath(String alipayAuthCodePath) {
+        this.alipayAuthCodePath = alipayAuthCodePath;
+    }
+    
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
         return this.creator;
@@ -354,6 +365,8 @@ public class Dealer
             builder.append("qrCodePath=").append(qrCodePath).append(", ");
         if (alipayUserId != null)
             builder.append("alipayUserId=").append(alipayUserId).append(", ");
+        if (alipayAuthCodePath != null)
+            builder.append("alipayAuthCodePath=").append(alipayAuthCodePath).append(", ");
         if (creator != null)
             builder.append("creator=").append(creator).append(", ");
         if (createTime != null)

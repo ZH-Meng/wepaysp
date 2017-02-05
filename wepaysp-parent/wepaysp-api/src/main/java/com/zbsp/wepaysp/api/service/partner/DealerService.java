@@ -101,12 +101,13 @@ public interface DealerService {
 
     /**
      * 获取商户级别支付二维码（如果不存在则生成）
+     * @param qRCodeType 二维码类型：1为支付二维码，3为商户支付宝授权二维码
      * @param dealerOid
      * @param modifier 修改人名称
      * @param operatorUserOid 操作用户Oid
      * @param logFunctionOid 日志记录项Oid
      * @return DealerVO 包含二维码path
      */
-    public DealerVO doTransGetPayQRCode(String dealerOid, String modifier, String operatorUserOid, String logFunctionOid);
+    public DealerVO doTransGetQRCode(int qRCodeType, String dealerOid, String modifier, String operatorUserOid, String logFunctionOid);
     
 }

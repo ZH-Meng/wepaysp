@@ -181,6 +181,8 @@
 						  				<%-- <s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerVo.iwoid" />')">下载二维码</a>
 						  				</s:if> --%>
+						  				
+						  				<a href="javascript:void(0);" onclick="alipayManage('<s:property value="#dealerVo.iwoid" />')">支付宝管理</a>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -218,6 +220,11 @@
 		function downloadPayQRCode(iwoid){
 			$("#dealerOid").val(iwoid);
 			invokeAction('downloadPayQRCode');
+		}
+		
+		function alipayManage(iwoid){
+			$("#dealerOid").val(iwoid);
+			invokeAction('goToAlipayManage');
 		}
 	</script>
 	

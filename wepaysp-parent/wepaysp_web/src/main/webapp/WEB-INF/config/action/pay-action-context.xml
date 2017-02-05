@@ -29,7 +29,7 @@
 	
 	<bean id="aliPayDetailsAction" class="com.zbsp.wepaysp.manage.web.action.pay.AliPayDetailsAction" scope="prototype">
 		<property name="partnerService" ref="partnerService"></property>
-		<property name="weixinPayDetailsService" ref="weixinPayDetailsService"></property>
+		<property name="aliPayDetailsService" ref="aliPayDetailsService"></property>
 	</bean>
 	
 </beans>

@@ -32,6 +32,7 @@ public class SysConfigServiceImpl
     private String serverType;
     
     private String appId4Face2FacePay;
+    private String alipayAuthCallBackURL;
 
     private PartnerService partnerService;
     
@@ -95,14 +96,22 @@ public class SysConfigServiceImpl
         	}
             logger.info("初始化系统配置信息：appidQrCodePath=" + appidQrCodePath);
         }
+
+        if (StringUtils.isBlank(appId4Face2FacePay)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
+        } else {
+            logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
+        }
         
         // 初始化系统静态配置
-        SysConfig.payClientCheckURL= payClientCheckURL;
-        SysConfig.wxPayCallBackURL = wxPayCallBackURL;
-        SysConfig.wxPayNotifyURL = wxPayNotifyURL;
-        SysConfig.bindCallBackURL = bindCallBackURL;
-        SysConfig.qRCodeRootPath = qRCodeRootPath;
-        SysConfig.appidQrCodePath = appidQrCodePath;
+		SysConfig.payClientCheckURL = payClientCheckURL;
+		SysConfig.wxPayCallBackURL = wxPayCallBackURL;
+		SysConfig.wxPayNotifyURL = wxPayNotifyURL;
+		SysConfig.bindCallBackURL = bindCallBackURL;
+		SysConfig.qRCodeRootPath = qRCodeRootPath;
+		SysConfig.appidQrCodePath = appidQrCodePath;
+
+        SysConfig.appId4Face2FacePay = appId4Face2FacePay; // FIXME 初始化支付当面付的应用ID
 
         // 加载状态为非冻结服务商配置信息到内存，FIXME 考虑清除和更新的问题
         List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(null, null);
@@ -139,16 +148,17 @@ public class SysConfigServiceImpl
             // 初始化支付宝支付的配置 FIXME 改为从数据库中读取
             AliPayUtil.init();
 
-            // FIXME 初始化支付当面付的应用ID
-            if (StringUtils.isBlank(appId4Face2FacePay)) {
-                throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
-            } else {
-                logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
-            }
-            SysConfig.appId4Face2FacePay = appId4Face2FacePay;
-            
             //FIXME WEB中的公众号支付迁移后，需要将微信的也添加
         }
+        if (ServerType.WEB_MANAGE.equals(serType)) {
+	        if (StringUtils.isBlank(alipayAuthCallBackURL)) {
+	            throw new SystemInitException("初始化系统配置信息失败，参数缺失：alipayAuthCallBackURL");
+	        } else {
+	            logger.info("初始化系统配置信息：alipayAuthCallBackURL=" + alipayAuthCallBackURL);
+	        }
+			SysConfig.alipayAuthCallBackURL = alipayAuthCallBackURL;
+        }
+        
     }
 
     @Override
@@ -243,7 +253,11 @@ public class SysConfigServiceImpl
         this.appId4Face2FacePay = appId4Face2FacePay;
     }
 
-    public void setServerType(String serverType) {
+    public void setAlipayAuthCallBackURL(String alipayAuthCallBackURL) {
+		this.alipayAuthCallBackURL = alipayAuthCallBackURL;
+	}
+
+	public void setServerType(String serverType) {
         this.serverType = serverType;
     }
 

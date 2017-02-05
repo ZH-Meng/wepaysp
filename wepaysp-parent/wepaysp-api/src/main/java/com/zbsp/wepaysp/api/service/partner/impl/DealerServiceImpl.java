@@ -465,7 +465,7 @@ public class DealerServiceImpl
     }
 
     @Override
-    public DealerVO doTransGetPayQRCode(String dealerOid, String modifier, String operatorUserOid, String logFunctionOid) {
+    public DealerVO doTransGetQRCode(int qRCodeType, String dealerOid, String modifier, String operatorUserOid, String logFunctionOid) {
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "商戶Oid不能为空！");
         DealerVO dealerVO = new DealerVO();
 
@@ -473,7 +473,16 @@ public class DealerServiceImpl
         if (dealer == null) {
             throw new NotExistsException("商户不存在");
         }
-        String qrCodePath = dealer.getQrCodePath();
+        
+        String qrCodePath = null;
+        if (QRCodeType.PAY.getValue() == qRCodeType) {
+        	qrCodePath = dealer.getQrCodePath();
+        } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType) {
+        	qrCodePath = dealer.getAlipayAuthCodePath();
+        } else {
+        	throw new IllegalArgumentException("参数错误，二维码类型不支持" + qRCodeType);
+        }
+        
         boolean qrCodeExist = false;
         if (StringUtils.isNotBlank(qrCodePath)) {
             File qrCodeFile = new File(qrCodePath);
@@ -486,22 +495,33 @@ public class DealerServiceImpl
             String partnerOid = dealer.getPartner1Oid();// 所属顶级服务商Oid
             Validator.checkArgument(StringUtils.isBlank(partnerOid), "商户信息缺少partnerOid无法生成二维码");
             
-            Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
-            if (partnerMap == null || partnerMap.isEmpty()) {
-                throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
-            }
-            String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
+            String appid = null;
             
             // 生成二维码对应链接
             String qrURL = null;
             Map<String, String> urlParamMap = new HashMap<String, String>();
             urlParamMap.put("partnerOid", partnerOid);
             urlParamMap.put("dealerOid", dealer.getIwoid());
-            Validator.checkArgument(StringUtils.isBlank(SysConfig.payClientCheckURL), "未配置支付客户端检查地址无法生成支付二维码");
             
-            qrURL = Generator.generateQRURL(QRCodeType.PAY.getValue(), appid, SysConfig.bindCallBackURL, SysConfig.payClientCheckURL, urlParamMap);
+            String tempURL = null;
+            if (QRCodeType.PAY.getValue() == qRCodeType) {
+                Validator.checkArgument(StringUtils.isBlank(SysConfig.payClientCheckURL), "未配置支付客户端检查地址无法生成支付二维码");
+                Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+                if (partnerMap == null || partnerMap.isEmpty()) {
+                    throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
+                }
+                appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
+                
+                tempURL = SysConfig.payClientCheckURL;
+            } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType) {
+                Validator.checkArgument(StringUtils.isBlank(SysConfig.alipayAuthCallBackURL), "未配置支付宝授权回调地址无法生成二维码");
+                //FIXME
+                appid = SysConfig.appId4Face2FacePay;
+                tempURL = SysConfig.alipayAuthCallBackURL;
+            }
+            qrURL = Generator.generateQRURL(qRCodeType, appid, tempURL, urlParamMap);
             
-            logger.info("商户-" + dealer.getCompany() + "生成支付客户端检查二维码URL：" + qrURL);
+            logger.info("商户-" + dealer.getCompany() + "生成二维码URL：" + qrURL + "，qRCodeType=" + qRCodeType);
 
             // 路径生成规则：服务商ID/商户ID
             String relativePath = dealer.getPartner().getPartnerId() + File.separator + dealer.getDealerId();
@@ -513,19 +533,24 @@ public class DealerServiceImpl
             // 生成二维码图片
             try {
                 QRCodeUtil.writeToFile(qrURL, filePath.getPath(), fileName);
-                logger.info("商户-" + dealer.getCompany() + "生成二维码图片");
+                logger.info("商户-" + dealer.getCompany() + "生成二维码（类型：" + qRCodeType + "）图片");
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (WriterException e) {
                 e.printStackTrace();
             }
             // 更新商户二维码地址信息
-            dealer.setQrCodePath(filePath.getPath() + File.separator + fileName + ".png");
+            String pathTemp = filePath.getPath() + File.separator + fileName + ".png";
+            if (QRCodeType.PAY.getValue() == qRCodeType) {
+            	dealer.setQrCodePath(pathTemp);
+            } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType) {
+            	dealer.setAlipayAuthCodePath(pathTemp);
+            }
             commonDAO.update(dealer);
             
             Date processEndTime = new Date();
             // 记录修改日志
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改商户二维码信息[二维码地址：" + dealer.getQrCodePath() + "]", processEndTime, processEndTime, dealerStr, dealer.toString(), SysLog.State.success.getValue(), dealer.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "修改商户二维码信息[二维码地址：" + pathTemp + "]", processEndTime, processEndTime, dealerStr, dealer.toString(), SysLog.State.success.getValue(), dealer.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
         }
         BeanCopierUtil.copyProperties(dealer, dealerVO);
         return dealerVO;

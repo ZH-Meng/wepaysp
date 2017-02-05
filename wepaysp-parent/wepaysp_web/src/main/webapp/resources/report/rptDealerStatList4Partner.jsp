@@ -17,7 +17,7 @@
 </head>
 <body class="bgbj">
 	<div class="rightbg">
-		<div class="bgposition">您现在的位置：分润计算&gt;<s:property value="#title"/></div>
+		<div class="bgposition">您现在的位置：分润结算&gt;<s:property value="#title"/></div>
 		<s:form id="queryForm" method="post">
 			<s:hidden name="listType"/>
 			<div class="bgtj">

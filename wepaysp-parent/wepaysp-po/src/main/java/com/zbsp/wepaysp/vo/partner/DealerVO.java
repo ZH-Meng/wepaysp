@@ -38,6 +38,8 @@ public class DealerVO
 
     private String qrCodePath;
     
+    private String alipayAuthCodePath;
+    
     public String getIwoid() {
         return iwoid;
     }
@@ -221,5 +223,13 @@ public class DealerVO
     public void setQrCodePath(String qrCodePath) {
         this.qrCodePath = qrCodePath;
     }
+
+	public String getAlipayAuthCodePath() {
+		return alipayAuthCodePath;
+	}
+
+	public void setAlipayAuthCodePath(String alipayAuthCodePath) {
+		this.alipayAuthCodePath = alipayAuthCodePath;
+	}
 
 }

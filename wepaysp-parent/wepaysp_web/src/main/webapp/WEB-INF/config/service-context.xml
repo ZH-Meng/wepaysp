@@ -12,7 +12,7 @@
 				http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 				
 	
-	<bean id="sysConfigService" class="com.zbsp.wepaysp.api.service.main.init.impl.SysConfigServiceImpl" parent="baseService" init-method="init">
+		<bean id="sysConfigService" class="com.zbsp.wepaysp.api.service.main.init.impl.SysConfigServiceImpl" parent="baseService" init-method="init">
 		<property name="partnerService" ref="partnerService" />
 		<property name="payClientCheckURL" value="${payClientCheckURL}" />
 		<property name="wxPayCallBackURL" value="${wxPayCallBackURL}" />
@@ -20,6 +20,8 @@
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
+		<property name="appId4Face2FacePay" value="${appId4Face2FacePay}" />
+		<property name="alipayAuthCallBackURL" value="${alipayAuthCallBackURL}" />
 		<property name="serverType" value="${serverType}" />
 	</bean>
 	
@@ -102,6 +104,10 @@
 	
 	<bean id="aliPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainServiceImpl" parent="baseService">
 		<property name="aliPayDetailsService" ref="aliPayDetailsService" />
+	</bean>
+	
+	<bean id="alipayAppAuthDetailsService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppAuthDetailsServiceImpl" parent="baseService">
+		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	
 </beans>

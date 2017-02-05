@@ -262,12 +262,15 @@ public class StoreServiceImpl
             urlParamMap.put("partnerOid", partnerOid);
             urlParamMap.put("dealerOid", dealer.getIwoid());
             urlParamMap.put("storeOid", store.getIwoid());
+            String tempURL = null;
             if (QRCodeType.PAY.getValue() == qRCodeType) {
                 Validator.checkArgument(StringUtils.isBlank(SysConfig.payClientCheckURL), "未配置支付客户端检查地址无法生成支付二维码");
+                tempURL = SysConfig.payClientCheckURL;
             } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
                 Validator.checkArgument(StringUtils.isBlank(SysConfig.bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
+                tempURL = SysConfig.bindCallBackURL;
             }
-            qrURL = Generator.generateQRURL(qRCodeType, appid, SysConfig.bindCallBackURL, SysConfig.payClientCheckURL, urlParamMap);
+            qrURL = Generator.generateQRURL(qRCodeType, appid, tempURL, urlParamMap);
             
             // 生成二维码对应链接
             logger.info("门店-" + store.getStoreName() + "("+ dealer.getCompany() + ")生成业务二维码，类型：" + qRCodeType + "，URL：" + qrURL);
