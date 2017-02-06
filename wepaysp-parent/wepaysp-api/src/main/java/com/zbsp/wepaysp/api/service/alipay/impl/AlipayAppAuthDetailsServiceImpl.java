@@ -31,7 +31,8 @@ public class AlipayAppAuthDetailsServiceImpl
         // 检查参数
         Validator.checkArgument(appAuthDetailsVO == null, "appAuthDetailsVO为空");
         Validator.checkArgument(StringUtils.isBlank(appAuthDetailsVO.getAppId()), "appAuthDetailsVO.appid为空");
-        Validator.checkArgument(StringUtils.isBlank(appAuthDetailsVO.getAuthUserId()), "appAuthDetailsVO.authUserId为空");
+        Validator.checkArgument(StringUtils.isBlank(appAuthDetailsVO.getDealerOid()), "appAuthDetailsVO.dealerOid为空");
+        //Validator.checkArgument(StringUtils.isBlank(appAuthDetailsVO.getAuthUserId()), "appAuthDetailsVO.authUserId为空");
         
         // 根据appId查找应用
         logger.info("查找应用({}) - 开始", appAuthDetailsVO.getAppId());
@@ -45,7 +46,7 @@ public class AlipayAppAuthDetailsServiceImpl
         }
         logger.info("查找应用({}) - 结束", appAuthDetailsVO.getAppId());
         
-        // 根据authUserId查找商户
+        /*// 根据authUserId查找商户
         logger.info("查找商户(支付宝PID={}) - 开始", appAuthDetailsVO.getAuthUserId());
         jpqlMap.clear();
         jpql = "from Dealer d where d.alipayUserId=:ALIPAYUSERID";
@@ -55,7 +56,30 @@ public class AlipayAppAuthDetailsServiceImpl
         if (dealer == null) {
             throw new NotExistsException("dealer不存在（alipayUserId=" + appAuthDetailsVO.getAuthUserId() + "）");
         }
-        logger.info("查找商户(支付宝PID={}) - 结束", appAuthDetailsVO.getAuthUserId());
+        logger.info("查找商户(支付宝PID={}) - 结束", appAuthDetailsVO.getAuthUserId());*/
+        
+        // 查找商户
+        logger.info("查找商户(oid={}) - 开始", appAuthDetailsVO.getDealerOid());
+        Dealer dealer = commonDAO.findObject(Dealer.class, appAuthDetailsVO.getDealerOid());
+        if (dealer == null) {
+            throw new NotExistsException("dealer不存在（oid=" + appAuthDetailsVO.getDealerOid() + "）");
+        }
+        logger.info("查找商户(oid={}) - 结束", appAuthDetailsVO.getDealerOid());
+        // 更新商户支付宝PID（暂无实用）
+        Date logDate = new Date();
+        if (StringUtils.isNotBlank(appAuthDetailsVO.getAuthUserId())) {
+            if (StringUtils.isNotBlank(dealer.getAlipayUserId()) && !StringUtils. equals(dealer.getAlipayUserId(), appAuthDetailsVO.getAuthUserId())) {
+                logger.info("商户(oid={}) - 支付宝授权更换支付宝账户，原有PID：{}, 新的PID：{}", dealer.getAlipayUserId(), appAuthDetailsVO.getAuthUserId());
+            }
+            String oldDealerStr = dealer.toString();
+            dealer.setAlipayUserId(appAuthDetailsVO.getAuthUserId());
+            commonDAO.update(dealer);
+            // 记录修改日志
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改商户信息[alipayUserId=" + dealer.getAlipayUserId() + "]", 
+                logDate, logDate, oldDealerStr, dealer.toString(), SysLog.State.success.getValue(), dealer.getIwoid(), null, SysLog.ActionType.modify.getValue());
+        } else {
+            logger.warn("商户(oid={}) - 授权处理，authUserId为空", appAuthDetailsVO.getDealerOid());
+        }
         
         // 将旧的授权状态置为无效
         jpqlMap.clear();
@@ -65,9 +89,13 @@ public class AlipayAppAuthDetailsServiceImpl
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         AlipayAppAuthDetails oldAuths = commonDAO.findObject(jpql, jpqlMap, false);
         if (oldAuths != null) {
+            String oldAuthStr = oldAuths.toString();
             logger.info("商户({})曾授权过应用({})，现将令牌({})状态置为invalid", dealer.getDealerId(), app.getAppId(), oldAuths.getAppAuthToken());
             oldAuths.setStatus(AlipayAppAuthDetails.AppAuthStatus.INVALID.toString());
-            commonDAO.update(oldAuths);
+            commonDAO.update(oldAuths);            
+            // 记录修改日志
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改商户授权支付宝应用明细[status=" + oldAuths.getStatus() + "]", 
+                logDate, logDate, oldAuthStr, oldAuths.toString(), SysLog.State.success.getValue(), oldAuths.getIwoid(), null, SysLog.ActionType.modify.getValue());
         }
         
         // 记录新的授权记录，关联商户、蚂蚁平台应用
@@ -105,7 +133,26 @@ public class AlipayAppAuthDetailsServiceImpl
         
         return appAuthDetailsVO;
     }
-    
+
+    @Override
+    public AlipayAppAuthDetailsVO doJoinTranQueryAppAuthDetailByDealer(String dealerOid, String appId) {
+        // 检查参数
+        Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid为空");
+        Validator.checkArgument(StringUtils.isBlank(appId), "appId为空");
+        
+        AlipayAppAuthDetailsVO appAuthDetailsVO = new AlipayAppAuthDetailsVO();
+        
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayAppAuthDetails a where a.dealer.iwoid=:DEALEROID and a.alipayApp.appId=:APPID and a.status=:STATUS";
+        jpqlMap.put("DEALEROID", dealerOid);
+        jpqlMap.put("APPID", appId);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        AlipayAppAuthDetails appAuthDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
+        
+        return appAuthDetailsVO;
+    }
+
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }

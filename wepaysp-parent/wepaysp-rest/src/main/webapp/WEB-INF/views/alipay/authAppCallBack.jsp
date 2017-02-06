@@ -29,9 +29,9 @@
 		<div class="succ-item">
 			授权生效时间<span class="fr"><fmt:formatDate value="${appAuthDetailsVO.authStart}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
 		</div>
-		<div class="succ-item">
+		<%-- <div class="succ-item">
 			授权失效时间<span class="fr"><fmt:formatDate value="${appAuthDetailsVO.authEnd}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
-		</div>
+		</div> --%>
    	 </div> 
 </body>
 </html>

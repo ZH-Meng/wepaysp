@@ -18,12 +18,16 @@ import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
+import com.zbsp.wepaysp.po.alipay.AlipayAppAuthDetails;
 import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.api.service.alipay.AlipayAppAuthDetailsService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.PartnerEmployeeService;
+import com.zbsp.wepaysp.vo.alipay.AlipayAppAuthDetailsVO;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
 import com.zbsp.wepaysp.vo.partner.PartnerEmployeeVO;
 
@@ -48,8 +52,10 @@ public class DealerAction
     private String qRCodeName;
     private String dealerOid; 
     private String partnerOid;
-    private String devMode;
     private String alipayAuthUrl;
+    
+    private AlipayAppAuthDetailsService alipayAppAuthDetailsService;
+    private String authStatusDesc;// 已授权、未授权
     
     @Override
     protected String query(int start, int size) {
@@ -457,9 +463,20 @@ public class DealerAction
 	             setAlertMessage("非法操作！");
 	             return "accessDenied";
         	 }
-        	 // 拼接支付第三方应用授权链接
-        	 String authUrlTmp = "1".equals(devMode) ? SysEnvKey.ALIPAY_AUTH_APP_URL_DEV : SysEnvKey.ALIPAY_AUTH_APP_URL;
-    		 alipayAuthUrl = authUrlTmp.replace("APPID", SysConfig.appId4Face2FacePay).replace("REDIRECT_URI", SysConfig.alipayAuthCallBackURL);
+        	 // 拼接支付第三方应用授权链接，商户识别码dealerOid，回调处理时，根据dealerOid更新dealer_t中授权的支付宝商户PID字段
+        	 
+    		 Map<String, String> urlParamMap = new HashMap<String, String>();
+             urlParamMap.put("dealerOid", dealerOid);
+            alipayAuthUrl = Generator.generateQRURL("1".equals(SysConfig.devMode) ? QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() : QRCodeType.ALIPAY_APP_AUTH.getValue(), 
+                SysConfig.appId4Face2FacePay, SysConfig.alipayAuthCallBackURL, urlParamMap);
+    		 
+    		 // 查看商户是否授权当面付应用
+    		 AlipayAppAuthDetailsVO authDetailsVO = alipayAppAuthDetailsService.doJoinTranQueryAppAuthDetailByDealer(dealerOid, SysConfig.appId4Face2FacePay);
+    		 if (authDetailsVO != null && AlipayAppAuthDetails.AppAuthStatus.VALID.toString().equals(authDetailsVO.getStatus())) {
+    		     authStatusDesc = "已授权";
+    		 } else {
+    		     authStatusDesc = "未授权";
+    		 }
         } catch (Exception e) {
             logger.error("跳转商户管理支付宝页面错误：" + e.getMessage());
             setAlertMessage("跳转商户管理支付宝页面错误！");
@@ -477,7 +494,7 @@ public class DealerAction
 	        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	        if (StringUtils.isNotBlank(dealerOid)) {
 	            // 加载授权二维码
-	        	dealerVO = dealerService.doTransGetQRCode("1".equals(devMode) ? QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() : QRCodeType.ALIPAY_APP_AUTH.getValue(), 
+	        	dealerVO = dealerService.doTransGetQRCode("1".equals(SysConfig.devMode) ? QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() : QRCodeType.ALIPAY_APP_AUTH.getValue(), 
 	        			dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
 	        } 
 	    } catch (Exception e) {
@@ -558,16 +575,16 @@ public InputStream getAliapyAppAuthCodeImg() {
         return partnerOid;
     }
 
-	public String getDevMode() {
-		return devMode;
-	}
-	
-	public void setDevMode(String devMode) {
-		this.devMode = devMode;
-	}
-
 	public String getAlipayAuthUrl() {
 		return alipayAuthUrl;
 	}
+    
+    public String getAuthStatusDesc() {
+        return authStatusDesc;
+    }
+    
+    public void setAlipayAppAuthDetailsService(AlipayAppAuthDetailsService alipayAppAuthDetailsService) {
+        this.alipayAppAuthDetailsService = alipayAppAuthDetailsService;
+    }
 	
 }

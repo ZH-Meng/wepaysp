@@ -21,17 +21,17 @@
 			</ul>
 			<div id="div_auth">
 				<div>
-					邀请支付宝用户授权给应用的URL(在PC电脑上授权)：<br/><a href="${alipayAuthUrl}">${alipayAuthUrl}</a>
+					邀请支付宝用户授权给应用的URL(在PC电脑上授权)：<a href="${alipayAuthUrl}" target="_blank">点此链接登录支付宝授权给应用</a>
 				</div>
 				<div>
 					邀请支付宝用户授权给应用的二维码(用支付宝APP扫码授权)：
 				</div> 
 				<div>
-					<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadAliapyAppAuthCode.action?dealerOid=${dealerOid}&devMode=${devMode}" alt="支付宝授权二维码" width="200" height="200"/>
+					<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadAliapyAppAuthCode.action?dealerOid=${dealerOid}" alt="支付宝授权二维码" width="200" height="200"/>
 					<span class="qrCode_title">支付宝授权二维码</span>
 				</div>
 				<div>
-					状态：已授权/未授权
+					状态：${authStatusDesc }
 				</div>
 			</div>
 		</div>

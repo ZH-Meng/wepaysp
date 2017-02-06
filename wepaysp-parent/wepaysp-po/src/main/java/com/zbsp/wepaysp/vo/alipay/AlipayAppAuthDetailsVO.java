@@ -24,6 +24,8 @@ public class AlipayAppAuthDetailsVO {
     private String dealerName;
     /**系统保存蚂蚁平台应用名称，授权成功后展示*/
     private String appName;
+    /**支付宝商户授权应用回调时回传*/
+    private String dealerOid;
 
     public String getAppId() {
         return appId;
@@ -129,4 +131,12 @@ public class AlipayAppAuthDetailsVO {
         this.appName = appName;
     }
 
+    public String getDealerOid() {
+        return dealerOid;
+    }
+    
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
+    }
+    
 }

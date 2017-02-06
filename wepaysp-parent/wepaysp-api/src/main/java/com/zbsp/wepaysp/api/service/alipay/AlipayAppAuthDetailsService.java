@@ -15,5 +15,13 @@ public interface AlipayAppAuthDetailsService {
      * @return AlipayAppAuthDetailsVO
      */
     public AlipayAppAuthDetailsVO doTransCreateAppAuthDetail(AlipayAppAuthDetailsVO appAuthDetailsVO);
+
+    /**
+     * 根据商户Oid查找有效的应用授权记录
+     * @param dealerOid 商户Oid 
+     * @param appId 应用ID 
+     * @return 授权记录
+     */
+    public AlipayAppAuthDetailsVO doJoinTranQueryAppAuthDetailByDealer(String dealerOid, String appId);
     
 }

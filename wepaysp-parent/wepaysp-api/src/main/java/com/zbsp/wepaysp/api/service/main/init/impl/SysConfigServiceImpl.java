@@ -30,6 +30,7 @@ public class SysConfigServiceImpl
     private String qRCodeRootPath;
     private String appidQrCodePath;
     private String serverType;
+    private String devMode;
     
     private String appId4Face2FacePay;
     private String alipayAuthCallBackURL;
@@ -112,6 +113,7 @@ public class SysConfigServiceImpl
 		SysConfig.appidQrCodePath = appidQrCodePath;
 
         SysConfig.appId4Face2FacePay = appId4Face2FacePay; // FIXME 初始化支付当面付的应用ID
+        SysConfig.devMode=devMode;
 
         // 加载状态为非冻结服务商配置信息到内存，FIXME 考虑清除和更新的问题
         List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(null, null);
@@ -259,6 +261,10 @@ public class SysConfigServiceImpl
 
 	public void setServerType(String serverType) {
         this.serverType = serverType;
+    }
+	
+    public void setDevMode(String devMode) {
+        this.devMode = devMode;
     }
 
     public void setPartnerService(PartnerService partnerService) {

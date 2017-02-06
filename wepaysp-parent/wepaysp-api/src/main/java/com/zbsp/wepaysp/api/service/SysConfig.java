@@ -67,5 +67,8 @@ public class SysConfig {
     
     /**支付宝授权回调系统地址*/
     public static String alipayAuthCallBackURL;
+    
+    /**开发模式标志，为1时为开发，其他为线上模式*/
+    public static String devMode;
 
 }

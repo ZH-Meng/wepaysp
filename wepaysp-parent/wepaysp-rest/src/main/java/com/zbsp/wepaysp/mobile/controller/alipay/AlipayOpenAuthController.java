@@ -57,6 +57,12 @@ public class AlipayOpenAuthController
         boolean flag = false;        
         if (StringUtils.isNotBlank(callBackVO.getApp_auth_code())) {
             logger.info(logPrefix + "同意授权，类型为商户应用授权回调，app_id : {}, app_auth_code : {}", callBackVO.getApp_id(), callBackVO.getApp_auth_code());
+            if (StringUtils.isBlank(callBackVO.getDealerOid())) {
+                logger.warn(logPrefix + "商户同意授权，但是回调地址参数缺失：dealerOid");
+                errResult = new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc() + ("dealerOid")).setTitleDesc(resultTitle);
+                modelAndView = new ModelAndView("accessDeniedH5", "errResult", errResult);
+                return modelAndView;
+            }
 
             // 使用app_auth_code换取app_auth_token
             AlipayOpenAuthTokenAppResponse authResponse = AliPayUtil.authTokenApp(
@@ -67,7 +73,8 @@ public class AlipayOpenAuthController
 
                 // 保存商户授权应用令牌信息
                 AlipayAppAuthDetailsVO appAuthDetailsVO = new AlipayAppAuthDetailsVO();
-                appAuthDetailsVO.setAppId(callBackVO.getApp_id());
+                appAuthDetailsVO.setDealerOid(callBackVO.getDealerOid());// 商户
+                appAuthDetailsVO.setAppId(callBackVO.getApp_id());// 应用
                 appAuthDetailsVO.setAppAuthToken(authResponse.getAppAuthToken());
                 appAuthDetailsVO.setAppRefreshToken(authResponse.getAppRefreshToken());
                 appAuthDetailsVO.setExpiresIn(Integer.valueOf(authResponse.getExpiresIn()));

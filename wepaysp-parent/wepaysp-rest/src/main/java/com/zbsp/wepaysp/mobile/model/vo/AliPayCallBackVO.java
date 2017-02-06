@@ -7,7 +7,8 @@ public class AliPayCallBackVO {
     private String source;
     
     /**商户应用授权回调请求参数，同意授权后返回*/
-    private String app_auth_code;
+    private String app_auth_code;// 支付宝返回
+    private String dealerOid;// 授权回调地址指定的商户识别码
     
     /**用户信息授权回调请求参数，同意授权后返回*/
     private String auth_code;
@@ -51,6 +52,14 @@ public class AliPayCallBackVO {
     
     public void setScope(String scope) {
         this.scope = scope;
-    } 
+    }
+    
+    public String getDealerOid() {
+        return dealerOid;
+    }
+    
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
+    }
     
 }

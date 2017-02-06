@@ -477,7 +477,7 @@ public class DealerServiceImpl
         String qrCodePath = null;
         if (QRCodeType.PAY.getValue() == qRCodeType) {
         	qrCodePath = dealer.getQrCodePath();
-        } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType) {
+        } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType || QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() == qRCodeType) {
         	qrCodePath = dealer.getAlipayAuthCodePath();
         } else {
         	throw new IllegalArgumentException("参数错误，二维码类型不支持" + qRCodeType);
@@ -513,7 +513,7 @@ public class DealerServiceImpl
                 appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
                 
                 tempURL = SysConfig.payClientCheckURL;
-            } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType) {
+            } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType || QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() == qRCodeType) {
                 Validator.checkArgument(StringUtils.isBlank(SysConfig.alipayAuthCallBackURL), "未配置支付宝授权回调地址无法生成二维码");
                 //FIXME
                 appid = SysConfig.appId4Face2FacePay;
@@ -543,7 +543,7 @@ public class DealerServiceImpl
             String pathTemp = filePath.getPath() + File.separator + fileName + ".png";
             if (QRCodeType.PAY.getValue() == qRCodeType) {
             	dealer.setQrCodePath(pathTemp);
-            } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType) {
+            } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType || QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() == qRCodeType) {
             	dealer.setAlipayAuthCodePath(pathTemp);
             }
             commonDAO.update(dealer);
