@@ -27,4 +27,11 @@ public interface AliPayDetailsMainService {
      */
     public Map<String, Object> face2FaceBarPay(AliPayDetailsVO payDetailsVO);
 
+    /**
+     * 手机网站支付下单
+     * @param payDetailsVO 下单参数
+     * @return
+     */
+    public Map<String, Object> wapPayCreateOrder(AliPayDetailsVO payDetailsVO);
+
 }

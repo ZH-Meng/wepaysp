@@ -21,7 +21,10 @@
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
 		<property name="appId4Face2FacePay" value="${appId4Face2FacePay}" />
+		<property name="alipayWapPayNotifyURL" value="${alipayWapPayNotifyURL}" />
+		<property name="alipayWapPayReturnURL" value="${alipayWapPayReturnURL}" />
 		<property name="serverType" value="${serverType}" />
+		<property name="devMode" value="${devMode}" />
 	</bean>
 	
 	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />

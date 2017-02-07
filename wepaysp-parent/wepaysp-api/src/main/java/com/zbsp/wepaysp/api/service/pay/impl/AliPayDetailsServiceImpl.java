@@ -63,13 +63,16 @@ public class AliPayDetailsServiceImpl
         if (StringUtils.equals(PayType.ALI_FACE_BAR.getValue(), payDetailsVO.getPayType())) {
         	logger.info("创建订单，支付方式：支付宝-当面付-条码支付");
             returnVO = createF2FBarPayDetail(payDetailsVO);
+        } else if (StringUtils.equals(PayType.ALI_H5.getValue(), payDetailsVO.getPayType())) {
+                logger.info("创建订单，支付方式：支付宝-手机网站支付");
+                returnVO = createWapPayDetail(payDetailsVO);
         } else {
         	logger.warn("创建订单失败，不支持当前支付，payType={}", payType);
         } 
 
         return returnVO;
     }
-    
+
     @Override
     public AliPayDetailsVO doTransUpdateFace2FacePayResult(String code, String subCode, AliPayDetailsVO payResultVO, Integer updateTradeStatus) {
         // 校验参数
@@ -284,6 +287,67 @@ public class AliPayDetailsServiceImpl
         return payDetailsVO;
     }
     
+    /**
+     * 生成、保存手机网站支付明细
+     * @param payDetailsVO
+     * @return
+     */
+    private AliPayDetailsVO createWapPayDetail(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getStoreOid()), "storeOid为空");
+        
+        // 生成明细
+        AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO);
+        newPayOrder.setPayType(PayType.ALI_H5.getValue() + "");       
+        
+        // 根据系统配置的支持手机网站支付应用ID查找系统维护的蚂蚁平台应用
+        newPayOrder.setAppId(SysConfig.appId4Face2FacePay);//FIXME
+        
+        logger.info("查找应用({}) - 开始", newPayOrder.getAppId());
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayApp a where a.appId=:APPID";
+        jpqlMap.put("APPID", newPayOrder.getAppId());
+
+        AlipayApp app = commonDAO.findObject(jpql, jpqlMap, false);
+        if (app == null) {
+            throw new NotExistsException("AlipayApp不存在（appId=" + newPayOrder.getAppId() + "）");
+        }
+        logger.info("查找应用({}) - 结束", newPayOrder.getAppId());
+        
+        // 查找商户授权令牌         // FIXME 手机网站支付不支持第三方授权，只能考虑设置seller_id试试
+        
+        //---------------请求必填项------------//
+        // 订单标题，暂取 品牌(商户名)-门店
+        newPayOrder.setSubject(newPayOrder.getDealer().getCompany() + (newPayOrder.getStore() == null ? "" : "-" + newPayOrder.getStore().getStoreName()));
+        newPayOrder.setTotalAmount(payDetailsVO.getTotalAmount());
+        //product_code 销售产品码，商家和支付宝签约的产品码
+        
+        //---------------请求非必填项------------//
+        newPayOrder.setBody(newPayOrder.getSubject());
+        newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
+        //TODO newPayOrder.setSellerId 默认为空
+        //TODO 校验商户信息是否支付宝PID
+        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
+        //timeout_express //该笔订单允许的最晚付款时间，逾期将关闭交易。
+        //auth_token // 针对用户授权接口，获取用户相关数据时，用于标识用户授权关系
+        //goods_type //商品主类
+        //passback_params //公用回传参数
+        //promo_params //优惠参数
+        //extend_params //业务扩展参数
+        //enable_pay_channels //可用渠道
+        //disable_pay_channels //禁用渠道
+        
+        commonDAO.save(newPayOrder, false);
+        // 记录日志
+        Date processTime = new Date();
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, 
+            "新增支付宝支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo() + "支付方式=手机网站支付, 商户=" + newPayOrder.getDealer().getDealerId() + "，下单金额：" + newPayOrder.getTotalAmount() + ", 商品详情=" + newPayOrder.getBody() + "]", 
+            processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), null, SysLog.ActionType.create.getValue());
+        
+        BeanCopierUtil.copyProperties(newPayOrder, payDetailsVO);
+        return payDetailsVO;
+    }
+    
+    
     /** 
      * 创建包含公共属性的支付明细
      * @param payDetailsVO
@@ -319,8 +383,8 @@ public class AliPayDetailsServiceImpl
         if (dealer == null) {
             throw new NotExistsException("商户不存在！");
             
-        } else if (StringUtils.isBlank(dealer.getAlipayUserId())) {// 支付宝商户的PID或UID
-            throw new InvalidValueException("商户信息缺失：alipayUserId为空！");
+        /*} else if (StringUtils.isBlank(dealer.getAlipayUserId())) {// 支付宝商户的PID或UID
+            throw new InvalidValueException("商户信息缺失：alipayUserId为空！");*/
         } else if (StringUtils.isBlank(dealer.getPartner1Oid())) {
             throw new InvalidValueException("商户信息缺失：partner1Oid为空！");
         }
@@ -357,7 +421,7 @@ public class AliPayDetailsServiceImpl
         aliPayDetails.setTransBeginTime(new Timestamp(new Date().getTime()));
         aliPayDetails.setCreator(payDetailsVO.getDealerEmployeeOid());
         
-        /*返佣必填项*/
+        /*返佣必填项，支付请求设置 extend_params 中sys_service_provider_id参数的值*/
         aliPayDetails.setIsvPartnerId(topPartner.getIsvPartnerId());
         
         return aliPayDetails;

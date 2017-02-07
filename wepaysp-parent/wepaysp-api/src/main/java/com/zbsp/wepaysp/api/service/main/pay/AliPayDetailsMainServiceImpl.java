@@ -5,8 +5,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeQueryRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
 import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
 import com.zbsp.alipay.trade.service.AlipayTradeService;
@@ -84,7 +86,7 @@ public class AliPayDetailsMainServiceImpl
         } catch (Exception e) {
             logger.error(logPrefix + AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "调用当面付接口-条码支付请求(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage(), e);
         } finally {
-            logger.info("调用当面付接口-条码支付请求 - 结束");
+            logger.info(logPrefix + "调用当面付接口-条码支付请求 - 结束");
             if (!flag) {
                 return resultMap;
             }
@@ -216,6 +218,75 @@ public class AliPayDetailsMainServiceImpl
         } finally {
             logger.info("调用支付宝支付查询接口 - 结束");
         }
+    }
+    
+    @Override
+    public Map<String, Object> wapPayCreateOrder(AliPayDetailsVO payDetailsVO) {
+        String logPrefix = "手机网站支付 - ";
+        // 生成保存支付明细；
+        logger.info(logPrefix + "生成支付宝支付明细 - 开始");
+        
+        String resCode = AliPayResult.ERROR.getCode();
+        String resDesc = AliPayResult.ERROR.getDesc();
+        
+        // 声明返回Map
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put("resultCode", resCode);
+        resultMap.put("resultDesc", resDesc);
+        
+        boolean flag = false;
+        try {
+            payDetailsVO = aliPayDetailsService.doTransCreatePayDetails(payDetailsVO);
+            resultMap.put("aliPayDetailsVO", payDetailsVO);
+            flag = true;
+            logger.info(logPrefix + "生成支付宝支付明细 - 成功，系统订单号：{}", payDetailsVO.getOutTradeNo());
+        } catch (Exception e) {
+            logger.error(logPrefix + "生成支付宝支付明细 - 失败：{}", e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "生成支付宝支付明细 - 结束");
+            if (!flag) {
+                return resultMap;
+            }
+        }
+        String outTradeNo = payDetailsVO.getOutTradeNo();
+        
+        // -------------创建成功后调用手机网站支付接口--------------- //
+        logger.info(logPrefix + "调用手机网站支付接口 - 开始");
+        
+        flag = false;
+        AlipayTradeWapPayResponse wapPayResp = null;
+        try {
+            logger.info(logPrefix + "支付明细转换支付请求包构造器 - 开始");
+            // 支付请求构造器
+            AlipayTradeWapPayRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradeWapPayRequestBuilder(payDetailsVO);
+            
+            logger.info(logPrefix + "支付明细转换支付请求包构造器 - 成功");
+            
+            // 调用手机网站支付
+            wapPayResp = AliPayUtil.tradeWapPay(builder);
+            // 打印应答
+            logger.info(logPrefix + "调用当面付接口-条码支付结果 - outTradeNo={}, reponse : {})", outTradeNo,
+                wapPayResp == null ? null : JSONUtil.toJSONString(wapPayResp, true));
+            
+            // FIXME code subCode
+            if (wapPayResp != null && StringUtils.isNotBlank(wapPayResp.getBody())) {
+                resultMap.put("wapPayRespBody", wapPayResp.getBody());
+                flag = true;
+            }
+        } catch (ConvertPackException e) {
+            logger.error(logPrefix + AlarmLogPrefix.sendAliPayRequestException + "支付明细转换支付请求包构造器(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage());
+        } catch (Exception e) {
+            logger.error(logPrefix + AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "调用手机网站支付接口(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage(), e);
+        } finally {
+            logger.info("logPrefix + 调用手机网站支付接口 -结束");
+        }
+        
+        if (flag) {
+            resultMap.put("resultCode", AliPayResult.SUCCESS.getCode());// 下单成功
+            resultMap.put("resultDesc", AliPayResult.SUCCESS.getDesc());
+        }
+        
+        return resultMap;
     }
     
     public void setAliPayDetailsService(AliPayDetailsService aliPayDetailsService) {

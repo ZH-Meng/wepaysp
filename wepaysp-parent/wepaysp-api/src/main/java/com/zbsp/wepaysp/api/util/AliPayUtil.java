@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,17 +11,21 @@ import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
+import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.config.Constants;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
 import com.zbsp.alipay.trade.service.AlipayMonitorService;
 import com.zbsp.alipay.trade.service.AlipayTradeService;
 import com.zbsp.alipay.trade.service.impl.AlipayMonitorServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 
 /**
@@ -114,6 +119,41 @@ public class AliPayUtil {
                 break;
             } else {
                 logger.warn("查询授权信息（app_auth_token={}）异常", builder.getAppAuthToken());
+            }
+        }
+        
+        return response;
+    }
+    
+    /**
+     * 手机网站支付下单(手机网站支付2.0)
+     * @param builder
+     * @return
+     */
+    public static AlipayTradeWapPayResponse tradeWapPay(AlipayTradeWapPayRequestBuilder builder) {
+        AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
+        // 设置平台参数
+        request.setNotifyUrl(SysConfig.alipayWapPayNotifyURL);
+        request.setReturnUrl(SysConfig.alipayWapPayReturnURL);
+        
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AlipayTradeWapPayRequest bizContent:" + request.getBizContent());
+        AlipayTradeWapPayResponse response = null;
+        for (int i = 1; i < 3; i++) {
+            try {
+                response = client.pageExecute(request);
+                logger.info("AlipayTradeWapPayResponse :" + response == null ? null : JSONUtil.toJSONString(response, true));
+                if (response != null && StringUtils.isNotBlank(response.getBody())) {
+                    logger.info("手机网站支付下单成功");
+                    break;
+                } else {
+                    logger.warn("手机网站支付下单失败");
+                    break;
+                }
+            } catch (AlipayApiException e) {
+                logger.warn("手机网站支付下单异常");
+                e.printStackTrace();
             }
         }
         

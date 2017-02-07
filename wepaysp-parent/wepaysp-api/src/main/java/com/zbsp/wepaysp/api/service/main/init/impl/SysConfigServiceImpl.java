@@ -34,6 +34,8 @@ public class SysConfigServiceImpl
     
     private String appId4Face2FacePay;
     private String alipayAuthCallBackURL;
+    private String alipayWapPayReturnURL;
+    private String alipayWapPayNotifyURL;
 
     private PartnerService partnerService;
     
@@ -150,6 +152,19 @@ public class SysConfigServiceImpl
             // 初始化支付宝支付的配置 FIXME 改为从数据库中读取
             AliPayUtil.init();
 
+            if (StringUtils.isBlank(alipayWapPayNotifyURL)) {
+                throw new SystemInitException("初始化系统配置信息失败，参数缺失：alipayWapPayNotifyURL");
+            } else {
+                logger.info("初始化系统配置信息：alipayWapPayNotifyURL=" + alipayWapPayNotifyURL);
+            }
+            if (StringUtils.isBlank(alipayWapPayReturnURL)) {
+                throw new SystemInitException("初始化系统配置信息失败，参数缺失：alipayWapPayReturnURL");
+            } else {
+                logger.info("初始化系统配置信息：alipayWapPayReturnURL=" + alipayWapPayReturnURL);
+            }
+            SysConfig.alipayWapPayNotifyURL = alipayWapPayNotifyURL;
+            SysConfig.alipayWapPayReturnURL = alipayWapPayReturnURL;
+            
             //FIXME WEB中的公众号支付迁移后，需要将微信的也添加
         }
         if (ServerType.WEB_MANAGE.equals(serType)) {
@@ -258,8 +273,16 @@ public class SysConfigServiceImpl
     public void setAlipayAuthCallBackURL(String alipayAuthCallBackURL) {
 		this.alipayAuthCallBackURL = alipayAuthCallBackURL;
 	}
+    
+    public void setAlipayWapPayReturnURL(String alipayWapPayReturnURL) {
+        this.alipayWapPayReturnURL = alipayWapPayReturnURL;
+    }
 
-	public void setServerType(String serverType) {
+    public void setAlipayWapPayNotifyURL(String alipayWapPayNotifyURL) {
+        this.alipayWapPayNotifyURL = alipayWapPayNotifyURL;
+    }
+
+    public void setServerType(String serverType) {
         this.serverType = serverType;
     }
 	

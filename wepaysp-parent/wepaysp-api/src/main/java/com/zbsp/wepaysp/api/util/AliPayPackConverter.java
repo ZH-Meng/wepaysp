@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.alipay.api.response.AlipayTradePayResponse;
 import com.zbsp.alipay.trade.model.ExtendParams;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
@@ -119,5 +120,37 @@ public class AliPayPackConverter {
             throw new ConvertPackException(e.getMessage());
         }
         return vo;
+    }
+
+    public static AlipayTradeWapPayRequestBuilder aliPayDetailsVO2AlipayTradeWapPayRequestBuilder(AliPayDetailsVO payDetailsVO) {
+        AlipayTradeWapPayRequestBuilder builder = new AlipayTradeWapPayRequestBuilder();
+        try {
+            // (必填) 订单总金额，单位为元，不能超过1亿元
+            String totalAmount = new BigDecimal(payDetailsVO.getTotalAmount()).divide(new BigDecimal(100)).toString();
+        
+            // 卖家支付宝账号ID
+            String sellerId = payDetailsVO.getSellerId();
+
+            // 业务扩展参数
+            ExtendParams extendParams = new ExtendParams();
+            // 设置返佣帐号，支付宝分配的系统商编号(通过setSysServiceProviderId方法)
+            extendParams.setSysServiceProviderId(payDetailsVO.getIsvPartnerId());
+            
+            // 手机网站支付超时 设定 30分钟
+            String timeoutExpress = SysEnvKey.EXPIRE_TIME_ALI_PAY_30M;
+            
+            // 创建条码支付请求builder，设置请求参数
+            builder.setOutTradeNo(payDetailsVO.getOutTradeNo())
+                .setSubject(payDetailsVO.getSubject())
+                .setBody(payDetailsVO.getBody())
+                .setSellerId(sellerId)
+                .setTotalAmount(totalAmount)
+                .setStoreId(payDetailsVO.getStoreId())
+                .setExtendParams(extendParams)
+                .setTimeoutExpress(timeoutExpress);
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return builder;
     }
 }

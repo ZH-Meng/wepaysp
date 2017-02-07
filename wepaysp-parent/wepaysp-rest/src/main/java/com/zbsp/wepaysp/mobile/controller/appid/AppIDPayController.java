@@ -35,9 +35,13 @@ import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenRe
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
+import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
+import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
+import com.zbsp.wepaysp.vo.partner.DealerEmployeeVO;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
+import com.zbsp.wepaysp.vo.partner.StoreVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
@@ -57,6 +61,12 @@ public class AppIDPayController extends BaseController {
     
     @Autowired
     private DealerService dealerService;
+    
+    @Autowired
+    private StoreService storeService;
+    
+    @Autowired    
+    private DealerEmployeeService dealerEmployeeService;
     
     @Autowired
     private WeixinPayDetailsMainService weixinPayDetailsMainService;
@@ -161,10 +171,10 @@ public class AppIDPayController extends BaseController {
         logger.info(logPrefix + "参数检查 - 开始");
         boolean checkFlag = false;
         try {
-            if (StringUtils.isBlank(money) && NumberUtils.isCreatable(money)) {
+            if (StringUtils.isBlank(money) || !NumberUtils.isCreatable(money)) {//TODO
                 logger.warn(logPrefix + "参数检查 - 失败：{}", "金额无效，请重新输入，单位为元！");
                 result = new CreateOrderResult(H5CommonResult.INVALID_ARGUMENT.getCode(), "金额无效，请重新输入，单位为元！", null, null);
-            } else if (StringUtils.isBlank(callBackVO.getDealerOid()) || StringUtils.isBlank(callBackVO.getOpenid())) {
+            } else if (callBackVO == null || StringUtils.isBlank(callBackVO.getDealerOid()) || StringUtils.isBlank(callBackVO.getOpenid())) {
                 logger.warn(logPrefix + "参数检查 - 失败：{}", "商户Oid和openid都不能为空！");
                 result = new CreateOrderResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc(), null, null);
             } else if (StringUtils.isBlank(SysConfig.wxPayNotifyURL)) {
@@ -306,7 +316,27 @@ public class AppIDPayController extends BaseController {
                 //checkResutMap.put("dealerName", accessDealer.getCompany());
                 callBack.setDealerName(accessDealer.getCompany());
                 result = true;
+                
+                // 获取门店信息，一商户一码模式屏蔽，门店Oid应为必填，暂不控制
+                if (StringUtils.isNotBlank(callBack.getStoreOid())) {
+                    StoreVO accessStore = storeService.doJoinTransQueryStoreByOid(callBack.getStoreOid());
+                    if (accessStore == null) {
+                        logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, storeOid：{}", "访问的门店不存在", callBack.getStoreOid());
+                        checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()));
+                        result = false;
+                    } else {
+                        if (StringUtils.isNotBlank(callBack.getDealerEmployeeOid())) {
+                            DealerEmployeeVO accessDE = dealerEmployeeService.doJoinTransQueryDealerEmployeeByOid(callBack.getDealerEmployeeOid());
+                            if (accessDE == null) {
+                                logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, dealerEmloyeeOid：{}", "访问的商户员工不存在", callBack.getDealerEmployeeOid());
+                                checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()));
+                                result = false;
+                            }
+                        }
+                    }
+                }
             }
+            
         }
         checkResutMap.put("result", result);
         return checkResutMap;
