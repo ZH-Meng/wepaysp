@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.mobile.model.vo;
+package com.zbsp.wepaysp.vo.alipay;
 
 /** 支付宝手机网站支付VO */
 public class AlipayWapPayNotifyVO {

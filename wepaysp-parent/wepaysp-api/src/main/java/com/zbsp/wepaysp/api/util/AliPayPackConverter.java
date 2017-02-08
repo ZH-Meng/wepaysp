@@ -6,9 +6,12 @@ import java.sql.Timestamp;
 import org.apache.commons.lang3.StringUtils;
 
 import com.alipay.api.response.AlipayTradePayResponse;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.zbsp.alipay.trade.model.ExtendParams;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
+import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
@@ -152,5 +155,71 @@ public class AliPayPackConverter {
             throw new ConvertPackException(e.getMessage());
         }
         return builder;
+    }
+
+    public static AliPayDetailsVO alipayTradeQueryResponse2AliPayDetailsVO(AlipayTradeQueryResponse queryResponse) {
+        AliPayDetailsVO vo = new AliPayDetailsVO();
+        try {
+            // 公共响应参数
+            vo.setCode(queryResponse.getCode());
+            vo.setMsg(queryResponse.getMsg());
+            vo.setSubCode(queryResponse.getSubCode());
+            vo.setSubMsg(queryResponse.getSubMsg());
+
+            // 必填
+            // tradeStatus 交易状态转换
+            if (TradeState4AliPay.WAIT_BUYER_PAY.toString().equals(queryResponse.getTradeStatus())) {
+                vo.setTradeStatus(TradeStatus.TRADEING.getValue());
+            } else if (TradeState4AliPay.TRADE_CLOSED.toString().equals(queryResponse.getTradeStatus())) {
+                //FIXME 关闭含义有点区别
+                vo.setTradeStatus(TradeStatus.TRADE_CLOSED.getValue());
+            } else if (TradeState4AliPay.TRADE_FINISHED.toString().equals(queryResponse.getTradeStatus())) {
+                //FIXME 
+                vo.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
+            } else if (TradeState4AliPay.TRADE_SUCCESS.toString().equals(queryResponse.getTradeStatus())) {
+                vo.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
+            }
+            
+            vo.setTradeNo(queryResponse.getTradeNo());
+            vo.setOutTradeNo(queryResponse.getOutTradeNo());
+            vo.setBuyerLogonId(queryResponse.getBuyerLogonId());// 买家支付宝账号
+            if (StringUtils.isNotBlank(queryResponse.getTotalAmount())) {
+                vo.setTotalAmount(new BigDecimal(queryResponse.getTotalAmount()).multiply(SysEnvKey.BIG_100).intValue());// 交易金额
+            }
+            if (StringUtils.isNotBlank(queryResponse.getReceiptAmount())) {
+                vo.setReceiptAmount(new BigDecimal(queryResponse.getReceiptAmount()).multiply(SysEnvKey.BIG_100).intValue());// 实收金额
+            }
+            if (queryResponse.getSendPayDate() != null) {//本次交易打款给卖家的时间
+                // 返回值没有gmt_payment，但是保存至gmt_payment字段中
+                vo.setGmtPayment(new Timestamp(queryResponse.getSendPayDate().getTime()));
+            }
+            
+            // fund_bill_list // 交易支付使用的资金渠道        
+            //TODO discount_goods_detail //本次交易支付所使用的单品券优惠的商品优惠信息
+
+            // 选填
+            if (StringUtils.isNotBlank(queryResponse.getBuyerPayAmount())) {
+                vo.setBuyerPayAmount(new BigDecimal(queryResponse.getBuyerPayAmount()).multiply(SysEnvKey.BIG_100).intValue());// 买家支付金额
+            }
+            if (StringUtils.isNotBlank(queryResponse.getPointAmount())) {
+                vo.setPointAmount(new BigDecimal(queryResponse.getPointAmount()).multiply(SysEnvKey.BIG_100).intValue());// 使用积分宝付款的金额
+            }
+            if (StringUtils.isNotBlank(queryResponse.getInvoiceAmount())) {
+                vo.setInvoiceAmount(new BigDecimal(queryResponse.getInvoiceAmount()).multiply(SysEnvKey.BIG_100).intValue());// 交易中可给用户开具发票的金额
+            }
+            
+            vo.setStoreName(queryResponse.getStoreName());// 发生支付交易的商户门店名称        
+            vo.setBuyerUserId(queryResponse.getBuyerUserId());//买家在支付宝的用户id
+            
+            // voucher_detail_list
+            
+            // 一些参数是交易请求参数，暂不处理
+            //alipay_store_id 
+            //alipay_store_id
+            //terminal_id
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return vo;
     }
 }

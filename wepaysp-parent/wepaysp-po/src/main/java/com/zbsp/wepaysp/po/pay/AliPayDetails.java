@@ -21,7 +21,7 @@ public class AliPayDetails
     implements java.io.Serializable {
 
     private static final long serialVersionUID = 6012675304878197859L;
-    
+
     private String iwoid;
     private Dealer dealer;
     private DealerEmployee dealerEmployee;
@@ -69,6 +69,10 @@ public class AliPayDetails
     private Timestamp transEndTime;
     private Integer refundFee;
     private Integer tradeStatus;
+    private Timestamp notifyTime;
+    private String notifyId;
+    private Timestamp gmtRefund;
+    private Timestamp gmtClose;
     private String creator;
     private Timestamp createTime;
     private String modifier;
@@ -78,13 +82,15 @@ public class AliPayDetails
     public static void main(String[] args) {
         System.out.println(Scene.BAR_CODE.name());
     }
-    
-    /**支付场景 */
+
+    /** 支付场景 */
     public static enum Scene {
-        /** 条码支付 */     BAR_CODE,
-        /** 声波支付 */     WAVE_CODE
+        /** 条码支付 */
+        BAR_CODE,
+        /** 声波支付 */
+        WAVE_CODE
     }
-    
+
     public AliPayDetails() {
     }
 
@@ -517,6 +523,42 @@ public class AliPayDetails
         this.tradeStatus = tradeStatus;
     }
 
+    @Column(name = "notify_time", nullable = false, length = 0)
+    public Timestamp getNotifyTime() {
+        return notifyTime;
+    }
+
+    public void setNotifyTime(Timestamp notifyTime) {
+        this.notifyTime = notifyTime;
+    }
+
+    @Column(name = "notify_id", length = 128)
+    public String getNotifyId() {
+        return notifyId;
+    }
+
+    public void setNotifyId(String notifyId) {
+        this.notifyId = notifyId;
+    }
+
+    @Column(name = "gmt_refund", nullable = false, length = 0)
+    public Timestamp getGmtRefund() {
+        return gmtRefund;
+    }
+
+    public void setGmtRefund(Timestamp gmtRefund) {
+        this.gmtRefund = gmtRefund;
+    }
+
+    @Column(name = "gmt_close", nullable = false, length = 0)
+    public Timestamp getGmtClose() {
+        return gmtClose;
+    }
+
+    public void setGmtClose(Timestamp gmtClose) {
+        this.gmtClose = gmtClose;
+    }
+
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
         return this.creator;
@@ -658,6 +700,14 @@ public class AliPayDetails
             builder.append("refundFee=").append(refundFee).append(", ");
         if (tradeStatus != null)
             builder.append("tradeStatus=").append(tradeStatus).append(", ");
+        if (notifyTime != null)
+            builder.append("notifyTime=").append(notifyTime).append(", ");
+        if (notifyId != null)
+            builder.append("notifyId=").append(notifyId).append(", ");
+        if (gmtRefund != null)
+            builder.append("gmtRefund=").append(gmtRefund).append(", ");
+        if (gmtClose != null)
+            builder.append("gmtClose=").append(gmtClose).append(", ");
         if (creator != null)
             builder.append("creator=").append(creator).append(", ");
         if (createTime != null)

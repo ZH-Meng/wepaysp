@@ -16,7 +16,7 @@ public class AliPayDetailsVO
 
     /** 返佣必填项，支付宝分配的系统商编号 SysServiceProviderId */
     private String isvPartnerId;
-
+    private String appId;
     private String appAuthToken;
     private String outTradeNo;
     private String scene;
@@ -51,8 +51,12 @@ public class AliPayDetailsVO
     private Timestamp transEndTime;
     private Integer refundFee;
     private Integer tradeStatus;
+    private Timestamp notifyTime;
+    private String notifyId;
+    private Timestamp gmtRefund;
+    private Timestamp gmtClose;
 
-    /**后台管理查询和展示需要的参数*/
+    /** 后台管理查询和展示需要的参数 */
     private String dealerName;
     // private String storeName;
     private String dealerEmployeeName;
@@ -464,6 +468,46 @@ public class AliPayDetailsVO
 
     public void setPartnerEmployeeName(String partnerEmployeeName) {
         this.partnerEmployeeName = partnerEmployeeName;
+    }
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public Timestamp getNotifyTime() {
+        return notifyTime;
+    }
+
+    public void setNotifyTime(Timestamp notifyTime) {
+        this.notifyTime = notifyTime;
+    }
+
+    public String getNotifyId() {
+        return notifyId;
+    }
+
+    public void setNotifyId(String notifyId) {
+        this.notifyId = notifyId;
+    }
+
+    public Timestamp getGmtRefund() {
+        return gmtRefund;
+    }
+
+    public void setGmtRefund(Timestamp gmtRefund) {
+        this.gmtRefund = gmtRefund;
+    }
+
+    public Timestamp getGmtClose() {
+        return gmtClose;
+    }
+
+    public void setGmtClose(Timestamp gmtClose) {
+        this.gmtClose = gmtClose;
     }
 
 }

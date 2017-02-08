@@ -49,6 +49,10 @@ public class AliPayDetailsServiceImpl
     
     private SysLogService sysLogService;
     
+    public void setSysLogService(SysLogService sysLogService) {
+        this.sysLogService = sysLogService;
+    }
+    
     @Override
     public AliPayDetailsVO doTransCreatePayDetails(AliPayDetailsVO payDetailsVO) {
         // 校验参数
@@ -703,9 +707,155 @@ public class AliPayDetailsServiceImpl
         
         return commonDAO.queryObjectCount(sql.toString(), jpqlMap, false);
     }
-    
-    public void setSysLogService(SysLogService sysLogService) {
-        this.sysLogService = sysLogService;
+
+    @Override
+    public AliPayDetailsVO doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo) && StringUtils.isBlank(tradeNo),"outTradeNo/tradeNo都为空");
+        AliPayDetailsVO payDetailVO = null;
+        
+        // 查找支付明细
+        AliPayDetails payDetails = null;
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AliPayDetails w where 1=1 ";
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            jpql += " and w.outTradeNo=:OUTTRADENO";
+            jpqlMap.put("OUTTRADENO", outTradeNo);
+            payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        }
+        
+        if (payDetails == null && StringUtils.isNotBlank(tradeNo)) {
+            jpql = "from AliPayDetails w where w.tradeNo=:TRADENO";
+            jpqlMap.clear();
+            jpqlMap.put("TRADENO", tradeNo);
+            payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        }
+            
+        if (payDetails != null) {
+            payDetailVO = new AliPayDetailsVO();
+            BeanCopierUtil.copyProperties(payDetails, payDetailVO);
+            payDetailVO.setDealerName(payDetails.getDealer().getCompany());
+            payDetailVO.setStoreName(payDetails.getStore().getStoreName());
+        }
+        
+        return payDetailVO;
+    }
+
+    @Override
+    public AliPayDetailsVO doTransUpdateQueryTradeResult(AliPayDetailsVO queryPayResultVO) {
+        // 校验参数
+        Validator.checkArgument(queryPayResultVO == null, "payResultVO为空");
+        
+        Validator.checkArgument(StringUtils.isBlank(queryPayResultVO.getOutTradeNo()),"outTradeNo为空");
+        Validator.checkArgument(StringUtils.isBlank(queryPayResultVO.getTradeNo()), "支付宝支付订单ID(tradeNo)为空");
+        Validator.checkArgument(queryPayResultVO.getTotalAmount() == null, "订单金额(totalAmount)为空");
+
+        String outTradeNo = queryPayResultVO.getOutTradeNo();
+        logger.info("支付宝查询支付结果：outTradeNo : {}, code : {}, msg : {}, subCode : {}, subMsg : {}", outTradeNo, queryPayResultVO.getCode(), queryPayResultVO.getMsg(), queryPayResultVO.getSubCode(), queryPayResultVO.getSubMsg());
+        
+        Date processBeginTime = new Date();
+        
+        // 查找支付明细
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AliPayDetails w where w.outTradeNo=:OUTTRADENO";
+        jpqlMap.put("OUTTRADENO", outTradeNo);
+        
+        AliPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
+        if (payDetails == null) {
+            throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + outTradeNo);
+        }
+        
+        AliPayDetailsVO returnPayDetailVO = null;
+        
+        // 查询的响应码，由于是交易成功时调用，所以结果应该都是成功
+        payDetails.setCode(queryPayResultVO.getCode());
+        payDetails.setMsg(queryPayResultVO.getMsg());
+        
+        String oldPayDetailStr = payDetails.toString();        
+        StringBuffer logDescBuffer = new StringBuffer("修改支付宝支付明细[");
+        
+        logDescBuffer.append("code：");
+        logDescBuffer.append(queryPayResultVO.getCode());
+        logDescBuffer.append("，msg：");
+        logDescBuffer.append(queryPayResultVO.getMsg());
+        
+        // 更新交易状态
+        int tradeStatus = queryPayResultVO.getTradeStatus();
+        
+        // 校验金额
+        if (payDetails.getTotalAmount().intValue() != queryPayResultVO.getTotalAmount().intValue()) {
+            logger.error(StringHelper.combinedString(AlarmLogPrefix.aliPayAPIMoneyException.getValue(), 
+                "金额不一致，需要人工处理，系统订单ID=" + queryPayResultVO.getOutTradeNo(), 
+                "支付请求总金额："+ payDetails.getTotalAmount().intValue() + "，查询交易响应总金额：" + queryPayResultVO.getTotalAmount().intValue()));
+            tradeStatus = TradeStatus.MANUAL_HANDLING.getValue();
+            payDetails.setRemark((StringUtils.isBlank(payDetails.getRemark()) ? "查询支付宝交易响应成功，但" : (payDetails.getRemark() +",")) + "金额不一致");
+        }
+        //TODO 其他金额校验
+        
+        payDetails.setTradeStatus(tradeStatus);
+        
+        payDetails.setTradeNo(queryPayResultVO.getTradeNo());
+        payDetails.setBuyerLogonId(queryPayResultVO.getBuyerLogonId());
+        payDetails.setBuyerUserId(queryPayResultVO.getBuyerUserId());
+        payDetails.setTotalAmount(queryPayResultVO.getTotalAmount());
+        payDetails.setReceiptAmount(queryPayResultVO.getReceiptAmount());
+        payDetails.setPointAmount(queryPayResultVO.getPointAmount());
+        payDetails.setInvoiceAmount(queryPayResultVO.getInvoiceAmount());
+        payDetails.setGmtPayment(queryPayResultVO.getGmtPayment());
+        //TODO fund_bill_list voucher_detail_list
+        //payDetails.setCardBalance(queryPayResultVO.getCardBalance());// 查询结果不会返回
+        payDetails.setStoreName(queryPayResultVO.getStoreName());
+        payDetails.setDiscountGoodsDetail(queryPayResultVO.getDiscountGoodsDetail());
+        
+        
+        logDescBuffer.append("tradeNo：");
+        logDescBuffer.append(queryPayResultVO.getTradeNo());
+        logDescBuffer.append("，tradeStatus：");
+        logDescBuffer.append(payDetails.getTradeStatus());
+        logDescBuffer.append("，totalAmount：");
+        logDescBuffer.append(queryPayResultVO.getTotalAmount());
+        logDescBuffer.append("，buyerLogonId：");
+        logDescBuffer.append(queryPayResultVO.getBuyerLogonId());
+        logDescBuffer.append("，buyerUserId：");
+        logDescBuffer.append(queryPayResultVO.getBuyerUserId());
+        logDescBuffer.append("，gmtPayment：");
+        logDescBuffer.append(queryPayResultVO.getGmtPayment());
+        if (StringUtils.isNotBlank(payDetails.getRemark())) {
+            logDescBuffer.append("，remark：");
+            logDescBuffer.append(payDetails.getRemark());
+        }
+        logDescBuffer.append("]");
+        
+        /*logDescBuffer.append("，receiptAmount：");
+        logDescBuffer.append(payResultVO.getReceiptAmount());
+        logDescBuffer.append("，pointAmount：");
+        logDescBuffer.append(payResultVO.getPointAmount());
+        logDescBuffer.append("，invoiceAmount：");
+        logDescBuffer.append(payResultVO.getInvoiceAmount());
+        logDescBuffer.append("，invoiceAmount：");
+        logDescBuffer.append(payResultVO.getInvoiceAmount());*/
+        
+        Date endTime = new Date();
+        payDetails.setTransEndTime(new Timestamp(endTime.getTime()));
+        commonDAO.update(payDetails);
+        
+        // 记录修改日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细[" + logDescBuffer.toString() + "]", 
+            processBeginTime, endTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+        
+        // 组装返回结果
+        returnPayDetailVO = new AliPayDetailsVO();
+        BeanCopierUtil.copyProperties(payDetails, returnPayDetailVO);
+        if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
+            returnPayDetailVO.setStoreOid(payDetails.getStore() != null ? payDetails.getStore().getIwoid() : "");
+            returnPayDetailVO.setStoreId(payDetails.getStore() != null ? payDetails.getStore().getStoreId() : "");
+            returnPayDetailVO.setDealerEmployeeOid(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getIwoid() : "");
+            returnPayDetailVO.setDealerEmployeeId(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getDealerEmployeeId() : "");
+            returnPayDetailVO.setDealerEmployeeName(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getEmployeeName() : "");
+            returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");// FIXME storeName
+            returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
+        }
+        
+        return returnPayDetailVO;
     }
 
 }

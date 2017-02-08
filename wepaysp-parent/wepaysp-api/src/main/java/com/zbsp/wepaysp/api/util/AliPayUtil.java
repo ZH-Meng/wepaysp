@@ -11,15 +11,21 @@ import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
+import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.config.Constants;
+import com.zbsp.alipay.trade.model.TradeStatus;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
+import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
+import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
 import com.zbsp.alipay.trade.service.AlipayMonitorService;
 import com.zbsp.alipay.trade.service.AlipayTradeService;
 import com.zbsp.alipay.trade.service.impl.AlipayMonitorServiceImpl;
@@ -27,6 +33,8 @@ import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 /**
  * 支付宝支付接口工具类
@@ -126,11 +134,41 @@ public class AliPayUtil {
     }
     
     /**
-     * 手机网站支付下单(手机网站支付2.0)
-     * @param builder
+     * 当面付支付2.0
+     * @param payDetailsVO
      * @return
      */
-    public static AlipayTradeWapPayResponse tradeWapPay(AlipayTradeWapPayRequestBuilder builder) {
+    public static AlipayF2FPayResult tradeF2FPay(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
+        
+        logger.info("支付明细转换当面付支付请求包构造器 - 开始");
+        AlipayTradePayRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradePayRequestBuilder(payDetailsVO);
+        logger.info("支付明细转换当面付支付请求包构造器 - 成功");
+        
+        // 调用tradePay方法获取当面付应答
+        AlipayF2FPayResult payResult = null;
+        if (SysConfig.alipayReportFlag) {
+            payResult = AliPayUtil.tradeWithHBService.tradePay(builder);
+        } else {
+            payResult = AliPayUtil.tradeService.tradePay(builder);
+        }
+        return payResult;
+    }
+    
+    /**
+     * 手机网站支付下单(手机网站支付2.0)
+     * @param payDetailsVO
+     * @return
+     */
+    public static AlipayTradeWapPayResponse tradeWapPay(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
+        
+        logger.info("支付明细转换手机网站支付请求包构造器 - 开始");
+        // 支付请求构造器
+        AlipayTradeWapPayRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradeWapPayRequestBuilder(payDetailsVO);
+        
+        logger.info("支付明细转换手机网站支付请求包构造器  - 成功");
+        
         AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
         // 设置平台参数
         request.setNotifyUrl(SysConfig.alipayWapPayNotifyURL);
@@ -158,6 +196,51 @@ public class AliPayUtil {
         }
         
         return response;
+    }
+    
+    /**
+     * 支付宝交易查询
+     * @param outTradeNo
+     * @return
+     */
+    public static AlipayF2FQueryResult tradeQuery(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
+        Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getOutTradeNo()), "payDetailsVO.outTradeNo为空");
+        
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        
+        AlipayTradeQueryRequestBuilder builder = new AlipayTradeQueryRequestBuilder();
+        builder.setOutTradeNo(payDetailsVO.getOutTradeNo());
+        builder.setTradeNo(payDetailsVO.getTradeNo());
+        builder.setAppAuthToken(payDetailsVO.getAppAuthToken());
+        
+        request.setBizContent(builder.toJsonString());
+        
+        logger.info("AlipayTradeQueryRequest bizContent:" + request.getBizContent());
+        AlipayF2FQueryResult queryTradeResult = null;
+        for (int i = 1; i < 3; i++) {
+            // 查询
+            queryTradeResult = tradeService.queryTradeResult(builder);
+            if (TradeStatus.UNKNOWN.equals(queryTradeResult.getTradeStatus())) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+        }
+        
+        logger.info("queryTradeResult : {}", JSONUtil.toJSONString(queryTradeResult, true));
+        if (TradeStatus.SUCCESS.equals(queryTradeResult.getTradeStatus())) {
+            logger.info("支付宝交易查询结果：交易成功（outTradeNo={}）", builder.getOutTradeNo());
+        } else if (TradeStatus.UNKNOWN.equals(queryTradeResult.getTradeStatus())) {
+            logger.warn("支付宝交易查询结果：交易状态未知（outTradeNo={}）", builder.getOutTradeNo());
+        } else {
+            logger.warn("支付宝交易查询结果：交易失败（outTradeNo={}）", builder.getOutTradeNo());
+        }
+        
+        return queryTradeResult;
     }
 
     public static void init() {

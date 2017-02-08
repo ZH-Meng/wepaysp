@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.mobile.controller.appid;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -171,7 +172,7 @@ public class AppIDPayController extends BaseController {
         logger.info(logPrefix + "参数检查 - 开始");
         boolean checkFlag = false;
         try {
-            if (StringUtils.isBlank(money) || !NumberUtils.isCreatable(money)) {//TODO
+            if (StringUtils.isBlank(money) || !NumberUtils.isCreatable(money) || !Pattern.matches(SysEnvKey.REGEX_￥_POSITIVE_FLOAT_2BIT, money)) {// 正确金额：例如：0.01/200/201.99
                 logger.warn(logPrefix + "参数检查 - 失败：{}", "金额无效，请重新输入，单位为元！");
                 result = new CreateOrderResult(H5CommonResult.INVALID_ARGUMENT.getCode(), "金额无效，请重新输入，单位为元！", null, null);
             } else if (callBackVO == null || StringUtils.isBlank(callBackVO.getDealerOid()) || StringUtils.isBlank(callBackVO.getOpenid())) {

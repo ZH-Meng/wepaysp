@@ -1,28 +1,37 @@
 package com.zbsp.wepaysp.api.service.main.pay;
 
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
-import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
-import com.zbsp.alipay.trade.model.builder.AlipayTradeQueryRequestBuilder;
-import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
+import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
 import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
-import com.zbsp.alipay.trade.service.AlipayTradeService;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayPackConverter;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
+import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.GateWayResponse;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.vo.alipay.AlipayWapPayNotifyVO;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 public class AliPayDetailsMainServiceImpl
@@ -30,6 +39,10 @@ public class AliPayDetailsMainServiceImpl
     implements AliPayDetailsMainService {
 
     private AliPayDetailsService aliPayDetailsService;
+    
+    public void setAliPayDetailsService(AliPayDetailsService aliPayDetailsService) {
+        this.aliPayDetailsService = aliPayDetailsService;
+    }
     
     @Override
     public Map<String, Object> face2FaceBarPay(AliPayDetailsVO payDetailsVO) {
@@ -66,16 +79,8 @@ public class AliPayDetailsMainServiceImpl
        
         AlipayF2FPayResult payResult = null;
         try {
-            logger.info(logPrefix + "支付明细转换支付请求包构造器 - 开始");
-            // 支付请求构造器
-            AlipayTradePayRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradePayRequestBuilder(payDetailsVO);
+            payResult = AliPayUtil.tradeF2FPay(payDetailsVO);
             
-            logger.info(logPrefix + "支付明细转换支付请求包构造器 - 成功");
-            
-            // 当面付2.0服务
-            AlipayTradeService service = AliPayUtil.getDefaultAlipayTradeService(); 
-            // 调用tradePay方法获取当面付应答
-            payResult = service.tradePay(builder);
             // 打印应答
             logger.info(logPrefix + "调用当面付接口-条码支付结果 - outTradeNo={}, tradeStatus={}, reponse : {})", outTradeNo, payResult.getTradeStatus(), 
                 payResult.getResponse() == null ? null : JSONUtil.toJSONString(payResult.getResponse(), true));
@@ -197,16 +202,14 @@ public class AliPayDetailsMainServiceImpl
      * @return 支付订单状态
      */
     private Integer queryTradeStatusAfterCancelUnknown(AliPayDetailsVO payDetailsVO) {
-        logger.info("调用支付宝支付查询接口 - 开始");
-        AlipayTradeQueryRequestBuilder queryBuilder = new AlipayTradeQueryRequestBuilder()
-            .setAppAuthToken(payDetailsVO.getAppAuthToken())
-            .setOutTradeNo(payDetailsVO.getOutTradeNo());
+        logger.info("撤销后调用支付宝支付查询接口 - 开始");
         try {
-            AlipayF2FQueryResult queryTradeResult = AliPayUtil.getDefaultAlipayTradeService().queryTradeResult(queryBuilder);
-            logger.info("调用支付宝支付查询接口 - 结果 - 订单支付结果 : {}, outTradeNo : {}", queryTradeResult.getTradeStatus(), payDetailsVO.getOutTradeNo());
+            AlipayF2FQueryResult queryTradeResult = AliPayUtil.tradeQuery(payDetailsVO);
+            logger.info("撤销后调用支付宝支付查询接口 - 结果 - 订单支付结果 : {}, outTradeNo : {}", queryTradeResult.getTradeStatus(), payDetailsVO.getOutTradeNo());
+            // 由于已知调用过撤销。直接查看是否交易关闭
             if (queryTradeResult.getResponse() != null) {
                 String queryTradeStatus = queryTradeResult.getResponse().getTradeStatus();
-                logger.info("调用支付宝支付查询接口 - 结果 - 交易状态 : {}, outTradeNo : {}", queryTradeStatus, payDetailsVO.getOutTradeNo());
+                logger.info("撤销后调用支付宝支付查询接口 - 结果 - 交易状态 : {}, outTradeNo : {}", queryTradeStatus, payDetailsVO.getOutTradeNo());
                 if (StringUtils.equalsIgnoreCase(TradeState4AliPay.TRADE_CLOSED.toString(), queryTradeStatus)) {
                     return TradeStatus.TRADE_CLOSED.getValue();
                 }
@@ -256,14 +259,8 @@ public class AliPayDetailsMainServiceImpl
         flag = false;
         AlipayTradeWapPayResponse wapPayResp = null;
         try {
-            logger.info(logPrefix + "支付明细转换支付请求包构造器 - 开始");
-            // 支付请求构造器
-            AlipayTradeWapPayRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradeWapPayRequestBuilder(payDetailsVO);
-            
-            logger.info(logPrefix + "支付明细转换支付请求包构造器 - 成功");
-            
             // 调用手机网站支付
-            wapPayResp = AliPayUtil.tradeWapPay(builder);
+            wapPayResp = AliPayUtil.tradeWapPay(payDetailsVO);
             // 打印应答
             logger.info(logPrefix + "调用当面付接口-条码支付结果 - outTradeNo={}, reponse : {})", outTradeNo,
                 wapPayResp == null ? null : JSONUtil.toJSONString(wapPayResp, true));
@@ -288,9 +285,161 @@ public class AliPayDetailsMainServiceImpl
         
         return resultMap;
     }
-    
-    public void setAliPayDetailsService(AliPayDetailsService aliPayDetailsService) {
-        this.aliPayDetailsService = aliPayDetailsService;
+
+    @Override
+    public Map<String, Object> h5ReturnQueryPayResult(String outTradeNo, String tradeNo, String totalAmount, String sellerId) {
+        String logPrefix = "手机网站支付完成后前台回跳处理 - ";
+        logger.info(logPrefix + "开始");
+        // 校验参数
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo为空");
+        Validator.checkArgument(StringUtils.isBlank(tradeNo), "tradeNo为空");
+        // （暂只处理outTradeNo和tradeNo）
+        
+        Map<String, Object>  resultMap = new HashMap<String, Object>();
+        
+        // 通过系统订单号查找交易明细
+        logger.info(logPrefix + "检查交易状态");
+        AliPayDetailsVO payDetailsVO = aliPayDetailsService.doJoinTransQueryAliPayDetailsByNum(outTradeNo, tradeNo);
+        if (payDetailsVO == null) {
+            throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + outTradeNo + "，tradeNo=" + tradeNo);
+        }
+        
+        
+        int tradeStatus = payDetailsVO.getTradeStatus();
+        logger.info(logPrefix + "检查交易状态 - 状态 : {}", tradeStatus);
+        
+        // 根据notify_id是否存在判定是否处理过异步同通知，仅仅作为判断，当前交易状态决定是否继续处理
+        if (StringUtils.isNotBlank(payDetailsVO.getNotifyId())) {
+            logger.warn(logPrefix + "检查交易状态 - 系统已经处理过支付宝发来的支付结果异步通知");
+        } else {
+            logger.info(logPrefix + "检查交易状态 - 系统还未收到支付宝发来的支付结果异步通知");
+        }
+        
+        // 检查交易状态
+        if (SysEnums.TradeStatus.TRADEING.getValue() == tradeStatus) {
+            logger.info(logPrefix + "检查交易状态 - 状态处理中，调用查询接口"); 
+            // 交易状态处理中，查询支付宝
+            AlipayF2FQueryResult queryTradeResult = AliPayUtil.tradeQuery(payDetailsVO);
+            logger.info(logPrefix + "调用查询接口 - 交易状态 : {}", queryTradeResult.getTradeStatus());
+            
+            //前台回跳说明支付完成，正常不会出现支付中状态，所以直接将查询结果交易状态更新并返回
+            if (com.zbsp.alipay.trade.model.TradeStatus.FAILED.equals(queryTradeResult.getTradeStatus())) {
+                // 支付失败，直接更新状态
+                logger.warn(logPrefix + "查询交易结果为支付失败 - 准备更新交易状态为支付失败");
+                aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.TRADE_FAIL.getValue());// 可能支付宝的交易状态为交易关闭，本系统存交易失败也无碍
+                tradeStatus = TradeStatus.TRADE_FAIL.getValue();
+            } else if (com.zbsp.alipay.trade.model.TradeStatus.SUCCESS.equals(queryTradeResult.getTradeStatus())) {
+                logger.info(logPrefix + "查询交易结果为支付成功 - 准备更新查询交易信息到支付明细中");
+                payDetailsVO = AliPayPackConverter.alipayTradeQueryResponse2AliPayDetailsVO(queryTradeResult.getResponse());
+                
+                payDetailsVO = aliPayDetailsService.doTransUpdateQueryTradeResult(payDetailsVO);
+                tradeStatus = payDetailsVO.getTradeStatus();
+            } else {// 查询发生异常，交易状态未知
+                logger.warn(logPrefix + "查询异常，交易未知，更新状态为人工处理中");
+                aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.MANUAL_HANDLING.getValue());
+                tradeStatus = TradeStatus.MANUAL_HANDLING.getValue();
+            } 
+        }
+        
+        resultMap.put("tradeStatus", tradeStatus);
+        resultMap.put("aliPayDetailsVO", "payDetailsVO");
+        
+        logger.info(logPrefix + "结束");
+        return resultMap;
     }
-    
+
+    @Override
+    public Map<String, Object> handleAsynNotify(Map<String, String> paramMap) {
+        Validator.checkArgument(paramMap == null, "paramMap为空");
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        
+        String logPrefix = "处理支付宝手机网站支付异步通知请求";
+        
+        // 通过验签（验证通知中的sign参数）来确保支付通知是由支付宝发送的
+        logger.info(logPrefix + "验签 - 开始");
+        boolean flag = false;
+        try {
+            String sign = paramMap.get("sign");
+            logger.debug("异步通知请求参数sign：{}", sign);
+            if (!AlipaySignature.rsaCheckV1(paramMap, Configs.getAlipayPublicKey(), "utf-8", Configs.getSignType())) {
+                logger.error(logPrefix + "验签 - 签名错误");
+            } else {
+                logger.info(logPrefix + "验签 - 签名正确");
+                flag = true;
+            }
+        } catch (AlipayApiException e) {
+            logger.error(logPrefix + "验签 - 异常 : {}", e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "验签 - 结束");
+            if (!flag) {
+                resultMap.put("result", "sign_invalid");
+                return resultMap;
+            }
+        }
+        
+        flag = false;
+        // 转换参数到VO，方便操作
+        AlipayWapPayNotifyVO notifyVO = new AlipayWapPayNotifyVO();
+        try {
+            BeanUtils.populate(notifyVO, paramMap);
+            flag = true;
+        } catch (IllegalAccessException e) {
+            logger.error(logPrefix + "请求参数转换对象异常", e);
+        } catch (InvocationTargetException e) {
+            logger.error(logPrefix + "请求参数转换对象异常", e);
+        } finally {
+            if (!flag) {
+                resultMap.put("result", "sys_error");
+                return resultMap;
+            }
+        }
+
+        flag = false;
+        String result = "sys_error";
+        logger.info(logPrefix + "检查通知内容 - 开始");
+        
+        // 检查通知内容，包括通知中的app_id, out_trade_no, total_amount、seller_id是否与请求中的一致，不一致表明本次通知是异常通知，忽略
+        try {
+            String outTradeNo = notifyVO.getOut_trade_no();
+            String appId = notifyVO.getApp_id();
+            String totalAmountStr = notifyVO.getTotal_amount();
+            Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo为空");
+            Validator.checkArgument(StringUtils.isBlank(appId), "appId为空");
+            Validator.checkArgument(StringUtils.isBlank(totalAmountStr), "totalAmount为空");
+            Validator.checkArgument(!NumberUtils.isCreatable(totalAmountStr) || !Pattern.matches(SysEnvKey.REGEX_￥_POSITIVE_FLOAT_2BIT, totalAmountStr), "totalAmount(" + totalAmountStr + ")格式不正确");
+            
+            AliPayDetailsVO payDetailsVO = aliPayDetailsService.doJoinTransQueryAliPayDetailsByNum(outTradeNo, notifyVO.getTrade_no());
+            if (payDetailsVO == null) {
+                logger.error(AlarmLogPrefix.handleAliPayResultException + logPrefix + "检查通知内容 - 告警 -异步通知订单（outTradeNo={}）不存在", outTradeNo);
+                result = "order_not_exsit";
+            } else {
+                // 比较app_id
+                if (StringUtils.equals(appId, payDetailsVO.getAppId())) {
+                    logger.warn(logPrefix + "检查通知内容 - 失败 - app_id不一致，通知app_id={}, 支付明细app_id={}", appId, payDetailsVO.getAppId());
+                }
+                // 比较total_amount
+                BigDecimal yuan = new BigDecimal(totalAmountStr);
+                int totalAmountNotify = yuan.multiply(new BigDecimal(100)).intValue();// 元转化为分
+                if ( totalAmountNotify != payDetailsVO.getTotalAmount()) {
+                    logger.warn(logPrefix + "检查通知内容 - 失败 - total_amount不一致，通知total_amount={}, 支付明细total_amount={}", totalAmountNotify, payDetailsVO.getTotalAmount());
+                }
+                
+                if (StringUtils.equals(notifyVO.getSeller_id(), payDetailsVO.getSellerId())) {
+                    logger.warn(logPrefix + "检查通知内容 - 失败 - seller_id不一致，通知seller_id={}, 支付明细seller_id={}", notifyVO.getSeller_id(), payDetailsVO.getSellerId());
+                }
+                
+                // 根据trade_status进行后续业务处理
+                // notify_id比较
+            }
+        } catch (Exception e) {
+            logger.error(logPrefix + "检查通知内容 - 异常 : {}", e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "检查通知内容 - 结束");
+        }
+        
+        // 返回
+        resultMap.put("result", result);
+        return resultMap;
+    }
+
 }

@@ -76,5 +76,8 @@ public class SysConfig {
     
     /**支付宝手机网站支付异步通知地址*/
     public static String alipayWapPayNotifyURL;
+    
+    /**支付宝 - 接口调用效率上报标志，true，调用交易保障服务，false调用 非交易保障服务*/
+    public static boolean alipayReportFlag = false;
 
 }

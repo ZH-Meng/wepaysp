@@ -96,4 +96,21 @@ public interface AliPayDetailsService {
      */
     public int doJoinTransQueryAliPayDetailsCount(Map<String, Object> paramMap);
 
+
+    /**
+     * 根据商户订单号或者支付宝交易号查询交易明细，outTradeNo查询为先，outTradeNo为空或者查询结果为空再以tradeNo查询
+     * @param outTradeNo 商户订单号
+     * @param tradeNo 支付宝交易号
+     * @return AliPayDetailsVO 不存在时返回NULL
+     */
+    public AliPayDetailsVO doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo);
+
+
+    /**
+     * 更新查询交易结果，交易成功时调用，和当面付支付更新结果基本一致，可以考虑合并//TODO
+     * @param queryPayResultVO 查询支付结果
+     * @return AliPayDetailsVO 更新的支付明细
+     */
+    public AliPayDetailsVO doTransUpdateQueryTradeResult(AliPayDetailsVO queryPayResultVO);
+
 }
