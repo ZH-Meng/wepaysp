@@ -19,9 +19,9 @@
 				if (client == "1") {// 微信
 		        	window.location.href="${payUrl}";
 		        } else if (client == "2") {// 支付宝
-		           	//alert("支付宝支付正在研发中...");
+		        	window.location.href="${payUrl}";
 		        } else {
-		        	
+		        	// 如果是浏览器，考虑可以嵌入支付宝支付按钮		        	
 		        }
 			}
 		</script>
@@ -31,12 +31,12 @@
 		<c:when test="${payClient == 1}">   
 		</c:when> 
 		<c:when test="${payClient == 2}">
-			<div class="succ-info">
+			<%-- <div class="succ-info">
 				<div class="error-bottom">
 					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 				</div>			
 				<p class="info2">支付宝支付正在研发中，敬请期待!</p>
-			</div>
+			</div> --%>
 		</c:when> 
 		<c:otherwise>   
 			<div class="succ-info">

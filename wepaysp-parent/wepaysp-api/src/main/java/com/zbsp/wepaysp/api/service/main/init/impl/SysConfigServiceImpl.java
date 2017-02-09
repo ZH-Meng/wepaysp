@@ -34,6 +34,7 @@ public class SysConfigServiceImpl
     
     private String appId4Face2FacePay;
     private String alipayAuthCallBackURL;
+    private String alipayWapPayURL;
     private String alipayWapPayReturnURL;
     private String alipayWapPayNotifyURL;
 
@@ -152,6 +153,11 @@ public class SysConfigServiceImpl
             // 初始化支付宝支付的配置 FIXME 改为从数据库中读取
             AliPayUtil.init();
 
+            if (StringUtils.isBlank(alipayWapPayURL)) {
+                throw new SystemInitException("初始化系统配置信息失败，参数缺失：alipayWapPayURL");
+            } else {
+                logger.info("初始化系统配置信息：alipayWapPayURL=" + alipayWapPayURL);
+            }
             if (StringUtils.isBlank(alipayWapPayNotifyURL)) {
                 throw new SystemInitException("初始化系统配置信息失败，参数缺失：alipayWapPayNotifyURL");
             } else {
@@ -162,6 +168,7 @@ public class SysConfigServiceImpl
             } else {
                 logger.info("初始化系统配置信息：alipayWapPayReturnURL=" + alipayWapPayReturnURL);
             }
+            SysConfig.alipayWapPayURL = alipayWapPayURL; 
             SysConfig.alipayWapPayNotifyURL = alipayWapPayNotifyURL;
             SysConfig.alipayWapPayReturnURL = alipayWapPayReturnURL;
             
@@ -280,6 +287,10 @@ public class SysConfigServiceImpl
 
     public void setAlipayWapPayNotifyURL(String alipayWapPayNotifyURL) {
         this.alipayWapPayNotifyURL = alipayWapPayNotifyURL;
+    }
+    
+    public void setAlipayWapPayURL(String alipayWapPayURL) {
+        this.alipayWapPayURL = alipayWapPayURL;
     }
 
     public void setServerType(String serverType) {

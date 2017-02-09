@@ -71,6 +71,9 @@ public class SysConfig {
     /**开发模式标志，为1时为开发，其他为线上模式*/
     public static String devMode;
     
+    /**支付宝手机网站支付系统地址*/
+    public static String alipayWapPayURL;
+    
     /**支付宝手机网站支付支付成功回调系统地址*/
     public static String alipayWapPayReturnURL;
     

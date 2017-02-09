@@ -43,14 +43,12 @@ public final class Generator {
      * 生成支付二维码URL 
      * @param clientType 支付客户端类型
      * @param appId 公众号ID
-     * @param redirectURL
+     * @param systemURL 系统的URL，当为微信支付URL时，表示redirectURL，支付宝支付时直接当作支付URL
      * @param paramMap 附加参数Map
      * @return
      */
-    public static String generatePayURL(String clientType, String appId, String redirectURL, Map<String, String> paramMap) {
+    public static String generatePayURL(String clientType, String appId, String systemURL, Map<String, String> paramMap) {
         Validator.checkArgument(StringUtils.isBlank(clientType), "clientType不能为空！");
-        Validator.checkArgument(StringUtils.isBlank(appId), "appId不能为空！");
-        Validator.checkArgument(StringUtils.isBlank(redirectURL), "redirectURL不能为空！");
 
         String paramTemp = "";
         if (paramMap != null && !paramMap.isEmpty()) {
@@ -61,17 +59,25 @@ public final class Generator {
             }
         }
 
-        if (redirectURL.indexOf("?") == -1) {
-            redirectURL += "?" + paramTemp.substring(1);
-        } else {
-            redirectURL += paramTemp;
-        }
         String url = "";
         try {
             if (ScanCodeClient.APP_WEIXIN.getValue().equals(clientType)) {
-                url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(redirectURL, "UTF-8"));
+                Validator.checkArgument(StringUtils.isBlank(appId), "appId不能为空！");
+                Validator.checkArgument(StringUtils.isBlank(systemURL), "redirectURL不能为空！");
+                if (systemURL.indexOf("?") == -1) {
+                    systemURL += "?" + paramTemp.substring(1);
+                } else {
+                    systemURL += paramTemp;
+                }
+                url = WxApiUrl.JSAPI_AUTH_SNSAPI_BASE.replace("APPID", appId).replace("REDIRECT_URI", URLEncoder.encode(systemURL, "UTF-8"));
             } else if (ScanCodeClient.APP_ALI.getValue().equals(clientType)) {
-                
+                Validator.checkArgument(StringUtils.isBlank(systemURL), "payURL不能为空！");
+                if (systemURL.indexOf("?") == -1) {
+                    systemURL += "?" + paramTemp.substring(1);
+                } else {
+                    systemURL += paramTemp;
+                }
+                url = systemURL;
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

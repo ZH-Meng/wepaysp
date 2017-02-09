@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.common.util;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -160,6 +161,16 @@ public class DateUtil {
 		} catch (ParseException e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * date 转 timestamp
+	 * @param date
+	 * @return
+	 */
+	public static Timestamp getTimestamp(Date date) {
+	    if (date == null) return null;
+	    return new Timestamp(date.getTime());
 	}
 	
 }

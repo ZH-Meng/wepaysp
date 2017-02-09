@@ -49,6 +49,12 @@ public class MobliePayIndexController extends BaseController {
             return modelAndView;
         }
         
+        Map<String, String> urlParamMap = new HashMap<String, String>();
+        urlParamMap.put("partnerOid", indexVO.getPartnerOid());
+        urlParamMap.put("dealerOid", indexVO.getDealerOid());
+        urlParamMap.put("storeOid", indexVO.getStoreOid());
+        urlParamMap.put("dealerEmployeeOid", indexVO.getDealerEmployeeOid());
+        
         ModelMap model=new ModelMap();
         String userAgent = httpRequest.getHeader("User-Agent").toLowerCase();
         if (userAgent.indexOf("micromessenger") != -1) {
@@ -60,11 +66,6 @@ public class MobliePayIndexController extends BaseController {
                 return modelAndView;
             } else {
             	String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
-                Map<String, String> urlParamMap = new HashMap<String, String>();
-                urlParamMap.put("partnerOid", indexVO.getPartnerOid());
-                urlParamMap.put("dealerOid", indexVO.getDealerOid());
-                urlParamMap.put("storeOid", indexVO.getStoreOid());
-                urlParamMap.put("dealerEmployeeOid", indexVO.getDealerEmployeeOid());
                 urlParamMap.put("showwxpaytitle", "1");
                 
                 indexVO.setPayClient(ScanCodeClient.APP_WEIXIN.getValue());
@@ -73,6 +74,7 @@ public class MobliePayIndexController extends BaseController {
         } else if (userAgent.indexOf("alipayclient") != -1) {
         	logger.info(logPrefix + "支付客户端为支付宝");
             indexVO.setPayClient(ScanCodeClient.APP_ALI.getValue());
+            indexVO.setPayUrl(Generator.generatePayURL(indexVO.getPayClient(), null, SysConfig.alipayWapPayURL, urlParamMap));
         } else {// 未知客户端
         	logger.info(logPrefix + "支付客户端未知");
         	indexVO.setPayClient(ScanCodeClient.UN_KNOWN.getValue());

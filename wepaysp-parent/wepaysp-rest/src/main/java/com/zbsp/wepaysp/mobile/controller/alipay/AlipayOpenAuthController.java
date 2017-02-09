@@ -26,7 +26,7 @@ import com.zbsp.wepaysp.vo.alipay.AlipayAppAuthDetailsVO;
  * @author 孟郑宏
  */
 @Controller
-@RequestMapping("/alipay/")
+@RequestMapping("/alipay/auth/")
 public class AlipayOpenAuthController
     extends BaseController {
 
@@ -40,7 +40,7 @@ public class AlipayOpenAuthController
      *            回调参数自动封装成 AliPayCallBackVO
      * @return 返回H5授权结果页
      */
-    @RequestMapping("auth/callback")
+    @RequestMapping("callback")
     public ModelAndView appAuthCallBack(AliPayCallBackVO callBackVO) {
         String logPrefix = "处理蚂蚁开放平台商户应用授权后回调请求 - ";
         logger.info(logPrefix + "开始");

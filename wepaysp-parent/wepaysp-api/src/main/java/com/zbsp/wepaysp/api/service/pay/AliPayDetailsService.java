@@ -2,6 +2,11 @@ package com.zbsp.wepaysp.api.service.pay;
 
 import java.util.Map;
 
+import javax.persistence.LockModeType;
+
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.po.pay.AliPayDetails;
+import com.zbsp.wepaysp.vo.alipay.AlipayWapPayNotifyVO;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 /**
@@ -32,9 +37,11 @@ public interface AliPayDetailsService {
 
     /**
      * 更新支付状态
-     * @param outTradeNo
+     * @param outTradeNo 系统支付订单号
+     * @param tradeStatus 要更新的交易状态
+     * @param remark 更新的备注
      */
-    public void doTransUpdatePayDetailState(String outTradeNo, int tradeStatus);
+    public void doTransUpdatePayDetailState(String outTradeNo, int tradeStatus, String remark);
     
     /**
      * 查询符合条件的列表，查询结果按最后修改时间倒序排列.
@@ -103,7 +110,16 @@ public interface AliPayDetailsService {
      * @param tradeNo 支付宝交易号
      * @return AliPayDetailsVO 不存在时返回NULL
      */
-    public AliPayDetailsVO doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo);
+    public AliPayDetailsVO doJoinTransQueryAliPayDetailsVOByNum(String outTradeNo, String tradeNo);
+    
+    /**
+     * 根据商户订单号或者支付宝交易号查询交易明细，outTradeNo查询为先，outTradeNo为空或者查询结果为空再以tradeNo查询
+     * @param outTradeNo 商户订单号
+     * @param tradeNo 支付宝交易号
+     * @param lockModeType
+     * @return AliPayDetails 不存在时返回NULL
+     */
+    public AliPayDetails doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo, LockModeType lockModeType);
 
 
     /**
@@ -111,6 +127,15 @@ public interface AliPayDetailsService {
      * @param queryPayResultVO 查询支付结果
      * @return AliPayDetailsVO 更新的支付明细
      */
-    public AliPayDetailsVO doTransUpdateQueryTradeResult(AliPayDetailsVO queryPayResultVO);
+    public AliPayDetailsVO doTransUpdateQueryTradeSuccessResult(AliPayDetailsVO queryPayResultVO);
+
+
+    /**
+     * 更新异步通知结果
+     * @param notifyVO 通知信息
+     * @param tradeStatus 指定更新交易的状态
+     * @param remark 更新的备注
+     */
+    public void doTransUpdateNotifyResult(AlipayWapPayNotifyVO notifyVO, TradeStatus tradeStatus, String remark);
 
 }

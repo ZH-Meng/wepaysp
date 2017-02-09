@@ -20,6 +20,7 @@ import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.GateWayResponse;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
@@ -28,6 +29,7 @@ import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -40,6 +42,7 @@ import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.AliPayDetails;
+import com.zbsp.wepaysp.vo.alipay.AlipayWapPayNotifyVO;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 
@@ -51,6 +54,17 @@ public class AliPayDetailsServiceImpl
     
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
+    }
+    
+    /** 通过状态判断交易是否结束*/
+    private boolean tradeIsEnd(int tradeStatus) {
+        if (TradeStatus.TRADE_CLOSED.getValue() == tradeStatus 
+            || TradeStatus.TRADE_REVERSED.getValue() == tradeStatus 
+            || TradeStatus.TRADE_SUCCESS.getValue() == tradeStatus
+            || TradeStatus.TRADE_FAIL.getValue() == tradeStatus) {
+            return true;
+        }
+        return false;
     }
     
     @Override
@@ -68,8 +82,8 @@ public class AliPayDetailsServiceImpl
         	logger.info("创建订单，支付方式：支付宝-当面付-条码支付");
             returnVO = createF2FBarPayDetail(payDetailsVO);
         } else if (StringUtils.equals(PayType.ALI_H5.getValue(), payDetailsVO.getPayType())) {
-                logger.info("创建订单，支付方式：支付宝-手机网站支付");
-                returnVO = createWapPayDetail(payDetailsVO);
+            logger.info("创建订单，支付方式：支付宝-手机网站支付");
+            returnVO = createWapPayDetail(payDetailsVO);
         } else {
         	logger.warn("创建订单失败，不支持当前支付，payType={}", payType);
         } 
@@ -153,6 +167,11 @@ public class AliPayDetailsServiceImpl
             logDescBuffer.append(payDetails.getSubCode());
             logDescBuffer.append("，subMsg：");
             logDescBuffer.append(payDetails.getSubMsg());
+            
+            // 支付异常时会记录备注
+            if (StringUtils.isNotBlank(payResultVO.getRemark())) {
+                payDetails.setRemark(payResultVO.getRemark());
+            }
         }
         payDetails.setTradeStatus(tradeStatus);
         
@@ -232,7 +251,7 @@ public class AliPayDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getAuthCode()), "authCode为空");
         
         // 生成明细
-        AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO);
+        AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO, PayType.ALI_FACE_BAR.getValue());
         
         // 根据系统配置的支持当面付应用ID查找系统维护的蚂蚁平台应用
         newPayOrder.setAppId(SysConfig.appId4Face2FacePay);
@@ -280,6 +299,7 @@ public class AliPayDetailsServiceImpl
         newPayOrder.setPayType(PayType.ALI_FACE_BAR.getValue() + "");
         newPayOrder.setTotalAmount(payDetailsVO.getTotalAmount());
         newPayOrder.setAuthCode(payDetailsVO.getAuthCode());
+        newPayOrder.setCreator(newPayOrder.getDealerEmployee().getIwoid());// 收银员的Oid
         commonDAO.save(newPayOrder, false);
         // 记录日志
         Date processTime = new Date();
@@ -300,7 +320,7 @@ public class AliPayDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getStoreOid()), "storeOid为空");
         
         // 生成明细
-        AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO);
+        AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO, PayType.ALI_H5.getValue());
         newPayOrder.setPayType(PayType.ALI_H5.getValue() + "");       
         
         // 根据系统配置的支持手机网站支付应用ID查找系统维护的蚂蚁平台应用
@@ -328,9 +348,10 @@ public class AliPayDetailsServiceImpl
         //---------------请求非必填项------------//
         newPayOrder.setBody(newPayOrder.getSubject());
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
-        //TODO newPayOrder.setSellerId 默认为空
-        //TODO 校验商户信息是否支付宝PID
-        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
+        
+        // seller_id 默认为空，手机网站支付必填为商户的支付宝PID        
+        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());// FIXME 需要验证能否支持以收款人不同类区分不同商户不用授权就可以手机网站支付
+        
         //timeout_express //该笔订单允许的最晚付款时间，逾期将关闭交易。
         //auth_token // 针对用户授权接口，获取用户相关数据时，用于标识用户授权关系
         //goods_type //商品主类
@@ -340,6 +361,7 @@ public class AliPayDetailsServiceImpl
         //enable_pay_channels //可用渠道
         //disable_pay_channels //禁用渠道
         
+        //newPayOrder.setCreator(creator);// 考虑支付宝静默授权获取用户标识
         commonDAO.save(newPayOrder, false);
         // 记录日志
         Date processTime = new Date();
@@ -355,9 +377,10 @@ public class AliPayDetailsServiceImpl
     /** 
      * 创建包含公共属性的支付明细
      * @param payDetailsVO
+     * param payType 针对支付类型做限制
      * @return
      */
-    private AliPayDetails newAliPayDetail(AliPayDetailsVO payDetailsVO) {
+    private AliPayDetails newAliPayDetail(AliPayDetailsVO payDetailsVO, String payType) {
         AliPayDetails aliPayDetails = new AliPayDetails();
         DealerEmployee dealerEmployee = null;
         Dealer dealer = null;
@@ -386,9 +409,8 @@ public class AliPayDetailsServiceImpl
         }
         if (dealer == null) {
             throw new NotExistsException("商户不存在！");
-            
-        /*} else if (StringUtils.isBlank(dealer.getAlipayUserId())) {// 支付宝商户的PID或UID
-            throw new InvalidValueException("商户信息缺失：alipayUserId为空！");*/
+        } else if (StringUtils.isBlank(dealer.getAlipayUserId()) && StringUtils.equals(PayType.ALI_H5.getValue(), payType)) {// 支付宝商户的PID或UID
+            throw new InvalidValueException("商户信息缺失：手机网站支付，alipayUserId不能为空！");
         } else if (StringUtils.isBlank(dealer.getPartner1Oid())) {
             throw new InvalidValueException("商户信息缺失：partner1Oid为空！");
         }
@@ -432,7 +454,7 @@ public class AliPayDetailsServiceImpl
     }
 
     @Override
-    public void doTransUpdatePayDetailState(String outTradeNo, int tradeStatus) {
+    public void doTransUpdatePayDetailState(String outTradeNo, int tradeStatus, String remark) {
         Validator.checkArgument(StringUtils.isBlank(outTradeNo), "payType为空");
         
         // 查找支付明细
@@ -445,11 +467,31 @@ public class AliPayDetailsServiceImpl
             throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + outTradeNo);
         }
         String oldPayDetailStr = payDetails.toString();
+        StringBuffer logDescBuffer = new StringBuffer("修改支付宝明细[");
+        
         payDetails.setTradeStatus(tradeStatus);
+        payDetails.setRemark(payDetails.getRemark() + remark);
+        
+        logDescBuffer.append(", tradeStatus：");
+        logDescBuffer.append(payDetails.getTradeStatus());
+        if (StringUtils.isNotBlank(remark)) {
+            payDetails.setRemark(payDetails.getRemark() + remark);
+            logDescBuffer.append(", remark：");
+            logDescBuffer.append(remark);
+        }
+        if (tradeIsEnd(tradeStatus)) {
+            // 更新结束时间
+            Date endDate = new Date();
+            payDetails.setTransEndTime(DateUtil.getTimestamp(endDate));
+            logDescBuffer.append(", endTime：");
+            logDescBuffer.append(endDate);
+        }
+        logDescBuffer.append("]");
+        
         commonDAO.update(payDetails);
         Date logTime = new Date();
         // 记录修改日志
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细状态[" + tradeStatus + "]", 
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, logDescBuffer.toString(), 
             logTime, logTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
     }
     
@@ -589,7 +631,6 @@ public class AliPayDetailsServiceImpl
                 
                 vo.setTransBeginTime(aliPayDetails.getTransBeginTime());
                 
-                
                 resultList.add(vo);
             }
         }
@@ -707,28 +748,14 @@ public class AliPayDetailsServiceImpl
         
         return commonDAO.queryObjectCount(sql.toString(), jpqlMap, false);
     }
-
+    
     @Override
-    public AliPayDetailsVO doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo) {
+    public AliPayDetailsVO doJoinTransQueryAliPayDetailsVOByNum(String outTradeNo, String tradeNo) {
         Validator.checkArgument(StringUtils.isBlank(outTradeNo) && StringUtils.isBlank(tradeNo),"outTradeNo/tradeNo都为空");
         AliPayDetailsVO payDetailVO = null;
-        
+       
         // 查找支付明细
-        AliPayDetails payDetails = null;
-        Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from AliPayDetails w where 1=1 ";
-        if (StringUtils.isNotBlank(outTradeNo)) {
-            jpql += " and w.outTradeNo=:OUTTRADENO";
-            jpqlMap.put("OUTTRADENO", outTradeNo);
-            payDetails = commonDAO.findObject(jpql, jpqlMap, false);
-        }
-        
-        if (payDetails == null && StringUtils.isNotBlank(tradeNo)) {
-            jpql = "from AliPayDetails w where w.tradeNo=:TRADENO";
-            jpqlMap.clear();
-            jpqlMap.put("TRADENO", tradeNo);
-            payDetails = commonDAO.findObject(jpql, jpqlMap, false);
-        }
+        AliPayDetails payDetails = doJoinTransQueryAliPayDetailsByNum(outTradeNo, tradeNo, null);
             
         if (payDetails != null) {
             payDetailVO = new AliPayDetailsVO();
@@ -741,7 +768,35 @@ public class AliPayDetailsServiceImpl
     }
 
     @Override
-    public AliPayDetailsVO doTransUpdateQueryTradeResult(AliPayDetailsVO queryPayResultVO) {
+    public AliPayDetails doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo, LockModeType lockModeType) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo) && StringUtils.isBlank(tradeNo),"outTradeNo/tradeNo都为空");
+        
+        // 查找支付明细
+        AliPayDetails payDetails = null;
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AliPayDetails w where 1=1 ";
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            jpql += " and w.outTradeNo=:OUTTRADENO";
+            jpqlMap.put("OUTTRADENO", outTradeNo);
+            if (lockModeType != null) {
+                payDetails = commonDAO.findObject(jpql, jpqlMap, false, lockModeType);
+            } else {
+                payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+            }
+        }
+        
+        if (payDetails == null && StringUtils.isNotBlank(tradeNo)) {
+            jpql = "from AliPayDetails w where w.tradeNo=:TRADENO";
+            jpqlMap.clear();
+            jpqlMap.put("TRADENO", tradeNo);
+            payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        }
+            
+        return payDetails;
+    }
+
+    @Override
+    public AliPayDetailsVO doTransUpdateQueryTradeSuccessResult(AliPayDetailsVO queryPayResultVO) {
         // 校验参数
         Validator.checkArgument(queryPayResultVO == null, "payResultVO为空");
         
@@ -788,6 +843,8 @@ public class AliPayDetailsServiceImpl
                 "支付请求总金额："+ payDetails.getTotalAmount().intValue() + "，查询交易响应总金额：" + queryPayResultVO.getTotalAmount().intValue()));
             tradeStatus = TradeStatus.MANUAL_HANDLING.getValue();
             payDetails.setRemark((StringUtils.isBlank(payDetails.getRemark()) ? "查询支付宝交易响应成功，但" : (payDetails.getRemark() +",")) + "金额不一致");
+        } else {
+            payDetails.setRemark(payDetails.getRemark() + queryPayResultVO.getRemark());
         }
         //TODO 其他金额校验
         
@@ -823,6 +880,16 @@ public class AliPayDetailsServiceImpl
             logDescBuffer.append("，remark：");
             logDescBuffer.append(payDetails.getRemark());
         }
+        Date endTime = new Date();
+        
+        if (tradeIsEnd(tradeStatus)) {
+            // 更新结束时间
+            Date endDate = new Date();
+            payDetails.setTransEndTime(DateUtil.getTimestamp(endDate));
+            logDescBuffer.append(", endTime：");
+            logDescBuffer.append(endDate);
+        }
+        
         logDescBuffer.append("]");
         
         /*logDescBuffer.append("，receiptAmount：");
@@ -833,13 +900,11 @@ public class AliPayDetailsServiceImpl
         logDescBuffer.append(payResultVO.getInvoiceAmount());
         logDescBuffer.append("，invoiceAmount：");
         logDescBuffer.append(payResultVO.getInvoiceAmount());*/
-        
-        Date endTime = new Date();
-        payDetails.setTransEndTime(new Timestamp(endTime.getTime()));
+
         commonDAO.update(payDetails);
         
         // 记录修改日志
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改支付宝支付明细[" + logDescBuffer.toString() + "]", 
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, logDescBuffer.toString(), 
             processBeginTime, endTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
         
         // 组装返回结果
@@ -856,6 +921,65 @@ public class AliPayDetailsServiceImpl
         }
         
         return returnPayDetailVO;
+    }
+
+    @Override
+    public void doTransUpdateNotifyResult(AlipayWapPayNotifyVO notifyVO, TradeStatus tradeStatus, String remark) {
+        // 校验参数
+        Validator.checkArgument(notifyVO == null, "notifyVO为空");
+        Validator.checkArgument(StringUtils.isBlank(notifyVO.getOut_trade_no()),"notifyVO.outTradeNo为空");
+        
+        AliPayDetails payDetails = doJoinTransQueryAliPayDetailsByNum(notifyVO.getOut_trade_no(), null, LockModeType.PESSIMISTIC_WRITE);
+        
+        if (payDetails == null) {
+            throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + notifyVO.getOut_trade_no());
+        }
+        String oldPayDetailStr = payDetails.toString();
+        StringBuffer logDescBuffer = new StringBuffer("修改支付宝明细[");
+
+        // 更新通知内容
+        payDetails.setNotifyId(notifyVO.getNotify_id());
+        payDetails.setNotifyTime(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getNotify_time(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
+
+        logDescBuffer.append("notifyId：");
+        logDescBuffer.append(payDetails.getNotifyId());
+        logDescBuffer.append(", notifyTime：");
+        logDescBuffer.append(payDetails.getNotifyTime());
+        if (notifyVO.getGmt_refund() != null) {
+            payDetails.setGmtRefund(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_refund(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
+            logDescBuffer.append(", gmtRefund：");
+            logDescBuffer.append(payDetails.getGmtRefund());
+        }
+        if (notifyVO.getGmt_close() != null) {
+            payDetails.setGmtClose(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_close(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
+            logDescBuffer.append(", gmtClose：");
+            logDescBuffer.append(payDetails.getGmtClose());
+        }
+        if (tradeStatus != null) {
+            payDetails.setTradeStatus(tradeStatus.getValue());
+            logDescBuffer.append(", tradeStatus：");
+            logDescBuffer.append(payDetails.getTradeStatus());
+            
+            if (tradeIsEnd(tradeStatus.getValue())) {
+                // 更新结束时间
+                Date endDate = new Date();
+                payDetails.setTransEndTime(DateUtil.getTimestamp(endDate));
+                logDescBuffer.append(", endTime：");
+                logDescBuffer.append(endDate);
+            }
+        }
+        if (StringUtils.isNotBlank(remark)) {
+            payDetails.setRemark(payDetails.getRemark() + remark);
+            logDescBuffer.append(", remark：");
+            logDescBuffer.append(remark);
+        }
+        logDescBuffer.append("]");
+        
+        commonDAO.update(payDetails);
+        Date logDate = new Date();
+        // 记录修改日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, logDescBuffer.toString(), 
+            logDate, logDate, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
     }
 
 }

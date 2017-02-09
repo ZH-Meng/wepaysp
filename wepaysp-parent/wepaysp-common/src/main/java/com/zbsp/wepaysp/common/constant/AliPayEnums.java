@@ -112,6 +112,11 @@ public class AliPayEnums {
         /** 未付款交易超时关闭，或支付完成后全额退款 */                  TRADE_CLOSED,
         /** 交易支付成功 */                                                            TRADE_SUCCESS,
         /** 交易结束，不可退款 */                                                   TRADE_FINISHED;
-    }    
+    }
+    
+    /**支付宝异步通知，系统处理返回结果*/
+    public static enum AsynNotifyHandleResult {
+        SUCCESS, FAILURE;
+    }
     
 }

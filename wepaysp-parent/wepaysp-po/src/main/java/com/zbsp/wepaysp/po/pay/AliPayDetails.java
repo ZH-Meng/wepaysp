@@ -523,7 +523,7 @@ public class AliPayDetails
         this.tradeStatus = tradeStatus;
     }
 
-    @Column(name = "notify_time", nullable = false, length = 0)
+    @Column(name = "notify_time", length = 0)
     public Timestamp getNotifyTime() {
         return notifyTime;
     }
@@ -541,7 +541,7 @@ public class AliPayDetails
         this.notifyId = notifyId;
     }
 
-    @Column(name = "gmt_refund", nullable = false, length = 0)
+    @Column(name = "gmt_refund", length = 0)
     public Timestamp getGmtRefund() {
         return gmtRefund;
     }
@@ -550,7 +550,7 @@ public class AliPayDetails
         this.gmtRefund = gmtRefund;
     }
 
-    @Column(name = "gmt_close", nullable = false, length = 0)
+    @Column(name = "gmt_close", length = 0)
     public Timestamp getGmtClose() {
         return gmtClose;
     }

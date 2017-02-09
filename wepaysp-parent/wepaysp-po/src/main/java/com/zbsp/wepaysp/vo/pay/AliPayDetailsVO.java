@@ -55,6 +55,7 @@ public class AliPayDetailsVO
     private String notifyId;
     private Timestamp gmtRefund;
     private Timestamp gmtClose;
+    private String remark;
 
     /** 后台管理查询和展示需要的参数 */
     private String dealerName;
@@ -508,6 +509,14 @@ public class AliPayDetailsVO
 
     public void setGmtClose(Timestamp gmtClose) {
         this.gmtClose = gmtClose;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+    
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
 }

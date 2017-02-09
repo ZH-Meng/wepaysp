@@ -1,6 +1,7 @@
 package com.zbsp.wepaysp.mobile.controller.alipay;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -21,6 +22,7 @@ import com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
+import com.zbsp.wepaysp.common.constant.AliPayEnums;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
@@ -238,6 +240,7 @@ public class AlipayWapPayController
             model.put("aliPayDetailsVO", resultMap.get("aliPayDetailsVO"));
             
             modelAndView = new ModelAndView("alipay/wapPayResult", model);
+            logger.info(logPrefix + "成功");
         } catch (Exception e) {
             logger.error(logPrefix + "异常 : {}", e.getMessage(), e);
             modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.SYS_ERROR.getCode(), H5CommonResult.SYS_ERROR.getDesc()).setTitleDesc("支付结果未知"));
@@ -258,22 +261,25 @@ public class AlipayWapPayController
         String logPrefix = "处理支付宝手机网站支付异步通知请求 - ";
         logger.info(logPrefix + "开始");
         
-        @SuppressWarnings("rawtypes")
-        Map paramMap = httpRequest.getParameterMap();
         // 获取所有请求参数
+        @SuppressWarnings("unchecked")
+        Map<String, String[]> parameterMap = httpRequest.getParameterMap();
+        
+        Map<String, String> paramMap = new HashMap<String, String>();
+        for (Map.Entry<String, String[]> parameter : parameterMap.entrySet()) {
+            paramMap.put(parameter.getKey(), parameter.getValue()[0]);
+        }
+        
         logger.info("异步通知请求参数：{}", JSONUtil.toJSONString(paramMap, true));
-        //logger.info("异步通知请求参数：{}", asynNotifyVO == null ? null : JSONUtil.toJSONString(asynNotifyVO, true));
-        //@SuppressWarnings("unchecked") paramMap = BeanMap.create(asynNotifyVO);
         
         String result;
         try {
-            @SuppressWarnings("unchecked")
             Map<String, Object> resultMap = aliPayDetailsMainService.handleAsynNotify(paramMap);
             result = MapUtils.getString(resultMap, "result");
             logger.info(logPrefix + "处理结果为({})", result);
         } catch (Exception e) {
             logger.error(logPrefix + "异常 : {}", e.getMessage(), e);
-            result = "sys_error";
+            result = AliPayEnums.AsynNotifyHandleResult.FAILURE.toString();
         }
         
         logger.info(logPrefix + "结束");
