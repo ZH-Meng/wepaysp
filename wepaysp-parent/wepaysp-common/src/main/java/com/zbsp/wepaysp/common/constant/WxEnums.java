@@ -196,7 +196,11 @@ public class WxEnums {
         /** 未使用post传递参数 */
         REQUIRE_POST_METHOD,
         /** XML格式错误 */
-        XML_FORMAT_ERROR;
+        XML_FORMAT_ERROR,
+        /** 订单状态错误，官方文档没有次错误码，程序调试或运行阶段好像出现过*/
+        TRADE_STATE_ERROR,
+        /** 用户支付中 支付锁定，扣款和撤销间隔要在10s以上，官方文档没有次错误码，程序调试或运行阶段出现过*/
+        USERPAYING;
     }
     
 }

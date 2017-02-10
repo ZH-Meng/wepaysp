@@ -3,6 +3,9 @@ package com.zbsp.wepaysp.api.service.pay;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.LockModeType;
+
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
@@ -137,12 +140,29 @@ public interface WeixinPayDetailsService {
      */
     public void doTransUpdateOrderCloseResult(String resultCode, WeixinPayDetailsVO closeResultVO);
 
-    /***
-     * 根据商户订单号查询支付明细
-     * 
-     * @param outTradeNo 商户订单号 
-     * @return WeixinPayDetailsVO
+    /**
+     * 根据商户订单号或者微信交易号查询交易明细，outTradeNo查询为先，outTradeNo为空或者查询结果为空再以transactionId查询
+     * @param outTradeNo 商户订单号
+     * @param transactionId 微信交易号
+     * @return WeixinPayDetailsVO 不存在时返回NULL
      */
-	public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetail(String outTradeNo);
+    public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetailsVOByNum(String outTradeNo, String transactionId);
+    
+    /**
+     * 根据商户订单号或者微信交易号查询交易明细，outTradeNo查询为先，outTradeNo为空或者查询结果为空再以transactionId查询
+     * @param outTradeNo 商户订单号
+     * @param transactionId 微信交易号
+     * @param lockModeType
+     * @return WeixinPayDetails 不存在时返回NULL
+     */
+    public WeixinPayDetails doJoinTransQueryWeixinPayDetailsByNum(String outTradeNo, String transactionId, LockModeType lockModeType);
+    
+    /**
+     * 更新支付状态
+     * @param outTradeNo 系统支付订单号
+     * @param tradeStatus 要更新的交易状态
+     * @param remark 更新的备注
+     */
+    public void doTransUpdatePayDetailState(String outTradeNo, TradeStatus tradeStatus, String remark);
 
 }

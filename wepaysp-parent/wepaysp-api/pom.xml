@@ -118,6 +118,13 @@
 			<systemPath>D:/iwt-workspaces/git-repo/wepaysp/wepaysp-parent/wepaysp-api/lib/wxpay-scanpay-java-sdk-1.0.1.jar</systemPath>
 		</dependency>
 -->
+		<dependency>
+		    <groupId>com.alipay</groupId>
+		    <artifactId>alipay-sdk-java</artifactId>
+		    <version>20161213173952</version>
+		    <scope>system</scope>
+			<systemPath>${project.basedir}/lib/alipay-sdk-java20161213173952.jar</systemPath>
+		</dependency>
 
 	    <dependency>
             <groupId>org.apache.httpcomponents</groupId>

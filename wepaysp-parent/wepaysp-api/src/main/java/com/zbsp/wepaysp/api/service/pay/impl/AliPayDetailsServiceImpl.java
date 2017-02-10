@@ -455,14 +455,10 @@ public class AliPayDetailsServiceImpl
 
     @Override
     public void doTransUpdatePayDetailState(String outTradeNo, int tradeStatus, String remark) {
-        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "payType为空");
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo为空");
         
         // 查找支付明细
-        Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from AliPayDetails w where w.outTradeNo=:OUTTRADENO";
-        jpqlMap.put("OUTTRADENO", outTradeNo);
-        
-        AliPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
+        AliPayDetails payDetails = doJoinTransQueryAliPayDetailsByNum(outTradeNo, null, LockModeType.PESSIMISTIC_WRITE);
         if (payDetails == null) {
             throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + outTradeNo);
         }

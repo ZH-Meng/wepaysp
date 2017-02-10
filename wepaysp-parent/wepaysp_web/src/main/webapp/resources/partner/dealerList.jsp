@@ -51,6 +51,7 @@
 			            </manage:permission>
 			            
 						<s:set name="findStoresFlag" value="true"/>
+						<%-- 服务商有编辑商户核心信息的开关 --%>
 						<s:if test="dealerVO != null && 'on' == dealerVO.coreDataFlag">
 							<s:set name="findStoresFlag" value="false"/>
 				            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealerCore.action">
@@ -62,10 +63,12 @@
 				        		</manage:notPass>
 				            </manage:permission>
 						</s:if>
+						<%-- 服务商向下钻取查看商户列表 --%>
 						<s:elseif test="partnerOid != null && partnerOid != '' ">
 							<%-- <s:set name="findStoresFlag" value="true"/> --%>
 							<s:set name="backFlag" value="true"/>
 						</s:elseif>
+						<%-- 代理商查看自己发展的商户列表 --%>
 						<s:elseif test="partnerOid == null || partnerOid == '' ">
 							<manage:permission validateUrl="/resources/partner/dealermanage!goToCreateDealer.action">
 				        		<manage:pass>
@@ -78,6 +81,15 @@
 				        		</manage:pass>
 				        		<manage:notPass>
 				        			<s:set var="hasUpdatePermission">no</s:set>
+				        		</manage:notPass>
+				            </manage:permission>
+				        	<%-- 代理商给自己推广的商户授权页 --%>    
+				            <manage:permission validateUrl="/resources/partner/dealermanage!goToAlipayManage.action">
+				        		<manage:pass>
+				        			<s:set var="hasAlipayPermission">yes</s:set>
+				        		</manage:pass>
+				        		<manage:notPass>
+				        			<s:set var="hasAlipayPermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
 						</s:elseif>
@@ -181,8 +193,9 @@
 						  				<%-- <s:if test="#hasDownQrCodePermission eq 'yes'">
 						  					<a href="javascript:void(0);" onclick="downloadPayQRCode('<s:property value="#dealerVo.iwoid" />')">下载二维码</a>
 						  				</s:if> --%>
-						  				
-						  				<a href="javascript:void(0);" onclick="alipayManage('<s:property value="#dealerVo.iwoid" />')">支付宝管理</a>
+						  				<s:if test="#hasAlipayPermission eq 'yes' && #dealerVo.state != 3">
+						  					<a href="javascript:void(0);" onclick="alipayManage('<s:property value="#dealerVo.iwoid" />')">支付宝管理</a>
+						  				</s:if>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>

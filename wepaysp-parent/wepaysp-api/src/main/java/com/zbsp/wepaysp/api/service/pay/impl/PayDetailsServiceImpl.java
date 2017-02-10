@@ -147,7 +147,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 		QueryPrintPayDetailResponse response = null;
 		//if (1 <= payType && payType <= 5) {// 微信支付
 		if (payType == Integer.valueOf(PayPlatform.WEIXIN.getValue())) {// 微信支付
-			WeixinPayDetailsVO payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetail(outTradeNo);
+			WeixinPayDetailsVO payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsVOByNum(outTradeNo, null);
 			if (payDetailVO == null || payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {// 没有支付成功的暂不允许查询
 				response = new QueryPrintPayDetailResponse(CommonResult.DATA_NOT_EXIST.getCode(), CommonResult.DATA_NOT_EXIST.getDesc(), Generator.generateIwoid());
 			} else {

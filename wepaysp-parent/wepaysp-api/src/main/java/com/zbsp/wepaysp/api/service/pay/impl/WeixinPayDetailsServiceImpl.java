@@ -51,7 +51,23 @@ public class WeixinPayDetailsServiceImpl
     
 	private SysConfigService sysConfigService;
     private SysLogService sysLogService;
-
+    
+    /** 通过状态判断交易是否结束*/
+    private boolean tradeIsEnd(TradeStatus tradeStatus) {
+        switch (tradeStatus) {
+            case TRADE_CLOSED:
+                return true;
+            case TRADE_REVERSED:
+                return true;
+            case TRADE_SUCCESS:
+                return true;
+            case TRADE_FAIL:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
     @SuppressWarnings("unchecked")
 	@Override
     public Map<String, Object> doJoinTransQueryWeixinPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
@@ -472,11 +488,7 @@ public class WeixinPayDetailsServiceImpl
         Date processBeginTime = new Date();
 
         // 查找支付明细
-        Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
-        jpqlMap.put("OUTTRADENO", outTradeNo);
-        
-        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
+        WeixinPayDetails payDetails = doJoinTransQueryWeixinPayDetailsByNum(outTradeNo, null, LockModeType.PESSIMISTIC_WRITE);
         if (payDetails == null) {
             throw new NotExistsException("系统支付订单不存在！");
         }
@@ -595,11 +607,7 @@ public class WeixinPayDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(outTradeNo), "系统订单ID不能为空");
 
         // 查找支付明细
-        Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
-        jpqlMap.put("OUTTRADENO", outTradeNo);
-        
-        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        WeixinPayDetails payDetails = doJoinTransQueryWeixinPayDetailsByNum(outTradeNo, null, LockModeType.PESSIMISTIC_WRITE);
         if (payDetails == null) {
             throw new NotExistsException("系统支付订单不存在！");
         }
@@ -705,13 +713,9 @@ public class WeixinPayDetailsServiceImpl
         String tradeState = orderQueryResultVO.getTradeState();
         Validator.checkArgument(StringUtils.isBlank(tradeState), "订单状态不能为空");
         
-        // 查找支付明细
-        Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
-        jpqlMap.put("OUTTRADENO", orderQueryResultVO.getOutTradeNo());
-        
         // 查询订单并锁定，防止更新查询结果时，微信支付结果通知更新结果
-        WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false, LockModeType.PESSIMISTIC_WRITE);
+        WeixinPayDetails payDetails = doJoinTransQueryWeixinPayDetailsByNum(orderQueryResultVO.getOutTradeNo(), null, LockModeType.PESSIMISTIC_WRITE);
+        
         if (payDetails == null) {
             throw new NotExistsException("系统支付订单不存在！");
         }
@@ -719,10 +723,11 @@ public class WeixinPayDetailsServiceImpl
         logger.info("系统支付订单（ID=" +orderQueryResultVO.getOutTradeNo() + "）查询结果成功，订单状态：" + tradeState);
         
         WeixinPayDetailsVO returnPayDetailVO = null;
-        // 非处理中，代表系统已收到微信支付结果通知并处理
-        if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) {
-        	logger.info("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
-        	if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
+        
+        if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) { // 非处理中，代表系统已收到微信支付结果通知并处理
+        	throw new DataStateException("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
+        	
+        	/*if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
         	    if (StringUtils.isBlank(orderQueryResultVO.getTransactionId())) {
         	        logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), 
                     		"查询结果交易状态为成功，微信支付单号为空，系统订单ID=" + orderQueryResultVO.getOutTradeNo()));
@@ -738,20 +743,21 @@ public class WeixinPayDetailsServiceImpl
                         		"支付结果通知总金额："+ payDetails.getTotalFee().intValue() + "，主动查询总金额：" + orderQueryResultVO.getTotalFee().intValue()));
         	        }
         	    }
-        	}
+        	}*/
         } else {
         	String oldPayDetailStr = payDetails.toString();
         	String logDescTemp = "修改微信支付明细[订单查询成功";
-            // 比对关键信息
+            // 比对关键信息 商户ID、
             if (!StringUtils.equalsIgnoreCase(payDetails.getMchId(), orderQueryResultVO.getMchId())) {
                 logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), 
                 		"查询结果信息商户号不一致，系统订单ID=" + orderQueryResultVO.getOutTradeNo(), 
                 		"主动查询请求商户号："+ payDetails.getMchId() + "，主动查询结果商户号：" + orderQueryResultVO.getMchId()));
                 tradeState = TradeState.PAYERROR.toString();
             }
-            if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
+            if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {// 支付成功
                 Validator.checkArgument(StringUtils.isBlank(orderQueryResultVO.getTransactionId()), "微信支付订单ID不能为空");
                 Validator.checkArgument(orderQueryResultVO.getTotalFee() == null, "订单金额不能为空");
+                // 比对金额
                 if (payDetails.getTotalFee().intValue() != orderQueryResultVO.getTotalFee().intValue()) {
                 	logger.error(StringHelper.combinedString(AlarmLogPrefix.wxPayAPIMoneyException.getValue(), 
                     		"查询结果信息金额不一致，系统订单ID=" + orderQueryResultVO.getOutTradeNo(), 
@@ -773,7 +779,7 @@ public class WeixinPayDetailsServiceImpl
             }
             
             Date processEndTime = new Date();
-            payDetails.setTransEndTime(processEndTime);
+            payDetails.setTransEndTime(processEndTime);// 交易结束
             if (StringUtils.equalsIgnoreCase(tradeState, TradeState.SUCCESS.toString())) {
             	payDetails.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.CLOSED.toString())) { 
@@ -786,7 +792,7 @@ public class WeixinPayDetailsServiceImpl
             } else {
                 // 未支付，支付超时 用户支付中，对应交易处理中
             	//TODO 转入退款
-                payDetails.setTransEndTime(null);
+                payDetails.setTransEndTime(null);// 交易未结束
             }
             logDescTemp += "，交易状态：" + tradeState +"]";
             
@@ -832,6 +838,7 @@ public class WeixinPayDetailsServiceImpl
         if (payDetails == null) {
             throw new NotExistsException("系统支付订单(ID=" + outTradeNo + ")不存在！");
         }
+        String oldPayDetailStr = payDetails.toString();
         
         boolean canCloseFlag = false;
         String errCode = closeResultVO.getErrCode();
@@ -852,35 +859,48 @@ public class WeixinPayDetailsServiceImpl
         } else if (StringUtils.equalsIgnoreCase(OrderClosedErr.ORDERPAID.toString(), errCode)) {// 订单已支付
             logger.warn("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果错误提示为[订单已支付]，检查系统订单状态");
             if (payDetails.getTradeStatus() != null && payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
-                logger.info("系统支付订单(ID=" + outTradeNo + ")状态与返回结果一致，为支付成功");
-            } else if (payDetails.getTradeStatus() != null && payDetails.getTradeStatus().intValue() == TradeStatus.TRADEING.getValue()) {
-            	logger.info("系统支付订单(ID=" + outTradeNo + ")状态为处理中，关单返回结果为支付成功，准备更新订单状态为已支付");
-            	String oldPayDetailStr = payDetails.toString();
+                logger.info("系统支付订单(ID=" + outTradeNo + ")状态与返回结果ORDERPAID一致，为支付成功");
+            } else if (payDetails.getTradeStatus() != null && payDetails.getTradeStatus().intValue() == TradeStatus.TRADEING.getValue()) {// 理论不会出现
+            	logger.info("系统支付订单(ID=" + outTradeNo + ")状态为处理中，关单返回结果为ORDERPAID，准备更新订单状态为已支付");
+
+            	Date processEndTime = new Date();
                 payDetails.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
+                payDetails.setTransEndTime(processEndTime);
                 commonDAO.update(payDetails);
                 logger.info("系统支付订单(ID=" + outTradeNo + ")更新状态为已支付");
                 // 记录日志
-                Date processEndTime = new Date();
-                sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[系统支付订单号：" + closeResultVO.getOutTradeNo() + "，交易状态：" + payDetails.getTradeStatus() + "]", processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+                sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[系统支付订单号：" + closeResultVO.getOutTradeNo() + "，交易状态：" + payDetails.getTradeStatus() + "]", 
+                    processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
             } else {
+                // FIXME 原先公众号支付前台取消后更新交易状态为待关闭，定时器调用关单接口时有时会出现关闭不掉的情况
             	logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "系统订单(ID=" + outTradeNo + ")状态为" + TradeStatus.TRADE_CLOSED.getValue() + "与微信关单结果[已支付]不一致"));
             }
+        } else if (StringUtils.equalsIgnoreCase(OrderClosedErr.TRADE_STATE_ERROR.toString(), errCode)) {// 订单状态错误
+            logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "调用关闭订单API结果错误提示TRADE_STATE_ERROR，更新交易状态为人工处理"));
+            Date processEndTime = new Date();
+            payDetails.setTradeStatus(TradeStatus.MANUAL_HANDLING.getValue());
+            payDetails.setTransEndTime(processEndTime);
+            commonDAO.update(payDetails);
+            logger.info("系统支付订单(ID=" + outTradeNo + ")更新状态为人工处理");
+            // 记录日志
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[系统支付订单号：" + closeResultVO.getOutTradeNo() + "，交易状态：" + payDetails.getTradeStatus() + "]", 
+                processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
         } else {
             logger.warn("系统支付订单(ID=" + outTradeNo + ")调用关闭订单API结果错误码："+ errCode +"，错误描述：" + closeResultVO.getErrCodeDes() +"，【此API不处理此错误结果】");
             // SIGNERROR、REQUIRE_POST_METHOD、XML_FORMAT_ERROR 是请求错误，由监听器报警
             // SYSTEMERROR
-            // TRADE_STATE_ERROR，订单状态错误
-            // USERPAYING--用户支付中 支付锁定，扣款和撤销间隔要在10s以上 
+            // USERPAYING--用户支付中 支付锁定，扣款和撤销间隔要在10s以上，原先公众号支付前台取消后直接关闭订单出现过此错误码
         }
         
         if (canCloseFlag) {
-        	String oldPayDetailStr = payDetails.toString();
             payDetails.setTradeStatus(TradeStatus.TRADE_CLOSED.getValue());
+            Date processEndTime = new Date();
+            payDetails.setTransEndTime(processEndTime);
             commonDAO.update(payDetails);
             logger.info("系统支付订单(ID=" + outTradeNo + ")关闭成功");
             // 记录日志
-            Date processEndTime = new Date();
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[关闭订单结果成功" + "，系统支付订单号：" + closeResultVO.getOutTradeNo() + "，交易状态：" + payDetails.getTradeStatus() + "]", processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改微信支付明细[关闭订单结果成功" + "，系统支付订单号：" + closeResultVO.getOutTradeNo() + "，交易状态：" + payDetails.getTradeStatus() + "]", 
+                processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
         }
     }
     
@@ -912,45 +932,111 @@ public class WeixinPayDetailsServiceImpl
     }
     
     @Override
-	public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetail(String outTradeNo) {
-		Validator.checkArgument(StringUtils.isBlank(outTradeNo), "查询状态不能为空");
-		
-		Map<String, Object> jpqlMap = new HashMap<String, Object>(); 
-		StringBuffer jpql = new StringBuffer("from WeixinPayDetails w where 1=1 ");
-		jpql.append(" and w.outTradeNo=:OUTTRADENO");
-		jpqlMap.put("OUTTRADENO", outTradeNo);
-		
-		WeixinPayDetails weixinPayDetails = commonDAO.findObject(jpql.toString(), jpqlMap, false);
-		WeixinPayDetailsVO vo = null;
-		
-		if (weixinPayDetails != null) {
-			vo = new WeixinPayDetailsVO();
-			BeanCopierUtil.copyProperties(weixinPayDetails, vo);
-			//vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
-			
-	        DealerEmployee de = weixinPayDetails.getDealerEmployee();
-	        vo.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
-	        vo.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
-	        
-	        Store store = weixinPayDetails.getStore();
-	        vo.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
-	        vo.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
-	        
-	        Dealer dealer = weixinPayDetails.getDealer();
-	        vo.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
-	        vo.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
-	        
-	        PartnerEmployee pe = weixinPayDetails.getPartnerEmployee();
-	        vo.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
-	        vo.setPartnerEmployeeId(pe != null ? pe.getPartnerEmployeeId() : (dealer != null ? dealer.getPartnerEmployee().getPartnerEmployeeId() : ""));
-	        
-	        Partner p = weixinPayDetails.getPartner();
-	        vo.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
-	        vo.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
-		}
-		
-		return vo;
-	}
+    public WeixinPayDetailsVO doJoinTransQueryWeixinPayDetailsVOByNum(String outTradeNo, String transactionId) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo) && StringUtils.isBlank(transactionId),"outTradeNo/transactionId都为空");
+        WeixinPayDetailsVO vo = null;
+       
+        // 查找支付明细
+        WeixinPayDetails weixinPayDetails = doJoinTransQueryWeixinPayDetailsByNum(outTradeNo, transactionId, null);
+            
+        if (weixinPayDetails != null) {
+            vo = new WeixinPayDetailsVO();
+            BeanCopierUtil.copyProperties(weixinPayDetails, vo);
+            //vo.setBankType(weixinPayDetails.getBankType());//FIXME 转换
+            
+            DealerEmployee de = weixinPayDetails.getDealerEmployee();
+            vo.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
+            vo.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
+            
+            Store store = weixinPayDetails.getStore();
+            vo.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
+            vo.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
+            
+            Dealer dealer = weixinPayDetails.getDealer();
+            vo.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
+            vo.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+            
+            PartnerEmployee pe = weixinPayDetails.getPartnerEmployee();
+            vo.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
+            vo.setPartnerEmployeeId(pe != null ? pe.getPartnerEmployeeId() : (dealer != null ? dealer.getPartnerEmployee().getPartnerEmployeeId() : ""));
+            
+            Partner p = weixinPayDetails.getPartner();
+            vo.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
+            vo.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
+        }
+        
+        return vo;
+    }
+
+    @Override
+    public WeixinPayDetails doJoinTransQueryWeixinPayDetailsByNum(String outTradeNo, String transactionId, LockModeType lockModeType) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo) && StringUtils.isBlank(transactionId),"outTradeNo/transactionId都为空");
+        
+        // 查找支付明细
+        WeixinPayDetails payDetails = null;
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from WeixinPayDetails w where 1=1 ";
+        if (StringUtils.isNotBlank(outTradeNo)) {
+            jpql += " and w.outTradeNo=:OUTTRADENO";
+            jpqlMap.put("OUTTRADENO", outTradeNo);
+            if (lockModeType != null) {
+                payDetails = commonDAO.findObject(jpql, jpqlMap, false, lockModeType);
+            } else {
+                payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+            }
+        }
+        
+        if (payDetails == null && StringUtils.isNotBlank(transactionId)) {
+            jpql = "from WeixinPayDetails w where w.transactionId=:TRANSACTIONID";
+            jpqlMap.clear();
+            jpqlMap.put("TRANSACTIONID", transactionId);
+            if (lockModeType != null) {
+                payDetails = commonDAO.findObject(jpql, jpqlMap, false, lockModeType);
+            } else {
+                payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+            }
+        }
+            
+        return payDetails;
+    }
+    
+    @Override
+    public void doTransUpdatePayDetailState(String outTradeNo, TradeStatus tradeStatus, String remark) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo为空");
+        
+        // 查找支付明细
+        WeixinPayDetails payDetails = doJoinTransQueryWeixinPayDetailsByNum(outTradeNo, null, LockModeType.PESSIMISTIC_WRITE);
+        if (payDetails == null) {
+            throw new NotExistsException("微信支付明细不存在，outTradeNo=" + outTradeNo);
+        }
+        String oldPayDetailStr = payDetails.toString();
+        StringBuffer logDescBuffer = new StringBuffer("修改微信支付明细[");
+        
+        payDetails.setTradeStatus(tradeStatus.getValue());
+        payDetails.setRemark(payDetails.getRemark() + remark);
+        
+        logDescBuffer.append(", tradeStatus：");
+        logDescBuffer.append(payDetails.getTradeStatus());
+        if (StringUtils.isNotBlank(remark)) {
+            payDetails.setRemark(payDetails.getRemark() + remark);
+            logDescBuffer.append(", remark：");
+            logDescBuffer.append(remark);
+        }
+        
+        Date logTime = new Date();
+        if (tradeIsEnd(tradeStatus)) {
+            // 更新结束时间
+            payDetails.setTransEndTime(logTime);
+            logDescBuffer.append(", endTime：");
+            logDescBuffer.append(logTime);
+        }
+        logDescBuffer.append("]");
+        
+        commonDAO.update(payDetails);
+        // 记录修改日志
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, logDescBuffer.toString(), 
+            logTime, logTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
+    }
     
     public void setSysConfigService(SysConfigService sysConfigService) {
 		this.sysConfigService = sysConfigService;

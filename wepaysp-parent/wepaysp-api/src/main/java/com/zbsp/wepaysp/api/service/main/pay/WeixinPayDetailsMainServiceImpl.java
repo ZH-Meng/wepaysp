@@ -32,7 +32,6 @@ import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.api.util.WeixinPackConverter;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
-import com.zbsp.wepaysp.api.listener.DefaultCloseOrderBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultOrderQueryBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
@@ -181,7 +180,7 @@ public class WeixinPayDetailsMainServiceImpl
                 String resultCode = wxNotify.getResult_code();
                 try {
 	                if (StringUtils.equalsIgnoreCase(ReturnCode.SUCCESS.toString(), returnCode)) {
-	                	
+	                    // FIXME 考虑先核对关键信息
 	                    WeixinPayDetailsVO payResultVO;
 						try {
 							payResultVO = weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, WeixinPackConverter.payNotify2weixinPayDetailsVO(wxNotify));
@@ -248,42 +247,45 @@ public class WeixinPayDetailsMainServiceImpl
 		}
         
         if (tradeStatus == TradeStatus.TRADEING.getValue()) {// 处理中，代表系统没有收到微信支付结果通知
-            if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
-                // 关闭订单
-                // 由于立即关闭订单提示 支付锁定，扣款和撤销间隔要在10s以上，所以先将订单设置为待关闭，由定时任务处理
-                /*logger.info("系统支付订单状态处理中，用户取消支付，现主动发起关闭订单请求");
-                try {
-                    WXPay.doCloseOrderBusiness(WeixinPackConverter.weixinPayDetailsVO2CloseOrderReq(payDetailVO),
-                        new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService), certLocalPath, certPassword, keyPartner);
-                } catch (Exception e) {
-                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
-                        "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
-                    logger.error(e.getMessage(), e);
-                }*/
-                logger.info("系统支付订单状态处理中，用户取消支付，设置订单状态为待关闭");
-                tradeStatus = TradeStatus.TRADE_TO_BE_CLOSED.getValue();
-                try {
-                    weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
-                } catch (Exception e) {
-                    logger.error("取消订单（设置状态为待关闭）失败，异常信息：" + e.getMessage());
-                }
-            } else {
-                logger.info("系统支付订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
-                // 主动查询微信支付结果
-                try {
-                    DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(this);// 订单查询监听器
-                    
-                    // 订单查询
-                    WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, certLocalPath, certPassword, payDetailVO.getKeyPartner());
-                    
-                    payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
-                    tradeStatus = payDetailVO.getTradeStatus();// 当前订单状态
-                } catch (Exception e) {
-                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
-                        "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）查询错误", "，异常信息：" + e.getMessage()));
-                    logger.error(e.getMessage(), e);
-                }
+            // FIXME 
+            //if ("cancel".equalsIgnoreCase(payResult)) {// 用户取消支付
+                // 原处理方案一（错误必现，不可取，除非线程等待10s也许能成功）：立即关闭订单，提示“支付锁定”，扣款和撤销间隔要在10s以上
+                    /*logger.info("系统支付订单状态处理中，用户取消支付，现主动发起关闭订单请求");
+                    try {
+                        WXPay.doCloseOrderBusiness(WeixinPackConverter.weixinPayDetailsVO2CloseOrderReq(payDetailVO),
+                            new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService), certLocalPath, certPassword, keyPartner);
+                    } catch (Exception e) {
+                        logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                            "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
+                        logger.error(e.getMessage(), e);
+                    }*/
+                // 原处理方案二（错误偶现，有漏洞）先将订单设置为待关闭，由定时任务处理去调用关单接口，有时会关闭失败（ORDERPAID：订单已支付，不能发起关单），前台取消操作不真实(具体场景未模拟出)
+                    /*logger.info("系统支付订单状态处理中，用户取消支付，设置订单状态为待关闭");
+                    tradeStatus = TradeStatus.TRADE_TO_BE_CLOSED.getValue();
+                    try {
+                        weixinPayDetailsService.doTransCancelPay(weixinPayDetailOid);
+                    } catch (Exception e) {
+                        logger.error("取消订单（设置状态为待关闭）失败，异常信息：" + e.getMessage());
+                    }*/
+                
+                // 方案三，同其他前台回传事件码一并处理为调用查询接口，弊端：可能前台真有意取消支付，但查询交易结果为支付成功，需要退款接口辅助
+            //} else {
+            
+            logger.info("系统支付订单状态处理中，系统暂未收到微信支付结果通知，现主动发起订单查询请求");
+            // 主动查询微信支付结果
+            try {
+                DefaultOrderQueryBusinessResultListener orderQueryListener = new DefaultOrderQueryBusinessResultListener(this);// 订单查询监听器
+
+                // 订单查询
+                WXPay.doOrderQueryBusiness(WeixinPackConverter.weixinPayDetailsVO2OrderQueryReq(payDetailVO), orderQueryListener, certLocalPath, certPassword, payDetailVO.getKeyPartner());
+
+                payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByOid(weixinPayDetailOid);
+                tradeStatus = payDetailVO.getTradeStatus();// 当前订单状态
+            } catch (Exception e) {
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), "系统支付订单(ID=" + payDetailVO.getOutTradeNo() + "）查询错误", "，异常信息：" + e.getMessage()));
+                logger.error(e.getMessage(), e);
             }
+            
         }
         
         if ("ok".equalsIgnoreCase(payResult)) {
@@ -295,7 +297,7 @@ public class WeixinPayDetailsMainServiceImpl
             if (tradeStatus != TradeStatus.TRADE_TO_BE_CLOSED.getValue()) {
                 logger.warn("微信H5支付结果为cancel，系统支付交易状态为：" + tradeStatus + "系统订单ID：" + payDetailVO.getOutTradeNo());
             }
-        } else if ("error".equalsIgnoreCase(payResult)) {// 用户取消支付
+        } else if ("error".equalsIgnoreCase(payResult)) {// 支付失败
             if (tradeStatus != TradeStatus.TRADE_FAIL.getValue()) {
                 logger.warn("微信H5支付结果为error，系统支付交易状态为：" + tradeStatus + "系统订单ID：" + payDetailVO.getOutTradeNo());
             }
@@ -317,20 +319,28 @@ public class WeixinPayDetailsMainServiceImpl
         
         if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {// 查询成功
             logger.info("调用订单查询API结果成功，更新系统订单状态");
-            WeixinPayDetailsVO payResultVO = weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
             
-            if (payResultVO != null && TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
-                logger.info("订单查询结果为支付成功，向收银员/商户发送支付成功通知");
-                try {
-                    sendPayResultNotice(payResultVO);
-                } catch (Exception e) {
-                    logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
-                            "发送支付成功通知错误，异常信息：" + e.getMessage()));
+            try {
+                // 更新查询结果
+                WeixinPayDetailsVO payResultVO = weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
+                
+                if (payResultVO != null && TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
+                    logger.info("订单查询结果为支付成功，向收银员/商户发送支付成功通知");
+                    try {
+                        sendPayResultNotice(payResultVO);
+                    } catch (Exception e) {
+                        logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
+                                "发送支付成功通知错误，异常信息：" + e.getMessage()), e);
+                    }
                 }
+            } catch (DataStateException e) {// 可能是订单已被异步通知处理过，不需要更新，也不需要发送支付结果通知
+                logger.warn("更新查询交易结果 - 告警 : {}", e.getMessage());
+            } catch (Exception e) {
+                logger.error(AlarmLogPrefix.handleWxPayResultErr.getValue() + "更新查询交易结果失败，异常信息 : {}", e.getMessage(), e);
             }
-        } else {
-            if (StringUtils.equalsIgnoreCase(OrderQueryErr.ORDERNOTEXIST.toString(), queryResultVO.getErrCode())) {// 订单不存在
-                logger.info("调用订单查询API结果【订单不存在】，调用关闭订单API");
+        } else {// 查询失败
+            if (StringUtils.equalsIgnoreCase(OrderQueryErr.ORDERNOTEXIST.toString(), queryResultVO.getErrCode())) {// 订单不存在，可以直接关闭系统订单，不必调用关单接口
+                /*logger.info("调用订单查询API结果【订单不存在】，调用关闭订单API");
                 if (StringUtils.isBlank(queryResultVO.getAppid())) {
                 	throw new RuntimeException("queryResultVO缺失appid");
                 }
@@ -348,7 +358,7 @@ public class WeixinPayDetailsMainServiceImpl
         			throw new RuntimeException("系统数据异常，服务商配置信息不存在");
         		}
                 
-                // 关闭订单
+                // FIXME 因为微信订单不存在，不必调用关闭订单接口，直接更新交易状态为关闭
                 try {
                     WXPay.doCloseOrderBusiness(WeixinPackConverter.weixinPayDetailsVO2CloseOrderReq(queryResultVO),
                         new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService), certLocalPath, certPassword, keyPartner);
@@ -356,7 +366,10 @@ public class WeixinPayDetailsMainServiceImpl
                     logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
                         "系统支付订单(ID=" + queryResultVO.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()));
                     logger.error(e.getMessage(), e);
-                }
+                }*/
+                logger.info("调用订单查询API结果【订单不存在】，更新订单状态为关闭");
+                weixinPayDetailsService.doTransUpdatePayDetailState(queryResultVO.getOutTradeNo(), TradeStatus.TRADE_CLOSED, "查询结果返回ORDERNOTEXIST，更新订单状态为关闭");
+                
             } else if (StringUtils.equalsIgnoreCase(OrderQueryErr.SYSTEMERROR.toString(), queryResultVO.getErrCode())) {// 微信系统异常
                 logger.warn("系统支付订单(ID=" + queryResultVO.getOutTradeNo() + ")调用订单查询API结果错误码：SYSTEMERROR，错误描述：" + queryResultVO.getErrCodeDes() +"，【由定时器再发起查询】");
             } else {
