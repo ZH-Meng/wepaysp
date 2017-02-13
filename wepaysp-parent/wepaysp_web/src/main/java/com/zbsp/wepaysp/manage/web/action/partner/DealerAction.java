@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -467,7 +466,7 @@ public class DealerAction
         	 
     		 Map<String, String> urlParamMap = new HashMap<String, String>();
              urlParamMap.put("dealerOid", dealerOid);
-            alipayAuthUrl = Generator.generateQRURL("1".equals(SysConfig.devMode) ? QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() : QRCodeType.ALIPAY_APP_AUTH.getValue(), 
+            alipayAuthUrl = Generator.generateQRURL(SysConfig.onlineFlag ? QRCodeType.ALIPAY_APP_AUTH.getValue() : QRCodeType.ALIPAY_APP_AUTH_DEV.getValue(), 
                 SysConfig.appId4Face2FacePay, SysConfig.alipayAuthCallBackURL, urlParamMap);
     		 
     		 // 查看商户是否授权当面付应用
@@ -494,7 +493,7 @@ public class DealerAction
 	        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	        if (StringUtils.isNotBlank(dealerOid)) {
 	            // 加载授权二维码
-	        	dealerVO = dealerService.doTransGetQRCode("1".equals(SysConfig.devMode) ? QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() : QRCodeType.ALIPAY_APP_AUTH.getValue(), 
+	        	dealerVO = dealerService.doTransGetQRCode(SysConfig.onlineFlag ? QRCodeType.ALIPAY_APP_AUTH.getValue() : QRCodeType.ALIPAY_APP_AUTH_DEV.getValue(), 
 	        			dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
 	        } 
 	    } catch (Exception e) {

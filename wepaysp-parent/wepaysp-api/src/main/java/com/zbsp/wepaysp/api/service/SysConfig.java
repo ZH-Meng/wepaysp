@@ -60,6 +60,22 @@ public class SysConfig {
 	 */
     public static Map<String, Map<String, Object>> partnerConfigMap2 = new HashMap<String, Map<String, Object>>();
     
+    /**
+     * 系统中的支付宝应用配置，key=appid，value为应用信息Map 
+     * 服务商配置Map key ：
+     * <pre>
+     * SysEnvKey.WX_APPID<br>
+     * SysEnvKey.WX_MCH_ID<br>
+     * SysEnvKey.WX_SECRET<br>
+     * SysEnvKey.WX_CERT_LOCAL_PATH<br>
+     * SysEnvKey.CERT_PASSWORD<br>
+     * SysEnvKey.WX_KEY<br>
+     * SysEnvKey.WX_BASE_ACCESS_TOKEN<br>
+     * SysEnvKey.WX_BASE_EXPIRE_TIME<br>
+     * </pre>
+     */
+    public static Map<String, Map<String, Object>> alipayAppMap = new HashMap<String, Map<String, Object>>();
+    
     /***
      * 支付当面付功能的蚂蚁平台应用ID，需要在 alipay_app_t 表中存在
      */
@@ -67,9 +83,6 @@ public class SysConfig {
     
     /**支付宝授权回调系统地址*/
     public static String alipayAuthCallBackURL;
-    
-    /**开发模式标志，为1时为开发，其他为线上模式*/
-    public static String devMode;
     
     /**支付宝手机网站支付系统地址*/
     public static String alipayWapPayURL;
@@ -82,5 +95,8 @@ public class SysConfig {
     
     /**支付宝 - 接口调用效率上报标志，true，调用交易保障服务，false调用 非交易保障服务*/
     public static boolean alipayReportFlag = false;
+    
+    /**上线开关，为true时为线上模式，false为开发/测试模式*/
+    public static boolean onlineFlag;
 
 }

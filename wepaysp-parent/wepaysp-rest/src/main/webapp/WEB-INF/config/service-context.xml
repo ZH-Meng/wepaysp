@@ -14,6 +14,7 @@
 	
 	<bean id="sysConfigService" class="com.zbsp.wepaysp.api.service.main.init.impl.SysConfigServiceImpl" parent="baseService" init-method="init">
 		<property name="partnerService" ref="partnerService" />
+		<property name="alipayAppService" ref="alipayAppService" />
 		<property name="payClientCheckURL" value="${payClientCheckURL}" />
 		<property name="wxPayCallBackURL" value="${wxPayCallBackURL}" />
 		<property name="wxPayNotifyURL" value="${wxPayNotifyURL}" />
@@ -21,11 +22,13 @@
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
 		<property name="appId4Face2FacePay" value="${appId4Face2FacePay}" />
+		<property name="alipayAuthCallBackURL" value="${alipayAuthCallBackURL}" />
 		<property name="alipayWapPayURL" value="${alipayWapPayURL}" />
 		<property name="alipayWapPayNotifyURL" value="${alipayWapPayNotifyURL}" />
 		<property name="alipayWapPayReturnURL" value="${alipayWapPayReturnURL}" />
+		<property name="alipayReportFlag" value="${alipayReportFlag}" />
 		<property name="serverType" value="${serverType}" />
-		<property name="devMode" value="${devMode}" />
+		<property name="onlineFlag" value="${onlineFlag}" />
 	</bean>
 	
 	<bean id="sysAuthorityService" class="com.zbsp.wepaysp.api.service.manage.impl.SysAuthorityServiceImpl" parent="baseService" />
@@ -111,6 +114,9 @@
 	
 	<bean id="alipayAppAuthDetailsService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppAuthDetailsServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
+	</bean>
+	
+	<bean id="alipayAppService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppServiceImpl" parent="baseService">
 	</bean>
 	
 </beans>

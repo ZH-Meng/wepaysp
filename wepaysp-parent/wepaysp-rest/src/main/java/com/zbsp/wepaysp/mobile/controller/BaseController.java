@@ -15,9 +15,9 @@ public abstract class BaseController {
     protected Logger logger = LogManager.getLogger(getClass());
     
     /** 客户端 rest请求 验签密钥*/
-    protected static final String KEY = ResourceBundle.getBundle("key").getString("key");
+    protected static final String KEY = ResourceBundle.getBundle("rest").getString("rest_key");
     
     /** 开发阶段标志*/
-    protected static final boolean DEV_FLAG = Boolean.valueOf(ResourceBundle.getBundle("key").getString("devMode"));
+    protected static final boolean DEV_FLAG = Boolean.valueOf(ResourceBundle.getBundle("rest").getString("dev_mode"));
     
 }
