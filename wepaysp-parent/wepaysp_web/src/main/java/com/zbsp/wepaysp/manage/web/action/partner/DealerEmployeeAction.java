@@ -49,7 +49,7 @@ public class DealerEmployeeAction
     private StoreService storeService;
     private List<StoreVO> storeVoList;
     private String resetFlag;
-    private String qRCodeName;
+    private String qrCodeName;
     private String dealerEmployeeOid;
     private String storeOid;
     private PayNoticeBindWeixinService payNoticeBindWeixinService;
@@ -359,15 +359,15 @@ public class DealerEmployeeAction
             setAlertMessage("下载收银员级别支付二维码错误！");
             return list();
         }
-        return "getQRCodeImg";
+        return "getQrCodeImg";
     }
     
-    public InputStream getQRCodeImg() {
+    public InputStream getQrCodeImg() {
         InputStream inputStream = null;
         try {
             File qrFile = new File(dealerEmployeeVO.getQrCodePath());
             inputStream = new FileInputStream(qrFile);
-            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
             logger.info("下载收银员级别支付二维码图片成功.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -447,7 +447,7 @@ public class DealerEmployeeAction
         try {
             File qrFile = new File(dealerEmployeeVO.getBindQrCodePath());
             inputStream = new FileInputStream(qrFile);
-            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
             logger.info("加载收银员级别绑定支付通知二维码图片成功.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -476,7 +476,7 @@ public class DealerEmployeeAction
         				String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
         				File qrFile = new File(SysConfig.appidQrCodePath + File.separator + appid + ".png");
         				inputStream = new FileInputStream(qrFile);
-        				qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+        				qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
         				logger.info("加载公众号（" + appid + "）二维码图片成功.");
         			}
         		}
@@ -629,8 +629,8 @@ public class DealerEmployeeAction
 		return resetFlag;
 	}
 
-	public String getQRCodeName() {
-		return qRCodeName;
+	public String getQrCodeName() {
+		return qrCodeName;
 	}
 
 	public void setDealerEmployeeOid(String dealerEmployeeOid) {

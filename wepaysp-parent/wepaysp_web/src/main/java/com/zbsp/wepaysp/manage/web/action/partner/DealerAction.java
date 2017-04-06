@@ -48,7 +48,7 @@ public class DealerAction
     private DealerService dealerService;
     private List<PartnerEmployeeVO> partnerEmployeeVoList;
     private PartnerEmployeeService partnerEmployeeService;
-    private String qRCodeName;
+    private String qrCodeName;
     private String dealerOid; 
     private String partnerOid;
     private String alipayAuthUrl;
@@ -421,17 +421,17 @@ public class DealerAction
             setAlertMessage("下载商户级别支付二维码错误！");
             return list();
         }
-        return "getQRCodeImg";
+        return "getQrCodeImg";
     }
     
-    public InputStream getQRCodeImg() {
+    public InputStream getQrCodeImg() {
         InputStream inputStream = null;
         try {
             File qrFile = new File(dealerVO.getQrCodePath());
             inputStream = new FileInputStream(qrFile);
             /*String fileNameTemp = "二维码-" + dealerVO.getCompany() + ".png";
-            qRCodeName = new String(fileNameTemp.getBytes("GBK"), "ISO8859-1");*/
-            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            qrCodeName = new String(fileNameTemp.getBytes("GBK"), "ISO8859-1");*/
+            qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
             logger.info("下载商户级别支付二维码图片成功.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -511,7 +511,7 @@ public InputStream getAliapyAppAuthCodeImg() {
     try {
         File qrFile = new File(dealerVO.getAlipayAuthCodePath());
         inputStream = new FileInputStream(qrFile);
-        qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+        qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
         logger.info("加载支付宝授权二维码图片成功.");
     } catch (FileNotFoundException e) {
         e.printStackTrace();
@@ -554,8 +554,8 @@ public InputStream getAliapyAppAuthCodeImg() {
         this.partnerEmployeeService = partnerEmployeeService;
     }
     
-    public String getQRCodeName() {
-        return qRCodeName;
+    public String getQrCodeName() {
+        return qrCodeName;
     }
     
     public String getDealerOid() {

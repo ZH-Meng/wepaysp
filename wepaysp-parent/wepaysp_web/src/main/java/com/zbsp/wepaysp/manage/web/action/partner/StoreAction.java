@@ -48,7 +48,7 @@ public class StoreAction
     private StoreVO storeVO;
     private List<StoreVO> storeVoList;
     private StoreService storeService;
-    private String qRCodeName;
+    private String qrCodeName;
     private String storeOid;
     private String dealerOid;
     private PayNoticeBindWeixinService payNoticeBindWeixinService;
@@ -240,16 +240,16 @@ public class StoreAction
             setAlertMessage("下载门店级别支付二维码错误！");
             return list();
         }
-        return "getQRCodeImg";
+        return "getQrCodeImg";
     }
     
     /**下载门店级别支付二维码*/
-    public InputStream getQRCodeImg() {
+    public InputStream getQrCodeImg() {
         InputStream inputStream = null;
         try {
             File qrFile = new File(storeVO.getQrCodePath());
             inputStream = new FileInputStream(qrFile);
-            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
             logger.info("下载门店级别支付二维码图片成功.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -328,7 +328,7 @@ public class StoreAction
         try {
             File qrFile = new File(storeVO.getBindQrCodePath());
             inputStream = new FileInputStream(qrFile);
-            qRCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
             logger.info("加载门店级别绑定支付通知二维码图片成功.");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -356,7 +356,7 @@ public class StoreAction
 					String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
 					File qrFile = new File(SysConfig.appidQrCodePath + File.separator + appid + ".png");
 					inputStream = new FileInputStream(qrFile);
-					qRCodeName = URLEncoder.encode(qrFile.getName(), "utf-8");
+					qrCodeName = URLEncoder.encode(qrFile.getName(), "utf-8");
 					logger.info("加载公众号（" + appid + "）二维码图片成功.");
 				}
 			}
@@ -453,8 +453,8 @@ public class StoreAction
         this.storeService = storeService;
     }
 
-	public String getQRCodeName() {
-		return qRCodeName;
+	public String getQrCodeName() {
+		return qrCodeName;
 	}
 
 	public void setStoreOid(String storeOid) {

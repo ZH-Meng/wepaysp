@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
- "http://struts.apache.org/dtds/struts-2.1.dtd">
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
 <struts>
 	<package name="partner" namespace="/resources/partner" extends="wepaysp-manage-default">
 		<!-- 代理商管理 -->
@@ -21,10 +22,10 @@
 				<param name="namespace">/resources/partner</param>
 				<param name="method">goToCreateDealer</param>
 			</result>
-			<result name="getQRCodeImg" type="stream">
+			<result name="getQrCodeImg" type="stream">
 				<param name="contentType">application/octet-stream</param>
-				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
-				<param name="inputName">qRCodeImg</param>
+				<param name="contentDisposition">attachment;fileName="${qrCodeName}"</param>  
+				<param name="inputName">qrCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
 			<result name="dealerAlipayManage">/resources/partner/dealerAlipayManage.jsp</result>
@@ -39,10 +40,10 @@
 			<result name="storeList">/resources/partner/storeList.jsp</result>
 			<result name="createStore">/resources/partner/createStore.jsp</result>
 			<result name="updateStore">/resources/partner/updateStore.jsp</result>
-			<result name="getQRCodeImg" type="stream">
+			<result name="getQrCodeImg" type="stream">
 				<param name="contentType">application/octet-stream</param>
-				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
-				<param name="inputName">qRCodeImg</param>
+				<param name="contentDisposition">attachment;fileName=${qrCodeName}</param>
+				<param name="inputName">qrCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
 			<result name="storeBindWxID">/resources/partner/storeBindWxID.jsp</result>
@@ -70,10 +71,10 @@
 			<result name="updateDealerEmployee">/resources/partner/updateDealerEmployee.jsp</result>
 			<result name="resetRefundPwd">/resources/partner/resetRefundPwd.jsp</result>
 			<result name="modifyRefundPwd">/resources/partner/modifyRefundPwd.jsp</result>
-			<result name="getQRCodeImg" type="stream">
+			<result name="getQrCodeImg" type="stream">
 				<param name="contentType">application/octet-stream</param>
-				<param name="contentDisposition">attachment;fileName="${qRCodeName}"</param>  
-				<param name="inputName">qRCodeImg</param>
+				<param name="contentDisposition">attachment;fileName="${qrCodeName}"</param>  
+				<param name="inputName">qrCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
 			<result name="dealerEmployeeBindWxID">/resources/partner/dealerEmployeeBindWxID.jsp</result>
