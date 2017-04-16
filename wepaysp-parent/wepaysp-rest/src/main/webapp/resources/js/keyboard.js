@@ -1,4 +1,6 @@
 (function(exports){
+	var amountText='';
+	
 	var KeyBoard = function(input, options){
 		var body = document.getElementsByTagName('body')[0];
 		var DIV_ID = options && options.divId || '__w_l_h_v_c_z_e_r_o_divid';
@@ -48,72 +50,77 @@
 			tableStr += '</table>';
 		this.el.innerHTML = cssStr + tableStr;
 		
-		function addEvent(e){
+		function addEvent1(e){
 			var ev = e || window.event;
 			var clickEl = ev.element || ev.target;
 			var value = clickEl.textContent || clickEl.innerText;
 			
-			if(self.input.value.toString().length < 10) {
+			if(amountText.toString().length < 10) {
 				// 输入01234567890
 				if(clickEl.tagName.toLocaleLowerCase() === 'td' && value !== "×" && value !== ".") {
 
-					if(self.input.value == "0" && value == "0") {// 已经输入了一个0，再输入一个0
+					if(amountText == "0" && value == "0") {// 已经输入了一个0，再输入一个0
 						$("#ok-btn").attr("disabled", true);
-					} else if(self.input.value.indexOf(".") >= 0) {// 包含小数点
-						if(self.input.value.toString().split(".")[1].length < 2) {// 小数位数不超过2
+					} else if(amountText.indexOf(".") >= 0) {// 包含小数点
+						if(amountText.toString().split(".")[1].length < 2) {// 小数位数不超过2
 							if(self.input) {
-								self.input.value += value;
+								amountText += value;
 							}
 						}
 					} else {
 						if(self.input) {
-							self.input.value += value;
+							if (amountText == "0") {
+								amountText = value;
+							} else {
+								amountText += value;
+							}
 						}
 					}
-
 				}
 				// 输入.
 				else if(clickEl.tagName.toLocaleLowerCase() === 'td' && value === ".") {
-					if(self.input.value.indexOf(".") == -1) {// 未包含小数点
+					if(amountText.indexOf(".") == -1 && amountText !='') {// 未包含小数点
 						if(self.input) {
-							self.input.value += value;
+							amountText += value;
 						}
 					} 
 				}
 			}
 			
 			// 点击“×”
-				if(clickEl.tagName.toLocaleLowerCase() === 'td' && (clickEl.className === "wen") || (clickEl.className === "icon iconfont icon-shurushanchu")) {
-					var num = self.input.value;
-					if(num) {
-						var newNum = num.substr(0, num.length - 1);
-						self.input.value = newNum;
-					}
+			if(clickEl.tagName.toLocaleLowerCase() === 'td' && (clickEl.className === "wen") || (clickEl.className === "icon iconfont icon-shurushanchu")) {
+				var num = amountText;
+				if(num) {
+					var newNum = num.substr(0, num.length - 1);
+					amountText = newNum;
 				}
-				// 点击“完成”
-				else if(clickEl.tagName.toLocaleLowerCase() === 'div' && value === "完成") {
-					body.removeChild(self.el);
-				} 
+			}
+			// 点击“完成”
+			else if(clickEl.tagName.toLocaleLowerCase() === 'div' && value === "完成") {
+				body.removeChild(self.el);
+			} 
 
-
-				// 判断输入框是否为空或者金额为 0
-				if(self.input.value == "") {
-					$("#ok-btn").attr("disabled", true);
-				} else if (parseFloat(self.input.value) == "0") {
-					$("#ok-btn").attr("disabled", true);
-				} else {
-					$("#ok-btn").attr("disabled", false);
-				}
-				
-				
-				
+		}
+		
+		function addEvent2(e){
+			self.input.value=amountText;
 			
+			// 判断输入框是否为空或者金额为 0
+			if(self.input.value == "") {
+				$("#ok-btn").attr("disabled", true);
+			} else if (parseFloat(self.input.value) == "0") {
+				$("#ok-btn").attr("disabled", true);
+			} else {
+				$("#ok-btn").attr("disabled", false);
+			}
 		}
 		
 		if(mobile) {
-			this.el.ontouchstart = addEvent;
+			this.el.ontouchstart = addEvent1;
+			this.el.ontouchend = addEvent2;
 		} else {
-			this.el.onclick = addEvent;
+			this.el.onmousedown = addEvent1;
+			this.el.onmouseup = addEvent2;
 		}
 		body.appendChild(this.el);
 	}
