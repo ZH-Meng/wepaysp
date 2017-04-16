@@ -106,12 +106,16 @@
 			self.input.value=amountText;
 			
 			// 判断输入框是否为空或者金额为 0
-			if(self.input.value == "") {
+			if(amountText == "") {
 				$("#ok-btn").attr("disabled", true);
-			} else if (parseFloat(self.input.value) == "0") {
+			} else if (parseFloat(amountText) == "0") {
 				$("#ok-btn").attr("disabled", true);
 			} else {
-				$("#ok-btn").attr("disabled", false);
+				if (amountText.indexOf(".") == amountText.length-1) {
+					$("#ok-btn").attr("disabled", true);
+				} else {
+					$("#ok-btn").attr("disabled", false);
+				}
 			}
 		}
 		
