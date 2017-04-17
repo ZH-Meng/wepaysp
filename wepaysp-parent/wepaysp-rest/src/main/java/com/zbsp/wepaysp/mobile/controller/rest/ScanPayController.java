@@ -100,8 +100,8 @@ public class ScanPayController extends BaseController {
                         }
                         response.setCollectionMoney(payDetailsVO.getTotalFee());// 总金额实际收款金额
                         response.setOutTradeNo(payDetailsVO.getOutTradeNo());
-                        response.setPayType(PayPlatform.WEIXIN.getDesc());
-                        response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getDesc());
+                        response.setPayType(PayPlatform.WEIXIN.getValue());
+                        response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getValue());
                         response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
                 } else if (request.getAuthCode().startsWith("28")) {// 支付宝-当面付-条码支付
@@ -132,8 +132,8 @@ public class ScanPayController extends BaseController {
                         
                         response.setCollectionMoney(payDetailsVO.getTotalAmount());
                         response.setOutTradeNo(payDetailsVO.getOutTradeNo());
-                        response.setPayType(PayPlatform.ALI.getDesc());
-                        response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getDesc());
+                        response.setPayType(PayPlatform.ALI.getValue());
+                        response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getValue());
                         response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
                 } else {

@@ -27,10 +27,10 @@ public class QueryPayDetailRequest extends MobileRequest {
 	private String endTime;
 	
 	/**支付方式*/
-	private String payType;
+	private Integer payType;
 	
 	/**订单状态*/
-	private String tradeStatus;
+	private Integer tradeStatus;
 	
 	/** 页码 */
 	private int pageNum;
@@ -102,19 +102,19 @@ public class QueryPayDetailRequest extends MobileRequest {
 		this.endTime = endTime;
 	}
 
-    public String getPayType() {
+    public Integer getPayType() {
         return payType;
     }
     
-    public void setPayType(String payType) {
+    public void setPayType(Integer payType) {
         this.payType = payType;
     }
     
-    public String getTradeStatus() {
+    public Integer getTradeStatus() {
         return tradeStatus;
     }
     
-    public void setTradeStatus(String tradeStatus) {
+    public void setTradeStatus(Integer tradeStatus) {
         this.tradeStatus = tradeStatus;
     }
 

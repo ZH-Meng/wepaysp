@@ -35,18 +35,18 @@ public class SysEnums {
      * 支付平台：适用用于汇总展示支付类型，PayType（1~5对应PayPlatformType=1，6~10对应PayPlatformType=2）
      */
     public static enum PayPlatform {
-        /** 1 微信支付*/            WEIXIN("1", "微信支付"),
-        /** 2 支付宝支付 */        ALI("2", "支付宝支付");
+        /** 1 微信支付*/            WEIXIN(1, "微信支付"),
+        /** 2 支付宝支付 */        ALI(2, "支付宝支付");
         
-        private String value;
+        private int value;
         private String desc;
 
-        private PayPlatform(String value, String desc) {
+        private PayPlatform(int value, String desc) {
             this.value = value;
             this.desc = desc;
         }
         
-        public String getValue() {
+        public int getValue() {
             return value;
         }
         

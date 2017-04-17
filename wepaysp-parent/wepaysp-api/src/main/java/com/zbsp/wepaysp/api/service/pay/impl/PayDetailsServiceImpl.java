@@ -15,13 +15,11 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
-import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxPayBank;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.DateUtil;
-import com.zbsp.wepaysp.common.util.EnumUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -44,8 +42,8 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         
         Date beginTime = (Date) MapUtils.getObject(paramMap, "beginTime");
         Date endTime = (Date) MapUtils.getObject(paramMap, "endTime");
-        String payType = MapUtils.getString(paramMap, "payType");
-        String tradeStatus = MapUtils.getString(paramMap, "tradeStatus");
+        Integer payType = MapUtils.getInteger(paramMap, "payType");
+        Integer tradeStatus = MapUtils.getInteger(paramMap, "tradeStatus");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号或支付宝单号
         boolean totalFlag = MapUtils.getBoolean(paramMap, "totalFlag");
@@ -73,14 +71,14 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
             sqlMap.put("ENDTIME", endTime);
         }
         
-        if (StringUtils.isNotBlank(payType)) {
+        if (payType != null) {
             sql.append(" and w.id.payType = :PAYTYPE");
-            sqlMap.put("PAYTYPE", payType);
+            sqlMap.put("PAYTYPE", payType.toString());
         }
         
-        if (StringUtils.isNotBlank(tradeStatus)) {
+        if (tradeStatus != null) {
             sql.append(" and w.id.tradeStatus = :TRADESTATUS");
-            sqlMap.put("TRADESTATUS", Integer.valueOf(tradeStatus));
+            sqlMap.put("TRADESTATUS", tradeStatus);
         }
         
         if (StringUtils.isNotBlank(outTradeNo)) {
@@ -121,8 +119,8 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
                 
                 PayDetailData data = new PayDetailData();
                 data.setOutTradeNo(weixinPayDetails.getOutTradeNo());
-                data.setPayType(EnumUtil.getEnumByGetValueMethod(PayPlatform.class, weixinPayDetails.getPayType()).getDesc());
-                data.setTradeStatus(EnumUtil.getEnumByGetValueMethod(TradeStatusShow.class, weixinPayDetails.getTradeStatus()).getDesc());
+                data.setPayType(Integer.parseInt(weixinPayDetails.getPayType()));
+                data.setTradeStatus(weixinPayDetails.getTradeStatus());
                 data.setTransTime(DateUtil.getDate(weixinPayDetails.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                 data.setCollectionMoney(weixinPayDetails.getTotalFee());// 实收金额 = 总金额
                 data.setRefundMoney(weixinPayDetails.getRefundFee() == null ? 0L : weixinPayDetails.getRefundFee());
@@ -146,7 +144,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         
 		QueryPrintPayDetailResponse response = null;
 		//if (1 <= payType && payType <= 5) {// 微信支付
-		if (payType == Integer.valueOf(PayPlatform.WEIXIN.getValue())) {// 微信支付
+		if (payType == PayPlatform.WEIXIN.getValue()) {// 微信支付
 			WeixinPayDetailsVO payDetailVO = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsVOByNum(outTradeNo, null);
 			if (payDetailVO == null || payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {// 没有支付成功的暂不允许查询
 				response = new QueryPrintPayDetailResponse(CommonResult.DATA_NOT_EXIST.getCode(), CommonResult.DATA_NOT_EXIST.getDesc(), Generator.generateIwoid());
@@ -158,8 +156,8 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 				response.setDeviceId(payDetailVO.getDeviceInfo());// FIXME
 				response.setMoney(payDetailVO.getTotalFee());
 				response.setOutTradeNo(payDetailVO.getOutTradeNo());
-				response.setPayType(EnumUtil.getEnumByGetValueMethod(PayPlatform.class, payDetailVO.getPayType()).getDesc());
-				response.setTradeStatus(EnumUtil.getEnumByGetValueMethod(TradeStatusShow.class, payDetailVO.getTradeStatus()).getDesc());
+				response.setPayType(Integer.parseInt(payDetailVO.getPayType()));
+				response.setTradeStatus(payDetailVO.getTradeStatus());
 				response.setTransactionId(payDetailVO.getTransactionId());
 				response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
 				try {

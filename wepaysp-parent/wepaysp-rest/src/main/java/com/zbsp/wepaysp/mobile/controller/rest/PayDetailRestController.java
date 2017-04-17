@@ -63,8 +63,8 @@ public class PayDetailRestController extends BaseController {
             response = new QueryPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else if (!Validator.contains(QueryPayDetailRequest.QueryType.class, request.getQueryType())) {
             response = new QueryPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(queryType)", responseId);
-        } else if (request.getQueryType() == QueryPayDetailRequest.QueryType.BILL.getValue() 
-            && (StringUtils.isBlank(request.getTradeStatus()) || StringUtils.isBlank(request.getPayType()) || StringUtils.isBlank(request.getBeginTime()) || StringUtils.isBlank(request.getEndTime()))) {
+        } else if (request.getQueryType() == QueryPayDetailRequest.QueryType.BILL.getValue()// 账单查询
+            && (request.getTradeStatus() == null || request.getPayType() == null || StringUtils.isBlank(request.getBeginTime()) || StringUtils.isBlank(request.getEndTime()))) {
         	response = new QueryPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
             try {

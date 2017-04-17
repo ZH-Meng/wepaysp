@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.ArrayUtil;
@@ -896,7 +897,7 @@ public class RptDealerStatServiceImpl
                     vo.setDealerEmployeeName(StringUtils.defaultString((String) oArr[10]));
                     
                     PayStatData statData = new PayStatData();
-                    statData.setPayType("微信支付");// FIXME
+                    statData.setPayType(PayPlatform.WEIXIN.getValue());// FIXME
                     statData.setTotalCollectionMoney(vo.getPayMoney());
                     statData.setTotalRefundMoney(vo.getRefundMoney());
                     statData.setTotalNetCollectionMoney(vo.getTotalMoney());
@@ -932,7 +933,7 @@ public class RptDealerStatServiceImpl
                     vo.setPayMoney(ArrayUtil.getLong(oArr, 11, 0));
                     
                     PayStatData statData = new PayStatData();
-                    statData.setPayType("微信支付"); 
+                    statData.setPayType(PayPlatform.WEIXIN.getValue()); 
                     statData.setTotalCollectionMoney(vo.getPayMoney());
                     statData.setTotalRefundMoney(vo.getRefundMoney());
                     statData.setTotalNetCollectionMoney(vo.getTotalMoney());

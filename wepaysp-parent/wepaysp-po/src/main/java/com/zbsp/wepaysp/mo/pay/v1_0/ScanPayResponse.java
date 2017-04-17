@@ -12,10 +12,10 @@ public class ScanPayResponse extends MobileResponse {
 	private String outTradeNo;
 	
 	/**支付方式*/
-	private String payType;
+	private int payType;
 	
 	/**订单状态*/
-	private String tradeStatus;
+	private int tradeStatus;
 	
 	/**实收金额，单位：分*/
 	private long collectionMoney;
@@ -37,19 +37,19 @@ public class ScanPayResponse extends MobileResponse {
 		this.outTradeNo = outTradeNo;
 	}
 
-	public String getPayType() {
+	public int getPayType() {
 		return payType;
 	}
 
-	public void setPayType(String payType) {
+	public void setPayType(int payType) {
 		this.payType = payType;
 	}
 
-	public String getTradeStatus() {
+	public int getTradeStatus() {
 		return tradeStatus;
 	}
 
-	public void setTradeStatus(String tradeStatus) {
+	public void setTradeStatus(int tradeStatus) {
 		this.tradeStatus = tradeStatus;
 	}
 
