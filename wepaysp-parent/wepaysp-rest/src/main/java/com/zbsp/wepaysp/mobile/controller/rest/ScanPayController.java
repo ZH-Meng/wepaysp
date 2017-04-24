@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +42,9 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 @RestController
 @RequestMapping("/pay/v1")
 public class ScanPayController extends BaseController {
+
+    /** 目前微信的刷卡支付的条码规则为：以10、11、12、13、14、15开头的18位纯数字 */
+    protected static final String[] WX_AUTH_CODES = { "10", "11", "12", "13", "14", "15" };
     
 	@Autowired
 	private WeixinPayDetailsMainService weixinPayDetailsMainService;
@@ -68,12 +72,14 @@ public class ScanPayController extends BaseController {
             response = new ScanPayResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else if (request.getPayMoney() <= 0 ) {// 支付金额，单位：分
         	response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(payMoney)", responseId);
+        } else if (request.getAuthCode().length() <= 2) {// 支付金额，单位：分
+            response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
         } else {
             try {
             	// 根据AuthCode 判断微信或者支付宝支付
-                // 微信刷卡授权码以13开头，例：130772863047391648
-            	// 支付宝授权码以28开头，   例：280409337332958977
-                if (request.getAuthCode().startsWith("13")) {// 微信-刷卡支付
+                String authCodeStart = request.getAuthCode().substring(0, 2);
+                if (ArrayUtils.contains(WX_AUTH_CODES, authCodeStart)) {
+                    // 微信-刷卡支付
                     logger.info("检测支付方式：微信-刷卡支付, 授权码：{}", request.getAuthCode());
                     // 保存交易明细
                     WeixinPayDetailsVO payDetailsVO = new WeixinPayDetailsVO();
@@ -104,7 +110,8 @@ public class ScanPayController extends BaseController {
                         response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getValue());
                         response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
-                } else if (request.getAuthCode().startsWith("28")) {// 支付宝-当面付-条码支付
+                } else if (authCodeStart.equals("28")) {// 支付宝-当面付-条码支付
+                    // 支付宝授权码以28开头，   例：280409337332958977
                     logger.info("检测支付方式：支付宝-当面付-条码支付, 授权码：{}", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
                     AliPayDetailsVO payDetailsVO = new AliPayDetailsVO();
