@@ -14,9 +14,6 @@ public class QueryPrintPayDetailResponse extends MobileResponse {
 	/** 商户编号 */
 	private String dealerId;
 
-	/** 终端编号（设备号） */
-	private String deviceId;
-
 	/** 收银员号 */
 	private String dealerEmployeeId;
 
@@ -30,22 +27,13 @@ public class QueryPrintPayDetailResponse extends MobileResponse {
 	private String tradeTime;
 
 	/** 交易方式 */
-	private int payType;
+	private String payType;
 
 	/** 交易状态 */
-	private int tradeStatus;
+	private String tradeStatus;
 
-	/** 交易银行 */
-	private String payBank;
-
-	/** 金额，单位：分 */
-	private long Money;
-
-	/** 批次号 */
-	private String batchNo;
-
-	/** 打印标题 */
-	private String printTitle;
+	/** 金额，单位：元 */
+	private String money;
 
 	public QueryPrintPayDetailResponse() {
 	}
@@ -68,14 +56,6 @@ public class QueryPrintPayDetailResponse extends MobileResponse {
 
 	public void setDealerId(String dealerId) {
 		this.dealerId = dealerId;
-	}
-
-	public String getDeviceId() {
-		return deviceId;
-	}
-
-	public void setDeviceId(String deviceId) {
-		this.deviceId = deviceId;
 	}
 
 	public String getDealerEmployeeId() {
@@ -110,61 +90,36 @@ public class QueryPrintPayDetailResponse extends MobileResponse {
 		this.tradeTime = tradeTime;
 	}
 
-	public int getPayType() {
+	public String getPayType() {
 		return payType;
 	}
 
-	public void setPayType(int payType) {
+	public void setPayType(String payType) {
 		this.payType = payType;
 	}
 
-	public int getTradeStatus() {
+	public String getTradeStatus() {
 		return tradeStatus;
 	}
 
-	public void setTradeStatus(int tradeStatus) {
+	public void setTradeStatus(String tradeStatus) {
 		this.tradeStatus = tradeStatus;
 	}
 
-	public String getPayBank() {
-		return payBank;
+	public String getMoney() {
+		return money;
 	}
 
-	public void setPayBank(String payBank) {
-		this.payBank = payBank;
-	}
-
-	public long getMoney() {
-		return Money;
-	}
-
-	public void setMoney(long money) {
-		Money = money;
-	}
-
-	public String getBatchNo() {
-		return batchNo;
-	}
-
-	public void setBatchNo(String batchNo) {
-		this.batchNo = batchNo;
-	}
-
-	public String getPrintTitle() {
-		return printTitle;
-	}
-
-	public void setPrintTitle(String printTitle) {
-		this.printTitle = printTitle;
+	public void setMoney(String money) {
+	    this.money = money;
 	}
 
 	@Override
 	public String toString() {
-		return "QueryPrintPayDetailResponse [dealerCompany=" + dealerCompany + ", dealerId=" + dealerId + ", deviceId="
-				+ deviceId + ", dealerEmployeeId=" + dealerEmployeeId + ", outTradeNo=" + outTradeNo
+		return "QueryPrintPayDetailResponse [dealerCompany=" + dealerCompany + ", dealerId=" + dealerId + ", "
+		        + "dealerEmployeeId=" + dealerEmployeeId + ", outTradeNo=" + outTradeNo
 				+ ", transactionId=" + transactionId + ", tradeTime=" + tradeTime + ", payType=" + payType
-				+ ", tradeStatus=" + tradeStatus + ", payBank=" + payBank + ", Money=" + Money + ", batchNo=" + batchNo
-				+ ", printTitle=" + printTitle + ", " + super.toString() + " ]";
+				+ ", tradeStatus=" + tradeStatus + ", money=" + money + super.toString() + " ]";
 	}
 
 	@Override

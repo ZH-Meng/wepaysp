@@ -28,7 +28,7 @@ public final class JSONUtil {
      */
     public static String toJSONString(Object obj, boolean writeNullValue){
         if (writeNullValue){
-            return JSON.toJSONString(obj, SerializerFeature.WriteMapNullValue);
+            return JSON.toJSONString(obj, SerializerFeature.SortField, SerializerFeature.MapSortField, SerializerFeature.WriteMapNullValue);
         } else {
             return JSON.toJSONString(obj);
         }

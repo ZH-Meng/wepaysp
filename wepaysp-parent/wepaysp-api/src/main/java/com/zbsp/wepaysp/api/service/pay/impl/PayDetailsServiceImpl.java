@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.pay.impl;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,10 +17,11 @@ import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.WxPayBank;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.util.DateUtil;
+import com.zbsp.wepaysp.common.util.Formatter;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -153,20 +155,20 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 				response.setDealerCompany(payDetailVO.getDealerEmployeeName());
 				response.setDealerId(payDetailVO.getDealerId());
 				response.setDealerEmployeeId(payDetailVO.getDealerEmployeeId());
-				response.setDeviceId(payDetailVO.getDeviceInfo());// FIXME
-				response.setMoney(payDetailVO.getTotalFee());
+				
+                response.setMoney(Formatter.formatNumber("###,##0.00", new BigDecimal(payDetailVO.getTotalFee()).divide(new BigDecimal(100)).doubleValue()));
 				response.setOutTradeNo(payDetailVO.getOutTradeNo());
-				response.setPayType(Integer.parseInt(payDetailVO.getPayType()));
-				response.setTradeStatus(payDetailVO.getTradeStatus());
+				response.setPayType(PayPlatform.WEIXIN.getDesc());
+				response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getDesc());
 				response.setTransactionId(payDetailVO.getTransactionId());
 				response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
-				try {
-				    //if (Validator.contains(WxPayBank.class, payDetailVO.getBankType())) {
-				    //} else {}
-				    response.setPayBank(WxPayBank.valueOf(payDetailVO.getBankType()).getName());
-                } catch (Exception e) {
-                    response.setPayBank(payDetailVO.getBankType());
-		        }
+//				try {
+//				    //if (Validator.contains(WxPayBank.class, payDetailVO.getBankType())) {
+//				    //} else {}
+//				    response.setPayBank(WxPayBank.valueOf(payDetailVO.getBankType()).getName());
+//                } catch (Exception e) {
+//                    response.setPayBank(payDetailVO.getBankType());
+//		        }
 			}
 		//} else if (6 <= payType && payType <= 10) {// 支付宝支付
 		} else if (payType == Integer.valueOf(PayPlatform.ALI.getValue())) {// 支付宝支付
