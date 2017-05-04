@@ -944,6 +944,16 @@ public class RptDealerStatServiceImpl
             }
         }
         
+        PayStatData totalData = new PayStatData();
+        totalData.setPayType(PayPlatform.TOTAL.getValue());
+        for (PayStatData statData : payStatList) {
+            totalData.setTotalCollectionMoney(totalData.getTotalCollectionMoney() + statData.getTotalCollectionMoney());
+            totalData.setTotalNetCollectionMoney(totalData.getTotalNetCollectionMoney() + statData.getTotalNetCollectionMoney());
+            totalData.setTotalRefundAmount(totalData.getTotalRefundAmount() + statData.getTotalRefundAmount());
+            totalData.setTotalRefundMoney(totalData.getTotalRefundMoney() + statData.getTotalRefundMoney());
+            totalData.setTotalTradeAmount(totalData.getTotalTradeAmount() + statData.getTotalTradeAmount());
+        }
+        payStatList.add(totalData);// 追加合计
         QueryPayStatResponse response = new QueryPayStatResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), Generator.generateIwoid());
         response.setPayStatListJSON(JSONUtil.toJSONString(payStatList, true));
         return response;

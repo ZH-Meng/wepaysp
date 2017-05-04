@@ -36,7 +36,8 @@ public class SysEnums {
      */
     public static enum PayPlatform {
         /** 1 微信支付*/            WEIXIN(1, "微信支付"),
-        /** 2 支付宝支付 */        ALI(2, "支付宝支付");
+        /** 2 支付宝支付 */        ALI(2, "支付宝支付"),
+        /** 9 合计 */                 TOTAL(99, "合计");
         
         private int value;
         private String desc;

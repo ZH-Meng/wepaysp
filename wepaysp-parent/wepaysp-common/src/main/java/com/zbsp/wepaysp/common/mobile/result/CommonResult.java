@@ -9,7 +9,7 @@ public enum CommonResult {
     SUCCESS(0, "处理成功"),
     
     /** 系统错误 */
-    SYS_ERROR(1, "系统错误"),
+    SYS_ERROR(1, "系统或网络异常"),
     
     /** 数据包解析错误 */
     PARSE_ERROR(100, "数据包解析错误"),

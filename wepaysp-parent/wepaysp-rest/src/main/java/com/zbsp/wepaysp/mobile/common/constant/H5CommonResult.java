@@ -9,7 +9,7 @@ public enum H5CommonResult {
     SUCCESS("success", "处理成功"),
     
     /** 系统错误 */
-    SYS_ERROR("error", "系统错误"),
+    SYS_ERROR("error", "系统或网络异常"),
     
     /** 参数缺失 */
     ARGUMENT_MISS("param_miss", "参数缺失"),

@@ -95,7 +95,8 @@ public class WeixinPayDetailsServiceImpl
         //StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p and w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         String jpqlSelect = "select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         StringBuffer conditionSB = new StringBuffer();
-        
+        // 只查交易成功的
+        conditionSB.append(" and w.tradeStatus=1");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -254,6 +255,9 @@ public class WeixinPayDetailsServiceImpl
 
         //StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p, w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
+        
+        // 只查交易成功的
+        sql.append(" and w.tradeStatus=1");
         
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
@@ -873,7 +877,7 @@ public class WeixinPayDetailsServiceImpl
                     processEndTime, processEndTime, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
             } else {
                 // FIXME 原先公众号支付前台取消后更新交易状态为待关闭，定时器调用关单接口时有时会出现关闭不掉的情况
-            	logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "系统订单(ID=" + outTradeNo + ")状态为" + TradeStatus.TRADE_CLOSED.getValue() + "与微信关单结果[已支付]不一致"));
+            	logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "系统订单(ID=" + outTradeNo + ")状态为" + payDetails.getTradeStatus().intValue() + "与微信关单结果[已支付]不一致"));
             }
         } else if (StringUtils.equalsIgnoreCase(OrderClosedErr.TRADE_STATE_ERROR.toString(), errCode)) {// 订单状态错误
             logger.error(StringHelper.combinedString(AlarmLogPrefix.handleWxPayResultException.getValue(), "调用关闭订单API结果错误提示TRADE_STATE_ERROR，更新交易状态为人工处理"));
