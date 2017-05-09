@@ -1,9 +1,12 @@
 package com.zbsp.wepaysp.mobile.controller.appid;
 
+import java.io.BufferedReader;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -131,7 +134,7 @@ public class AppIDPayController extends BaseController {
             
             // 校验获取access_token
             if (WeixinUtil.checkAuthAccessTokenResult(authResult)) {
-                logger.info(logPrefix + "获取网页授权access_token 和 openid - 成功, auth_access_token：{}, expires_in：{} " + "auth_access_token：{}, openid：{}", authResult.getAccess_token(), authResult.getExpires_in(), authResult.getOpenid());
+                logger.info(logPrefix + "获取网页授权access_token 和 openid - 成功, auth_access_token：{}, expires_in：{} " + ",refresh_token：{}, openid：{}", authResult.getAccess_token(), authResult.getExpires_in(), authResult.getRefresh_token(), authResult.getOpenid());
             	// 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
                 callBackVO.setOpenid(authResult.getOpenid());
                 // TODO 设置过期时间
@@ -245,14 +248,20 @@ public class AppIDPayController extends BaseController {
      * 微信异步通知支付结果
      */
     @RequestMapping(value="wxPayNotify")
-    public String wxPayNotify(String payNotifyXmlStr) {
+    public String wxPayNotify(HttpServletRequest request) {
         String logPrefix = "处理微信异步通知支付结果请求 - ";
         logger.info(logPrefix + "开始");
-        
-        logger.info("微信异步通知支付结果内容：" + payNotifyXmlStr);
+        StringBuffer xmlStr = new StringBuffer();
         String resultXML = null;
         try {
-            resultXML = weixinPayDetailsMainService.handleWxPayNotify(payNotifyXmlStr);
+            BufferedReader reader = request.getReader();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                xmlStr.append(line);
+            }
+            logger.info("微信异步通知支付结果内容：" + xmlStr.toString());
+            
+            resultXML = weixinPayDetailsMainService.handleWxPayNotify(xmlStr.toString());
             logger.info("系统处理微信异步通知支付结果的响应内容：" + resultXML);
         } catch (Exception e) {
             logger.error(logPrefix + "异常：{}", e.getMessage(), e);
