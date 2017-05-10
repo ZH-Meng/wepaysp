@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.tencent.WXPay;
-import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenReqData;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoReqData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
@@ -25,7 +24,6 @@ import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
@@ -104,44 +102,16 @@ public class WxPayNoticeBindController extends BaseController {
                 return modelAndView; 
             }
         }
-        
-        logger.info(logPrefix + "获取网页授权access_token 和 openid - 开始");
+
+        // 通过code换取网页授权access_token 和 openid
         GetAuthAccessTokenResData authResult = null;
-        flag = false;
-        try {
-            // 通过code换取网页授权access_token 和 openid
-            GetAuthAccessTokenReqData authReqData = new GetAuthAccessTokenReqData(GrantType.AUTHORIZATION_CODE.getValue(), 
-                MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID), MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET), callBackVO.getCode(), null);
-            logger.info(logPrefix + "获取网页授权access_token 和 openid，request Data : {}", authReqData.toString());
-            
-            
-            String jsonResult = WXPay.requestGetAuthAccessTokenService(authReqData, 
-                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
-            authResult = JSONUtil.parseObject(jsonResult, GetAuthAccessTokenResData.class);
-            logger.info(logPrefix + "获取网页授权access_token 和 openid，response Data : {}", authResult.toString());
-            
-            // 校验获取access_token
-            if (WeixinUtil.checkAuthAccessTokenResult(authResult)) {
-                logger.info(logPrefix + "获取网页授权access_token 和 openid - 成功, auth_access_token：{}, expires_in：{} " + "auth_access_token：{}, openid：{}", authResult.getAccess_token(), authResult.getExpires_in(), authResult.getOpenid());
-                flag = true;
-                // TODO 设置过期时间
-                /*由于access_token拥有较短的有效期，当access_token超时后，可以使用refresh_token进行刷新，
-                refresh_token拥有较长的有效期（7天、30天、60天、90天），当refresh_token失效的后，需要用户重新授权。
-                如果需要定期同步用户的昵称，则需要考虑刷新access_token*/
-            } else {
-                logger.warn(logPrefix + "获取网页授权access_token 和 openid - 失败，错误码：" + authResult.getErrcode() + "，错误描述：" + authResult.getErrmsg());
-                errResult = new ErrResult(H5CommonResult.ACCESS_TOKEN_FAIL.getCode(), H5CommonResult.ACCESS_TOKEN_FAIL.getDesc());
-            }
-        } catch (Exception e) {
-            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), logPrefix, "获取网页授权Access_token失败", "，异常信息：{}"), e.getMessage(), e);
-            errResult = new ErrResult(H5CommonResult.SYS_ERROR.getCode(), H5CommonResult.SYS_ERROR.getDesc());
-        } finally {
-            logger.info(logPrefix + "获取网页授权access_token 和 openid - 结束");
-            if (!flag) {
-                errResult.setTitleDesc("微信支付通知绑定");
-                modelAndView = new ModelAndView("accessDeniedH5", "errResult", errResult);
-                return modelAndView; 
-            }
+        authResult = WeixinUtil.getAuthAccessToken(callBackVO.getCode(), callBackVO.getPartnerOid());
+        if (authResult == null) {
+            flag = false;
+            errResult = new ErrResult(H5CommonResult.ACCESS_TOKEN_FAIL.getCode(), H5CommonResult.ACCESS_TOKEN_FAIL.getDesc());
+            errResult.setTitleDesc("微信支付通知绑定");
+            modelAndView = new ModelAndView("accessDeniedH5", "errResult", errResult);
+            return modelAndView;
         }
         
         logger.info(logPrefix + "拉取用户信息 - 开始");// 拉取用户信息(scope为 snsapi_userinfo)

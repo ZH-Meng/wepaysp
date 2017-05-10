@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,11 +17,13 @@ import com.tencent.protocol.appid.base_access_token_protocol.GetBaseAccessTokenR
 import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgReqData;
 import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgResData;
 import com.tencent.protocol.appid.send_template_msg_protocol.TemplateData;
+import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenReqData;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
@@ -269,6 +271,52 @@ public class WeixinUtil {
             }
         }
         return result;
+    }
+    
+    /**
+     * 通过code换取网页授权access_token 和 openid
+     * @param authCode 微信公众号授权后回调返回的code
+     * @return 获取token和openid的响应GetAuthAccessTokenResData，如果null代表授权失败
+     */
+    public static GetAuthAccessTokenResData getAuthAccessToken(String authCode, String topPartnerOid) {
+        logger.info("获取网页授权access_token 和 openid - 开始");
+        GetAuthAccessTokenResData authResult = null;
+        try {
+            Validator.checkArgument(StringUtils.isBlank(authCode), "authCode不能空");
+            Validator.checkArgument(StringUtils.isBlank(topPartnerOid), "topPartnerOid不能空");
+            // 从内存中获取服务商配置信息
+            Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(topPartnerOid);
+            if (partnerMap == null || partnerMap.isEmpty()) {
+                throw new RuntimeException("服务商配置不存在，topPartnerOid=" + topPartnerOid);
+            }
+            GetAuthAccessTokenReqData authReqData = new GetAuthAccessTokenReqData(GrantType.AUTHORIZATION_CODE.getValue(), MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID),
+                MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET), authCode, null);
+            logger.info("获取网页授权access_token 和 openid，request Data : {}", authReqData.toString());
+
+            String jsonResult = WXPay.requestGetAuthAccessTokenService(authReqData, MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH),
+                MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
+            authResult = JSONUtil.parseObject(jsonResult, GetAuthAccessTokenResData.class);
+            logger.info("获取网页授权access_token 和 openid，response Data : {}", authResult.toString());
+
+            // 校验获取access_token
+            if (WeixinUtil.checkAuthAccessTokenResult(authResult)) {
+                logger.info("获取网页授权access_token 和 openid - 成功, auth_access_token：{}, expires_in：{} " + ",refresh_token：{}, openid：{}", authResult.getAccess_token(), authResult.getExpires_in(),
+                    authResult.getRefresh_token(), authResult.getOpenid());
+                // TODO 设置过期时间
+                /*由于access_token拥有较短的有效期，当access_token超时后，可以使用refresh_token进行刷新，
+                refresh_token拥有较长的有效期（7天、30天、60天、90天），当refresh_token失效的后，需要用户重新授权。
+                如果需要定期同步用户的昵称，则需要考虑刷新access_token*/
+            } else {
+                logger.warn("获取网页授权access_token 和 openid - 失败，" + (authResult != null ? (" 错误码：" + authResult.getErrcode() + "，错误描述：" + authResult.getErrmsg()) : null));
+                authResult = null;
+            }
+        } catch (Exception e) {
+            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), "获取网页授权access_token 和 openid", "，异常信息：{}"), e.getMessage(), e);
+            authResult = null;
+        } finally {
+            logger.info("获取网页授权access_token 和 openid - 结束");
+        }
+        return authResult;
     }
     
 }

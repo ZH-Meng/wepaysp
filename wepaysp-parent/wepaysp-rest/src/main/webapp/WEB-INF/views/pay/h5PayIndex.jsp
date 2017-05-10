@@ -29,6 +29,8 @@
 	</head>
 <body onload="onload()">
 	<c:choose> 
+		<c:when test="${indexVO.payClient eq 1}">
+		</c:when>
 		<c:when test="${indexVO.payClient eq 2}">
 			<div class="succ-info">
 				<div class="error-bottom">

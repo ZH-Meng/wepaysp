@@ -20,21 +20,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
-import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
 import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
-import com.zbsp.wepaysp.common.util.JSONUtil;
-import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.result.CreateOrderResult;
 import com.zbsp.wepaysp.mobile.model.result.ErrResult;
 import com.zbsp.wepaysp.mobile.model.vo.WxCallBackVO;
-import com.tencent.WXPay;
-import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenReqData;
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 import com.zbsp.wepaysp.api.service.SysConfig;
@@ -81,7 +75,6 @@ public class AppIDPayController extends BaseController {
      * 
      * @return
      */
-    @SuppressWarnings("finally")
     @RequestMapping(value="wxCallBack", method=RequestMethod.GET)
     public ModelAndView wxCallBack(WxCallBackVO callBackVO) {
         String logPrefix = "处理微信扫码公众号下单网页授权回调请求 - ";
@@ -118,46 +111,21 @@ public class AppIDPayController extends BaseController {
             }
         }
         
-        
-        logger.info(logPrefix + "获取网页授权access_token 和 openid - 开始");
-        try {
-            // 通过code换取网页授权access_token 和 openid
-            GetAuthAccessTokenReqData authReqData = new GetAuthAccessTokenReqData(GrantType.AUTHORIZATION_CODE.getValue(), 
-                MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID), MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET), callBackVO.getCode(), null);
-            
-            logger.info(logPrefix + "获取网页授权access_token 和 openid，request Data : {}", authReqData.toString());
-            GetAuthAccessTokenResData authResult = null;
-            
-            String jsonResult = WXPay.requestGetAuthAccessTokenService(authReqData, MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH), MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD));
-            authResult = JSONUtil.parseObject(jsonResult, GetAuthAccessTokenResData.class);
-            logger.info(logPrefix + "获取网页授权access_token 和 openid，response Data : {}", authResult.toString());
-            
-            // 校验获取access_token
-            if (WeixinUtil.checkAuthAccessTokenResult(authResult)) {
-                logger.info(logPrefix + "获取网页授权access_token 和 openid - 成功, auth_access_token：{}, expires_in：{} " + ",refresh_token：{}, openid：{}", authResult.getAccess_token(), authResult.getExpires_in(), authResult.getRefresh_token(), authResult.getOpenid());
-            	// 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
-                callBackVO.setOpenid(authResult.getOpenid());
-                // TODO 设置过期时间
-               /* 由于access_token拥有较短的有效期，当access_token超时后，可以使用refresh_token进行刷新，
-                refresh_token拥有较长的有效期（7天、30天、60天、90天），当refresh_token失效的后，需要用户重新授权。
-                如果需要定期同步用户的昵称，则需要考虑刷新access_token*/
-                
-                ModelMap model=new ModelMap();
-                model.addAttribute("callBackVO", callBackVO);
-                modelAndView = new ModelAndView("appid/wxCallBack", model);
-                logger.info(logPrefix + "成功");
-            } else {
-                logger.warn(logPrefix + "获取网页授权access_token 和 openid - 失败，错误码：" + authResult.getErrcode() + "，错误描述：" + authResult.getErrmsg());
-                modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ACCESS_TOKEN_FAIL.getCode(), H5CommonResult.ACCESS_TOKEN_FAIL.getDesc()));
-            }
-        } catch (Exception e) {
-            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), logPrefix, "获取网页授权access_token 和 openid - 异常：{}"), e.getMessage(), e);
-            modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.SYS_ERROR.getCode(), H5CommonResult.SYS_ERROR.getDesc()));
-        } finally {
-            logger.info(logPrefix + "结束");
-            return modelAndView;
+        // 通过code换取网页授权access_token 和 openid
+        GetAuthAccessTokenResData authResult = null;
+        authResult = WeixinUtil.getAuthAccessToken(callBackVO.getCode(), callBackVO.getPartnerOid());
+        if (authResult == null) {
+            modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ACCESS_TOKEN_FAIL.getCode(), H5CommonResult.ACCESS_TOKEN_FAIL.getDesc()));
+        } else {
+            // 设置openid，下单时需要，暂通过request及前台隐藏于传递给下单请求
+            callBackVO.setOpenid(authResult.getOpenid());
+
+            ModelMap model = new ModelMap();
+            model.addAttribute("callBackVO", callBackVO);
+            modelAndView = new ModelAndView("appid/wxCallBack", model);
         }
-        //return "appid/wxCallBack";
+        logger.info(logPrefix + "结束");
+        return modelAndView;
     }
     
     /**
@@ -248,6 +216,7 @@ public class AppIDPayController extends BaseController {
      * 微信异步通知支付结果
      */
     @RequestMapping(value="wxPayNotify")
+    @ResponseBody
     public String wxPayNotify(HttpServletRequest request) {
         String logPrefix = "处理微信异步通知支付结果请求 - ";
         logger.info(logPrefix + "开始");

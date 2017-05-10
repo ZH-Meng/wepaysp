@@ -488,7 +488,7 @@ public class WeixinPayDetailsServiceImpl
         Validator.checkArgument(payResultVO == null, "支付结果对象不能为空");
         String outTradeNo = payResultVO.getOutTradeNo();// 系统订单号
         Validator.checkArgument(StringUtils.isBlank(outTradeNo), "系统订单ID不能为空");
-        logger.info("微信刷卡支付结果：outTradeNo : {}, returnCode : {}, resultCode : {}", outTradeNo, returnCode, resultCode);
+        logger.info("微信支付结果：outTradeNo : {}, returnCode : {}, resultCode : {}", outTradeNo, returnCode, resultCode);
         Date processBeginTime = new Date();
 
         // 查找支付明细
