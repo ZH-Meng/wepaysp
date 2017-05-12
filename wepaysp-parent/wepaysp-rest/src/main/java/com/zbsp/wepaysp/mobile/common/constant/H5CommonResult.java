@@ -21,7 +21,10 @@ public enum H5CommonResult {
     DATA_NOT_EXIST("data_not_exist", "数据不存在"),
     
     /**获取access_token失败*/
-    ACCESS_TOKEN_FAIL("access_token_fail", "授权失败");
+    ACCESS_TOKEN_FAIL("access_token_fail", "授权失败"),
+    
+    /**微信未绑定系统账户*/
+    OPENID_UNKOWN("access_token_fail", "微信未绑定系统账户");
     
     private String code;
 

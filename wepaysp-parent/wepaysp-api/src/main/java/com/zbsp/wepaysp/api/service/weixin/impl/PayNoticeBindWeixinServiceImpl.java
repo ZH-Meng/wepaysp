@@ -19,6 +19,7 @@ import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
+import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
@@ -225,6 +226,31 @@ public class PayNoticeBindWeixinServiceImpl
         }
         
         return vo;
+    }
+    
+    @Override
+    public SysUser doJoinTransQueryBindUser(String openid) {
+        Validator.checkArgument(StringUtils.isBlank(openid), "openid不能为空！");
+        String jpql = "from PayNoticeBindWeixin p where p.openid=:OPENID";
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        jpqlMap.put("OPENID", openid);
+        PayNoticeBindWeixin bindInfo = commonDAO.findObject(jpql, jpqlMap, false);
+        if (bindInfo == null) {
+            return null;
+        } else {
+            jpqlMap.clear();
+            if (bindInfo.getBindDealer() != null) {
+                jpql = "from SysUser u where u.dealer=:DEALER";
+                jpqlMap.put("DEALER", bindInfo.getBindDealer() );
+                return commonDAO.findObject(jpql, jpqlMap, false);
+            } else if (bindInfo.getBindDealerEmployee() != null) {
+                jpql = "from SysUser u where u.dealerEmployee=:DEALEREMPLOYEE";
+                jpqlMap.put("DEALEREMPLOYEE", bindInfo.getBindDealerEmployee());
+                return commonDAO.findObject(jpql, jpqlMap, false);
+            } else {
+                return null;
+            }
+        }
     }
     
 	public void setSysLogService(SysLogService sysLogService) {
