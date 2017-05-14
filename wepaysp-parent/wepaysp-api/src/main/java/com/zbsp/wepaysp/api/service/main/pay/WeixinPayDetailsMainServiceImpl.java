@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.main.pay;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
@@ -383,19 +385,8 @@ public class WeixinPayDetailsMainServiceImpl
     @Override
     public void updateScanPayResult(String returnCode, String resultCode, WeixinPayDetailsVO payResultVO) {
     	// 更新扫码支付结果
-    	WeixinPayDetailsVO payDetailsVO = weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, payResultVO);
-        
-        if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode)) {
-        	logger.info("扫码支付成功，向收银员/商户发送支付成功通知");
-        	// 发送支付结果公众号信息（支付成功）
-        	try {
-        		sendPayResultNotice(payDetailsVO);
-			} catch (Exception e) {
-				logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
-                        "发送支付成功通知错误，异常信息：" + e.getMessage()));
-				logger.error(e.getMessage(), e);
-			}
-        }
+    	weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, payResultVO);
+    	// 刷卡支付不发送支付通知
     }
 
     private void sendPayResultNotice(WeixinPayDetailsVO payDetailsVO) throws Exception {
@@ -441,7 +432,8 @@ public class WeixinPayDetailsMainServiceImpl
     		
     		for(PayNoticeBindWeixinVO toUser : toUserList) {
     			if (toUser != null && StringUtils.isNotBlank(toUser.getOpenid())) {
-					SendTemplateMsgResData sendResult = WeixinUtil.sendPaySuccessNotice(payDetailsVO, toUser.getOpenid(), certLocalPath, certPassword, accessToken);
+    				String messageURL = MessageFormat.format(SysConfig.wxPayMessageLinkURL, toUser.getOpenid(), payDetailsVO.getDealerOid(), payDetailsVO.getStoreOid(), payDetailsVO.getDealerEmployeeOid());
+					SendTemplateMsgResData sendResult = WeixinUtil.sendPaySuccessNotice(payDetailsVO, toUser.getOpenid(), certLocalPath, certPassword, accessToken, messageURL);
 					if (SendTempMsgErr.SUCCESS.getValue().equals(sendResult.getErrcode())) {// 发送成功
 						logger.info("订单（ID=" + payDetailsVO.getOutTradeNo() + "）向（" + toUser.getNickname() + "(openid=" + toUser.getOpenid() + ")）发送支付成功通知成功");
 						count ++;

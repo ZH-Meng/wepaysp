@@ -240,11 +240,11 @@ public class PayNoticeBindWeixinServiceImpl
         } else {
             jpqlMap.clear();
             if (bindInfo.getBindDealer() != null) {
-                jpql = "from SysUser u where u.dealer=:DEALER";
+                jpql = "from SysUser u left Join fetch u.dealer where u.dealer=:DEALER";
                 jpqlMap.put("DEALER", bindInfo.getBindDealer() );
                 return commonDAO.findObject(jpql, jpqlMap, false);
             } else if (bindInfo.getBindDealerEmployee() != null) {
-                jpql = "from SysUser u where u.dealerEmployee=:DEALEREMPLOYEE";
+                jpql = "from SysUser u left Join fetch u.dealerEmployee where u.dealerEmployee=:DEALEREMPLOYEE";
                 jpqlMap.put("DEALEREMPLOYEE", bindInfo.getBindDealerEmployee());
                 return commonDAO.findObject(jpql, jpqlMap, false);
             } else {

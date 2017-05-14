@@ -64,7 +64,7 @@ public class WeixinUtil {
      * @return 发送消息结果（不能判断是否下发至微信用户）
      * @throws Exception
      */
-    public static SendTemplateMsgResData sendPaySuccessNotice(WeixinPayDetailsVO payResultVO, String touser, String certLocalPath, String certPassword, String accessToken) throws Exception {
+    public static SendTemplateMsgResData sendPaySuccessNotice(WeixinPayDetailsVO payResultVO, String touser, String certLocalPath, String certPassword, String accessToken, String messageUrl) throws Exception {
         Validator.checkArgument(payResultVO == null, "发送支付通知payResultVO不能为空");
         Validator.checkArgument(StringUtils.isBlank(touser),"发送支付通知touser不能为空");
         Validator.checkArgument(StringUtils.isBlank(certLocalPath),"发送支付通知certLocalPath不能为空");
@@ -94,7 +94,7 @@ public class WeixinUtil {
         dataMap.put("keyword4", keyword4);
         dataMap.put("keyword5", keyword5);
         // 构造模版消息包
-        SendTemplateMsgReqData templateMsg = new SendTemplateMsgReqData(touser, null, TEMPLATE_ID_PAY_SUCCESS, null, dataMap);
+        SendTemplateMsgReqData templateMsg = new SendTemplateMsgReqData(touser, null, TEMPLATE_ID_PAY_SUCCESS, messageUrl, dataMap);
         // 调用模版消息发送接口
         String jsonResult = WXPay.requestSendTemplateMsgService(templateMsg, accessToken, certLocalPath, certPassword);
         // 返回消息发送结果（不能确定是否下发至微信用户，需要查看事件推送结果）

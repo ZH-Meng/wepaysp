@@ -563,6 +563,7 @@ public class WeixinPayDetailsServiceImpl
                     returnPayDetailVO.setDealerEmployeeName(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getEmployeeName() : "");
                     returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");
                     returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
+                    returnPayDetailVO.setDealerOid(payDetails.getDealer() != null ? payDetails.getDealer().getIwoid() : "");
                 } else {
                     logDescTemp += "，支付结果：交易失败，" + payDetails.getRemark() + "，微信支付订单号：" + payResultVO.getTransactionId() + "，交易状态：" + tradeStatus;
                 }
@@ -816,6 +817,7 @@ public class WeixinPayDetailsServiceImpl
                 returnPayDetailVO.setDealerEmployeeName(payDetails.getDealerEmployee() != null ? payDetails.getDealerEmployee().getEmployeeName() : "");
                 returnPayDetailVO.setStoreName(payDetails.getStore() != null ? payDetails.getStore().getStoreName() : "");
                 returnPayDetailVO.setDealerName(payDetails.getDealer() != null ? payDetails.getDealer().getCompany() : "");
+                returnPayDetailVO.setDealerOid(payDetails.getDealer() != null ? payDetails.getDealer().getIwoid() : "");
             }
             
         }

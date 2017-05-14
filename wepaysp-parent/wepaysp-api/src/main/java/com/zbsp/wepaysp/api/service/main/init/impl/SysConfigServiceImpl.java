@@ -29,6 +29,7 @@ public class SysConfigServiceImpl
     private String wxPayCallBackURL;
     private String wxPayNotifyURL;
     private String bindCallBackURL;
+    private String wxPayMessageLinkURL;
     private String qRCodeRootPath;
     private String appidQrCodePath;
     private String serverType;
@@ -111,6 +112,13 @@ public class SysConfigServiceImpl
         } else {
             logger.info("初始化系统配置信息：wxPayNotifyURL=" + wxPayNotifyURL);
             SysConfig.wxPayNotifyURL = wxPayNotifyURL;
+        }
+        // 微信公众号收款消息链接URL
+        if (StringUtils.isBlank(wxPayMessageLinkURL)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：wxPayMessageLinkURL");
+        } else {
+            logger.info("初始化系统配置信息：wxPayMessageLinkURL=" + wxPayMessageLinkURL);
+            SysConfig.wxPayMessageLinkURL = wxPayMessageLinkURL;
         }
         
         // 收银员使用微信扫码绑定支付结果发送消息二维码授权回调URL
@@ -220,6 +228,7 @@ public class SysConfigServiceImpl
         SysConfig.wxPayCallBackURL = wxPayCallBackURL;
         SysConfig.wxPayNotifyURL = wxPayNotifyURL;
         SysConfig.bindCallBackURL = bindCallBackURL;
+        SysConfig.wxPayMessageLinkURL = wxPayMessageLinkURL;
     }
     
     /**初始化服务商的相关信息*/
@@ -423,7 +432,11 @@ public class SysConfigServiceImpl
         this.alipayReportFlag = alipayReportFlag;
     }
 
-    public void setPartnerService(PartnerService partnerService) {
+    public void setWxPayMessageLinkURL(String wxPayMessageLinkURL) {
+		this.wxPayMessageLinkURL = wxPayMessageLinkURL;
+	}
+
+	public void setPartnerService(PartnerService partnerService) {
         this.partnerService = partnerService;
     }
 

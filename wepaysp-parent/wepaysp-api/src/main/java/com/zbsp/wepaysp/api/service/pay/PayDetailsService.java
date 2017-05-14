@@ -37,8 +37,18 @@ public interface PayDetailsService {
      * 根据商户订单号查找支付成功明细
      * 
      * @param outTradeNo 商户订单号
-     * @param payType 支付类型
+     * @param payPlatform 支付平台
      * @return QueryPrintPayDetailResponse
      */
-	public QueryPrintPayDetailResponse doJoinTransQueryPaySuccessDetail(String outTradeNo, int payType);
+	public QueryPrintPayDetailResponse doJoinTransQueryPaySuccessDetail(String outTradeNo, int payPlatform);
+
+
+	/**
+	 * 
+	 * @param paramMap
+	 * @param startIndex
+	 * @param maxResult
+	 * @return
+	 */
+	public Map<String, Object> doJoinTransAppIdQueryList(Map<String, Object> paramMap, int startIndex, int maxResult);
 }
