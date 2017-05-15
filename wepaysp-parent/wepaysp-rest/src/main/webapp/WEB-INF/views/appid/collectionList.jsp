@@ -6,55 +6,88 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
 <title>收款列表</title>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/weui.css">
 <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/jquery-weui.css">
 <style type="text/css">
+	body,html{
+		height: 100%;
+	}
 	.collection-money{color: #7D9EC0}
 	.collection-time{color: #838B8B}
 </style>
 </head>
 <body ontouchstart>
-	<div class="bd">
-		<div class="page__bd">
-			<c:if test="${not empty storeList }">
-				<div class="weui-cell weui-cell_select">
-					<div class="weui-cell__bd">
-						<select class="weui-select" name="queryStoreOid" id="query-store">
-							<option value="">全部门店</option>
-							<c:forEach items="${storeList}" var="store">
-								<option value="${store.iwoid }">${store.storeName }</option>
-							</c:forEach>
-						</select>
+	<div class="weui-tab">
+		<div class="weui-tab__bd">
+			<div id="tab-collection-list" class="weui-tab__bd-item weui-tab__bd-item--active">
+				<c:if test="${not empty storeList }">
+					<div class="weui-cell weui-cell_select">
+						<div class="weui-cell__bd">
+							<select class="weui-select" name="queryStoreOid" id="query-store">
+								<option value="">全部门店</option>
+								<c:forEach items="${storeList}" var="store">
+									<option value="${store.iwoid }">${store.storeName }</option>
+								</c:forEach>
+							</select>
+						</div>
 					</div>
+				</c:if>
+				<div class="weui-cell">
+					<div class="weui-cell__ft ">
+						<input class="weui-input" id="query-date" type="date" value="" max="${queryDate }">
+					</div>
+					<label for="" class="weui-cell__ft" id="total"></label>
+					<!-- 
+					<label for="" class="weui-label" id="total-amount"></label>
+					<label for="" class="weui-label" id="total-money"></label>
+					 -->
 				</div>
-			</c:if>
-			<div class="weui-cell">
-				<div class="weui-cell__ft ">
-					<input class="weui-input" id="query-date" type="date" value="" max="${queryDate }">
+				<div class="weui-cells" id="collection-list">
 				</div>
-				<label for="" class="weui-cell__ft" id="total"></label>
-				<!-- 
-				<label for="" class="weui-label" id="total-amount"></label>
-				<label for="" class="weui-label" id="total-money"></label>
-				 -->
+				<div id="collection-loading">
+					<div class="weui-loadmore">
+				        <i class="weui-loading"></i>
+				        <span class="weui-loadmore__tips">正在加载</span>
+				      </div>
+				</div>
+				<div id="collection-empty">
+					<div class="weui-loadmore weui-loadmore_line">
+				        <span class="weui-loadmore__tips">暂无数据</span>
+				    </div>
+				</div>
+				<div style="padding-top: 50px;"></div>
 			</div>
-			<div class="weui-cells" id="collection-list">
+			<div id="tab-stat-list" class="weui-tab__bd-item">
+				<h1>页面二</h1>
 			</div>
-			<div id="collection-loading">
-				<div class="weui-loadmore">
-			        <i class="weui-loading"></i>
-			        <span class="weui-loadmore__tips">正在加载</span>
-			      </div>
-			</div>
-			<div id="collection-empty">
-				<div class="weui-loadmore weui-loadmore_line">
-			        <span class="weui-loadmore__tips">暂无数据</span>
-			    </div>
-			</div>
+			<div id="tab-more-list" class="weui-tab__bd-item">
+				<h1>页面三</h1>
+			</div>			
+		</div>
+
+		<div class="weui-tabbar">
+			<a href="#tab-collection-list" class="weui-tabbar__item weui-bar__item--on">
+				<div class="weui-tabbar__icon">
+					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_cell.png" alt="">
+				</div>
+				<p class="weui-tabbar__label">收款列表</p>
+			</a>
+			 <a href="#tab-stat-list" class="weui-tabbar__item">
+				<div class="weui-tabbar__icon">
+					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_calendar.png" alt="">					
+				</div>
+				<p class="weui-tabbar__label">收款汇总</p>
+			</a> 
+			<a href="#tab3" class="weui-tabbar__item">
+				<div class="weui-tabbar__icon">
+					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_actionSheet.png" alt="">
+				</div>
+				<p class="weui-tabbar__label">更多</p>
+			</a> 
 		</div>
 	</div>
+
 	<script src="<%=request.getContextPath()%>/resources/js/jquery-2.1.4.js"></script>
 	<script src="<%=request.getContextPath()%>/resources/js/fastclick.js"></script>
 	<script src="<%=request.getContextPath()%>/resources/js/jquery-weui.js"></script>
@@ -128,8 +161,8 @@
 	  }
 	  
 	  function addCell(item){
-		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">transTime</div><div class="weui-cell__ft collection-money">collectionMoney</div></div>';
-		  $("#collection-list").append(cell.replace("transTime", item.transTime).replace("collectionMoney", item.collectionMoney));
+		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">index&nbsp;&nbsp;transTime</div><div class="weui-cell__ft collection-money">collectionMoney</div></div>';
+		  $("#collection-list").append(cell.replace("index", item.index).replace("transTime", item.transTime).replace("collectionMoney", item.collectionMoney));
 	  }
 	</script>
 </body>

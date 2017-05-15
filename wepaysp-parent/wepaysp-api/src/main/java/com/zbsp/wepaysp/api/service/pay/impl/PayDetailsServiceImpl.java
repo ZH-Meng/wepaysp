@@ -231,6 +231,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         
         List<?> payDetailList = (List<?>) commonDAO.findObjectList(listJpql + sql.toString(), sqlMap, false, startIndex, maxResult);
   
+        int i = startIndex;
         // 总笔数为记录总数，总金额为交易成功的总金额
         if(payDetailList != null && !payDetailList.isEmpty()) {
             Iterator<?> it = payDetailList.iterator();
@@ -251,6 +252,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
                 payDetail.setRefundFee((Integer) curRow[10]);
                 
                 PayDetailVO data = new PayDetailVO();
+                data.setIndex(++i);
                 data.setOutTradeNo(payDetail.getOutTradeNo());
                 data.setTransTime(DateUtil.getDate(payDetail.getTransBeginTime(), "HH:mm:ss"));
                 data.setCollectionMoney("￥"+Formatter.formatNumber("#0.00", new BigDecimal(payDetail.getTotalFee()).divide(new BigDecimal(100)).doubleValue()));// 实收金额 = 总金额

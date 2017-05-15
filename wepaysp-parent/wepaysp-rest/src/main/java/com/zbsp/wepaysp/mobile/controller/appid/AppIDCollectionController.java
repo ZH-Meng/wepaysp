@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
+import com.zbsp.wepaysp.api.service.report.RptDealerStatService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.api.util.SysUserUtil;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
@@ -38,6 +39,8 @@ public class AppIDCollectionController extends BaseController {
     private PayNoticeBindWeixinService payNoticeBindWeixinService;
     @Autowired
     private PayDetailsService payDetailsService;
+    @Autowired
+    private RptDealerStatService rptDealerStatService;
     @Autowired
     private StoreService storeService;
     
@@ -68,6 +71,9 @@ public class AppIDCollectionController extends BaseController {
 						paramMap.put("dealerOid", user.getDealer().getIwoid());
 						modelAndView.addObject("storeList", storeService.doJoinTransQueryStoreList(paramMap, 0, -1));
 					}
+					// 激活收款列表面板
+					modelAndView.addObject("title", "收款列表");
+					modelAndView.addObject("tabActive", "tab-collection-list");
 					modelAndView.addObject("openid", openid);
 					modelAndView.addObject("dealerOid", dealerOid);
 					modelAndView.addObject("storeOid", storeOid);
@@ -155,6 +161,53 @@ public class AppIDCollectionController extends BaseController {
 			}
         }
         return resultMap;
+    }
+    
+    @RequestMapping(value = "stat")
+    public ModelAndView stat(String openid, String dealerOid, String storeOid, String dealerEmployeeOid, String queryStoreOid) {
+        String logPrefix = "处理微信公众号收款汇总请求 - ";
+        logger.info(logPrefix + "开始");
+        logger.info(logPrefix + "参数openid：{}, dealerOid：{}, storeOid：{}, dealerEmployeeOid：{}, queryStoreOid：{}", openid, dealerOid, storeOid, dealerEmployeeOid, queryStoreOid);
+        ModelAndView modelAndView = null;
+        
+        // 检查参数
+        if (StringUtils.isBlank(openid) || StringUtils.isBlank(dealerOid)) {
+            logger.warn(logPrefix + "openid或dealerOid为空");
+            modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc()));
+        } else {
+            // 根据openid 查找绑定商户、商户员工，并返回商户级别
+            SysUser user = payNoticeBindWeixinService.doJoinTransQueryBindUser(openid);
+            if (user == null) {
+                logger.warn(logPrefix + "此openid未关联商户或商户员工，openid：{}", openid);
+                modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.OPENID_UNKOWN.getCode(), H5CommonResult.OPENID_UNKOWN.getDesc()));
+            } else {
+                // 根据级别查询不同收款记录
+                if (SysUserUtil.isDealer(user) || SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {// 商户、商户员工有权查看
+                    modelAndView = new ModelAndView("appid/collectionList");
+                    if (SysUserUtil.isDealer(user)) {
+                        // 查找商户门店
+                        Map<String, Object> paramMap = new HashMap<String, Object>();
+                        paramMap.put("dealerOid", user.getDealer().getIwoid());
+                        modelAndView.addObject("storeList", storeService.doJoinTransQueryStoreList(paramMap, 0, -1));
+                    }
+                    
+                    // 查询统计
+                    
+                    // 激活收款汇总面板
+                    modelAndView.addObject("title", "收款汇总");
+                    modelAndView.addObject("tabActive", "tab-stat-list");
+                    modelAndView.addObject("openid", openid);
+                    modelAndView.addObject("dealerOid", dealerOid);
+                    modelAndView.addObject("storeOid", storeOid);
+                    modelAndView.addObject("dealerEmployeeOid", dealerEmployeeOid);
+                } else {
+                    modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
+                    logger.warn(logPrefix + "权限不足，openid：{}", openid);                  
+                }
+            }
+        }
+        logger.info(logPrefix + "结束");
+        return modelAndView;
     }
     
 }
