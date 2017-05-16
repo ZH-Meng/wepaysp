@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
 import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailResponse;
+import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 
 /***
  * 支付明细service
@@ -44,11 +45,19 @@ public interface PayDetailsService {
 
 
 	/**
-	 * 
+	 * 公众号收款列表分页查看（首页查询会返回总计）
 	 * @param paramMap
 	 * @param startIndex
 	 * @param maxResult
 	 * @return
 	 */
 	public Map<String, Object> doJoinTransAppIdQueryList(Map<String, Object> paramMap, int startIndex, int maxResult);
+
+	/**
+	 * 查看今日统计（只包含收款笔数和金额）
+	 * @param paramMap
+	 * @return
+	 */
+    public RptDealerStatVO doJoinTransQueryTodyStat(Map<String, Object> paramMap);
+    
 }

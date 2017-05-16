@@ -1,7 +1,9 @@
 package com.zbsp.wepaysp.mobile.controller.appid;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,7 @@ import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.result.ErrResult;
 import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.vo.report.AppidCollectionStatVO;
 
 /**
  * 公众号收款控制器
@@ -64,7 +67,7 @@ public class AppIDCollectionController extends BaseController {
             } else {
                 // 根据级别查询不同收款记录
                 if (SysUserUtil.isDealer(user) || SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {// 商户、商户员工有权查看
-                    modelAndView = new ModelAndView("appid/collectionList");
+                    modelAndView = new ModelAndView("appid/appidIndex");
 					if (SysUserUtil.isDealer(user)) {
 						// 查找商户门店
 						Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -72,8 +75,7 @@ public class AppIDCollectionController extends BaseController {
 						modelAndView.addObject("storeList", storeService.doJoinTransQueryStoreList(paramMap, 0, -1));
 					}
 					// 激活收款列表面板
-					modelAndView.addObject("title", "收款列表");
-					modelAndView.addObject("tabActive", "tab-collection-list");
+					modelAndView.addObject("function", "collection-list");
 					modelAndView.addObject("openid", openid);
 					modelAndView.addObject("dealerOid", dealerOid);
 					modelAndView.addObject("storeOid", storeOid);
@@ -106,7 +108,6 @@ public class AppIDCollectionController extends BaseController {
         logger.info(logPrefix + "参数openid：{}, dealerOid：{}, storeOid：{}, dealerEmployeeOid：{}", openid, dealerOid, storeOid, dealerEmployeeOid);
     	Map<String, Object> resultMap = new HashMap<String, Object>();
     	
-    	Map<String, Object> paramMap = new HashMap<String, Object>();
 		int startIndex = 0;
 		int maxResult = 0;
 		// 检查参数
@@ -126,23 +127,11 @@ public class AppIDCollectionController extends BaseController {
 			if (user == null) {
 				logger.warn(logPrefix + "此openid未关联商户或商户员工，openid：{}", openid);
 			} else {
+                Map<String, Object> paramMap = new HashMap<String, Object>();
 				maxResult = Integer.valueOf(pageSize);
 				startIndex = maxResult * (Integer.valueOf(pageIndex) - 1);
 
-				// 微信公众号查看收款列表-针对微信公众号支付
-				paramMap.put("payType", PayType.WEIXIN_JSAPI.getValue());
-				// 根据级别查询不同收款记录
-				if (StringUtils.isBlank(queryDate)) {
-					// 当天
-					Date today = new Date();
-					paramMap.put("beginTime", TimeUtil.getDayStart(today));
-					paramMap.put("endTime", TimeUtil.getDayEnd(today));
-				} else {
-					Date date = DateUtil.getDate(queryDate, "yyyy-MM-dd");
-					paramMap.put("beginTime", TimeUtil.getDayStart(date));
-					paramMap.put("endTime", TimeUtil.getDayEnd(date));
-				}
-
+				boolean flag = true;
 				if (SysUserUtil.isDealer(user)) {// 商户查看所有门店的数据
 					paramMap.put("dealerOid", user.getDealer().getIwoid());
 					paramMap.put("storeOid", queryStoreOid);
@@ -155,9 +144,25 @@ public class AppIDCollectionController extends BaseController {
 						paramMap.put("dealerEmployeeOid", dealerEmployeeOid);
 					}
 				} else {
+				    flag = false;
 					logger.warn(logPrefix + "权限不足，openid：{}", openid);
 				}
-				resultMap = payDetailsService.doJoinTransAppIdQueryList(paramMap, startIndex, maxResult);
+                if (flag) {
+                    // 微信公众号查看收款列表-针对微信公众号支付
+                    paramMap.put("payType", PayType.WEIXIN_JSAPI.getValue());
+                    // 根据级别查询不同收款记录
+                    if (StringUtils.isBlank(queryDate)) {
+                        // 当天
+                        Date today = new Date();
+                        paramMap.put("beginTime", TimeUtil.getDayStart(today));
+                        paramMap.put("endTime", TimeUtil.getDayEnd(today));
+                    } else {
+                        Date date = DateUtil.getDate(queryDate, "yyyy-MM-dd");
+                        paramMap.put("beginTime", TimeUtil.getDayStart(date));
+                        paramMap.put("endTime", TimeUtil.getDayEnd(date));
+                    }
+                    resultMap = payDetailsService.doJoinTransAppIdQueryList(paramMap, startIndex, maxResult);
+                }
 			}
         }
         return resultMap;
@@ -165,7 +170,7 @@ public class AppIDCollectionController extends BaseController {
     
     @RequestMapping(value = "stat")
     public ModelAndView stat(String openid, String dealerOid, String storeOid, String dealerEmployeeOid, String queryStoreOid) {
-        String logPrefix = "处理微信公众号收款汇总请求 - ";
+        String logPrefix = "处理微信公众号收款汇总页面请求 - ";
         logger.info(logPrefix + "开始");
         logger.info(logPrefix + "参数openid：{}, dealerOid：{}, storeOid：{}, dealerEmployeeOid：{}, queryStoreOid：{}", openid, dealerOid, storeOid, dealerEmployeeOid, queryStoreOid);
         ModelAndView modelAndView = null;
@@ -181,33 +186,71 @@ public class AppIDCollectionController extends BaseController {
                 logger.warn(logPrefix + "此openid未关联商户或商户员工，openid：{}", openid);
                 modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.OPENID_UNKOWN.getCode(), H5CommonResult.OPENID_UNKOWN.getDesc()));
             } else {
-                // 根据级别查询不同收款记录
+                modelAndView = new ModelAndView("appid/appidIndex");
+                
                 if (SysUserUtil.isDealer(user) || SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {// 商户、商户员工有权查看
-                    modelAndView = new ModelAndView("appid/collectionList");
+                    modelAndView = new ModelAndView("appid/appidIndex");
                     if (SysUserUtil.isDealer(user)) {
                         // 查找商户门店
                         Map<String, Object> paramMap = new HashMap<String, Object>();
                         paramMap.put("dealerOid", user.getDealer().getIwoid());
                         modelAndView.addObject("storeList", storeService.doJoinTransQueryStoreList(paramMap, 0, -1));
                     }
-                    
-                    // 查询统计
-                    
-                    // 激活收款汇总面板
-                    modelAndView.addObject("title", "收款汇总");
-                    modelAndView.addObject("tabActive", "tab-stat-list");
+                    // 激活收款列表面板
+                    modelAndView.addObject("function", "stat-list");
                     modelAndView.addObject("openid", openid);
                     modelAndView.addObject("dealerOid", dealerOid);
                     modelAndView.addObject("storeOid", storeOid);
                     modelAndView.addObject("dealerEmployeeOid", dealerEmployeeOid);
                 } else {
                     modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
-                    logger.warn(logPrefix + "权限不足，openid：{}", openid);                  
+                    logger.warn(logPrefix + "权限不足，openid：{}", openid);
                 }
             }
         }
         logger.info(logPrefix + "结束");
         return modelAndView;
+    }
+    
+    @RequestMapping(value = "statList")
+    @ResponseBody
+    public List<AppidCollectionStatVO> statList(String openid, String dealerOid, String storeOid, String dealerEmployeeOid, String queryStoreOid) {
+        String logPrefix = "处理微信公众号收款汇总列表请求 - ";
+        logger.info(logPrefix + "开始");
+        logger.info(logPrefix + "参数openid：{}, dealerOid：{}, storeOid：{}, dealerEmployeeOid：{}, queryStoreOid：{}", openid, dealerOid, storeOid, dealerEmployeeOid, queryStoreOid);
+        List<AppidCollectionStatVO> statList = new ArrayList<AppidCollectionStatVO>();
+
+        // 检查参数
+        if (StringUtils.isBlank(openid) || StringUtils.isBlank(dealerOid)) {
+            logger.warn(logPrefix + "openid或dealerOid为空");
+        } else {
+            // 根据openid 查找绑定商户、商户员工，并返回商户级别
+            SysUser user = payNoticeBindWeixinService.doJoinTransQueryBindUser(openid);
+            if (user == null) {
+                logger.warn(logPrefix + "此openid未关联商户或商户员工，openid：{}", openid);
+            } else {
+                // 根据级别查询不同收款记录
+                if (SysUserUtil.isDealer(user)) {// 商户查看所有门店的数据
+                    if (StringUtils.isNoneBlank(queryStoreOid)) {
+                        statList = rptDealerStatService.doJoinTransQueryStoreList(queryStoreOid, 0, 4);
+                    } else {
+                        statList = rptDealerStatService.doJoinTransQueryDealerList(user.getDealer().getIwoid(), 0, 4);
+                    }
+                } else if (SysUserUtil.isStoreManager(user)) {// 店长查看门店所有数据
+                    statList = rptDealerStatService.doJoinTransQueryStoreList(storeOid, 0, 4);
+                } else if (SysUserUtil.isDealerEmployee(user)) {// 店员
+                    if (StringUtils.isNotBlank(dealerEmployeeOid)) {// 一人一码
+                        statList = rptDealerStatService.doJoinTransQueryDealerEList(dealerEmployeeOid, 0, 4);
+                    } else {
+                        statList = rptDealerStatService.doJoinTransQueryStoreList(storeOid, 0, 4);
+                    }
+                } else {
+                    logger.warn(logPrefix + "权限不足，openid：{}", openid);
+                }
+            }
+        }
+        logger.info(logPrefix + "结束");
+        return statList;
     }
     
 }

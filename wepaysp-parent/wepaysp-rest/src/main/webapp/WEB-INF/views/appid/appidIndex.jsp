@@ -20,11 +20,11 @@
 <body ontouchstart>
 	<div class="weui-tab">
 		<div class="weui-tab__bd">
-			<div id="tab-collection-list" class="weui-tab__bd-item weui-tab__bd-item--active">
+			<div id="tab-collection-list" class="weui-tab__bd-item ">
 				<c:if test="${not empty storeList }">
 					<div class="weui-cell weui-cell_select">
 						<div class="weui-cell__bd">
-							<select class="weui-select" name="queryStoreOid" id="query-store">
+							<select class="weui-select" name="queryStoreOid" id="collection-query-store">
 								<option value="">全部门店</option>
 								<c:forEach items="${storeList}" var="store">
 									<option value="${store.iwoid }">${store.storeName }</option>
@@ -59,27 +59,58 @@
 				<div style="padding-top: 50px;"></div>
 			</div>
 			<div id="tab-stat-list" class="weui-tab__bd-item">
-				<h1>页面二</h1>
+				<c:if test="${not empty storeList }">
+					<div class="weui-cell weui-cell_select">
+						<div class="weui-cell__bd">
+							<select class="weui-select" name="queryStoreOid" id="stat-query-store">
+								<option value="">全部门店</option>
+								<c:forEach items="${storeList}" var="store">
+									<option value="${store.iwoid }">${store.storeName }</option>
+								</c:forEach>
+							</select>
+						</div>
+					</div>
+				</c:if>
+				<div class="weui-cells" id="stat-list">
+				<div id="stat-loading">
+					<div class="weui-loadmore">
+				        <i class="weui-loading"></i>
+				        <span class="weui-loadmore__tips">正在加载</span>
+				      </div>
+				</div>
+				<div id="stat-empty">
+					<div class="weui-loadmore weui-loadmore_line">
+				        <span class="weui-loadmore__tips">暂无数据</span>
+				    </div>
+				</div>
 			</div>
-			<div id="tab-more-list" class="weui-tab__bd-item">
-				<h1>页面三</h1>
+			<div id="tab-more" class="weui-tab__bd-item">
+				 <div class="weui-cell weui-cell_switch">
+			        <div class="weui-cell__bd">接收收款通知</div>
+			        <div class="weui-cell__ft">
+			          <label for="switchCP" class="weui-switch-cp">
+			            <input id="switchCP" class="weui-switch-cp__input" type="checkbox" checked="checked">
+			            <div class="weui-switch-cp__box"></div>
+			          </label>
+			        </div>
+			      </div>
 			</div>			
 		</div>
 
 		<div class="weui-tabbar">
-			<a href="#tab-collection-list" class="weui-tabbar__item weui-bar__item--on">
+			<a href="#tab-collection-list" class="weui-tabbar__item " id="bar-collection-list">
 				<div class="weui-tabbar__icon">
 					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_cell.png" alt="">
 				</div>
 				<p class="weui-tabbar__label">收款列表</p>
 			</a>
-			 <a href="#tab-stat-list" class="weui-tabbar__item">
+			 <a href="#tab-stat-list" class="weui-tabbar__item" id="bar-stat-list">
 				<div class="weui-tabbar__icon">
 					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_calendar.png" alt="">					
 				</div>
 				<p class="weui-tabbar__label">收款汇总</p>
 			</a> 
-			<a href="#tab3" class="weui-tabbar__item">
+			<a href="#tab3" class="weui-tabbar__item" id="bar-more">
 				<div class="weui-tabbar__icon">
 					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_actionSheet.png" alt="">
 				</div>
@@ -96,12 +127,64 @@
 	  var pageRow = 12;
 	  var loading = false;  //状态标记
 	  var queryDate = "${today}";
+	  var statFlag = true;
 	  $(function(){
 	    FastClick.attach(document.body);
-	    $(document.body).infinite();
+	    $("#tab-collection-list").infinite();
 	    $("#query-date").val(queryDate);
-	    initLoad();
-	    loadData(queryDate);
+	    
+	    var func = "${function}";
+	    $("#bar-"+func).addClass("weui-bar__item--on");
+		$("#tab-"+func).addClass("weui-tab__bd-item--active");
+	    if (func == "collection-list") {
+	    	activeCollection(true);
+	    } else if (func == "stat-list") {
+	    	activeStat(true);
+		} else if (func == "more") {
+	    	activeMore(true);
+	    }
+	  });
+	  
+	  function activeCollection(init) {
+		  $(document).attr("title","收款列表");
+		  if (init == true) {
+			initCollection();
+			loadCollectionData(queryDate);
+		  }
+	  }
+	  function activeStat(init) {
+		  $(document).attr("title","收款汇总");
+		  if (init == true || statFlag) {
+			initStatLoad();
+			loadStatData();
+		  }
+	  }
+	  function activeMore(init) {
+		  $(document).attr("title","更多");
+		  if (init == true) {
+		  }
+	  }
+	  
+	  function initStatLoad(){
+		  statFlag = true;
+		  $("#stat-list").html("");
+		  $("#stat-empty").hide();
+	  }
+	  
+	  $(".weui-tabbar__item").on("click",function(){
+		  var id =$(this).attr("id");
+		  if (id=="bar-collection-list") {
+			  activeCollection();
+		  } else if (id=="bar-stat-list") {
+			  activeStat();
+		  } else if (id=="bar-stat-list") {
+			  activeMore();
+		  }		  
+	  });
+	  
+	  $("#stat-query-store").on("change",function(){
+		initStatLoad();
+		loadStatData($("#stat-query-store").val());
 	  });
 	  
 	  $("#query-date").on("change",function(){
@@ -110,28 +193,28 @@
 			queryDate = "${today}";
 			$("#query-date").val(queryDate);
 		}
-	    initLoad();
-	    loadData(queryDate);
+	    initCollection();
+	    loadCollectionData(queryDate);
 	  });
 	  
-	  $("#query-store").on("change",function(){
-	    initLoad();
-	    loadData(queryDate, $("#query-store").val());
+	  $("#collection-query-store").on("change",function(){
+	    initCollection();
+	    loadCollectionData(queryDate, $("#collection-query-store").val());
 	  });
 	  
-	  function initLoad(){
+	  function initCollection(){
 		  curPage = 0;
 		  loading = false;
 		  $("#collection-list").html("");
 		  $("#collection-empty").hide();
 		  $("#total").html("");
-		  $(document.body).infinite().on("infinite", function() {
+		  $("#tab-collection-list").infinite().on("infinite", function() {
 		    if(loading) return;
-		    loadData(queryDate);
+		    loadCollectionData(queryDate, $("#collection-query-store").val());
 		  });
 	  }
 	  
-	  function loadData(date,storeOid){
+	  function loadCollectionData(date,storeOid){
 		  loading = true;
 		  $("#collection-loading").show();
 		  $.get("<%=request.getContextPath()%>/appid/collection/list/" + ++curPage, 
@@ -145,14 +228,14 @@
 				    	//$("#total-money").text("金额:"+data.total[0]);
 			    	}
 	   				if (curPage == 1 && dataSize == 0){
-	   					$(document.body).destroyInfinite();
+	   					$("#tab-collection-list").destroyInfinite();
 	   					$("#collection-empty").show();
 	   				} else {
 	   					if (dataSize < pageRow) {
-	   						$(document.body).destroyInfinite();
+	   						$("#tab-collection-list").destroyInfinite();
 		   				}
 	   					for(var i=0; i<data.payList.length; i++) {
-				    		addCell(data.payList[i]);
+				    		addCollectionCell(data.payList[i]);
 				    	}
 	   					loading = false;//加载成功
 	   				}
@@ -160,9 +243,33 @@
 		    },"json");
 	  }
 	  
-	  function addCell(item){
+	  function addCollectionCell(item){
 		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">index&nbsp;&nbsp;transTime</div><div class="weui-cell__ft collection-money">collectionMoney</div></div>';
 		  $("#collection-list").append(cell.replace("index", item.index).replace("transTime", item.transTime).replace("collectionMoney", item.collectionMoney));
+	  }
+	  
+	  function loadStatData(storeOid){
+		  $("#stat-loading").show();
+		  $.get("<%=request.getContextPath()%>/appid/collection/statList/", 
+		    		{ openid:"${openid}", dealerOid:"${dealerOid}", storeOid:"${storeOid}", dealerEmployeeOid:"${dealerEmployeeOid}", queryStoreOid:storeOid },
+		    function(data,status,xhr){
+	   			if (status == 'success'&& undefined != data) {
+			    	$("#stat-loading").hide();
+			    	statFlag = false;
+	   				if (data.length == 0){
+	   					$("#stat-empty").show();
+	   				} else {
+	   					for(var i=0; i<data.length; i++) {
+				    		addStatCell(data[i]);
+				    	}
+	   				}
+	   			}
+		    },"json");
+	  }
+	  
+	  function addStatCell(item){
+		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">statTime</div><div class="weui-cell__ft collection-money">总笔数:totalAmount&nbsp;&nbsp;总金额:totalMoney</div></div>';
+		  $("#stat-list").append(cell.replace("statTime", item.statTime).replace("totalAmount", item.totalAmount).replace("totalMoney", item.totalMoney));
 	  }
 	</script>
 </body>

@@ -24,6 +24,7 @@ import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Formatter;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.PayDetailData;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
@@ -31,6 +32,7 @@ import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailResponse;
 import com.zbsp.wepaysp.po.view.ViewPayDetailId;
 import com.zbsp.wepaysp.vo.pay.PayDetailVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 
 public class PayDetailsServiceImpl extends BaseService implements PayDetailsService {
 	
@@ -272,7 +274,42 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         return resultMap;
 	}
 
+    @Override
+    public RptDealerStatVO doJoinTransQueryTodyStat(Map<String, Object> paramMap) {
+        RptDealerStatVO statVO = new RptDealerStatVO();
+        String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String storeOid = MapUtils.getString(paramMap, "storeOid");
+        String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
+
+        String totalJpql = "select sum(case when w.id.tradeStatus=1 then w.id.totalFee else 0 end),count(w.id.totalFee) from ViewPayDetail w where 1=1 ";
+        StringBuffer sql = new StringBuffer("");
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
+        if (StringUtils.isNotBlank(dealerOid)) {
+            sql.append(" and w.id.dealerOid = :DEALEROID");
+            sqlMap.put("DEALEROID", dealerOid);
+        }
+        if (StringUtils.isNotBlank(storeOid)) {
+            sql.append(" and w.id.storeOid = :STOREOID");
+            sqlMap.put("STOREOID", storeOid);
+        }
+        if (StringUtils.isNotBlank(dealerEmployeeOid)) {
+            sql.append(" and w.id.dealerEmployeeOid = :DEALEREMPLOYEEOID");
+            sqlMap.put("DEALEREMPLOYEEOID", dealerEmployeeOid);
+        }
+        sql.append(" and w.id.transBeginTime >=:BEGINTIME ");
+        sqlMap.put("BEGINTIME", TimeUtil.getDayStart(new Date()));
+        sql.append(" and w.id.transBeginTime <=:ENDTIME ");
+        sqlMap.put("ENDTIME", TimeUtil.getDayEnd(new Date()));
+
+        Object totalObj = commonDAO.findObject(totalJpql + sql.toString(), sqlMap, false);
+        Object[] totalArr = (Object[]) totalObj;
+        statVO.setTotalAmount(totalArr[1] == null ? 0L : (Long) totalArr[1]);
+        statVO.setTotalMoney(totalArr[0] == null ? 0L : (Long) totalArr[0]);
+        return statVO;
+    }
+	
 	public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
 		this.weixinPayDetailsService = weixinPayDetailsService;
 	}
+
 }
