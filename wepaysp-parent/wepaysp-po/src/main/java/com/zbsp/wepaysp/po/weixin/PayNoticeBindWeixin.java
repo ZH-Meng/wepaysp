@@ -58,7 +58,8 @@ public class PayNoticeBindWeixin
     
     public static enum Type {
         /** 1绑定门店支付通知 */        store("1"),
-        /** 2绑定收银员支付通知 */     dealerEmployee("2");
+        /** 2绑定收银员支付通知 */     dealerEmployee("2"),
+        /** 3绑定商户 */                    dealer("3");
         private String value;
         
         public String getValue() {

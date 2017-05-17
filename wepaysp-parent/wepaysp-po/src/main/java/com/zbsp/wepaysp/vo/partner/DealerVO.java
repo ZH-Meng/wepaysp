@@ -37,9 +37,10 @@ public class DealerVO
     private String partnerEmployeeName;
 
     private String qrCodePath;
-    
+    private String bindQrCodePath;
+
     private String alipayAuthCodePath;
-    
+
     public String getIwoid() {
         return iwoid;
     }
@@ -219,17 +220,25 @@ public class DealerVO
     public String getQrCodePath() {
         return qrCodePath;
     }
-    
+
     public void setQrCodePath(String qrCodePath) {
         this.qrCodePath = qrCodePath;
     }
 
-	public String getAlipayAuthCodePath() {
-		return alipayAuthCodePath;
-	}
+    public String getAlipayAuthCodePath() {
+        return alipayAuthCodePath;
+    }
 
-	public void setAlipayAuthCodePath(String alipayAuthCodePath) {
-		this.alipayAuthCodePath = alipayAuthCodePath;
-	}
+    public void setAlipayAuthCodePath(String alipayAuthCodePath) {
+        this.alipayAuthCodePath = alipayAuthCodePath;
+    }
+
+    public String getBindQrCodePath() {
+        return bindQrCodePath;
+    }
+
+    public void setBindQrCodePath(String bindQrCodePath) {
+        this.bindQrCodePath = bindQrCodePath;
+    }
 
 }

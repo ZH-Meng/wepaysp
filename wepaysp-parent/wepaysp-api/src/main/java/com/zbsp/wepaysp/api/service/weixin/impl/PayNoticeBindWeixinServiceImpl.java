@@ -14,15 +14,18 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
+import com.zbsp.wepaysp.common.exception.BindNoUniqueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
+import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin.State;
 import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 public class PayNoticeBindWeixinServiceImpl
@@ -147,50 +150,76 @@ public class PayNoticeBindWeixinServiceImpl
         Validator.checkArgument(StringUtils.isBlank(bindType), "bindType不能为空！");
         Validator.checkArgument(userinfoResData == null, "userinfoResData不能为空！");
         Validator.checkArgument(StringUtils.isBlank(userinfoResData.getOpenid()), "userinfoResData.openid不能为空！");
-        Validator.checkArgument(!PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType) && 
-        		!PayNoticeBindWeixin.Type.store.getValue().equals(bindType), "参数type只能是1或者2！");
-        Validator.checkArgument(StringUtils.isBlank(toRelateOid), "支付通知绑定门店或收银员Oid不能为空！");
+        Validator.checkArgument(StringUtils.isBlank(toRelateOid), "支付通知绑定toRelateOid不能为空！");
         
         // 校验是否绑定过
-        String jpql = "from PayNoticeBindWeixin p where p.openid=:OPENID and p.type=:TYPE";
+        StringBuffer jpql = new StringBuffer("from PayNoticeBindWeixin p where p.openid=:OPENID ");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         jpqlMap.put("OPENID", userinfoResData.getOpenid());
-        jpqlMap.put("TYPE", bindType);
         
-        @SuppressWarnings("rawtypes")
-		List list = null;
+        List<?> bindList = null;
+        
         PayNoticeBindWeixin po = new PayNoticeBindWeixin();
         String logTemp = "";
-        if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
-        	jpql += " and p.payDealerEmployee.iwoid =:PAYDEALEREMPLOYEEOID";
-        	jpqlMap.put("PAYDEALEREMPLOYEEOID", toRelateOid);
-        	list = commonDAO.findObjectList(jpql, jpqlMap, false);
-        	if (list != null && list.size() > 0) {
-        		throw new AlreadyExistsException("已绑定过此收银员级支付通知，忽略绑定");
-        	}
-        	
-            // 绑定收银员
-            DealerEmployee de = commonDAO.findObject(DealerEmployee.class, toRelateOid);
-            if (de == null) {
-                throw new NotExistsException("微信支付通知绑定，收银员不存在，dealerEmployeeOid=" + toRelateOid);
+        if (PayNoticeBindWeixin.Type.dealer.getValue().equals(bindType)) {// 微信绑定商户
+            jpql.append(" and p.type=:TYPE");
+            jpqlMap.put("TYPE", bindType);
+            bindList = commonDAO.findObjectList(jpql.toString(), jpqlMap, false);
+            if (bindList != null && !bindList.isEmpty()) {// 只可能存在一个
+                PayNoticeBindWeixin bindwx = (PayNoticeBindWeixin) bindList.get(0);
+                if (toRelateOid.equals(bindwx.getBindDealer().getIwoid())) {
+                    throw new AlreadyExistsException("已绑定过此商户，忽略绑定");
+                } else {
+                    // 不能重复绑定
+                    throw new BindNoUniqueException("绑定失败，已绑定过其他商户");
+                }
             }
-            po.setPayDealerEmployee(de);
-            logTemp = "，关联收银员：" + toRelateOid;
-        } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType)) {
-        	jpql += " and p.store.iwoid =:STOREOID";
-        	jpqlMap.put("STOREOID", toRelateOid);
-        	list = commonDAO.findObjectList(jpql, jpqlMap, false);
-        	if (list != null && list.size() > 0) {
-        		throw new AlreadyExistsException("已绑定过此门店级支付通知，忽略绑定");
-        	}
-        	
-            // 绑定门店
-            Store store = commonDAO.findObject(Store.class, toRelateOid);
-            if (store == null) {
-                throw new NotExistsException("微信支付通知绑定，门店不存在，storeOid=" + toRelateOid);
+            
+            // 绑定商户
+            Dealer d = commonDAO.findObject(Dealer.class, toRelateOid);
+            if (d == null) {
+                throw new NotExistsException("微信绑定商户，收银员不存在，dealerEmployeeOid=" + toRelateOid);
             }
-            po.setStore(store);
-            logTemp = "，关联门店：" + toRelateOid;
+            po.setBindDealer(d);;
+            logTemp = "，关联商户：" + toRelateOid;
+        } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType) // 微信绑定绑定门店级支付码 
+            || PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {// 微信绑定绑定收银员级支付码
+            jpql.append(" and p.type in (:TYPE1,:TYPE2)");
+            jpqlMap.put("TYPE1", PayNoticeBindWeixin.Type.store.getValue());
+            jpqlMap.put("TYPE2", PayNoticeBindWeixin.Type.dealerEmployee.getValue());
+            
+            bindList = commonDAO.findObjectList(jpql.toString(), jpqlMap, false);
+            if (bindList != null && !bindList.isEmpty()) {// 只可能存在一个
+                PayNoticeBindWeixin bindwx = (PayNoticeBindWeixin) bindList.get(0);
+                if (PayNoticeBindWeixin.Type.store.getValue().equals(bindwx.getType()) && toRelateOid.equals(bindwx.getStore().getIwoid())) {
+                    throw new AlreadyExistsException("已绑定过此门店级支付通知，忽略绑定");
+                } else if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindwx.getType()) && toRelateOid.equals(bindwx.getPayDealerEmployee().getIwoid())) {
+                    throw new AlreadyExistsException("已绑定过此收银员级支付通知，忽略绑定");
+                } else {
+                    // 支付码（门店级、收银员级）只能绑定一个微信，不能重复绑定。但可以绑定商户
+                    throw new BindNoUniqueException("绑定失败，已绑定过其他支付码");
+                }
+            }
+            
+            if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
+                // 绑定收银员
+                DealerEmployee de = commonDAO.findObject(DealerEmployee.class, toRelateOid);
+                if (de == null) {
+                    throw new NotExistsException("微信支付通知绑定，收银员不存在，dealerEmployeeOid=" + toRelateOid);
+                }
+                po.setPayDealerEmployee(de);
+                logTemp = "，关联收银员：" + toRelateOid;
+            } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType)) {
+                // 绑定门店
+                Store store = commonDAO.findObject(Store.class, toRelateOid);
+                if (store == null) {
+                    throw new NotExistsException("微信支付通知绑定，门店不存在，storeOid=" + toRelateOid);
+                }
+                po.setStore(store);
+                logTemp = "，关联门店：" + toRelateOid;
+            }
+        } else {
+            throw new IllegalArgumentException("参数type只能是1、2、3");
         }
         
         po.setIwoid(Generator.generateIwoid());
@@ -212,6 +241,10 @@ public class PayNoticeBindWeixinServiceImpl
         BeanCopierUtil.copyProperties(po, vo);
         
         if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
+            vo.setDealerId(po.getBindDealer().getDealerId());
+            vo.setDealerName(po.getBindDealer().getCompany());
+            vo.setDealerOid(po.getBindDealer().getIwoid());
+        } else if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
             Store sto = po.getPayDealerEmployee().getStore();
             vo.setPayDealerEmployeeName(po.getPayDealerEmployee().getEmployeeName());
             vo.setPayDealerEmployeeId(po.getPayDealerEmployee().getDealerEmployeeId());
@@ -253,8 +286,47 @@ public class PayNoticeBindWeixinServiceImpl
         }
     }
     
+    @Override
+    public Map<String, Object> doJoinTransQueryBindInfo(String openid) {
+        Validator.checkArgument(StringUtils.isBlank(openid), "openid不能为空！");
+        String jpql = "from PayNoticeBindWeixin p where p.openid=:OPENID";
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        jpqlMap.put("OPENID", openid);
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        PayNoticeBindWeixin bindInfo = commonDAO.findObject(jpql, jpqlMap, false);
+        if (bindInfo != null) {
+            resultMap.put("bindwx", bindInfo);
+            jpqlMap.clear();
+            SysUser user = null;
+            if (bindInfo.getBindDealer() != null) {
+                jpql = "from SysUser u left Join fetch u.dealer where u.dealer=:DEALER";
+                jpqlMap.put("DEALER", bindInfo.getBindDealer() );
+                user = commonDAO.findObject(jpql, jpqlMap, false);
+            } else if (bindInfo.getBindDealerEmployee() != null) {
+                jpql = "from SysUser u left Join fetch u.dealerEmployee where u.dealerEmployee=:DEALEREMPLOYEE";
+                jpqlMap.put("DEALEREMPLOYEE", bindInfo.getBindDealerEmployee());
+                user = commonDAO.findObject(jpql, jpqlMap, false);
+            }
+            resultMap.put("user", user);
+        }
+        return resultMap;
+    }
+    
+    @Override
+    public void doTransUpdateBindWeixinState(String bindOid, State state) {
+        Validator.checkArgument(StringUtils.isBlank(bindOid), "bindOid不能为空！");
+        Validator.checkArgument(state == null, "state不能为空！");
+        PayNoticeBindWeixin bindwx = commonDAO.findObject(PayNoticeBindWeixin.class, bindOid);
+        if (bindwx == null) {
+            throw new NotExistsException("PayNoticeBindWeixin不存在，oid=" + bindOid);
+        }
+        bindwx.setState(state.getValue());
+        commonDAO.update(bindwx);
+    }
+    
 	public void setSysLogService(SysLogService sysLogService) {
 		this.sysLogService = sysLogService;
 	}
+
 
 }

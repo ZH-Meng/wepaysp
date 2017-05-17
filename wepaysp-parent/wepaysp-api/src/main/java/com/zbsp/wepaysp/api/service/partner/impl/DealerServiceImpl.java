@@ -477,6 +477,8 @@ public class DealerServiceImpl
         String qrCodePath = null;
         if (QRCodeType.PAY.getValue() == qRCodeType) {
         	qrCodePath = dealer.getQrCodePath();
+        } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+            qrCodePath = dealer.getBindQrCodePath();
         } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType || QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() == qRCodeType) {
         	qrCodePath = dealer.getAlipayAuthCodePath();
         } else {
@@ -518,6 +520,14 @@ public class DealerServiceImpl
                 //FIXME
                 appid = SysConfig.appId4Face2FacePay;
                 tempURL = SysConfig.alipayAuthCallBackURL;
+            } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+                Validator.checkArgument(StringUtils.isBlank(SysConfig.bindCallBackURL), "未配置微信支付通知绑定扫码回调地址无法生成二维码");
+                tempURL = SysConfig.bindCallBackURL;
+                Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(partnerOid);
+                if (partnerMap == null || partnerMap.isEmpty()) {
+                    throw new NotExistsException("服务商信息配置不存在，partnerOid=" + partnerOid);
+                }
+                appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);// 微信公众号ID
             }
             qrURL = Generator.generateQRURL(qRCodeType, appid, tempURL, urlParamMap);
             
@@ -543,6 +553,8 @@ public class DealerServiceImpl
             String pathTemp = filePath.getPath() + File.separator + fileName + ".png";
             if (QRCodeType.PAY.getValue() == qRCodeType) {
             	dealer.setQrCodePath(pathTemp);
+            } else if (QRCodeType.BIND_PAY_NOTICE.getValue() == qRCodeType) {
+                dealer.setBindQrCodePath(pathTemp);
             } else if (QRCodeType.ALIPAY_APP_AUTH.getValue() == qRCodeType || QRCodeType.ALIPAY_APP_AUTH_DEV.getValue() == qRCodeType) {
             	dealer.setAlipayAuthCodePath(pathTemp);
             }
@@ -555,6 +567,17 @@ public class DealerServiceImpl
         BeanCopierUtil.copyProperties(dealer, dealerVO);
         return dealerVO;
     }
+    
+    @Override
+    public String doJoinTransGetTopPartnerOid(String dealerOid) {
+        Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid不能为空！");
+        String topPartnerOid = null;
+        Dealer d = commonDAO.findObject(Dealer.class, dealerOid);
+        if (d != null) {
+            topPartnerOid = d.getPartner1Oid();
+        }
+        return topPartnerOid;
+    }    
 
     public void setSysConfigService(SysConfigService sysConfigService) {
         this.sysConfigService = sysConfigService;

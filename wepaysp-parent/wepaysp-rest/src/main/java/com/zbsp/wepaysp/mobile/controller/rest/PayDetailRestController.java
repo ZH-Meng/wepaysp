@@ -38,7 +38,7 @@ import com.zbsp.wepaysp.mobile.controller.BaseController;
 public class PayDetailRestController extends BaseController {
     
     /*** 分页查询每页默认行数 */
-    private final static int PAGE_SIZE = 10;
+    private final static int PAGE_SIZE = 7;
 
     @Autowired
     private PayDetailsService payDetailsService;
@@ -78,10 +78,9 @@ public class PayDetailRestController extends BaseController {
                     paramMap.put("tradeStatus", request.getTradeStatus());
                     paramMap.put("totalFlag", true);
                 } else {
-                    // 当天
-                    Date today = new Date();
-                    paramMap.put("beginTime", TimeUtil.getDayStart(today));
-                    paramMap.put("endTime", TimeUtil.getDayEnd(today));
+                    // 当天+昨天
+                    paramMap.put("beginTime", TimeUtil.getBeforeDayStart());
+                    paramMap.put("endTime", TimeUtil.getDayEnd(new Date()));
                     paramMap.put("totalFlag", false);
                 }
 

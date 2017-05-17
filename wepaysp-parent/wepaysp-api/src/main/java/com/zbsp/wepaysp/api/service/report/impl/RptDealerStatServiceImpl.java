@@ -979,9 +979,8 @@ public class RptDealerStatServiceImpl
 
     @Override
     public List<AppidCollectionStatVO> doJoinTransQueryDealerEList(String dealerEmployeeOid, int startIndex, int maxResult) {
-        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerOid不能为空");
-        List<AppidCollectionStatVO> resultList = new ArrayList<AppidCollectionStatVO>();
-        StringBuffer sql = new StringBuffer("select r.startTime, r.totalAmount, r.totalMoney  from RptDealerStatDay r where 1=1 ");
+        Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "dealerEmployeeOid不能为空");
+        StringBuffer sql = new StringBuffer("select r.startTime, r.payAmount, r.totalMoney  from RptDealerStatDay r where 1=1 ");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         
         sql.append(" and r.dealerEmployeeOid = :DEALEREMPLOYEEOID");
@@ -989,14 +988,7 @@ public class RptDealerStatServiceImpl
 
         sql.append(" order by r.startTime desc");
         List<?> statList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
-        for (Object statObj : statList) {
-            Object[] statlArr = (Object[]) statObj;
-            AppidCollectionStatVO vo = new AppidCollectionStatVO();
-            vo.setTotalAmount(statlArr[1] == null ? "0" : statlArr[1].toString());
-            vo.setTotalMoney("￥"+Formatter.formatNumber("#0.00", new BigDecimal((Long)statlArr[2]).divide(new BigDecimal(100)).doubleValue()));
-            vo.setStatTime(DateUtil.getDate(new Date(((Timestamp) statlArr[0]).getTime()), "yyyy-MM-dd"));
-            resultList.add(vo);
-        }
+        List<AppidCollectionStatVO> resultList  = makeStatVOList(statList);
 
         // 统计当日
         sql = new StringBuffer("select sum(case when w.id.tradeStatus=1 then w.id.totalFee else 0 end),count(w.id.totalFee) from ViewPayDetail w where 1=1 ");
@@ -1010,6 +1002,9 @@ public class RptDealerStatServiceImpl
         if (totalObj != null) {
             AppidCollectionStatVO vo = new AppidCollectionStatVO();
             Object[] totalArr = (Object[]) totalObj;
+            if (totalArr[0] == null) {
+                totalArr[0] = 0L;
+            }
             vo.setTotalMoney("￥" + Formatter.formatNumber("#0.00", new BigDecimal((Long) totalArr[0]).divide(new BigDecimal(100)).doubleValue()));
             vo.setTotalAmount(totalArr[1] == null ? "0" : totalArr[1].toString());
             vo.setStatTime(DateUtil.getDate(new Date(), "yyyy-MM-dd"));
@@ -1020,9 +1015,8 @@ public class RptDealerStatServiceImpl
     
     @Override
     public List<AppidCollectionStatVO> doJoinTransQueryStoreList(String storeOid, int startIndex, int maxResult) {
-        Validator.checkArgument(StringUtils.isBlank(storeOid), "dealerOid不能为空");
-        List<AppidCollectionStatVO> resultList = new ArrayList<AppidCollectionStatVO>();
-        StringBuffer sql = new StringBuffer("select r.startTime, sum(r.totalAmount), sum(r.totalMoney)  from RptDealerStatDay r where 1=1 ");
+        Validator.checkArgument(StringUtils.isBlank(storeOid), "storeOid不能为空");
+        StringBuffer sql = new StringBuffer("select r.startTime, sum(r.payAmount), sum(r.totalMoney)  from RptDealerStatDay r where 1=1 ");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         
         sql.append(" and r.storeOid = :STOREOID");
@@ -1031,14 +1025,7 @@ public class RptDealerStatServiceImpl
         sql.append(" group by r.startTime, r.dealerOid, r.storeOid");
         sql.append(" order by r.startTime desc");
         List<?> statList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
-        for (Object statObj : statList) {
-            Object[] statlArr = (Object[]) statObj;
-            AppidCollectionStatVO vo = new AppidCollectionStatVO();
-            vo.setTotalAmount(statlArr[1] == null ? "0" : statlArr[1].toString());
-            vo.setTotalMoney("￥"+Formatter.formatNumber("#0.00", new BigDecimal((Long)statlArr[2]).divide(new BigDecimal(100)).doubleValue()));
-            vo.setStatTime(DateUtil.getDate(new Date(((Timestamp) statlArr[0]).getTime()), "yyyy-MM-dd"));
-            resultList.add(vo);
-        }
+        List<AppidCollectionStatVO> resultList  = makeStatVOList(statList);
         
         // 统计当日
         sql = new StringBuffer("select sum(case when w.id.tradeStatus=1 then w.id.totalFee else 0 end),count(w.id.totalFee) from ViewPayDetail w where 1=1 ");
@@ -1052,6 +1039,9 @@ public class RptDealerStatServiceImpl
         if (totalObj != null) {
             AppidCollectionStatVO vo = new AppidCollectionStatVO();
             Object[] totalArr = (Object[]) totalObj;
+            if (totalArr[0] == null) {
+                totalArr[0] = 0L;
+            }
             vo.setTotalMoney("￥" + Formatter.formatNumber("#0.00", new BigDecimal((Long) totalArr[0]).divide(new BigDecimal(100)).doubleValue()));
             vo.setTotalAmount(totalArr[1] == null ? "0" : totalArr[1].toString());
             vo.setStatTime(DateUtil.getDate(new Date(), "yyyy-MM-dd"));
@@ -1064,8 +1054,7 @@ public class RptDealerStatServiceImpl
     @Override
     public List<AppidCollectionStatVO> doJoinTransQueryDealerList(String dealerOid, int startIndex, int maxResult) {
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid不能为空");
-        List<AppidCollectionStatVO> resultList = new ArrayList<AppidCollectionStatVO>();
-        StringBuffer sql = new StringBuffer("select r.startTime, sum(r.totalAmount), sum(r.totalMoney)  from RptDealerStatDay r where 1=1 ");
+        StringBuffer sql = new StringBuffer("select r.startTime, sum(r.payAmount), sum(r.totalMoney)  from RptDealerStatDay r where 1=1 ");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         
         sql.append(" and r.dealerOid = :DEALEROID");
@@ -1074,14 +1063,7 @@ public class RptDealerStatServiceImpl
         sql.append(" group by r.startTime, r.dealerOid");
         sql.append(" order by r.startTime desc");
         List<?> statList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
-        for (Object statObj : statList) {
-            Object[] statlArr = (Object[]) statObj;
-            AppidCollectionStatVO vo = new AppidCollectionStatVO();
-            vo.setTotalAmount(statlArr[1] == null ? "0" : statlArr[1].toString());
-            vo.setTotalMoney("￥"+Formatter.formatNumber("#0.00", new BigDecimal((Long)statlArr[2]).divide(new BigDecimal(100)).doubleValue()));
-            vo.setStatTime(DateUtil.getDate(new Date(((Timestamp) statlArr[0]).getTime()), "yyyy-MM-dd"));
-            resultList.add(vo);
-        }
+        List<AppidCollectionStatVO> resultList  = makeStatVOList(statList);
         
         // 统计当日
         sql = new StringBuffer("select sum(case when w.id.tradeStatus=1 then w.id.totalFee else 0 end),count(w.id.totalFee) from ViewPayDetail w where 1=1 ");
@@ -1095,10 +1077,29 @@ public class RptDealerStatServiceImpl
         if (totalObj != null) {
             AppidCollectionStatVO vo = new AppidCollectionStatVO();
             Object[] totalArr = (Object[]) totalObj;
+            if (totalArr[0] == null) {
+                totalArr[0] = 0L;
+            }
             vo.setTotalMoney("￥" + Formatter.formatNumber("#0.00", new BigDecimal((Long) totalArr[0]).divide(new BigDecimal(100)).doubleValue()));
             vo.setTotalAmount(totalArr[1] == null ? "0" : totalArr[1].toString());
             vo.setStatTime(DateUtil.getDate(new Date(), "yyyy-MM-dd"));
             resultList.add(0, vo);
+        }
+        return resultList;
+    }
+    
+    private List<AppidCollectionStatVO> makeStatVOList(List<?> statList) {
+        List<AppidCollectionStatVO> resultList = new ArrayList<AppidCollectionStatVO>();
+        for (Object statObj : statList) {
+            Object[] statlArr = (Object[]) statObj;
+            if (statlArr[2] == null) {
+                statlArr[2] = 0L;
+            }
+            AppidCollectionStatVO vo = new AppidCollectionStatVO();
+            vo.setTotalAmount(statlArr[1] == null ? "0" : statlArr[1].toString());
+            vo.setTotalMoney("￥" + Formatter.formatNumber("#0.00", new BigDecimal((Long) statlArr[2]).divide(new BigDecimal(100)).doubleValue()));
+            vo.setStatTime(statlArr[0] == null ? "" : DateUtil.getDate(new Date(((Timestamp) statlArr[0]).getTime()), "yyyy-MM-dd"));
+            resultList.add(vo);
         }
         return resultList;
     }

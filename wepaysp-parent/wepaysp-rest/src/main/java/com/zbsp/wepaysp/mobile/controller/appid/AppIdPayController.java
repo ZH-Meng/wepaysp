@@ -55,7 +55,7 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
  */
 @Controller
 @RequestMapping("/appid/pay/")
-public class AppIDPayController extends BaseController {
+public class AppIdPayController extends BaseController {
     
     @Autowired
     private DealerService dealerService;

@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.QRCodeType;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -433,6 +435,74 @@ public class DealerAction
             qrCodeName = new String(fileNameTemp.getBytes("GBK"), "ISO8859-1");*/
             qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
             logger.info("下载商户级别支付二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
+    /**
+     * 加载绑定微信收款汇总通知二维码
+     * @return
+     */
+    public String loadBindQRCode() {
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (StringUtils.isNotBlank(dealerOid)) {
+                // 加载绑定二维码
+                dealerVO = dealerService.doTransGetQRCode(QRCodeType.BIND_PAY_NOTICE.getValue(), dealerOid, manageUser.getUserId(), manageUser.getIwoid(), (String) session.get("currentLogFunctionOid"));
+            } 
+        } catch (Exception e) {
+            logger.error("加载绑定二维码错误：" + e.getMessage());
+        }
+        return "getBindQRCodeImg";
+    }
+    
+    /**
+     * 返回绑定微信收款汇总通知二维码图片流
+     * @return
+     */
+    public InputStream getBindQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            File qrFile = new File(dealerVO.getBindQrCodePath());
+            inputStream = new FileInputStream(qrFile);
+            qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+            logger.info("加载商户级别绑定收款汇总通知二维码图片成功.");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return inputStream;
+    }
+    
+    public String loadAppidQRCode() {
+        return "getAppidQRCodeImg";
+    }
+    
+    /**
+     * 返回绑定微信公众号二维码图片流
+     * @return
+     */
+    public InputStream getAppidQRCodeImg() {
+        InputStream inputStream = null;
+        try {
+            if (StringUtils.isNotBlank(dealerOid)) {
+                String partner1Oid = dealerService.doJoinTransGetTopPartnerOid(dealerOid);
+                if (StringUtils.isNotBlank(partner1Oid)) {
+                    Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid);
+                    if (partnerMap != null && !partnerMap.isEmpty()) {
+                        String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
+                        File qrFile = new File(SysConfig.appidQrCodePath + File.separator + appid + ".png");
+                        inputStream = new FileInputStream(qrFile);
+                        qrCodeName=URLEncoder.encode(qrFile.getName(),"utf-8");
+                        logger.info("加载公众号（" + appid + "）二维码图片成功.");
+                    }
+                }
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {

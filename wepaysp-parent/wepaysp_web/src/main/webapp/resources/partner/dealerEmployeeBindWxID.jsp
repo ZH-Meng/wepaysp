@@ -23,18 +23,18 @@
 			</ul>
 			<div class="qrCode_wrapper">
 				<div class="qrCode_block">
-					<img src="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!loadBindQRCode.action?dealerEmployeeOid=${dealerEmployeeOid}" alt="支付通知二维码" width="200" height="200"/>
-					<span class="qrCode_title">绑定支付通知二维码</span>
-				</div>
-				<div class="qrCode_block">
 					<img src="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!loadAppidQRCode.action?dealerEmployeeOid=${dealerEmployeeOid}" alt="公众号二维码" width="200" height="200"/>
 					<span class="qrCode_title">公众号二维码</span>
 				</div>
+				<div class="qrCode_block">
+					<img src="<%=request.getContextPath()%>/resources/partner/dealeremployeemanage!loadBindQRCode.action?dealerEmployeeOid=${dealerEmployeeOid}" alt="支付通知二维码" width="200" height="200"/>
+					<span class="qrCode_title">绑定支付通知二维码</span>
+				</div>
 				<div class="qrCode_remark_block">
 					说明：
-					<p>1、商家可设置最多5名店员；</p>
+					<p>1、一张支付码最多绑定5名收银员；</p>
 					<p>2、顾客付款后，店员可收到支付通知，用于交易确认；</p>
-					<p>3、店员在关注公众号后，通过微信扫描“绑定支付通知二维码”，可在移动端查看收款列表和收款汇总；</p>
+					<p>3、店员在关注公众号后，通过微信扫描“绑定支付通知二维码”绑定，绑定后可在微信查看收款列表和收款汇总；</p>
 				</div>
 			</div>
 		</div>

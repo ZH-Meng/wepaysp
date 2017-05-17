@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib uri="http://java.sun.com/jstl/fmt_rt" prefix="fmt"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,21 +42,20 @@
 					<label for="" class="weui-label" id="total-money"></label>
 					 -->
 				</div>
-				<div class="weui-cells" id="collection-list">
-				</div>
+				<div class="weui-cells" id="collection-list"></div>
 				<div id="collection-loading">
 					<div class="weui-loadmore">
-				        <i class="weui-loading"></i>
-				        <span class="weui-loadmore__tips">正在加载</span>
-				      </div>
+						<i class="weui-loading"></i> <span class="weui-loadmore__tips">正在加载</span>
+					</div>
 				</div>
 				<div id="collection-empty">
 					<div class="weui-loadmore weui-loadmore_line">
-				        <span class="weui-loadmore__tips">暂无数据</span>
-				    </div>
+						<span class="weui-loadmore__tips">暂无数据</span>
+					</div>
 				</div>
 				<div style="padding-top: 50px;"></div>
 			</div>
+
 			<div id="tab-stat-list" class="weui-tab__bd-item">
 				<c:if test="${not empty storeList }">
 					<div class="weui-cell weui-cell_select">
@@ -71,30 +69,21 @@
 						</div>
 					</div>
 				</c:if>
-				<div class="weui-cells" id="stat-list">
+				<div class="weui-cells" id="stat-list"></div>
 				<div id="stat-loading">
 					<div class="weui-loadmore">
-				        <i class="weui-loading"></i>
-				        <span class="weui-loadmore__tips">正在加载</span>
-				      </div>
+						<i class="weui-loading"></i> <span class="weui-loadmore__tips">正在加载</span>
+					</div>
 				</div>
 				<div id="stat-empty">
 					<div class="weui-loadmore weui-loadmore_line">
-				        <span class="weui-loadmore__tips">暂无数据</span>
-				    </div>
+						<span class="weui-loadmore__tips">暂无数据</span>
+					</div>
 				</div>
 			</div>
 			<div id="tab-more" class="weui-tab__bd-item">
-				 <div class="weui-cell weui-cell_switch">
-			        <div class="weui-cell__bd">接收收款通知</div>
-			        <div class="weui-cell__ft">
-			          <label for="switchCP" class="weui-switch-cp">
-			            <input id="switchCP" class="weui-switch-cp__input" type="checkbox" checked="checked">
-			            <div class="weui-switch-cp__box"></div>
-			          </label>
-			        </div>
-			      </div>
-			</div>			
+				
+			</div>
 		</div>
 
 		<div class="weui-tabbar">
@@ -110,13 +99,14 @@
 				</div>
 				<p class="weui-tabbar__label">收款汇总</p>
 			</a> 
-			<a href="#tab3" class="weui-tabbar__item" id="bar-more">
+			<a href="#tab-more" class="weui-tabbar__item" id="bar-more">
 				<div class="weui-tabbar__icon">
 					<img src="<%=request.getContextPath()%>/resources/images/icon_nav_actionSheet.png" alt="">
 				</div>
 				<p class="weui-tabbar__label">更多</p>
-			</a> 
+			</a>
 		</div>
+		
 	</div>
 
 	<script src="<%=request.getContextPath()%>/resources/js/jquery-2.1.4.js"></script>
@@ -127,7 +117,9 @@
 	  var pageRow = 12;
 	  var loading = false;  //状态标记
 	  var queryDate = "${today}";
-	  var statFlag = true;
+	  var initStatFlag = true;
+	  var initCollectionFlag = true;
+	  var initMoreFlag = true;
 	  $(function(){
 	    FastClick.attach(document.body);
 	    $("#tab-collection-list").infinite();
@@ -137,36 +129,40 @@
 	    $("#bar-"+func).addClass("weui-bar__item--on");
 		$("#tab-"+func).addClass("weui-tab__bd-item--active");
 	    if (func == "collection-list") {
-	    	activeCollection(true);
+	    	activeCollection(initCollectionFlag);
 	    } else if (func == "stat-list") {
-	    	activeStat(true);
+	    	activeStat(initStatFlag);
 		} else if (func == "more") {
-	    	activeMore(true);
+	    	activeMore(initMoreFlag);
 	    }
 	  });
 	  
 	  function activeCollection(init) {
 		  $(document).attr("title","收款列表");
-		  if (init == true) {
+		  if (init) {
 			initCollection();
 			loadCollectionData(queryDate);
 		  }
 	  }
 	  function activeStat(init) {
 		  $(document).attr("title","收款汇总");
-		  if (init == true || statFlag) {
+		  if (init) {
 			initStatLoad();
 			loadStatData();
 		  }
 	  }
 	  function activeMore(init) {
-		  $(document).attr("title","更多");
-		  if (init == true) {
+		  $(document).attr("title","更多功能");
+		  if (init) {
+			  $("#tab-more").load("<%=request.getContextPath()%>/appid/more/index",{openid:"${openid}"},function(response,status,xhr){
+		   			if (status == 'success') {
+		   				initMoreFlag = false;
+		   			}
+			  });
 		  }
 	  }
 	  
 	  function initStatLoad(){
-		  statFlag = true;
 		  $("#stat-list").html("");
 		  $("#stat-empty").hide();
 	  }
@@ -174,11 +170,11 @@
 	  $(".weui-tabbar__item").on("click",function(){
 		  var id =$(this).attr("id");
 		  if (id=="bar-collection-list") {
-			  activeCollection();
+			  activeCollection(initCollectionFlag);
 		  } else if (id=="bar-stat-list") {
-			  activeStat();
-		  } else if (id=="bar-stat-list") {
-			  activeMore();
+			  activeStat(initStatFlag);
+		  } else if (id=="bar-more") {
+			  activeMore(initMoreFlag);
 		  }		  
 	  });
 	  
@@ -224,6 +220,7 @@
 	   				var dataSize = data.payList.length;
 			    	$("#collection-loading").hide();
 			    	if (curPage == 1){
+			    		initCollectionFlag = false;
 				    	$("#total").text("笔数:"+data.total[1]+"，金额:"+data.total[0]);
 				    	//$("#total-money").text("金额:"+data.total[0]);
 			    	}
@@ -244,7 +241,7 @@
 	  }
 	  
 	  function addCollectionCell(item){
-		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">index&nbsp;&nbsp;transTime</div><div class="weui-cell__ft collection-money">collectionMoney</div></div>';
+		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">index.&nbsp;&nbsp;transTime</div><div class="weui-cell__ft collection-money">collectionMoney</div></div>';
 		  $("#collection-list").append(cell.replace("index", item.index).replace("transTime", item.transTime).replace("collectionMoney", item.collectionMoney));
 	  }
 	  
@@ -255,7 +252,7 @@
 		    function(data,status,xhr){
 	   			if (status == 'success'&& undefined != data) {
 			    	$("#stat-loading").hide();
-			    	statFlag = false;
+			    	initStatFlag = false;
 	   				if (data.length == 0){
 	   					$("#stat-empty").show();
 	   				} else {
@@ -268,7 +265,7 @@
 	  }
 	  
 	  function addStatCell(item){
-		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">statTime</div><div class="weui-cell__ft collection-money">总笔数:totalAmount&nbsp;&nbsp;总金额:totalMoney</div></div>';
+		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">statTime</div><div class="weui-cell__ft collection-money">总笔数:totalAmount&nbsp;总金额:totalMoney</div></div>';
 		  $("#stat-list").append(cell.replace("statTime", item.statTime).replace("totalAmount", item.totalAmount).replace("totalMoney", item.totalMoney));
 	  }
 	</script>

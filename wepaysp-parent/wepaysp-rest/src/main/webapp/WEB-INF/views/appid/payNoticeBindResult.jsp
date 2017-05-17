@@ -63,6 +63,17 @@
 					<p class="info2">${bindResult.desc }</p>
 				</div>
 			</c:when> 
+			<c:when test="${bindResult.result == 'bindNoUnique' }">
+				<p class="error-title">
+					 <i class="weui_icon_warn"></i>已绑定
+				</p>		
+				<div class="succ-info">
+					<div class="error-bottom">
+						<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
+					</div>			
+					<p class="info2">${bindResult.desc }</p>
+				</div>
+			</c:when>
 			<c:otherwise>
 				<p class="error-title">
 					 <i class="weui_icon_warn"></i>绑定失败

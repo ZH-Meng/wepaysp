@@ -10,6 +10,10 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<style>
 		.bg_tjall th {width: 45%;}
+		.qrCode_wrapper{min-height:220px;text-align:center;}
+		.qrCode_block{float:left; padding:5px 0px;width:30%;}
+		.qrCode_remark_block{text-align:left;padding-top:10px;line-height: 30px;color:#999999;}
+		.qrCode_title{display:block;font-weight:bold;}
 	</style>
 </head>
 <body class="bgbj">
@@ -43,9 +47,27 @@
 	                </li>
 	                <li class="bg_button">
 	                    <a href="javascript:void(0);" onclick="updateDealerBase();return false;">保存</a>
+	                    <a href="javascript:void(0);" id="bind-wx-btn">绑定微信</a>
 	                </li>
 	            </ul>
 	        </form>
+	        <div id="bind-wx" style="display: none;">
+		        <div class="qrCode_wrapper">
+					<div class="qrCode_block">
+						<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadAppidQRCode.action?dealerOid=${dealerVO.iwoid}" alt="公众号二维码" width="200" height="200"/>
+						<span class="qrCode_title">公众号二维码</span>
+					</div>
+					<div class="qrCode_block">
+						<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadBindQRCode.action?dealerOid=${dealerVO.iwoid}" alt="收款汇总通知二维码" width="200" height="200"/>
+						<span class="qrCode_title">商户二维码</span>
+					</div>
+					<div class="qrCode_remark_block">
+						说明：
+						<p>1、商户在关注公众号后，通过微信扫描“绑定商户二维码”绑定商户</p>
+						<p>2、绑定成功后，可在微信查看收款列表和收款汇总信息</p>
+					</div>
+				</div>
+			</div>
 	        <s:form method="post">
 				<div style="display: none;">
 					<s:include value="/resources/include/page.jsp"/>
@@ -95,6 +117,12 @@
 			$("#dealerForm").submit();
 		}
 		
+
+		$("#bind-wx-btn").toggle(function() {
+			$("#bind-wx").show();
+		}, function() {
+			$("#bind-wx").hide();
+		});
 	</script>	
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 </body>

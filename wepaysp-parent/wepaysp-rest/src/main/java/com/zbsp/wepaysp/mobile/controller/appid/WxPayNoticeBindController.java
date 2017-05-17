@@ -18,11 +18,13 @@ import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoReqData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
+import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
+import com.zbsp.wepaysp.common.exception.BindNoUniqueException;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
@@ -33,6 +35,7 @@ import com.zbsp.wepaysp.mobile.model.result.PayNoticeBindResult;
 import com.zbsp.wepaysp.mobile.model.vo.WxCallBackVO;
 import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.vo.partner.DealerEmployeeVO;
+import com.zbsp.wepaysp.vo.partner.DealerVO;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
 import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
@@ -48,7 +51,8 @@ public class WxPayNoticeBindController extends BaseController {
     
     @Autowired
     private StoreService storeService;
-    
+    @Autowired
+    private DealerService dealerService;
     @Autowired
     private DealerEmployeeService dealerEmployeeService;
     
@@ -154,7 +158,12 @@ public class WxPayNoticeBindController extends BaseController {
         logger.info(logPrefix + "微信支付通知绑定，微信账户绑定门店/收银员信息 - 开始");
         PayNoticeBindResult bindResult = null;
         try {
-            String toRelateOid = PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType) ? callBackVO.getDealerEmployeeOid() : callBackVO.getStoreOid();
+            String toRelateOid = "";
+            if (PayNoticeBindWeixin.Type.dealer.getValue().equals(bindType)) {// 绑定商户
+                toRelateOid = callBackVO.getDealerOid();
+            } else {
+                toRelateOid = PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType) ? callBackVO.getDealerEmployeeOid() : callBackVO.getStoreOid();
+            }
             PayNoticeBindWeixinVO payNoticeBindWeixinVO = payNoticeBindWeixinService.doTransAddPayNoticeBindWeixin(bindType, toRelateOid, userinfoResult);
             bindResult = new PayNoticeBindResult("success", "绑定成功");//FIXME
 
@@ -164,6 +173,9 @@ public class WxPayNoticeBindController extends BaseController {
             model.put("payNoticeBindWeixinVO", payNoticeBindWeixinVO);
             modelAndView = new ModelAndView("appid/payNoticeBindResult", model);
             logger.info(logPrefix + "微信支付通知绑定，微信账户绑定门店/收银员信息 - 成功");
+        } catch (BindNoUniqueException e) {
+            logger.warn(logPrefix + "微信绑定，微信账户支付码（门店/收银员）/商户信息 - {}", e.getMessage());
+            bindResult = new PayNoticeBindResult("bindNoUnique", e.getMessage());
         } catch (AlreadyExistsException e) {
             logger.warn(logPrefix + "微信支付通知绑定，微信账户绑定门店/收银员信息 - {}", e.getMessage());
             bindResult = new PayNoticeBindResult("bound", "已绑定过并且当前有效");//FIXME
@@ -217,6 +229,15 @@ public class WxPayNoticeBindController extends BaseController {
                 if (storeVO == null) {
                     logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, storeOid：{}", "访问的门店不存在", callBack.getStoreOid());
                     checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()+"(store)"));
+                } else {
+                    result = true;
+                }
+            } else if (StringUtils.isNotBlank(callBack.getDealerOid())) {
+                checkResutMap.put("bindType", PayNoticeBindWeixin.Type.dealer.getValue());
+                DealerVO dealerVO = dealerService.doJoinTransQueryDealerByOid(callBack.getStoreOid());
+                if (dealerVO == null) {
+                    logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, dealerOid：{}", "访问的商户不存在", callBack.getDealerOid());
+                    checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()+"(dealer)"));
                 } else {
                     result = true;
                 }
