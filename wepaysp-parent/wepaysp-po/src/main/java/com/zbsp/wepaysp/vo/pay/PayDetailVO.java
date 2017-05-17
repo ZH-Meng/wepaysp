@@ -6,9 +6,9 @@ package com.zbsp.wepaysp.vo.pay;
  * @author mengzh
  */
 public class PayDetailVO {
-    
-    private int index;
-    
+
+	private int index;
+	private String payType;
 	private String outTradeNo;
 	/** 实收金额，格式化金额：元 */
 	private String collectionMoney;
@@ -46,13 +46,21 @@ public class PayDetailVO {
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
 	}
-    
-    public int getIndex() {
-        return index;
-    }
-    
-    public void setIndex(int index) {
-        this.index = index;
-    }
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public String getPayType() {
+		return payType;
+	}
+
+	public void setPayType(String payType) {
+		this.payType = payType;
+	}
 
 }

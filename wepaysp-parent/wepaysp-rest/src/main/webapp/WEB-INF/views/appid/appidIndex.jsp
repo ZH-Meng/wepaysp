@@ -14,6 +14,13 @@
 	}
 	.collection-money{color: #7D9EC0}
 	.collection-time{color: #838B8B}
+	.cell-trade-no{font-size: 14px;}
+	.cell-pay-type{font-size: 14px;}
+	#list-head{background-color: #EEEEEE;}
+	#total{font-size: 18px;}
+	#collection-list .weui-cell{padding-bottom: 2px;}
+	#tab-collection-list .weui-cells{margin-top: 0px;}
+	.cell-money {font-size: 20px;margin-bottom: 10px;}
 </style>
 </head>
 <body ontouchstart>
@@ -32,7 +39,7 @@
 						</div>
 					</div>
 				</c:if>
-				<div class="weui-cell">
+				<div class="weui-cell" id="list-head">
 					<div class="weui-cell__ft ">
 						<input class="weui-input" id="query-date" type="date" value="" max="${queryDate }">
 					</div>
@@ -241,8 +248,8 @@
 	  }
 	  
 	  function addCollectionCell(item){
-		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time">index.&nbsp;&nbsp;transTime</div><div class="weui-cell__ft collection-money">collectionMoney</div></div>';
-		  $("#collection-list").append(cell.replace("index", item.index).replace("transTime", item.transTime).replace("collectionMoney", item.collectionMoney));
+		  var cell = '<div class="weui-cell"><div class="weui-cell__bd collection-time"><p>index.&nbsp;transTime</p><p class="cell-trade-no">outTradeNo</p></div><div class="weui-cell__ft collection-money"><p class="cell-money">collectionMoney</p><p class="cell-pay-type">payType</p></div></div>';
+		  $("#collection-list").append(cell.replace("index", item.index).replace("transTime", item.transTime).replace("outTradeNo", item.outTradeNo).replace("collectionMoney", item.collectionMoney).replace("payType", item.payType));
 	  }
 	  
 	  function loadStatData(storeOid){

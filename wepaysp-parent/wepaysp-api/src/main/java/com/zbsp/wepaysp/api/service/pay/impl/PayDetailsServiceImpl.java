@@ -16,6 +16,7 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
@@ -254,9 +255,21 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
                 payDetail.setRefundFee((Integer) curRow[10]);
                 
                 PayDetailVO data = new PayDetailVO();
+                String type = payDetail.getPayType();
+                
+				if (PayType.WEIXIN_JSAPI.getValue().equals(type)) {
+					data.setPayType(PayType.WEIXIN_JSAPI.getDesc());
+				} else if (PayType.WEIXIN_MICROPAY.getValue().equals(type)) {
+					data.setPayType(PayType.WEIXIN_MICROPAY.getDesc());
+				} else if (PayType.ALI_FACE_BAR.getValue().equals(type)) {
+					data.setPayType(PayType.ALI_FACE_BAR.getDesc());
+				} else if (PayType.ALI_H5.getValue().equals(type)) {
+					data.setPayType(PayType.ALI_H5.getDesc());
+				}
+                
                 data.setIndex(++i);
                 data.setOutTradeNo(payDetail.getOutTradeNo());
-                data.setTransTime(DateUtil.getDate(payDetail.getTransBeginTime(), "HH:mm:ss"));
+                data.setTransTime(DateUtil.getDate(payDetail.getTransBeginTime(), "yyyy-MM-dd HH:mm:ss"));
                 data.setCollectionMoney("￥"+Formatter.formatNumber("#0.00", new BigDecimal(payDetail.getTotalFee()).divide(new BigDecimal(100)).doubleValue()));// 实收金额 = 总金额
                 payDetailVOList.add(data);
             }

@@ -58,6 +58,7 @@ public class AppIdMoreController
                 } else if (SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {//商户员工更多功能：选项：是否每日接收收款通知， 是否每日接收收款汇总通知
                     modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindwx.getState()) ? "on" : "off");
                     modelAndView.addObject("bindOid", bindwx.getIwoid());
+                    modelAndView.addObject("openid", openid);
                 } else {
                     modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
                     logger.warn(logPrefix + "权限不足，openid：{}", openid);
