@@ -177,8 +177,8 @@ public class AppIdCollectionController extends BaseController {
         List<AppidCollectionStatVO> statList = new ArrayList<AppidCollectionStatVO>();
 
         // 检查参数
-        if (StringUtils.isBlank(openid) || StringUtils.isBlank(dealerOid)) {
-            logger.warn(logPrefix + "openid或dealerOid为空");
+        if (StringUtils.isBlank(openid)) {
+            logger.warn(logPrefix + "openid为空");
         } else {
             // 根据openid 查找绑定商户、商户员工，并返回商户级别
             SysUser user = payNoticeBindWeixinService.doJoinTransQueryBindUser(openid);

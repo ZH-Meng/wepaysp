@@ -12,12 +12,12 @@ public class SysEnums {
      */
     public static enum PayType {
         /** 1：微信-刷卡支付*/                                  WEIXIN_MICROPAY("1", "微信-刷卡支付"),
-        /** 2：微信-公众号支付 */                                WEIXIN_JSAPI("2", "微信-公众号支付"),
+        /** 2：微信-公众号支付 */                                WEIXIN_JSAPI("2", "微信-扫码支付"),
         /** 3：微信-扫码支付 */                                 WEIXIN_NATIVE("3", "微信-扫码支付"),
         /** 4：微信-微信买单 */                                 WEIXIN_PAY("4", "微信-微信买单"),
         
         /** 6：支付宝-当面付-条码支付 */                    ALI_FACE_BAR("6", "支付宝-条码支付"),
-        /** 7：支付宝-扫码付 */                                  ALI_SCAN("7", "支付宝-扫码付"),
+        /** 7：支付宝-扫码付 */                                  ALI_SCAN("7", "支付宝-扫码支付"),
         /** 8：支付宝-手机网站支付 */                       ALI_H5("8", "支付宝-手机网站支付");
         
         private String value;

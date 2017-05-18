@@ -54,7 +54,8 @@ public class AppIdMoreController
                 modelAndView = new ModelAndView("appid/appidMore");
                 modelAndView.addObject("openid", openid);
                 if (SysUserUtil.isDealer(user)) {// 商户 更多功能，选项：是否每日接收收款汇总通知
-                    //modelAndView.addObject("statNoticeState", "on");
+                	// 暂也支持商户开关（主要针对既是商户有时员工）
+                	modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindwx.getState()) ? "on" : "off");
                 } else if (SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {//商户员工更多功能：选项：是否每日接收收款通知， 是否每日接收收款汇总通知
                     modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindwx.getState()) ? "on" : "off");
                     modelAndView.addObject("bindOid", bindwx.getIwoid());

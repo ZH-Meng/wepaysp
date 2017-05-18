@@ -61,8 +61,8 @@ public class AppIdIndexController
             }
 
             // 检查参数
-            if (StringUtils.isBlank(openid) || StringUtils.isBlank(dealerOid)) {
-                logger.warn(logPrefix + "openid或dealerOid为空");
+            if (StringUtils.isBlank(openid)) {
+                logger.warn(logPrefix + "openid为空");
                 modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc()));
             } else {
                 // 根据openid 查找绑定商户、商户员工，并返回商户级别
