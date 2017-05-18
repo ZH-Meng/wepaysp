@@ -58,7 +58,7 @@
 						<span class="qrCode_title">公众号二维码</span>
 					</div>
 					<div class="qrCode_block">
-						<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadBindQRCode.action?dealerOid=${dealerVO.iwoid}" alt="收款汇总通知二维码" width="200" height="200"/>
+						<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadBindQRCode.action?dealerOid=${dealerVO.iwoid}" alt="绑定二维码" width="200" height="200"/>
 						<span class="qrCode_title">商户二维码</span>
 					</div>
 					<div class="qrCode_remark_block">

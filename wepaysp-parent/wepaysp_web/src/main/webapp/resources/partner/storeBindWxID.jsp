@@ -109,6 +109,7 @@
 		                    <a href="javascript:void(0);" onclick="toBatchUpdate();return false;">保存</a>
 		                </s:if>
 	                    <a href="javascript:void(0);" onclick="refreshBind();return false;">刷新</a>
+	                    <a href="javascript:void(0);" onclick="history.back();">返回</a>
 	                </li>
 	            </ul>
 	            <ul>

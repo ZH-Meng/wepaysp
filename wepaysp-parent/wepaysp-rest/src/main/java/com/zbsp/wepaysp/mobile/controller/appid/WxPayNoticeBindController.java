@@ -234,7 +234,7 @@ public class WxPayNoticeBindController extends BaseController {
                 }
             } else if (StringUtils.isNotBlank(callBack.getDealerOid())) {
                 checkResutMap.put("bindType", PayNoticeBindWeixin.Type.dealer.getValue());
-                DealerVO dealerVO = dealerService.doJoinTransQueryDealerByOid(callBack.getStoreOid());
+                DealerVO dealerVO = dealerService.doJoinTransQueryDealerByOid(callBack.getDealerOid());
                 if (dealerVO == null) {
                     logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, dealerOid：{}", "访问的商户不存在", callBack.getDealerOid());
                     checkResutMap.put("errResult", new ErrResult(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc()+"(dealer)"));
@@ -242,7 +242,7 @@ public class WxPayNoticeBindController extends BaseController {
                     result = true;
                 }
             } else {
-                logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, (storeOid：{}, dealerEmployeeOid：{})", "参数缺失", callBack.getStoreOid(), callBack.getDealerEmployeeOid());
+                logger.warn("微信网页授权回调 - 参数检查 - 失败：{}, (dealerOid : {}, storeOid：{}, dealerEmployeeOid：{})", "参数缺失", callBack.getDealerOid(), callBack.getStoreOid(), callBack.getDealerEmployeeOid());
                 checkResutMap.put("errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc())+"store/cashier");
             }
             

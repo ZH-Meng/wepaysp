@@ -240,7 +240,7 @@ public class PayNoticeBindWeixinServiceImpl
         PayNoticeBindWeixinVO vo = new PayNoticeBindWeixinVO();
         BeanCopierUtil.copyProperties(po, vo);
         
-        if (PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {
+        if (PayNoticeBindWeixin.Type.dealer.getValue().equals(bindType)) {
             vo.setDealerId(po.getBindDealer().getDealerId());
             vo.setDealerName(po.getBindDealer().getCompany());
             vo.setDealerOid(po.getBindDealer().getIwoid());

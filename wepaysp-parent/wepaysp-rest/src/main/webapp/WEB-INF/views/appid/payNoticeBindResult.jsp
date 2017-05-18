@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>支付通知绑定结果</title>
+		<title>绑定结果</title>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
@@ -39,9 +39,17 @@
 				<div class="succ-info">
 					<p class="info1">${payNoticeBindWeixinVO.nickname }</p>
 					<div class="break-line"></div>
-					<div class="succ-item">
-						门&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;店<span class="fr">${payNoticeBindWeixinVO.storeName }</span>
-					</div>
+					<%--绑定商户 --%>
+					<c:if test="${bindType == 3}">
+						<div class="succ-item">
+						商&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;户<span class="fr">${payNoticeBindWeixinVO.dealerName }</span>
+						</div>
+					</c:if>
+					<c:if test="${bindType == 1 || bindType == 2 }">
+						<div class="succ-item">
+							门&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;店<span class="fr">${payNoticeBindWeixinVO.storeName }</span>
+						</div>
+					</c:if>
 					<c:if test="${bindType == 2}">
 						<div class="succ-item">
 							收银员<span class="fr">${payNoticeBindWeixinVO.payDealerEmployeeName }</span>
@@ -65,7 +73,7 @@
 			</c:when> 
 			<c:when test="${bindResult.result == 'bindNoUnique' }">
 				<p class="error-title">
-					 <i class="weui_icon_warn"></i>已绑定
+					 <i class="weui_icon_warn"></i>绑定失败
 				</p>		
 				<div class="succ-info">
 					<div class="error-bottom">
