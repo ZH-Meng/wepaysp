@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
-import com.zbsp.wepaysp.api.util.SysUserUtil;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.result.ErrResult;
@@ -44,25 +43,24 @@ public class AppIdMoreController
         } else {
             // 根据openid 查找绑定商户、商户员工，并返回商户级别
             Map<String, Object> bindMap = payNoticeBindWeixinService.doJoinTransQueryBindInfo(openid);
-            SysUser user = (SysUser) bindMap.get("user");
-            if (user == null) {
+            SysUser dealerUser = (SysUser) bindMap.get("dealerUser");
+            SysUser cashierUser = (SysUser) bindMap.get("cashierUser");
+
+            if (dealerUser == null && cashierUser == null) {
                 logger.warn(logPrefix + "此openid未关联商户或商户员工，openid：{}", openid);
-                modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.OPENID_UNKOWN.getCode(), H5CommonResult.OPENID_UNKOWN.getDesc()));
+                modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
             } else {
-                PayNoticeBindWeixin bindwx = (PayNoticeBindWeixin) bindMap.get("bindwx");
-                
                 modelAndView = new ModelAndView("appid/appidMore");
                 modelAndView.addObject("openid", openid);
-                if (SysUserUtil.isDealer(user)) {// 商户 更多功能，选项：是否每日接收收款汇总通知
-                	// 暂也支持商户开关（主要针对既是商户有时员工）
-                	modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindwx.getState()) ? "on" : "off");
-                } else if (SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {//商户员工更多功能：选项：是否每日接收收款通知， 是否每日接收收款汇总通知
-                    modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindwx.getState()) ? "on" : "off");
-                    modelAndView.addObject("bindOid", bindwx.getIwoid());
-                    modelAndView.addObject("openid", openid);
-                } else {
-                    modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
-                    logger.warn(logPrefix + "权限不足，openid：{}", openid);
+                if (dealerUser != null) {
+                    //PayNoticeBindWeixin bindDealer = (PayNoticeBindWeixin) bindMap.get("bindDealer");
+                }
+                // 商户员工更多功能：选项：是否每日接收收款通知， 是否每日接收收款汇总通知
+                // 商户 更多功能，选项：是否每日接收收款汇总通知，可能既是商户又是员工
+                if (cashierUser != null) {
+                    PayNoticeBindWeixin bindCashier = (PayNoticeBindWeixin) bindMap.get("bindCashier");
+                    modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindCashier.getState()) ? "on" : "off");
+                    modelAndView.addObject("bindCashierOid", bindCashier.getIwoid());
                 }
             }
         }

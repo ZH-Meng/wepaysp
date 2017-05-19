@@ -261,31 +261,7 @@ public class PayNoticeBindWeixinServiceImpl
         return vo;
     }
     
-    @Override
-    public SysUser doJoinTransQueryBindUser(String openid) {
-        Validator.checkArgument(StringUtils.isBlank(openid), "openid不能为空！");
-        String jpql = "from PayNoticeBindWeixin p where p.openid=:OPENID";
-        Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        jpqlMap.put("OPENID", openid);
-        PayNoticeBindWeixin bindInfo = commonDAO.findObject(jpql, jpqlMap, false);
-        if (bindInfo == null) {
-            return null;
-        } else {
-            jpqlMap.clear();
-            if (bindInfo.getBindDealer() != null) {
-                jpql = "from SysUser u left Join fetch u.dealer where u.dealer=:DEALER";
-                jpqlMap.put("DEALER", bindInfo.getBindDealer() );
-                return commonDAO.findObject(jpql, jpqlMap, false);
-            } else if (bindInfo.getBindDealerEmployee() != null) {
-                jpql = "from SysUser u left Join fetch u.dealerEmployee where u.dealerEmployee=:DEALEREMPLOYEE";
-                jpqlMap.put("DEALEREMPLOYEE", bindInfo.getBindDealerEmployee());
-                return commonDAO.findObject(jpql, jpqlMap, false);
-            } else {
-                return null;
-            }
-        }
-    }
-    
+    @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> doJoinTransQueryBindInfo(String openid) {
         Validator.checkArgument(StringUtils.isBlank(openid), "openid不能为空！");
@@ -293,21 +269,25 @@ public class PayNoticeBindWeixinServiceImpl
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         jpqlMap.put("OPENID", openid);
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        PayNoticeBindWeixin bindInfo = commonDAO.findObject(jpql, jpqlMap, false);
-        if (bindInfo != null) {
-            resultMap.put("bindwx", bindInfo);
+
+        List<PayNoticeBindWeixin> bindList = (List<PayNoticeBindWeixin>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        for (PayNoticeBindWeixin bindInfo : bindList) {
             jpqlMap.clear();
             SysUser user = null;
             if (bindInfo.getBindDealer() != null) {
+                resultMap.put("bindDealer", bindInfo);
                 jpql = "from SysUser u left Join fetch u.dealer where u.dealer=:DEALER";
-                jpqlMap.put("DEALER", bindInfo.getBindDealer() );
+                jpqlMap.put("DEALER", bindInfo.getBindDealer());
                 user = commonDAO.findObject(jpql, jpqlMap, false);
+                resultMap.put("dealerUser", user);
             } else if (bindInfo.getBindDealerEmployee() != null) {
+                resultMap.put("bindCashier", bindInfo);
                 jpql = "from SysUser u left Join fetch u.dealerEmployee where u.dealerEmployee=:DEALEREMPLOYEE";
                 jpqlMap.put("DEALEREMPLOYEE", bindInfo.getBindDealerEmployee());
                 user = commonDAO.findObject(jpql, jpqlMap, false);
+                resultMap.put("cashierUser", user);
             }
-            resultMap.put("user", user);
+
         }
         return resultMap;
     }

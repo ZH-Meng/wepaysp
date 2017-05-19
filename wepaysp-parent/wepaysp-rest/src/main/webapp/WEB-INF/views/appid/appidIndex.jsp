@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>收款列表</title>
+<title></title>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/weui.css">
 <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/jquery-weui.css">
 <style type="text/css">
@@ -221,7 +221,7 @@
 		  loading = true;
 		  $("#collection-loading").show();
 		  $.get("<%=request.getContextPath()%>/appid/collection/list/" + ++curPage, 
-		    		{ openid:"${openid}", dealerOid:"${dealerOid}", storeOid:"${storeOid}", dealerEmployeeOid:"${dealerEmployeeOid}", pageSize:pageRow,queryDate:date,queryStoreOid:storeOid },
+		    		{ openid:"${openid}", pageSize:pageRow,queryDate:date,queryStoreOid:storeOid },
 		    function(data,status,xhr){
 	   			if (status == 'success'&& undefined != data && undefined != data.payList) {
 	   				var dataSize = data.payList.length;
@@ -255,7 +255,7 @@
 	  function loadStatData(storeOid){
 		  $("#stat-loading").show();
 		  $.get("<%=request.getContextPath()%>/appid/collection/statList/", 
-		    		{ openid:"${openid}", dealerOid:"${dealerOid}", storeOid:"${storeOid}", dealerEmployeeOid:"${dealerEmployeeOid}", queryStoreOid:storeOid },
+		    		{ openid:"${openid}", queryStoreOid:storeOid },
 		    function(data,status,xhr){
 	   			if (status == 'success'&& undefined != data) {
 			    	$("#stat-loading").hide();

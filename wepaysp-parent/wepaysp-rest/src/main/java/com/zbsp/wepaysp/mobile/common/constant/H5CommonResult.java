@@ -23,8 +23,8 @@ public enum H5CommonResult {
     /**获取access_token失败*/
     ACCESS_TOKEN_FAIL("access_token_fail", "授权失败"),
     
-    /**权限不足*/
-    PERMISSION_DENIED("permission_denied", "权限不足"),
+    /**无权访问*/
+    PERMISSION_DENIED("permission_denied", "无权访问"),
     
     /**微信未绑定系统账户*/
     OPENID_UNKOWN("access_token_fail", "微信未绑定系统账户"),

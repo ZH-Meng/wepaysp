@@ -13,7 +13,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
-import com.zbsp.wepaysp.api.util.SysUserUtil;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
@@ -36,7 +35,7 @@ public class AppIdIndexController
     private StoreService storeService;
 
     @RequestMapping(value = "{function}")
-    public ModelAndView index(@PathVariable String function, String openid, String dealerOid, String storeOid, String dealerEmployeeOid) {
+    public ModelAndView index(@PathVariable String function, String openid) {
         String logPrefix = "处理微信公众号入口请求 - ";
         logger.info(logPrefix + "开始");
         ModelAndView modelAndView = null;
@@ -45,20 +44,7 @@ public class AppIdIndexController
             logger.warn(logPrefix + "function：{}非法，忽略处理", function);
             modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ILLEGAL_REQUEST.getCode(), H5CommonResult.ILLEGAL_REQUEST.getDesc()));
         } else {
-            logger.info(logPrefix + "参数openid：{}, dealerOid：{}, storeOid：{}, dealerEmployeeOid：{}", openid, dealerOid, storeOid, dealerEmployeeOid);
-
-            modelAndView = new ModelAndView("appid/appidIndex");
-            // 激活收款列表面板
-            if ("collection".equals(function)) {
-                logger.info(logPrefix + "收款列表");
-                modelAndView.addObject("function", "collection-list");
-            } else if ("stat".equals(function)) {
-                logger.info(logPrefix + "收款汇总");
-                modelAndView.addObject("function", "stat-list");
-            } else if ("more".equals(function)) {
-                logger.info(logPrefix + "更多功能");
-                modelAndView.addObject("function", "more");
-            }
+            logger.info(logPrefix + "参数openid：{}", openid);
 
             // 检查参数
             if (StringUtils.isBlank(openid)) {
@@ -66,26 +52,34 @@ public class AppIdIndexController
                 modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc()));
             } else {
                 // 根据openid 查找绑定商户、商户员工，并返回商户级别
-                SysUser user = payNoticeBindWeixinService.doJoinTransQueryBindUser(openid);
-                if (user == null) {
+                Map<String, Object> bindMap = payNoticeBindWeixinService.doJoinTransQueryBindInfo(openid);
+                SysUser dealerUser = (SysUser) bindMap.get("dealerUser");
+                SysUser cashierUser = (SysUser) bindMap.get("cashierUser");
+
+                if (dealerUser == null && cashierUser == null) {
                     logger.warn(logPrefix + "此openid未关联商户或商户员工，openid：{}", openid);
-                    modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.OPENID_UNKOWN.getCode(), H5CommonResult.OPENID_UNKOWN.getDesc()));
+                    modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult("访问失败", H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
                 } else {
-                    if (SysUserUtil.isDealer(user) || SysUserUtil.isStoreManager(user) || SysUserUtil.isDealerEmployee(user)) {// 商户、商户员工有权查看
-                        if (SysUserUtil.isDealer(user)) {
-                            // 查找商户门店
-                            Map<String, Object> paramMap = new HashMap<String, Object>();
-                            paramMap.put("dealerOid", user.getDealer().getIwoid());
-                            modelAndView.addObject("storeList", storeService.doJoinTransQueryStoreList(paramMap, 0, -1));
-                        }
-                        modelAndView.addObject("openid", openid);
-                        modelAndView.addObject("dealerOid", dealerOid);
-                        modelAndView.addObject("storeOid", storeOid);
-                        modelAndView.addObject("dealerEmployeeOid", dealerEmployeeOid);
-                        modelAndView.addObject("today", DateUtil.getDate(new Date(), "yyyy-MM-dd"));
-                    } else {
-                        modelAndView = new ModelAndView("accessDeniedH5", "errResult", new ErrResult(H5CommonResult.PERMISSION_DENIED.getCode(), H5CommonResult.PERMISSION_DENIED.getDesc()));
-                        logger.warn(logPrefix + "权限不足，openid：{}", openid);
+                    modelAndView = new ModelAndView("appid/appidIndex");
+                    modelAndView.addObject("openid", openid);
+                    modelAndView.addObject("today", DateUtil.getDate(new Date(), "yyyy-MM-dd"));
+                    // 激活收款列表面板
+                    if ("collection".equals(function)) {
+                        logger.info(logPrefix + "收款列表");
+                        modelAndView.addObject("function", "collection-list");
+                    } else if ("stat".equals(function)) {
+                        logger.info(logPrefix + "收款汇总");
+                        modelAndView.addObject("function", "stat-list");
+                    } else if ("more".equals(function)) {
+                        logger.info(logPrefix + "更多功能");
+                        modelAndView.addObject("function", "more");
+                    }
+
+                    if (dealerUser != null) {
+                        // 查找商户门店
+                        Map<String, Object> paramMap = new HashMap<String, Object>();
+                        paramMap.put("dealerOid", dealerUser.getDealer().getIwoid());
+                        modelAndView.addObject("storeList", storeService.doJoinTransQueryStoreList(paramMap, 0, -1));
                     }
                 }
             }

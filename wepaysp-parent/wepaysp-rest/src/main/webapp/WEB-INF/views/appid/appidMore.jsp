@@ -40,7 +40,7 @@
 		$.ajax({  
 	          type : "get",  
 	          url : "<%=request.getContextPath()%>/appid/more/collectionNotice/" + oper,  
-	          data : { bindOid:"${bindOid}"},
+	          data : { bindOid:"${bindCashierOid}"},
 	          async : false,  
 	          dataType : "json",
 	          success : function(data){
