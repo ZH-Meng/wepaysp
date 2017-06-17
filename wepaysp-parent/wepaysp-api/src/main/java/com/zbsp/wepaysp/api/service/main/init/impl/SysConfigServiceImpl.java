@@ -82,6 +82,27 @@ public class SysConfigServiceImpl
             initRest();
         }
         
+        // 支付宝支持当面付2.0的应用ID
+        if (StringUtils.isBlank(appId4Face2FacePay)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
+        } else {
+            logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
+            SysConfig.appId4Face2FacePay = appId4Face2FacePay;
+        }
+        
+        // 检查appId4Face2FacePay是否存在
+        Map<String, Object> app = SysConfig.alipayAppMap.get(appId4Face2FacePay);
+        if (app == null) {
+            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
+        }
+        
+        if (onlineFlag && AlipayApp.AppType.SANDBOXIE.toString().equals(app.get(SysEnvKey.ALIPAY_APP_TYPE))) {
+            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，上线不能使用沙箱应用");
+        }
+        
+        // 支付宝支付的配置 FIXME 改为从数据库中读取
+        AliPayUtil.init(app);
+        
     }
     
     /** 
@@ -162,27 +183,6 @@ public class SysConfigServiceImpl
         
         // 服务商信息
         initTopPartnerInfos();
-        
-        // 支付宝支持当面付2.0的应用ID
-        if (StringUtils.isBlank(appId4Face2FacePay)) {
-            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
-        } else {
-            logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
-            SysConfig.appId4Face2FacePay = appId4Face2FacePay;
-        }
-        
-        // 检查appId4Face2FacePay是否存在
-        Map<String, Object> app = SysConfig.alipayAppMap.get(appId4Face2FacePay);
-        if (app == null) {
-            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
-        }
-        
-        if (onlineFlag && AlipayApp.AppType.SANDBOXIE.toString().equals(app.get(SysEnvKey.ALIPAY_APP_TYPE))) {
-            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，上线不能使用沙箱应用");
-        }
-        
-        // 支付宝支付的配置 FIXME 改为从数据库中读取
-        AliPayUtil.init(app);
     }
 
     /** 
@@ -302,7 +302,7 @@ public class SysConfigServiceImpl
                 alipayMap.put(SysEnvKey.ALIPAY_APP_CANCEL_DURATION, app.getCancelDuration());
                 
                 SysConfig.alipayAppMap.put(app.getAppId(), alipayMap);
-                logger.warn("配置服务商(parterOid={}))的支付宝应用(appid={})的信息到内存", topPartner.getIwoid(), app.getAppId());
+                logger.info("配置服务商(parterOid={}))的支付宝应用(appid={})的信息到内存", topPartner.getIwoid(), app.getAppId());
             }
             
             logger.info("配置顶级服务商（parterOid={})的微信支付信息到内存：app_id : {}, mch_id : {}", topPartner.getIwoid(), topPartner.getAppId(), topPartner.getMchId());

@@ -284,8 +284,7 @@ public class AliPayDetailsServiceImpl
         // 商户操作员和商户门店，FIXME 接口中描述，这些参数都可以做统计和精准定位
         newPayOrder.setOperatorId(newPayOrder.getDealerEmployee().getDealerEmployeeId());
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
-        
-        //newPayOrder.setSellerId 默认为空
+        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());//FIXME
         // terminal_id
         // alipay_store_id
         // undiscountable_amount

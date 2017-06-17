@@ -319,7 +319,7 @@ public class AliPayUtil {
             .setFormat("json")
             .build();
         
-        client = new DefaultAlipayClient(Configs.getOpenApiDomain(), appid, privateKey, "json", "utf-8", alipayPublicKey, signType);
+        client = new DefaultAlipayClient(openApiDomain, appid, privateKey, "json", "utf-8", alipayPublicKey, signType);
     }
     
 }

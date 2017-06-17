@@ -140,16 +140,17 @@ public class AlipayAppAuthDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid为空");
         Validator.checkArgument(StringUtils.isBlank(appId), "appId为空");
         
-        AlipayAppAuthDetailsVO appAuthDetailsVO = new AlipayAppAuthDetailsVO();
-        
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         String jpql = "from AlipayAppAuthDetails a where a.dealer.iwoid=:DEALEROID and a.alipayApp.appId=:APPID and a.status=:STATUS";
         jpqlMap.put("DEALEROID", dealerOid);
         jpqlMap.put("APPID", appId);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         AlipayAppAuthDetails appAuthDetails = commonDAO.findObject(jpql, jpqlMap, false);
-        BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
-        
+        AlipayAppAuthDetailsVO appAuthDetailsVO = null;
+        if (appAuthDetails != null) {
+        	appAuthDetailsVO = new AlipayAppAuthDetailsVO();
+        	BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
+        }
         return appAuthDetailsVO;
     }
 
