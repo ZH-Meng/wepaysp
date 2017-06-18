@@ -274,12 +274,13 @@ public class AliPayDetailsServiceImpl
         jpqlMap.put("ALIPAYAPP", app);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         AlipayAppAuthDetails appAuth = commonDAO.findObject(jpql, jpqlMap, false);
-        if (appAuth == null) {
+        /*if (appAuth == null) {
             throw new NotExistsException("AlipayAppAuthDetails不存在（appId=" + newPayOrder.getAppId() + "，商户ID=" + newPayOrder.getDealer().getDealerId() +"）");
+        }*/
+        if (appAuth != null) {//FIXME
+        	// 代替商户发起当面付，设置商户授权令牌
+        	newPayOrder.setAppAuthToken(appAuth.getAppAuthToken());
         }
-        
-        // 代替商户发起当面付，设置商户授权令牌
-        newPayOrder.setAppAuthToken(appAuth.getAppAuthToken());
 
         // 商户操作员和商户门店，FIXME 接口中描述，这些参数都可以做统计和精准定位
         newPayOrder.setOperatorId(newPayOrder.getDealerEmployee().getDealerEmployeeId());

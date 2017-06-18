@@ -270,10 +270,10 @@ public class SysConfigServiceImpl
                 throw new SystemInitException("服务商(parterOid=" + topPartner.getIwoid() + ")没有配置支付宝信息");
             }
             
-            // 所有服务商所有的应用加载至内存，根据配置文件配置的当面付和手机网站appid获取对应的配置信息
-            Map<String, Object> alipayMap = new HashMap<String, Object>();
-            
             for(AlipayApp app : alipayApps) {
+            	// 所有服务商所有的应用加载至内存，根据配置文件配置的当面付和手机网站appid获取对应的配置信息
+                Map<String, Object> alipayMap = new HashMap<String, Object>();
+                
                 // 校验完整性
                 if (StringUtils.isBlank(app.getAlipayPublicKey()) || StringUtils.isBlank(app.getSignType()) || StringUtils.isBlank(app.getPublicKey()) || 
                     StringUtils.isBlank(app.getPrivateKey()) || app.getMaxQueryRetry() == null || app.getQueryDuration() == null || app.getMaxCancelRetry() == null || app.getCancelDuration() == null){
