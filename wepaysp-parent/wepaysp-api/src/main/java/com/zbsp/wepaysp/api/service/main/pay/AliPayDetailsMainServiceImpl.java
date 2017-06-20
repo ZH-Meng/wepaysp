@@ -12,6 +12,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
+import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
@@ -519,5 +520,62 @@ public class AliPayDetailsMainServiceImpl
         resultMap.put("result", result);
         return resultMap;
     }
+
+	@Override
+	public Map<String, Object> scanPayCreateOrder(AliPayDetailsVO payDetailsVO) {
+        String logPrefix = "扫码支付 - ";
+        // 生成保存支付明细；
+        logger.info(logPrefix + "生成支付宝支付明细 - 开始");
+        String resCode = AliPayResult.ERROR.getCode();
+        String resDesc = AliPayResult.ERROR.getDesc();
+        
+        // 声明返回Map
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put("resultCode", resCode);
+        resultMap.put("resultDesc", resDesc);
+        boolean flag = false;
+        try {
+            payDetailsVO = aliPayDetailsService.doTransCreatePayDetails(payDetailsVO);
+            resultMap.put("aliPayDetailsVO", payDetailsVO);
+            flag = true;
+            logger.info(logPrefix + "生成支付宝支付明细 - 成功，系统订单号：{}", payDetailsVO.getOutTradeNo());
+        } catch (Exception e) {
+            logger.error(logPrefix + "生成支付宝支付明细 - 失败：{}", e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "生成支付宝支付明细 - 结束");
+            if (!flag) {
+                return resultMap;
+            }
+        }
+        String outTradeNo = payDetailsVO.getOutTradeNo();
+        
+        // -------------创建成功后调用扫码预下单接口--------------- //
+        logger.info(logPrefix + "调用扫码预下单接口 - 开始");
+        
+        flag = false;
+        AlipayTradePrecreateResponse precreateResp = null;
+        try {
+            // 调用手机网站支付
+        	precreateResp = AliPayUtil.tradePrecreate(payDetailsVO);
+            // 打印应答
+            logger.info(logPrefix + "调用扫码预下单接口 - 支付结果 - outTradeNo={}, reponse : {})", outTradeNo,
+            		precreateResp == null ? null : JSONUtil.toJSONString(precreateResp, true));
+            if (precreateResp != null && StringUtils.isNotBlank(precreateResp.getQrCode())) {
+                resultMap.put("qrCode", precreateResp.getQrCode());
+                flag = true;
+            }
+        } catch (ConvertPackException e) {
+            logger.error(logPrefix + AlarmLogPrefix.sendAliPayRequestException + "支付明细转换预下单请求包构造器(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage());
+        } catch (Exception e) {
+            logger.error(logPrefix + AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "调用预下单接口(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "调用扫码预下单接口 -结束");
+        }
+        if (flag) {
+            resultMap.put("resultCode", AliPayResult.SUCCESS.getCode());// 下单成功
+            resultMap.put("resultDesc", AliPayResult.SUCCESS.getDesc());
+        }
+        return resultMap;
+	}
 
 }

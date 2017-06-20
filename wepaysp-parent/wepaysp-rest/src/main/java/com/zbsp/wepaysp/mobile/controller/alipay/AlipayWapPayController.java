@@ -23,15 +23,16 @@ import com.zbsp.wepaysp.api.service.partner.DealerEmployeeService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.common.constant.AliPayEnums;
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
 import com.zbsp.wepaysp.mobile.controller.BaseController;
 import com.zbsp.wepaysp.mobile.model.result.ErrResult;
+import com.zbsp.wepaysp.mobile.model.vo.AlipayPrecreateResultVO;
 import com.zbsp.wepaysp.mobile.model.vo.AlipayWapPayVO;
 import com.zbsp.wepaysp.vo.partner.DealerEmployeeVO;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
@@ -44,7 +45,7 @@ import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
  * @author 孟郑宏
  */
 @Controller
-@RequestMapping("/alipay/wappay/")
+@RequestMapping("/alipay/h5/")
 public class AlipayWapPayController
     extends BaseController {
 
@@ -129,10 +130,10 @@ public class AlipayWapPayController
     }
     
     /**
-     * 下单
+     * 手机网站下单
      */
-    @RequestMapping("createOrder")
-    public ModelAndView createOrder(AlipayWapPayVO createOrderVO) {
+    @RequestMapping("wap/createOrder")
+    public ModelAndView wapCreateOrder(AlipayWapPayVO createOrderVO) {
         String logPrefix = "处理支付宝手机网站支付下单请求 - ";
         logger.info(logPrefix + "开始");
         ModelAndView modelAndView = null;
@@ -220,11 +221,89 @@ public class AlipayWapPayController
     }
     
     /**
+     * 扫码下单
+     */
+    @RequestMapping("createOrder")
+    public AlipayPrecreateResultVO scanCreateOrder(AlipayWapPayVO createOrderVO) {
+        String logPrefix = "处理扫码支付下单请求 - ";
+        logger.info(logPrefix + "开始");
+        AlipayPrecreateResultVO result = null;
+        
+        logger.info(logPrefix + "参数检查 - 开始");
+        boolean checkFlag = false;
+        try {
+            if (createOrderVO == null || StringUtils.isBlank(createOrderVO.getDealerOid()) || StringUtils.isBlank(createOrderVO.getStoreOid())) {
+                logger.warn(logPrefix + "参数检查 - 失败：{}", "商户Oid和门店Oid都不能为空！");
+                result = new AlipayPrecreateResultVO(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc());
+            } else if (StringUtils.isBlank(createOrderVO.getMoney())) {
+                logger.warn(logPrefix + "参数检查 - 失败：{}", "金额不能为空！");
+                result = new AlipayPrecreateResultVO(H5CommonResult.ARGUMENT_MISS.getCode(), H5CommonResult.ARGUMENT_MISS.getDesc() + "金额");
+            } else if (!NumberUtils.isCreatable(createOrderVO.getMoney()) || !Pattern.matches(SysEnvKey.REGEX_￥_POSITIVE_FLOAT_2BIT, createOrderVO.getMoney())) {// 正确金额：例如：0.01/200/201.99
+                logger.warn(logPrefix + "参数检查 - 失败：{}", "金额无效" + createOrderVO.getMoney());
+                result = new AlipayPrecreateResultVO(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc() + "金额");
+            } else if (StringUtils.isBlank(SysConfig.alipayWapPayNotifyURL) || StringUtils.isBlank(SysConfig.alipayWapPayReturnURL)) {
+                logger.error("系统配置异常：alipayWapPayNotifyURL/alipayWapPayReturnURL不能为空！");
+                result = new AlipayPrecreateResultVO(H5CommonResult.SYS_ERROR.getCode(), H5CommonResult.SYS_ERROR.getDesc());
+            } else {
+                logger.info(logPrefix + "参数检查 - 通过");
+                checkFlag = true;
+            }
+        } catch (Exception e) {
+            logger.error(logPrefix + "参数检查 - 异常：{}", e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "参数检查 - 结束");
+            if (!checkFlag) {
+            	return result;
+            }
+        }
+        AliPayDetailsVO payDetailsVO = new AliPayDetailsVO();
+        payDetailsVO.setPayType(PayType.ALI_SCAN.getValue());// 扫码支付
+        payDetailsVO.setDealerOid(createOrderVO.getDealerOid());
+        payDetailsVO.setStoreOid(createOrderVO.getStoreOid());// 一店一码时，不为空
+        payDetailsVO.setDealerEmployeeOid(createOrderVO.getDealerEmployeeOid());// 一收银员一码时，不为空
+
+        BigDecimal orderMoney = new BigDecimal(createOrderVO.getMoney());// 订单金额
+        payDetailsVO.setTotalAmount(orderMoney.multiply(new BigDecimal(100)).intValue());// 元转化为分
+        
+        logger.info(logPrefix + "下单 - 开始");
+        try {
+            Map<String, Object> resultMap = aliPayDetailsMainService.scanPayCreateOrder(payDetailsVO);
+            String resCode = MapUtils.getString(resultMap, "resultCode");
+            String resDesc = MapUtils.getString(resultMap, "resultDesc");
+            payDetailsVO = (AliPayDetailsVO) MapUtils.getObject(resultMap, "aliPayDetailsVO");
+            String qrCode = MapUtils.getString(resultMap, "qrCode");
+
+            if (!StringUtils.equalsIgnoreCase(AliPayResult.SUCCESS.getCode(), resCode)) {// 扫码支付下单失败
+                logger.warn(logPrefix  + "下单 - 失败，错误码：{}, 错误描述：{}", resCode, resDesc);
+            } else {
+                logger.info(logPrefix  + "下单 - 成功");
+                result.setQrCode(qrCode);
+            }
+        } catch (InvalidValueException e) {
+            logger.warn(logPrefix + "下单 - 警告：{}", e.getMessage());
+            result = new AlipayPrecreateResultVO(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc());
+        } catch (IllegalArgumentException e) {
+            logger.warn(logPrefix + "下单 - 警告：{}", e.getMessage());
+            result = new AlipayPrecreateResultVO(H5CommonResult.INVALID_ARGUMENT.getCode(), H5CommonResult.INVALID_ARGUMENT.getDesc());
+        } catch (NotExistsException e) {
+            logger.warn(logPrefix + "下单 - 警告：{}", e.getMessage());
+            result = new AlipayPrecreateResultVO(H5CommonResult.SYS_ERROR.getCode(), "下单失败");
+        } catch (Exception e) {
+            logger.error(logPrefix + "下单 - 异常：{}", e.getMessage(), e);
+            result = new AlipayPrecreateResultVO(H5CommonResult.SYS_ERROR.getCode(), H5CommonResult.SYS_ERROR.getDesc());
+        } finally {
+            logger.info(logPrefix + "下单 -结束");
+        }
+        logger.info(logPrefix + "结束");
+        return result;
+    }
+    
+    /**
      * 下单支付后前台回跳
      * 由于前台回跳的不可靠性，前台回跳只能作为商户支付结果页的入口，最终支付结果必须以异步通知或查询接口返回为准，不能依赖前台回跳。
      * h5ReturnVO 包含业务参数：out_trade_no、trade_no、total_amount、seller_id，公共参数暂不处理
      */
-    @RequestMapping("h5Return")
+    @RequestMapping("return")
     public ModelAndView h5Return(AlipayWapPayVO h5ReturnVO) {
         String logPrefix = "处理支付宝手机网站支付完成后前台回跳请求 - ";
         logger.info(logPrefix + "开始");
