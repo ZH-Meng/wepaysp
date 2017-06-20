@@ -14,10 +14,12 @@ import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
+import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
+import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.config.Constants;
@@ -25,6 +27,7 @@ import com.zbsp.alipay.trade.model.TradeStatus;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradePrecreateRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
@@ -157,6 +160,39 @@ public class AliPayUtil {
             payResult = AliPayUtil.tradeService.tradePay(builder);
         }
         return payResult;
+    }
+    
+    /**
+     * 当面付支付2.0，预下单
+     * @param payDetailsVO
+     * @return
+     */
+    public static AlipayTradePrecreateResponse tradePrecreate(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
+
+        logger.info("支付明细转换扫码支付预下单请求包构造器 - 开始");
+        // 支付请求构造器
+        AlipayTradePrecreateRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradePrecreateRequestBuilder(payDetailsVO);
+
+        logger.info("支付明细转换扫码支付预下单请求包构造器  - 成功");
+
+        AlipayTradePrecreateRequest request = new AlipayTradePrecreateRequest();
+        // 设置异步通知地址
+        request.setNotifyUrl(SysConfig.alipayWapPayNotifyURL);
+        request.setReturnUrl(SysConfig.alipayWapPayReturnURL);
+
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AlipayTradeWapPayRequest bizContent:" + request.getBizContent());
+        AlipayTradePrecreateResponse response = null;
+        response = getResponse(client, request);
+        logger.info("AlipayTradeWapPayResponse :" + response == null ? null : JSONUtil.toJSONString(response, true));
+        if (response != null && StringUtils.isNotBlank(response.getBody())) {
+            logger.info("扫码支付预下单成功");
+        } else {
+            logger.warn("扫码支付预下单失败");
+        }
+        return response;
     }
     
     /**

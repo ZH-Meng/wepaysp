@@ -33,7 +33,7 @@
 					<p class="input-title">消费总额</p>
 					<p class="input-amt">
 						<span class="fuhao">&yen;</span>
-						<input id="money" name="money" type="number" type="hidden" readonly="readonly" contenteditable="true" />
+						<input id="money" name="money" type="text" type="hidden" readonly="readonly" contenteditable="true" />
 					</p>
 					<div class="break-line"></div>
 					<p class="input-explain">可询问服务员消费总额</p>

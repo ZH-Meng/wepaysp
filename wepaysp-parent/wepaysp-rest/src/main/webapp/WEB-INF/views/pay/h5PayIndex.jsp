@@ -20,7 +20,7 @@
 				if (client == "1") {// 微信
 		        	window.location.href="${indexVO.payUrl}";
 		        } else if (client == "2") {// 支付宝
-		        	//window.location.href="${indexVO.payUrl}";
+		        	window.location.href="${indexVO.payUrl}";
 		        } else {
 		        	// 如果是浏览器，考虑可以嵌入支付宝支付按钮		        	
 		        }
@@ -32,12 +32,6 @@
 		<c:when test="${indexVO.payClient eq 1}">
 		</c:when>
 		<c:when test="${indexVO.payClient eq 2}">
-			<div class="succ-info">
-				<div class="error-bottom">
-					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
-				</div>			
-				<p class="info2">支付宝支付正在研发中，敬请期待!</p>
-			</div>
 		</c:when> 
 		<c:otherwise>   
 			<div class="succ-info">

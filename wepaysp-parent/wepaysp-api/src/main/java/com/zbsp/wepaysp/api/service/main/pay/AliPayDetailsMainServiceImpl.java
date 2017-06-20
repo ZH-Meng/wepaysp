@@ -367,7 +367,7 @@ public class AliPayDetailsMainServiceImpl
         Validator.checkArgument(paramMap == null, "paramMap为空");
         Map<String, Object> resultMap = new HashMap<String, Object>();
         
-        String logPrefix = "处理支付宝手机网站支付异步通知请求 - ";
+        String logPrefix = "处理支付宝支付结果异步通知请求 - ";
         
         // 通过验签（验证通知中的sign参数）来确保支付通知是由支付宝发送的
         logger.info(logPrefix + "验签 - 开始");
