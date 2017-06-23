@@ -63,8 +63,8 @@ public class PartnerEmployeeServiceImpl
     	   
     	/* 所属某代理商下的所有代理商查询 */
     	// String state = MapUtils.getString(paramMap, "state");
-        String employeeName = MapUtils.getString(paramMap, "employeeName");
-        String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
+        String employeeName = StringUtils.trim(MapUtils.getString(paramMap, "employeeName"));
+        String moblieNumber = StringUtils.trim(MapUtils.getString(paramMap, "moblieNumber"));
         String partnerOid = MapUtils.getString(paramMap, "partnerOid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         Validator.checkArgument(StringUtils.isBlank(partnerOid) && StringUtils.isBlank(partnerEmployeeOid), "代理商Oid或代理商员工Oid至少一个不能为空！");
@@ -113,8 +113,8 @@ public class PartnerEmployeeServiceImpl
     @Override
     public int doJoinTransQueryPartnerEmployeeCount(Map<String, Object> paramMap) {
         // String state = MapUtils.getString(paramMap, "state");
-        String employeeName = MapUtils.getString(paramMap, "employeeName");
-        String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
+        String employeeName = StringUtils.trim(MapUtils.getString(paramMap, "employeeName"));
+        String moblieNumber = StringUtils.trim(MapUtils.getString(paramMap, "moblieNumber"));
         String partnerOid = MapUtils.getString(paramMap, "partnerOid");
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "代理商Oid不能为空！");
 
@@ -153,7 +153,7 @@ public class PartnerEmployeeServiceImpl
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("USERID", partnerEmployeeVO.getLoginId());
+        paramMap.put("USERID", StringUtils.trim(partnerEmployeeVO.getLoginId()));
         paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
 
         int idResult = commonDAO.queryObjectCount(sql, paramMap, false);
@@ -193,10 +193,10 @@ public class PartnerEmployeeServiceImpl
         SysUser newUser = new SysUser();
         newUser.setIwoid(Generator.generateIwoid());
         newUser.setState(SysUser.State.normal.getValue());
-        newUser.setUserId(partnerEmployeeVO.getLoginId());
-        newUser.setUserName(partnerEmployeeVO.getEmployeeName());
-        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(partnerEmployeeVO.getLoginPwd())));
-        newUser.setLineTel(partnerEmployeeVO.getMoblieNumber());
+        newUser.setUserId(StringUtils.trim(partnerEmployeeVO.getLoginId()));
+        newUser.setUserName(partnerEmployee.getEmployeeName());
+        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(partnerEmployeeVO.getLoginPwd()))));
+        newUser.setLineTel(partnerEmployee.getMoblieNumber());
         newUser.setBuildType(SysUser.BuildType.create.getValue());
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());

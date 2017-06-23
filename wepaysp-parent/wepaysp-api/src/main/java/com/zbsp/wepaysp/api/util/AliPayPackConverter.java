@@ -240,13 +240,16 @@ public class AliPayPackConverter {
             // 扫码支付2小时有效
             
             // 创建条码支付请求builder，设置请求参数
-            builder.setOutTradeNo(payDetailsVO.getOutTradeNo())
+            builder.setAppAuthToken(payDetailsVO.getAppAuthToken())
+                .setOutTradeNo(payDetailsVO.getOutTradeNo())
                 .setSubject(payDetailsVO.getSubject())
                 .setBody(payDetailsVO.getBody())
                 .setSellerId(sellerId)
                 .setTotalAmount(totalAmount)
-                .setStoreId(payDetailsVO.getStoreId())
-                .setExtendParams(extendParams);
+                .setUndiscountableAmount(null)
+                .setStoreId(payDetailsVO.getStoreId())            
+                .setExtendParams(extendParams)
+                .setGoodsDetailList(null);
         } catch (Exception e) {
             throw new ConvertPackException(e.getMessage());
         }

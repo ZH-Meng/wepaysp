@@ -525,7 +525,7 @@ public class WeixinPayDetailsServiceImpl
                 payDetails.setTransactionId(payResultVO.getTransactionId());// 微信支付订单号
                 payDetails.setOpenid(payResultVO.getOpenid());// 用户标识
                 payDetails.setIsSubscribe(payResultVO.getIsSubscribe());
-                
+
                 //payDetails.setTradeType(payResultVO.getTradeType());
                 // 比对关键信息
                 if (!StringUtils.equalsIgnoreCase(payDetails.getMchId(), payResultVO.getMchId())) {
@@ -545,9 +545,9 @@ public class WeixinPayDetailsServiceImpl
                 
                 payDetails.setTotalFee(payResultVO.getTotalFee());
                 //String attach = payResultVO.getAttach();// 商户数据包
-                
+                payDetails.setCouponFee(payResultVO.getCouponFee());// 优惠金额
                 payDetails.setCashFeeType(StringUtils.isNotBlank(payResultVO.getCashFeeType()) ? payResultVO.getCashFeeType() : "CNY");
-                payDetails.setCashFee(payResultVO.getCashFee());
+                payDetails.setCashFee(payResultVO.getCashFee());// 现金支付金额
                 payDetails.setTimeEnd(payResultVO.getTimeEnd());// 支付完成时间
                 payDetails.setTradeStatus(tradeStatus);
                 if (payDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
@@ -777,8 +777,9 @@ public class WeixinPayDetailsServiceImpl
                 payDetails.setTransactionId(orderQueryResultVO.getTransactionId());// 微信支付订单号
                 payDetails.setOpenid(orderQueryResultVO.getOpenid());// 用户标识
                 payDetails.setIsSubscribe(orderQueryResultVO.getIsSubscribe());
+                payDetails.setCouponFee(orderQueryResultVO.getCouponFee());// 优惠金额
                 payDetails.setCashFeeType(StringUtils.isNotBlank(orderQueryResultVO.getCashFeeType()) ? orderQueryResultVO.getCashFeeType() : "CNY");
-                payDetails.setCashFee(orderQueryResultVO.getCashFee());
+                payDetails.setCashFee(orderQueryResultVO.getCashFee());// 现金支付金额
                 payDetails.setTimeEnd(orderQueryResultVO.getTimeEnd());// 支付完成时间
                 logDescTemp += "，微信支付订单号：" + orderQueryResultVO.getTransactionId() + "，支付金额：" + orderQueryResultVO.getTotalFee() +"，支付完成时间：" + payDetails.getTimeEnd();
             }

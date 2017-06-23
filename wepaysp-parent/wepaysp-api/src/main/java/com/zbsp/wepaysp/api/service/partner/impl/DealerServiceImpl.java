@@ -78,10 +78,10 @@ public class DealerServiceImpl
 
         /* 在当前用户所属服务商的管辖的所有商户集合中模糊查询 */
         String state = MapUtils.getString(paramMap, "state");
-        String company = MapUtils.getString(paramMap, "company");
-        String loginId = MapUtils.getString(paramMap, "loginId");
-        String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
-        String coreDataFlag = MapUtils.getString(paramMap, "coreDataFlag");
+        String company = StringUtils.trim(MapUtils.getString(paramMap, "company"));
+        String loginId = StringUtils.trim(MapUtils.getString(paramMap, "loginId"));
+        String moblieNumber = StringUtils.trim(MapUtils.getString(paramMap, "moblieNumber"));
+        String coreDataFlag = StringUtils.trim(MapUtils.getString(paramMap, "coreDataFlag"));
         String partnerOid = MapUtils.getString(paramMap, "partnerOid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         //Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空！");
@@ -155,9 +155,9 @@ public class DealerServiceImpl
     public int doJoinTransQueryDealerCount(Map<String, Object> paramMap) {
         /* 在当前用户所属服务商的管辖的所有商户集合中模糊查询 */
         String state = MapUtils.getString(paramMap, "state");
-        String company = MapUtils.getString(paramMap, "company");
-        String loginId = MapUtils.getString(paramMap, "loginId");
-        String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
+        String company = StringUtils.trim(MapUtils.getString(paramMap, "company"));
+        String loginId = StringUtils.trim(MapUtils.getString(paramMap, "loginId"));
+        String moblieNumber = StringUtils.trim(MapUtils.getString(paramMap, "moblieNumber"));
         String partnerOid = MapUtils.getString(paramMap, "partnerOid");
         String partnerEmployeeOid = MapUtils.getString(paramMap, "partnerEmployeeOid");
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空！");
@@ -225,7 +225,7 @@ public class DealerServiceImpl
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("USERID", dealerVO.getLoginId());
+        paramMap.put("USERID", StringUtils.trim(dealerVO.getLoginId()));
         paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
 
         int idResult = commonDAO.queryObjectCount(sql, paramMap, false);
@@ -237,7 +237,7 @@ public class DealerServiceImpl
         Dealer dealer = new Dealer();
         BeanCopierUtil.copyProperties(dealerVO, dealer);
         dealer.setIwoid(Generator.generateIwoid());
-
+        
         // 获取 商户ID下一个序列值
         sql = "select nextval('" + SysSequenceCode.DEALER + "') as sequence_value";
         paramMap.clear();
@@ -297,19 +297,19 @@ public class DealerServiceImpl
         defaultStore.setStoreId(storeId);
         defaultStore.setDealer(dealer);
         defaultStore.setCreator(creator);
-        defaultStore.setStoreAddress(dealerVO.getAddress());
-        defaultStore.setStoreName(dealerVO.getCompany());
-        defaultStore.setStoreTel(StringUtils.isNotBlank(dealerVO.getTelephone()) ? dealerVO.getTelephone() : dealerVO.getMoblieNumber());
+        defaultStore.setStoreAddress(dealer.getAddress());
+        defaultStore.setStoreName(dealer.getCompany());
+        defaultStore.setStoreTel(StringUtils.isNotBlank(dealer.getTelephone()) ? dealer.getTelephone() : dealer.getMoblieNumber());
         commonDAO.save(defaultStore, false);
 
         // 保存用户
         SysUser newUser = new SysUser();
         newUser.setIwoid(Generator.generateIwoid());
         newUser.setState(SysUser.State.normal.getValue());
-        newUser.setUserId(dealerVO.getLoginId());
-        newUser.setUserName(dealerVO.getContactor());
-        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(dealerVO.getLoginPwd())));
-        newUser.setLineTel(StringUtils.isNotBlank(dealerVO.getMoblieNumber()) ? dealerVO.getMoblieNumber() : dealerVO.getTelephone());
+        newUser.setUserId(StringUtils.trim(dealerVO.getLoginId()));
+        newUser.setUserName(dealer.getContactor());
+        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(dealerVO.getLoginPwd()))));
+        newUser.setLineTel(StringUtils.isNotBlank(dealer.getMoblieNumber()) ? dealer.getMoblieNumber() : dealer.getTelephone());
         newUser.setEmail(dealerVO.getEmail());
         newUser.setBuildType(SysUser.BuildType.create.getValue());
         newUser.setLastLoginTime(null);
@@ -407,8 +407,8 @@ public class DealerServiceImpl
         dealer.setRemark(dealerVO.getRemark());
 
         if ("on".equals(dealerVO.getCoreDataFlag())) {// 核心数据修改
-            dealer.setSubAppid(dealerVO.getSubAppid());
-            dealer.setSubMchId(dealerVO.getSubMchId());
+            dealer.setSubAppid(StringUtils.trim(dealerVO.getSubAppid()));
+            dealer.setSubMchId(StringUtils.trim(dealerVO.getSubMchId()));
         }
         // TODO 提单商户信息
 

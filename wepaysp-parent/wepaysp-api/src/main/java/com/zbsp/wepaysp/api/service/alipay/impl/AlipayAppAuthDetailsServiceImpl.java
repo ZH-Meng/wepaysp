@@ -72,7 +72,7 @@ public class AlipayAppAuthDetailsServiceImpl
                 logger.info("商户(oid={}) - 支付宝授权更换支付宝账户，原有PID：{}, 新的PID：{}", dealer.getAlipayUserId(), appAuthDetailsVO.getAuthUserId());
             }
             String oldDealerStr = dealer.toString();
-            dealer.setAlipayUserId(appAuthDetailsVO.getAuthUserId());
+            //dealer.setAlipayUserId(appAuthDetailsVO.getAuthUserId());
             commonDAO.update(dealer);
             // 记录修改日志
             sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改商户信息[alipayUserId=" + dealer.getAlipayUserId() + "]", 

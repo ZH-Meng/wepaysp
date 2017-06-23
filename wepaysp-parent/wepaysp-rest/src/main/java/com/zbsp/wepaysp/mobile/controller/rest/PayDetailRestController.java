@@ -69,8 +69,8 @@ public class PayDetailRestController extends BaseController {
         } else {
             try {
                 Map<String, Object> paramMap = new HashMap<String, Object>();
-                paramMap.put("outTradeNo", request.getOutTradeNo());
-                paramMap.put("transactionId", request.getTransactionId());
+                paramMap.put("outTradeNo", StringUtils.trim(request.getOutTradeNo()));
+                paramMap.put("transactionId", StringUtils.trim(request.getTransactionId()));
                 if (request.getQueryType() == QueryPayDetailRequest.QueryType.BILL.getValue()) {
                     paramMap.put("beginTime", DateUtil.getDate(request.getBeginTime(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
                     paramMap.put("endTime", DateUtil.getDate(request.getEndTime(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
@@ -122,11 +122,11 @@ public class PayDetailRestController extends BaseController {
             response = new QueryPrintPayDetailResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
         } else if (StringUtils.isBlank(request.getRequestId()) || StringUtils.isBlank(request.getOutTradeNo())) {
             response = new QueryPrintPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
-        } else if (!Validator.contains(SysEnums.PayType.class, request.getPayType() + "")) {
+        } else if (!Validator.contains(SysEnums.PayPlatform.class, request.getPayType())) {
             response = new QueryPrintPayDetailResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
             try {
-                response = payDetailsService.doJoinTransQueryPaySuccessDetail(request.getOutTradeNo(), request.getPayType());
+                response = payDetailsService.doJoinTransQueryPaySuccessDetail(StringUtils.trim(request.getOutTradeNo()), request.getPayType());
                 logger.info(logPrefix + "成功");
             } catch (IllegalArgumentException e) {
                 logger.warn(logPrefix + "警告：{}", e.getMessage());

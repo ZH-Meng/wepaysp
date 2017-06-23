@@ -224,6 +224,7 @@ public class AlipayWapPayController
      * 扫码下单
      */
     @RequestMapping("createOrder")
+    @ResponseBody
     public AlipayPrecreateResultVO scanCreateOrder(AlipayWapPayVO createOrderVO) {
         String logPrefix = "处理扫码支付下单请求 - ";
         logger.info(logPrefix + "开始");
@@ -256,6 +257,7 @@ public class AlipayWapPayController
             	return result;
             }
         }
+
         AliPayDetailsVO payDetailsVO = new AliPayDetailsVO();
         payDetailsVO.setPayType(PayType.ALI_SCAN.getValue());// 扫码支付
         payDetailsVO.setDealerOid(createOrderVO.getDealerOid());
@@ -264,7 +266,7 @@ public class AlipayWapPayController
 
         BigDecimal orderMoney = new BigDecimal(createOrderVO.getMoney());// 订单金额
         payDetailsVO.setTotalAmount(orderMoney.multiply(new BigDecimal(100)).intValue());// 元转化为分
-        
+
         logger.info(logPrefix + "下单 - 开始");
         try {
             Map<String, Object> resultMap = aliPayDetailsMainService.scanPayCreateOrder(payDetailsVO);
@@ -272,11 +274,11 @@ public class AlipayWapPayController
             String resDesc = MapUtils.getString(resultMap, "resultDesc");
             payDetailsVO = (AliPayDetailsVO) MapUtils.getObject(resultMap, "aliPayDetailsVO");
             String qrCode = MapUtils.getString(resultMap, "qrCode");
-
+            result = new AlipayPrecreateResultVO(resCode, resDesc);
             if (!StringUtils.equalsIgnoreCase(AliPayResult.SUCCESS.getCode(), resCode)) {// 扫码支付下单失败
-                logger.warn(logPrefix  + "下单 - 失败，错误码：{}, 错误描述：{}", resCode, resDesc);
+                logger.warn(logPrefix + "下单 - 失败，错误码：{}, 错误描述：{}", resCode, resDesc);
             } else {
-                logger.info(logPrefix  + "下单 - 成功");
+                logger.info(logPrefix + "下单 - 成功");
                 result.setQrCode(qrCode);
             }
         } catch (InvalidValueException e) {
@@ -337,7 +339,7 @@ public class AlipayWapPayController
     @RequestMapping("asynNotify")
     @ResponseBody
     public String asynNotify(HttpServletRequest httpRequest) {
-        String logPrefix = "处理支付宝手机网站支付异步通知请求 - ";
+        String logPrefix = "处理支付宝支付异步通知请求 - ";
         logger.info(logPrefix + "开始");
         
         // 获取所有请求参数

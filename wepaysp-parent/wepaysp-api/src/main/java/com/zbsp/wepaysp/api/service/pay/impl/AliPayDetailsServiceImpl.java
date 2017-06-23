@@ -286,7 +286,7 @@ public class AliPayDetailsServiceImpl
         // 商户操作员和商户门店，FIXME 接口中描述，这些参数都可以做统计和精准定位
         newPayOrder.setOperatorId(newPayOrder.getDealerEmployee().getDealerEmployeeId());
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
-        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
+        //newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
         // terminal_id
         // alipay_store_id
         // undiscountable_amount
@@ -349,7 +349,7 @@ public class AliPayDetailsServiceImpl
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
         
         // seller_id 默认为空，手机网站支付必填为商户的支付宝PID        
-        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());// FIXME 需要验证能否支持以收款人不同类区分不同商户不用授权就可以手机网站支付
+        //newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());// FIXME 需要验证能否支持以收款人不同类区分不同商户不用授权就可以手机网站支付
         
         //timeout_express //该笔订单允许的最晚付款时间，逾期将关闭交易。
         //auth_token // 针对用户授权接口，获取用户相关数据时，用于标识用户授权关系
@@ -417,7 +417,7 @@ public class AliPayDetailsServiceImpl
         //---------------请求非必填项------------//
         newPayOrder.setBody(newPayOrder.getSubject());
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
-        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
+        //newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
         
         //newPayOrder.setCreator(creator);// 考虑支付宝静默授权获取用户标识
         commonDAO.save(newPayOrder, false);
@@ -816,8 +816,27 @@ public class AliPayDetailsServiceImpl
             BeanCopierUtil.copyProperties(payDetails, payDetailVO);
             payDetailVO.setDealerName(payDetails.getDealer().getCompany());
             payDetailVO.setStoreName(payDetails.getStore().getStoreName());
+            
+            DealerEmployee de = payDetails.getDealerEmployee();
+            payDetailVO.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
+            payDetailVO.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
+            
+            Store store = payDetails.getStore();
+            payDetailVO.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
+            payDetailVO.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
+            
+            Dealer dealer = payDetails.getDealer();
+            payDetailVO.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
+            payDetailVO.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+            
+            PartnerEmployee pe = payDetails.getPartnerEmployee();
+            payDetailVO.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
+            payDetailVO.setPartnerEmployeeId(pe != null ? pe.getPartnerEmployeeId() : (dealer != null ? dealer.getPartnerEmployee().getPartnerEmployeeId() : ""));
+            
+            Partner p = payDetails.getPartner();
+            payDetailVO.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
+            payDetailVO.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
         }
-        
         return payDetailVO;
     }
 

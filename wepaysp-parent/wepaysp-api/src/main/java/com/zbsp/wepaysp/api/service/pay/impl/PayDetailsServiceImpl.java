@@ -13,6 +13,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
@@ -31,6 +32,7 @@ import com.zbsp.wepaysp.mo.paydetail.v1_0.PayDetailData;
 import com.zbsp.wepaysp.mo.paydetail.v1_0.QueryPayDetailResponse;
 import com.zbsp.wepaysp.mo.paydetailprint.v1_0.QueryPrintPayDetailResponse;
 import com.zbsp.wepaysp.po.view.ViewPayDetailId;
+import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.PayDetailVO;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
@@ -38,6 +40,7 @@ import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 public class PayDetailsServiceImpl extends BaseService implements PayDetailsService {
 	
 	private WeixinPayDetailsService weixinPayDetailsService;
+	private AliPayDetailsService aliPayDetailsService;
 
 	@Override
 	public QueryPayDetailResponse doJoinTransQueryPayDetails(String dealerEmployeeOid, Map<String, Object> paramMap,	int startIndex, int maxResult) throws IllegalArgumentException {
@@ -179,12 +182,25 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 			}
 		//} else if (6 <= payType && payType <= 10) {// 支付宝支付
 		} else if (payType == Integer.valueOf(PayPlatform.ALI.getValue())) {// 支付宝支付
-			response = new QueryPrintPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), Generator.generateIwoid());
-			
+		    AliPayDetailsVO payDetailVO = aliPayDetailsService.doJoinTransQueryAliPayDetailsVOByNum(outTradeNo, null);
+		    if (payDetailVO == null || payDetailVO.getTradeStatus().intValue() != TradeStatus.TRADE_SUCCESS.getValue()) {// 没有支付成功的暂不允许查询
+                response = new QueryPrintPayDetailResponse(CommonResult.DATA_NOT_EXIST.getCode(), CommonResult.DATA_NOT_EXIST.getDesc(), Generator.generateIwoid());
+            } else {
+                response = new QueryPrintPayDetailResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), Generator.generateIwoid());
+                response.setDealerCompany(payDetailVO.getDealerName());
+                response.setDealerId(payDetailVO.getDealerId());
+                response.setDealerEmployeeId(payDetailVO.getDealerEmployeeId());
+                
+                response.setMoney(Formatter.formatNumber("###,##0.00", new BigDecimal(payDetailVO.getTotalAmount()).divide(new BigDecimal(100)).doubleValue()));
+                response.setOutTradeNo(payDetailVO.getOutTradeNo());
+                response.setPayType(PayPlatform.ALI.getDesc());
+                response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getDesc());
+                response.setTransactionId(payDetailVO.getTradeNo());
+                response.setTradeTime(DateUtil.getDate(payDetailVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
+            }
 		} else {
 			response = new QueryPrintPayDetailResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), Generator.generateIwoid());
 		}
-        
         return response;
 	}
 
@@ -324,5 +340,9 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 	public void setWeixinPayDetailsService(WeixinPayDetailsService weixinPayDetailsService) {
 		this.weixinPayDetailsService = weixinPayDetailsService;
 	}
+    
+    public void setAliPayDetailsService(AliPayDetailsService aliPayDetailsService) {
+        this.aliPayDetailsService = aliPayDetailsService;
+    }
 
 }

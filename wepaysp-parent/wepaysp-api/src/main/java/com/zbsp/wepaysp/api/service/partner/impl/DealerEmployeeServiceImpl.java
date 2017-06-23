@@ -51,7 +51,7 @@ public class DealerEmployeeServiceImpl
     public DealerEmployeeVO doJoinTransQueryDealerEmployeeByOid(String dealerEmployeeOid) {
     	Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "商户员工Oid不能为空！");
         DealerEmployeeVO dealerEmployeeVO = new DealerEmployeeVO();
-        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
+        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, StringUtils.trim(dealerEmployeeOid));
         if (dealerEmployee != null) {
             BeanCopierUtil.copyProperties(dealerEmployee, dealerEmployeeVO);
             dealerEmployeeVO.setStoreOid(dealerEmployee.getStore().getIwoid());
@@ -74,11 +74,11 @@ public class DealerEmployeeServiceImpl
     	   
     	/* 所属某服务商下的所有服务商查询 */
     	// String state = MapUtils.getString(paramMap, "state");
-        String employeeName = MapUtils.getString(paramMap, "employeeName");
-        String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
-        String dealerOid = MapUtils.getString(paramMap, "dealerOid");
-        String storeOid = MapUtils.getString(paramMap, "storeOid");
-        String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
+        String employeeName = StringUtils.trim(MapUtils.getString(paramMap, "employeeName"));
+        String moblieNumber = StringUtils.trim(MapUtils.getString(paramMap, "moblieNumber"));
+        String dealerOid = StringUtils.trim(MapUtils.getString(paramMap, "dealerOid"));
+        String storeOid = StringUtils.trim(MapUtils.getString(paramMap, "storeOid"));
+        String dealerEmployeeOid = StringUtils.trim(MapUtils.getString(paramMap, "dealerEmployeeOid"));
         
         Validator.checkArgument(StringUtils.isBlank(dealerOid) && StringUtils.isBlank(storeOid), "商户Oid或门店Oid至少一个不能为空！");
 
@@ -137,9 +137,9 @@ public class DealerEmployeeServiceImpl
     @Override
     public int doJoinTransQueryDealerEmployeeCount(Map<String, Object> paramMap) {
         // String state = MapUtils.getString(paramMap, "state");
-        String employeeName = MapUtils.getString(paramMap, "employeeName");
-        String moblieNumber = MapUtils.getString(paramMap, "moblieNumber");
-        String dealerOid = MapUtils.getString(paramMap, "dealerOid");
+        String employeeName = StringUtils.trim(MapUtils.getString(paramMap, "employeeName"));
+        String moblieNumber = StringUtils.trim(MapUtils.getString(paramMap, "moblieNumber"));
+        String dealerOid = StringUtils.trim(MapUtils.getString(paramMap, "dealerOid"));
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "商户Oid不能为空！");
 
         StringBuffer sql = new StringBuffer("select count(distinct de.iwoid) from DealerEmployee de, Dealer d where de.dealer=d");
@@ -179,7 +179,7 @@ public class DealerEmployeeServiceImpl
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("USERID", dealerEmployeeVO.getLoginId());
+        paramMap.put("USERID", StringUtils.trim(dealerEmployeeVO.getLoginId()));
         paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
 
         int idResult = commonDAO.queryObjectCount(sql, paramMap, false);
@@ -192,14 +192,14 @@ public class DealerEmployeeServiceImpl
         dealerEmployee.setIwoid(Generator.generateIwoid());
         
         // 查找所属商户      
-        Dealer dealer = commonDAO.findObject(Dealer.class, dealerEmployeeVO.getDealerOid());
+        Dealer dealer = commonDAO.findObject(Dealer.class, StringUtils.trim(dealerEmployeeVO.getDealerOid()));
         if (dealer == null) {
             throw new NotExistsException("未找到商户信息！");
         }
         dealerEmployee.setDealer(dealer);
         
         // 查找门店
-        Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
+        Store store = commonDAO.findObject(Store.class, StringUtils.trim(dealerEmployeeVO.getStoreOid()));
         if (store == null) {
             throw new NotExistsException("未找到门店信息");
         }
@@ -233,11 +233,11 @@ public class DealerEmployeeServiceImpl
         }
         String dealerEmployeeId = Generator.generateSequenceNum((Integer) seqObj, SysSequenceMultiple.PARTNER_EMPLOYEE);
         dealerEmployee.setDealerEmployeeId(dealerEmployeeId);
-        dealerEmployee.setMoblieNumber(dealerEmployeeVO.getMoblieNumber());
-        dealerEmployee.setEmployeeName(dealerEmployeeVO.getEmployeeName());
-        dealerEmployee.setRefundPassword(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(dealerEmployeeVO.getRefundPassword())));
-        dealerEmployee.setState(dealerEmployeeVO.getState());
-        dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
+        dealerEmployee.setMoblieNumber(StringUtils.trim(dealerEmployeeVO.getMoblieNumber()));
+        dealerEmployee.setEmployeeName(StringUtils.trim(dealerEmployeeVO.getEmployeeName()));
+        dealerEmployee.setRefundPassword(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(dealerEmployeeVO.getRefundPassword()))));
+        dealerEmployee.setState(StringUtils.trim(dealerEmployeeVO.getState()));
+        dealerEmployee.setRemark(StringUtils.trim(dealerEmployeeVO.getRemark()));
         dealerEmployee.setCreator(creator);
         dealerEmployee.setEmployeeType(dealerEmployeeVO.getEmployeeType());
         commonDAO.save(dealerEmployee, false);
@@ -246,10 +246,10 @@ public class DealerEmployeeServiceImpl
         SysUser newUser = new SysUser();
         newUser.setIwoid(Generator.generateIwoid());
         newUser.setState(SysUser.State.normal.getValue());
-        newUser.setUserId(dealerEmployeeVO.getLoginId());
-        newUser.setUserName(dealerEmployeeVO.getEmployeeName());
-        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(dealerEmployeeVO.getLoginPwd())));
-        newUser.setLineTel(dealerEmployeeVO.getMoblieNumber());
+        newUser.setUserId(StringUtils.trim(dealerEmployeeVO.getLoginId()));
+        newUser.setUserName(StringUtils.trim(dealerEmployeeVO.getEmployeeName()));
+        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(dealerEmployeeVO.getLoginPwd()))));
+        newUser.setLineTel(StringUtils.trim(dealerEmployeeVO.getMoblieNumber()));
         newUser.setBuildType(SysUser.BuildType.create.getValue());
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());
@@ -298,13 +298,13 @@ public class DealerEmployeeServiceImpl
         
         Date processBeginTime = new Date();
         // 查找商户
-        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, dealerEmployeeVO.getIwoid());
+        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, StringUtils.trim(dealerEmployeeVO.getIwoid()));
         if (dealerEmployee == null) {
             throw new NotExistsException("未找到要修改的商户员工对象");
         }
         String dealerEmployeeStr = dealerEmployee.toString();
         
-        if (!StringUtils.equals(dealerEmployee.getStore().getIwoid(), dealerEmployeeVO.getStoreOid())) {
+        if (!StringUtils.equals(dealerEmployee.getStore().getIwoid(), StringUtils.trim(dealerEmployeeVO.getStoreOid()))) {
             // 查找门店
             Store store = commonDAO.findObject(Store.class, dealerEmployeeVO.getStoreOid());
             if (store == null) {
@@ -313,10 +313,10 @@ public class DealerEmployeeServiceImpl
             dealerEmployee.setStore(store);
         }
 
-        dealerEmployee.setMoblieNumber(dealerEmployeeVO.getMoblieNumber());
-        dealerEmployee.setEmployeeName(dealerEmployeeVO.getEmployeeName());
-        dealerEmployee.setState(dealerEmployeeVO.getState());
-        dealerEmployee.setRemark(dealerEmployeeVO.getRemark());
+        dealerEmployee.setMoblieNumber(StringUtils.trim(dealerEmployeeVO.getMoblieNumber()));
+        dealerEmployee.setEmployeeName(StringUtils.trim(dealerEmployeeVO.getEmployeeName()));
+        dealerEmployee.setState(StringUtils.trim(dealerEmployeeVO.getState()));
+        dealerEmployee.setRemark(StringUtils.trim(dealerEmployeeVO.getRemark()));
         if (dealerEmployee.getEmployeeType() == null || dealerEmployee.getEmployeeType().intValue() != dealerEmployeeVO.getEmployeeType()) {// 员工类型改变
             Map<String, Object> jpqlMap = new HashMap<String, Object>();
             String newRoleCode = SysNestedRoleCode.CASHIER;
@@ -401,7 +401,7 @@ public class DealerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(modifier), "修改人不能为空");
         Validator.checkArgument(StringUtils.isBlank(operatorUserOid), "操作用户Oid不能为空");
         //Validator.checkArgument(StringUtils.isBlank(logFunctionOid), "日志记录项Oid不能为空");
-        oldPwd = DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(oldPwd));
+        oldPwd = DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(oldPwd)));
         DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
 
         if (dealerEmployee == null) {
@@ -412,7 +412,7 @@ public class DealerEmployeeServiceImpl
             throw new IllegalArgumentException("旧退款密码输入错误，请重试！");
         }
 
-        dealerEmployee.setRefundPassword(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(newPwd)));
+        dealerEmployee.setRefundPassword(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(newPwd))));
 
         commonDAO.update(dealerEmployee);
         
@@ -441,7 +441,7 @@ public class DealerEmployeeServiceImpl
         String oldPwdStr = dealerEmployee.getRefundPassword();
 
         Date currentTime = new Date();
-        dealerEmployee.setRefundPassword(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(newPwd)));
+        dealerEmployee.setRefundPassword(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(newPwd))));
         dealerEmployee.setModifier(operatorName);
         commonDAO.update(dealerEmployee);
 
@@ -479,7 +479,7 @@ public class DealerEmployeeServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "收银员Oid不能为空！");
         DealerEmployeeVO dealerEmployeeVO = new DealerEmployeeVO();
 
-        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, dealerEmployeeOid);
+        DealerEmployee dealerEmployee = commonDAO.findObject(DealerEmployee.class, StringUtils.trim(dealerEmployeeOid));
         if (dealerEmployee == null) {
             throw new NotExistsException("收银员不存在");
         }

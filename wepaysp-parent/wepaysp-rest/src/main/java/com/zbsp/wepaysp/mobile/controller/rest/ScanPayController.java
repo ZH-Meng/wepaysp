@@ -79,6 +79,7 @@ public class ScanPayController extends BaseController {
             response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
         } else {
             try {
+                request.setAuthCode(StringUtils.trim(request.getAuthCode()));
             	// 根据AuthCode 判断微信或者支付宝支付
                 String authCodeStart = request.getAuthCode().substring(0, 2);
                 if (ArrayUtils.contains(WX_AUTH_CODES, authCodeStart)) {
