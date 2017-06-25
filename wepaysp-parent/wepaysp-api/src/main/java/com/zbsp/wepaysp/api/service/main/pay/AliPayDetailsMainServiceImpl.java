@@ -13,9 +13,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
+import com.zbsp.alipay.trade.model.result.AlipayF2FPrecreateResult;
 import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.SysConfig;
@@ -555,17 +555,34 @@ public class AliPayDetailsMainServiceImpl
         logger.info(logPrefix + "调用扫码预下单接口 - 开始");
         
         flag = false;
-        AlipayTradePrecreateResponse precreateResp = null;
+        boolean updateFlag = false;
+        AlipayF2FPrecreateResult precreateResult = null;
         try {
             // 调用预下单
-        	precreateResp = AliPayUtil.tradePrecreate(payDetailsVO);
+        	precreateResult = AliPayUtil.tradePrecreate(payDetailsVO);
             // 打印应答
-            logger.info(logPrefix + "调用扫码预下单接口 - 支付结果 - outTradeNo={}, reponse : {})", outTradeNo,
-            		precreateResp == null ? null : JSONUtil.toJSONString(precreateResp, true));
-            if (precreateResp != null && StringUtils.isNotBlank(precreateResp.getQrCode())) {
-                resultMap.put("qrCode", precreateResp.getQrCode());
-                flag = true;
-            }
+			switch (precreateResult.getTradeStatus()) {
+			case SUCCESS:
+				logger.info(logPrefix + "调用扫码预下单接口 - 成功，response:{}", JSONUtil.toJSONString(precreateResult.getResponse(), true));
+				resultMap.put("qrCode", precreateResult.getResponse().getQrCode());
+				flag = true;
+				updateFlag = true;
+				break;
+			case FAILED:
+				logger.warn(logPrefix + "调用扫码预下单接口 - 失败");
+				updateFlag = true;
+				break;
+			case UNKNOWN:
+				logger.warn(logPrefix + "调用扫码预下单接口 - 异常，ouTradeNo={}, 支付状态置为待关闭", outTradeNo);
+				aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.TRADE_TO_BE_CLOSED.getValue(), "扫码预下单异常，更新状态为待关闭；");
+				break;
+			}
+			if (updateFlag) {
+		        logger.info(logPrefix + "更新预下单结果 - 开始");
+				aliPayDetailsService.doTransUpdateScanPrecreateResult(outTradeNo, precreateResult.getResponse().getCode(), precreateResult.getResponse().getMsg(),
+						precreateResult.getResponse().getSubCode(), precreateResult.getResponse().getSubMsg());
+		        logger.info(logPrefix + "更新预下单结果 - 结束");
+			}
         } catch (ConvertPackException e) {
             logger.error(logPrefix + AlarmLogPrefix.sendAliPayRequestException + "支付明细转换预下单请求包构造器(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage());
         } catch (Exception e) {
@@ -573,6 +590,7 @@ public class AliPayDetailsMainServiceImpl
         } finally {
             logger.info(logPrefix + "调用扫码预下单接口 -结束");
         }
+        
         if (flag) {
             resultMap.put("resultCode", AliPayResult.SUCCESS.getCode());// 下单成功
             resultMap.put("resultDesc", AliPayResult.SUCCESS.getDesc());

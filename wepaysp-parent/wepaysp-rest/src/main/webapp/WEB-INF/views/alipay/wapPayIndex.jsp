@@ -68,7 +68,7 @@
 					$("#money").focus();
 					return;
 				}
-				
+				$("#ok-btn").attr("disabled", false);				
 				$.post("<%=request.getContextPath()%>/alipay/h5/createOrder",
 					  {
 						"dealerOid":dealerOid,"money":money,
@@ -78,6 +78,7 @@
 					  function(data,status){
 					    if (status == "success" || status == "SUCCESS") {
 					    	if (data.resultCode == "success" || data.resultCode == "SUCCESS") {
+					    		$("#ok-btn").attr("disabled", true);				
 					    		window.location.href=data.qrCode;
 					    	} else {
 					    		alert("系统错误，下单失败");
