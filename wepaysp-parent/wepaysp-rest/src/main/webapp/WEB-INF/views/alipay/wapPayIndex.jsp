@@ -20,7 +20,8 @@
 	</head>
 </head>
 <body>
-		<form id="orderForm" action="<%=request.getContextPath()%>/alipay/wappay/createOrder"  method="post">
+		<form id="orderForm"  method="post">
+			<span id="debug_span"></span>
 			<input type="hidden" value="${indexVO.dealerOid}"  name="dealerOid" id="dealerOid">
 			<input type="hidden" value="${indexVO.storeOid}"  name="storeOid" id="storeOid">
 			<input type="hidden" value="${indexVO.dealerEmployeeOid}"  name="dealerEmployeeOid" id="dealerEmployeeOid">
@@ -33,7 +34,7 @@
 					<p class="input-title">消费总额</p>
 					<p class="input-amt">
 						<span class="fuhao">&yen;</span>
-						<input id="money" name="money" type="number" type="hidden" readonly="readonly" contenteditable="true" />
+						<input id="money" name="money" type="text" type="hidden" readonly="readonly" contenteditable="true" />
 					</p>
 					<div class="break-line"></div>
 					<p class="input-explain">可询问服务员消费总额</p>
@@ -67,7 +68,31 @@
 					$("#money").focus();
 					return;
 				}
-				$("#orderForm").submit();
+				$("#ok-btn").attr("disabled", false);				
+				$.post("<%=request.getContextPath()%>/alipay/h5/createOrder",
+					  {
+						"dealerOid":dealerOid,"money":money,
+					  	"storeOid":$.trim($("#storeOid").val()),
+					  	"dealerEmployeeOid":$.trim($("#dealerEmployeeOid").val())
+					  },
+					  function(data,status){
+					    if (status == "success" || status == "SUCCESS") {
+					    	if (data.resultCode == "success" || data.resultCode == "SUCCESS") {
+					    		$("#ok-btn").attr("disabled", true);				
+					    		window.location.href=data.qrCode;
+					    	} else {
+					    		alert("系统错误，下单失败");
+					    		/* if (data.desc != null && data.desc != "") {
+						    		alert(data.desc);
+					    		} else {
+					    			alert("系统错误，下单失败");
+					    		} */
+					    	}
+					    } else {
+					    	alert("系统异常，请重试！");
+					    }
+				  }, "json");
+				//$("#orderForm").submit();
 			}
 		</script>
 </body>

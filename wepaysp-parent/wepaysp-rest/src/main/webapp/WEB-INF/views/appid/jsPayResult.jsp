@@ -9,10 +9,10 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<title>支付结果</title>
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/weui.min.css"/>
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/font/iconfont.css"/>
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/main.css"/>
-		<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery-1.9.1.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/resources/js/jquery-1.9.1.min.js"></script>
 		<script type="text/javascript">
 			$(function () {
 				pushHistory();
@@ -47,7 +47,7 @@
 			</p>	
 			<div class="succ-info">
 				<div class="error-bottom">
-					<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 				</div>			
 				<p class="info2">订单处理中</p>
 	
@@ -66,7 +66,7 @@
 			</p>
 			<div class="succ-info">
 				<div class="error-bottom">
-					<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 				</div>			
 				<p class="info2">订单已取消</p>
 	
@@ -84,7 +84,7 @@
 			</p>		
 			<div class="succ-info">
 				<div class="error-bottom">
-					<img class="yzf-img" src="<%=request.getContextPath()%>/images/pay-error.png" alt="" />
+					<img class="yzf-img" src="<%=request.getContextPath()%>/resources/images/pay-error.png" alt="" />
 				</div>			
 				<p class="info2">支付失败请重试</p>
 				<div class="error-item">

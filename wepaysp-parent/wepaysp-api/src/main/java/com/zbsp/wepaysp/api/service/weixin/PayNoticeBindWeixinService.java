@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
+import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 /**
@@ -51,4 +52,13 @@ public interface PayNoticeBindWeixinService {
      * @return PayNoticeBindWeixinVO
      */
     public PayNoticeBindWeixinVO doTransAddPayNoticeBindWeixin(String bindType, String toRelateOid, GetUserinfoResData userinfoResData);
+
+    /**
+     * 根据微信唯一标识查找绑定用户和绑定信息
+     * @param openid
+     * @return
+     */
+    public Map<String, Object> doJoinTransQueryBindInfo(String openid);
+
+    public void doTransUpdateBindWeixinState(String bindOid, PayNoticeBindWeixin.State state);
 }

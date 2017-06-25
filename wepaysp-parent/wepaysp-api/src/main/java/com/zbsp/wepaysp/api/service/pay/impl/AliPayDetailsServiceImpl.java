@@ -84,6 +84,9 @@ public class AliPayDetailsServiceImpl
         } else if (StringUtils.equals(PayType.ALI_H5.getValue(), payDetailsVO.getPayType())) {
             logger.info("创建订单，支付方式：支付宝-手机网站支付");
             returnVO = createWapPayDetail(payDetailsVO);
+        } else if (StringUtils.equals(PayType.ALI_SCAN.getValue(), payDetailsVO.getPayType())) {
+            logger.info("创建订单，支付方式：支付宝-当面付-扫码支付");
+            returnVO = createScanPayDetail(payDetailsVO);
         } else {
         	logger.warn("创建订单失败，不支持当前支付，payType={}", payType);
         } 
@@ -277,15 +280,13 @@ public class AliPayDetailsServiceImpl
         if (appAuth == null) {
             throw new NotExistsException("AlipayAppAuthDetails不存在（appId=" + newPayOrder.getAppId() + "，商户ID=" + newPayOrder.getDealer().getDealerId() +"）");
         }
-        
-        // 代替商户发起当面付，设置商户授权令牌
-        newPayOrder.setAppAuthToken(appAuth.getAppAuthToken());
+		// 代替商户发起当面付，设置商户授权令牌
+		newPayOrder.setAppAuthToken(appAuth.getAppAuthToken());
 
         // 商户操作员和商户门店，FIXME 接口中描述，这些参数都可以做统计和精准定位
         newPayOrder.setOperatorId(newPayOrder.getDealerEmployee().getDealerEmployeeId());
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
-        
-        //newPayOrder.setSellerId 默认为空
+        //newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
         // terminal_id
         // alipay_store_id
         // undiscountable_amount
@@ -296,7 +297,6 @@ public class AliPayDetailsServiceImpl
         newPayOrder.setSubject(newPayOrder.getDealer().getCompany() + (newPayOrder.getStore() == null ? "" : "-" + newPayOrder.getStore().getStoreName()));
         
         newPayOrder.setBody(newPayOrder.getSubject());
-        newPayOrder.setPayType(PayType.ALI_FACE_BAR.getValue() + "");
         newPayOrder.setTotalAmount(payDetailsVO.getTotalAmount());
         newPayOrder.setAuthCode(payDetailsVO.getAuthCode());
         newPayOrder.setCreator(newPayOrder.getDealerEmployee().getIwoid());// 收银员的Oid
@@ -321,7 +321,6 @@ public class AliPayDetailsServiceImpl
         
         // 生成明细
         AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO, PayType.ALI_H5.getValue());
-        newPayOrder.setPayType(PayType.ALI_H5.getValue() + "");       
         
         // 根据系统配置的支持手机网站支付应用ID查找系统维护的蚂蚁平台应用
         newPayOrder.setAppId(SysConfig.appId4Face2FacePay);//FIXME
@@ -350,7 +349,7 @@ public class AliPayDetailsServiceImpl
         newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
         
         // seller_id 默认为空，手机网站支付必填为商户的支付宝PID        
-        newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());// FIXME 需要验证能否支持以收款人不同类区分不同商户不用授权就可以手机网站支付
+        //newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());// FIXME 需要验证能否支持以收款人不同类区分不同商户不用授权就可以手机网站支付
         
         //timeout_express //该笔订单允许的最晚付款时间，逾期将关闭交易。
         //auth_token // 针对用户授权接口，获取用户相关数据时，用于标识用户授权关系
@@ -373,6 +372,64 @@ public class AliPayDetailsServiceImpl
         return payDetailsVO;
     }
     
+    /**
+     * 生成、保存扫码支付明细
+     * @param payDetailsVO
+     * @return
+     */
+    private AliPayDetailsVO createScanPayDetail(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getStoreOid()), "storeOid为空");
+        
+        // 生成明细
+        AliPayDetails newPayOrder = newAliPayDetail(payDetailsVO, PayType.ALI_SCAN.getValue());
+        newPayOrder.setAppId(SysConfig.appId4Face2FacePay);
+        
+        logger.info("查找应用({}) - 开始", newPayOrder.getAppId());
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayApp a where a.appId=:APPID";
+        jpqlMap.put("APPID", newPayOrder.getAppId());
+
+        AlipayApp app = commonDAO.findObject(jpql, jpqlMap, false);
+        if (app == null) {
+            throw new NotExistsException("AlipayApp不存在（appId=" + newPayOrder.getAppId() + "）");
+        }
+        logger.info("查找应用({}) - 结束", newPayOrder.getAppId());
+        
+        // 查找商户授权令牌
+        jpqlMap.clear();
+        jpql = "from AlipayAppAuthDetails a where a.dealer=:DEALER and a.alipayApp=:ALIPAYAPP and a.status=:STATUS order by a.createTime desc";
+        jpqlMap.put("DEALER", newPayOrder.getDealer());
+        jpqlMap.put("ALIPAYAPP", app);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        AlipayAppAuthDetails appAuth = commonDAO.findObject(jpql, jpqlMap, false);
+        if (appAuth == null) {
+            throw new NotExistsException("AlipayAppAuthDetails不存在（appId=" + newPayOrder.getAppId() + "，商户ID=" + newPayOrder.getDealer().getDealerId() +"）");
+        }
+		// 代替商户发起当面付，设置商户授权令牌
+		newPayOrder.setAppAuthToken(appAuth.getAppAuthToken());
+		
+        //---------------请求必填项------------//
+        // 订单标题，暂取 品牌(商户名)-门店
+        newPayOrder.setSubject(newPayOrder.getDealer().getCompany() + (newPayOrder.getStore() == null ? "" : "-" + newPayOrder.getStore().getStoreName()));
+        newPayOrder.setTotalAmount(payDetailsVO.getTotalAmount());
+        //product_code 销售产品码，商家和支付宝签约的产品码
+        
+        //---------------请求非必填项------------//
+        newPayOrder.setBody(newPayOrder.getSubject());
+        newPayOrder.setStoreId(newPayOrder.getStore().getStoreId());
+        //newPayOrder.setSellerId(newPayOrder.getDealer().getAlipayUserId());
+        
+        //newPayOrder.setCreator(creator);// 考虑支付宝静默授权获取用户标识
+        commonDAO.save(newPayOrder, false);
+        // 记录日志
+        Date processTime = new Date();
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, 
+            "新增支付宝支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo() + "支付方式=扫码支付, 商户=" + newPayOrder.getDealer().getDealerId() + "，下单金额：" + newPayOrder.getTotalAmount() + ", 商品详情=" + newPayOrder.getBody() + "]", 
+            processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), null, SysLog.ActionType.create.getValue());
+        
+        BeanCopierUtil.copyProperties(newPayOrder, payDetailsVO);
+        return payDetailsVO;
+    }
     
     /** 
      * 创建包含公共属性的支付明细
@@ -446,6 +503,7 @@ public class AliPayDetailsServiceImpl
         aliPayDetails.setTradeStatus(TradeStatus.TRADEING.getValue());
         aliPayDetails.setTransBeginTime(new Timestamp(new Date().getTime()));
         aliPayDetails.setCreator(payDetailsVO.getDealerEmployeeOid());
+        aliPayDetails.setPayType(payType);
         
         /*返佣必填项，支付请求设置 extend_params 中sys_service_provider_id参数的值*/
         aliPayDetails.setIsvPartnerId(topPartner.getIsvPartnerId());
@@ -518,7 +576,8 @@ public class AliPayDetailsServiceImpl
         String jpqlSelect = "select distinct(w) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         
         StringBuffer conditionSB = new StringBuffer();
-        
+        // 只查交易成功的
+        conditionSB.append(" and w.tradeStatus=1");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -672,7 +731,8 @@ public class AliPayDetailsServiceImpl
         String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
 
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
-        
+        // 只查交易成功的
+        sql.append(" and w.tradeStatus=1");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -758,8 +818,27 @@ public class AliPayDetailsServiceImpl
             BeanCopierUtil.copyProperties(payDetails, payDetailVO);
             payDetailVO.setDealerName(payDetails.getDealer().getCompany());
             payDetailVO.setStoreName(payDetails.getStore().getStoreName());
+            
+            DealerEmployee de = payDetails.getDealerEmployee();
+            payDetailVO.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
+            payDetailVO.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
+            
+            Store store = payDetails.getStore();
+            payDetailVO.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
+            payDetailVO.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
+            
+            Dealer dealer = payDetails.getDealer();
+            payDetailVO.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
+            payDetailVO.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+            
+            PartnerEmployee pe = payDetails.getPartnerEmployee();
+            payDetailVO.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
+            payDetailVO.setPartnerEmployeeId(pe != null ? pe.getPartnerEmployeeId() : (dealer != null ? dealer.getPartnerEmployee().getPartnerEmployeeId() : ""));
+            
+            Partner p = payDetails.getPartner();
+            payDetailVO.setPartnerName(p != null ? p.getCompany() : (dealer != null ? dealer.getPartner().getCompany() : ""));
+            payDetailVO.setPartnerId(p != null ? p.getPartnerId() : (dealer != null ? dealer.getPartner().getPartnerId() : ""));
         }
-        
         return payDetailVO;
     }
 
@@ -926,56 +1005,57 @@ public class AliPayDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(notifyVO.getOut_trade_no()),"notifyVO.outTradeNo为空");
         
         AliPayDetails payDetails = doJoinTransQueryAliPayDetailsByNum(notifyVO.getOut_trade_no(), null, LockModeType.PESSIMISTIC_WRITE);
-        
         if (payDetails == null) {
             throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + notifyVO.getOut_trade_no());
         }
-        String oldPayDetailStr = payDetails.toString();
-        StringBuffer logDescBuffer = new StringBuffer("修改支付宝明细[");
-
         // 更新通知内容
         payDetails.setNotifyId(notifyVO.getNotify_id());
         payDetails.setNotifyTime(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getNotify_time(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
-
-        logDescBuffer.append("notifyId：");
-        logDescBuffer.append(payDetails.getNotifyId());
-        logDescBuffer.append(", notifyTime：");
-        logDescBuffer.append(payDetails.getNotifyTime());
+        payDetails.setTradeNo(notifyVO.getTrade_no());
+        payDetails.setBuyerUserId(notifyVO.getBuyer_id());
+        payDetails.setBuyerLogonId(notifyVO.getBuyer_logon_id());
+        payDetails.setSellerId(notifyVO.getSeller_id());
+        payDetails.setReceiptAmount(NumberUtils.toInt(notifyVO.getReceipt_amount()));
+        payDetails.setInvoiceAmount(NumberUtils.toInt(notifyVO.getInvoice_amount()));
+        payDetails.setBuyerPayAmount(NumberUtils.toInt(notifyVO.getBuyer_pay_amount()));
+        payDetails.setPointAmount(NumberUtils.toInt(notifyVO.getPoint_amount()));
         if (notifyVO.getGmt_refund() != null) {
             payDetails.setGmtRefund(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_refund(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
-            logDescBuffer.append(", gmtRefund：");
-            logDescBuffer.append(payDetails.getGmtRefund());
         }
         if (notifyVO.getGmt_close() != null) {
             payDetails.setGmtClose(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_close(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
-            logDescBuffer.append(", gmtClose：");
-            logDescBuffer.append(payDetails.getGmtClose());
         }
         if (tradeStatus != null) {
             payDetails.setTradeStatus(tradeStatus.getValue());
-            logDescBuffer.append(", tradeStatus：");
-            logDescBuffer.append(payDetails.getTradeStatus());
             
             if (tradeIsEnd(tradeStatus.getValue())) {
                 // 更新结束时间
                 Date endDate = new Date();
                 payDetails.setTransEndTime(DateUtil.getTimestamp(endDate));
-                logDescBuffer.append(", endTime：");
-                logDescBuffer.append(endDate);
             }
         }
         if (StringUtils.isNotBlank(remark)) {
             payDetails.setRemark(payDetails.getRemark() + remark);
-            logDescBuffer.append(", remark：");
-            logDescBuffer.append(remark);
         }
-        logDescBuffer.append("]");
-        
         commonDAO.update(payDetails);
-        Date logDate = new Date();
-        // 记录修改日志
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, logDescBuffer.toString(), 
-            logDate, logDate, oldPayDetailStr, payDetails.toString(), SysLog.State.success.getValue(), payDetails.getIwoid(), null, SysLog.ActionType.modify.getValue());
     }
+
+	@Override
+	public void doTransUpdateScanPrecreateResult(String outTradeNo, String code ,String msg, String subCode, String subMsg) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo),"outTradeNo为空");
+        AliPayDetails payDetails = doJoinTransQueryAliPayDetailsByNum(outTradeNo, null, LockModeType.PESSIMISTIC_WRITE);
+        if (payDetails == null) {
+            throw new NotExistsException("支付宝支付明细不存在，outTradeNo=" + outTradeNo);
+        }
+        payDetails.setCode(code);
+        payDetails.setMsg(msg);
+        payDetails.setSubCode(subCode);
+        payDetails.setSubMsg(subMsg);
+        if (!StringUtils.equals(GateWayResponse.SUCCESS.getCode(), code)) {
+        	payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
+        	payDetails.setTransEndTime(new Timestamp(new Date().getTime()));
+        }
+        commonDAO.update(payDetails);
+	}
 
 }

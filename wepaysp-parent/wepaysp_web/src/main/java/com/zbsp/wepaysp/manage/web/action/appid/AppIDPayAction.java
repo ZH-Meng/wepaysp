@@ -129,7 +129,7 @@ public class AppIDPayAction
             logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
                 "获取网页授权Access_token失败", "，异常信息：" + e.getMessage()));
             logger.error(e.getMessage(), e);
-            setErrResult(new ErrResult("sys_error", "系统异常"));
+            setErrResult(new ErrResult("sys_error", "系统或网络异常"));
             return "accessDeniedH5";
         }
         logger.info("微信支付回调成功.");
@@ -301,13 +301,13 @@ public class AppIDPayAction
             logger.warn("getBaseAccessTokenResData为空");
         } else {
             logger.debug(getAuthAccessTokenResData.toString());
-        }
-        if (StringUtils.isNotBlank(getAuthAccessTokenResData.getAccess_token()) && StringUtils.isNotBlank(getAuthAccessTokenResData.getOpenid())) {
-            result = true;
-        } else if (StringUtils.isNotBlank(getAuthAccessTokenResData.getErrcode())) {
-            result = false;
-        } else {
-            logger.warn("get auth access_token result invalid");
+            if (StringUtils.isNotBlank(getAuthAccessTokenResData.getAccess_token()) && StringUtils.isNotBlank(getAuthAccessTokenResData.getOpenid())) {
+                result = true;
+            } else if (StringUtils.isNotBlank(getAuthAccessTokenResData.getErrcode())) {
+                result = false;
+            } else {
+                logger.warn("get auth access_token result invalid");
+            }
         }
         return result;
     }

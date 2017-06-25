@@ -652,27 +652,37 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
     }
     
 	@Override
-	public UserLoginResponse doTransUserLogin4Client(String dealerEmployeeId, String password) throws IllegalArgumentException {
-		Validator.checkArgument(StringUtils.isBlank(dealerEmployeeId), "收银员ID不能为空");
+	public UserLoginResponse doTransUserLogin4Client(String loginId, String password) throws IllegalArgumentException {
+		Validator.checkArgument(StringUtils.isBlank(loginId), "loginId不能为空");
         Validator.checkArgument(StringUtils.isBlank(password), "登录密码不能为空");
-
-        String sql = "select u from SysUser u left join fetch u.dealerEmployee where u.dealerEmployee.dealerEmployeeId = :DEALEREMPLOYEEID and u.loginPwd = :LOGINPWD"
-        		+ " and u.state <> :DELETESTATE and u.userLevel in (:SHOPMANAGER, :CASHIER)";
         
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("DEALEREMPLOYEEID", dealerEmployeeId);
         paramMap.put("LOGINPWD", DigestHelper.md5Hex(password));
         paramMap.put("DELETESTATE", SysUser.State.canceled.getValue());
         paramMap.put("SHOPMANAGER", SysUser.UserLevel.shopManager.getValue());
         paramMap.put("CASHIER", SysUser.UserLevel.cashier.getValue());
-
-        SysUser sysUser = commonDAO.findObject(sql, paramMap, false);
+        
+        SysUser sysUser = null;
+        if (loginId.matches("\\d{10}")){// 按收银员ID查询
+            String sql = "select u from SysUser u left join fetch u.dealerEmployee where u.dealerEmployee.dealerEmployeeId = :DEALEREMPLOYEEID and u.loginPwd = :LOGINPWD"
+                + " and u.state <> :DELETESTATE and u.userLevel in (:SHOPMANAGER, :CASHIER)";
+            paramMap.put("DEALEREMPLOYEEID", loginId);
+            sysUser = commonDAO.findObject(sql, paramMap, false);
+        }
+        if (sysUser == null) {
+            String sql = "select u from SysUser u left join fetch u.dealerEmployee where u.userId = :USERID and u.loginPwd = :LOGINPWD"
+                + " and u.state <> :DELETESTATE and u.userLevel in (:SHOPMANAGER, :CASHIER)";
+            paramMap.remove("DEALEREMPLOYEEID");
+            paramMap.put("USERID", loginId);
+            sysUser = commonDAO.findObject(sql, paramMap, false);
+        }
+        
         DealerEmployee dealerE = null;
         
         UserLoginResponse response = null;
         String responseId = Generator.generateIwoid();
         if (sysUser == null) {
-            logger.warn("收银员ID( {} )或密码不正确！", dealerEmployeeId);
+            logger.warn("loginid( {} )或密码不正确！", loginId);
             response = new UserLoginResponse(LoginResult.LOGIN_ID_PASSWD_FAIL.getCode(), LoginResult.LOGIN_ID_PASSWD_FAIL.getDesc(), responseId);
         } else if (sysUser.getState() == SysUser.State.frozen.getValue()) {
             logger.warn("该用户( {} )已冻结，不允许登录！", sysUser.getUserId());
@@ -680,7 +690,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         } else {
             dealerE = sysUser.getDealerEmployee(); 
             if (dealerE == null || StringUtils.isBlank(dealerE.getIwoid())) {
-                logger.warn("收银员( {} )不存在！", dealerEmployeeId);
+                logger.warn("收银员，login：( {} )不存在！", loginId);
                 response = new UserLoginResponse(CommonResult.DATA_NOT_EXIST.getCode(), "收银员信息" + CommonResult.DATA_NOT_EXIST.getDesc(), responseId);
             } else {
                 Store store = sysUser.getDealerEmployee().getStore();

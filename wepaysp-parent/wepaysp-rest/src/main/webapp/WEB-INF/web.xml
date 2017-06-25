@@ -64,6 +64,15 @@
 		<servlet-name>SpringMVC</servlet-name>
 	</filter-mapping>
 	
+	<error-page>
+         <error-code>404</error-code>
+         <location>/WEB-INF/views/errors/404.jsp</location>
+     </error-page>
+     <error-page>
+         <error-code>500</error-code>
+         <location>/WEB-INF/views/errors/500.jsp</location>
+     </error-page>
+	
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>

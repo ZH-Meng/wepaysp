@@ -9,7 +9,7 @@ public enum H5CommonResult {
     SUCCESS("success", "处理成功"),
     
     /** 系统错误 */
-    SYS_ERROR("error", "系统错误"),
+    SYS_ERROR("error", "系统或网络异常"),
     
     /** 参数缺失 */
     ARGUMENT_MISS("param_miss", "参数缺失"),
@@ -21,7 +21,16 @@ public enum H5CommonResult {
     DATA_NOT_EXIST("data_not_exist", "数据不存在"),
     
     /**获取access_token失败*/
-    ACCESS_TOKEN_FAIL("access_token_fail", "授权失败");
+    ACCESS_TOKEN_FAIL("access_token_fail", "授权失败"),
+    
+    /**无权访问*/
+    PERMISSION_DENIED("permission_denied", "无权访问"),
+    
+    /**微信未绑定系统账户*/
+    OPENID_UNKOWN("access_token_fail", "微信未绑定系统账户"),
+    
+    /**非法请求*/
+    ILLEGAL_REQUEST("access_token_fail", "非法请求");
     
     private String code;
 

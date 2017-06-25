@@ -110,4 +110,10 @@ public interface DealerService {
      */
     public DealerVO doTransGetQRCode(int qRCodeType, String dealerOid, String modifier, String operatorUserOid, String logFunctionOid);
     
+    /**
+     * 获取当前商户归属的顶级服务商Oid
+     * @param dealerOid
+     * @return topPartnerOid
+     */
+    public String doJoinTransGetTopPartnerOid(String dealerOid);
 }

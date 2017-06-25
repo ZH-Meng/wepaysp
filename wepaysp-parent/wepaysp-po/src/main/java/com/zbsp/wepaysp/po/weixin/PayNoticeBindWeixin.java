@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 
@@ -24,9 +25,11 @@ public class PayNoticeBindWeixin
     private String iwoid;
     private DealerEmployee payDealerEmployee;
     private Store store;
+    private Dealer bindDealer;
     private DealerEmployee bindDealerEmployee;
     private String openid;
     private String nickname;
+    private String headimgurl;
     private Integer sex;
     private String type;
     private String state;
@@ -55,7 +58,8 @@ public class PayNoticeBindWeixin
     
     public static enum Type {
         /** 1绑定门店支付通知 */        store("1"),
-        /** 2绑定收银员支付通知 */     dealerEmployee("2");
+        /** 2绑定收银员支付通知 */     dealerEmployee("2"),
+        /** 3绑定商户 */                    dealer("3");
         private String value;
         
         public String getValue() {
@@ -212,10 +216,30 @@ public class PayNoticeBindWeixin
         this.remark = remark;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "BIND_DEALER_OID")
+    public Dealer getBindDealer() {
+        return bindDealer;
+    }
+
+    public void setBindDealer(Dealer bindDealer) {
+        this.bindDealer = bindDealer;
+    }
+    
+    @Column(name = "HEADIMGURL", length = 256)
+    public String getHeadimgurl() {
+        return headimgurl;
+    }
+
+    public void setHeadimgurl(String headimgurl) {
+        this.headimgurl = headimgurl;
+    }
+
     @Override
     public String toString() {
         return "PayNoticeBindWeixin [payDealerEmployee=" + (payDealerEmployee != null ? payDealerEmployee.getEmployeeName() : "") + ", store=" + (store != null ? store.getStoreName() : "")  + ", "
             + "bindDealerEmployee=" +  (bindDealerEmployee != null ? bindDealerEmployee.getEmployeeName() : "") + ", "
+            + "bindDealer=" +  (bindDealer != null ? bindDealer.getContactor() : "") + ", "
                 + "openid=" + openid + ", nickname=" + nickname + ", sex=" + sex + ", type=" + type + ", state=" + state + "]";
     }
     

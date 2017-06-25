@@ -28,6 +28,16 @@
 				<param name="inputName">qrCodeImg</param>
 				<param name="bufferSize">1024</param>
 			</result>
+			<result name="getBindQRCodeImg" type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">bindQRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
+			<result name="getAppidQRCodeImg" type="stream">
+				<param name="contentType">image/jpeg</param>
+				<param name="inputName">appidQRCodeImg</param>
+				<param name="bufferSize">1024</param>
+			</result>
 			<result name="dealerAlipayManage">/resources/partner/dealerAlipayManage.jsp</result>
 			<result name="getAliapyAppAuthCodeImg" type="stream">
 				<param name="contentType">image/jpeg</param>

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.zbsp.wepaysp.mo.paystat.v1_0.QueryPayStatResponse;
+import com.zbsp.wepaysp.vo.report.AppidCollectionStatVO;
 import com.zbsp.wepaysp.vo.report.RptDealerStatVO;
 
 /**
@@ -222,4 +223,30 @@ public interface RptDealerStatService {
      */
 	public QueryPayStatResponse doJoinTransQueryPayStat4DealerE(String dealerEmployeeOid, Map<String, Object> paramMap) throws IllegalArgumentException;
 
+	/**
+	 * 查看日期、商户分组的收款统计列表
+	 * @param dealerOid 商户Oid
+     * @param startIndex 记录起始位置
+     * @param maxResult 返回记录最大数
+	 * @return
+	 */
+    public List<AppidCollectionStatVO> doJoinTransQueryDealerList(String dealerOid, int startIndex, int maxResult);
+
+    /**
+     * 查看日期、门店分组的收款统计列表
+     * @param storeOid 门店Oid
+     * @param startIndex 记录起始位置
+     * @param maxResult 返回记录最大数
+     * @return
+     */
+    public List<AppidCollectionStatVO> doJoinTransQueryStoreList(String storeOid, int startIndex, int maxResult);
+    
+    /**
+     * 查看收款统计列表
+     * @param dealerEmployeeOid 收银员Oid
+     * @param startIndex 记录起始位置
+     * @param maxResult 返回记录最大数
+     * @return
+     */
+    public List<AppidCollectionStatVO> doJoinTransQueryDealerEList(String dealerEmployeeOid, int startIndex, int maxResult);
 }

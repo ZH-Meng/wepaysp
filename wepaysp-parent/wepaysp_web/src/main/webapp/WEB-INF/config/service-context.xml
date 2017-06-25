@@ -102,6 +102,7 @@
 	
 	<bean id="payDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.PayDetailsServiceImpl" parent="baseService">
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="aliPayDetailsService" ref="aliPayDetailsService" />
 	</bean>
 
 	<bean id="aliPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.AliPayDetailsServiceImpl" parent="baseService">

@@ -19,6 +19,9 @@
 			<ul class="tj_title">
 				<li>支付宝授权</li>
 			</ul>
+			<s:form method="post">
+				<s:hidden id="dealerOid" name="dealerOid"/>
+			</s:form>
 			<div id="div_auth">
 				<div>
 					邀请支付宝用户授权给应用的URL(在PC电脑上授权)：<a href="${alipayAuthUrl}" target="_blank">点此链接登录支付宝授权给应用</a>
@@ -34,10 +37,26 @@
 					状态：${authStatusDesc }
 				</div>
 			</div>
+			<ul>
+           	 <li class="bg_button">
+                 <a href="javascript:void(0);" onclick="alipayManage('${dealerOid}');return false;">刷新</a>
+                 <a href="javascript:void(0);" onclick="history.back();">返回</a>
+              </li>
+            	<li class="t-center">
+                	<s:include value="/resources/include/noPage.jsp"></s:include>
+                </li>
+            </ul>
 		</div>
 		
 	</div>
 	
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
+	<script type="text/javascript">
+	function alipayManage(iwoid){
+		$("#dealerOid").val(iwoid);
+		invokeAction('goToAlipayManage');
+	}
+	</script>
 </body>
 </html>

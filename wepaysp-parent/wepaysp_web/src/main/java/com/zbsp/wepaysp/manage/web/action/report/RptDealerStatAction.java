@@ -14,7 +14,7 @@ import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
-import com.zbsp.wepaysp.po.manage.SysUser;
+import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.api.service.partner.StoreService;
 import com.zbsp.wepaysp.api.service.report.RptDealerStatService;
 import com.zbsp.wepaysp.vo.partner.StoreVO;
@@ -91,81 +91,69 @@ public class RptDealerStatAction
             boolean flag = false;
 
             /* 根据用户的级别设置不同的查询条件 */
-            if (manageUser.getUserLevel() == SysUser.UserLevel.partner.getValue()) {// 服务商
-                if (manageUser.getDataPartner() != null) {
-                    partnerLevel = manageUser.getDataPartner().getLevel();
-                    if (partnerLevel == 1 || partnerLevel == 2 || partnerLevel == 3) {
-
-                        if ("partner".equals(listType)) {// 代理商访问代理商分润统计
-                            flag = true;
-                            paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
-                            paramMap.put("partnerLevel", partnerLevel);
-                            paramMap.put("partnerId", rptDealerStatVO.getPartnerId());
-                            paramMap.put("currentPartnerId", manageUser.getDataPartner().getPartnerId());
-
-                            //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Parnter(paramMap);
-                            rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Parnter(paramMap, 0, -1);
-                        } else if ("partnerEmployee".equals(listType)) {// 代理商访问代理商员工分润统计
-                            flag = true;
-                            paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
-                            paramMap.put("partnerEmployeeId", rptDealerStatVO.getPartnerEmployeeId());
-
-                            //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4ParnterE(paramMap);
-                            rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4ParnterE(paramMap, 0, -1);
-                        }
-                    }
-                }
-            } else if (manageUser.getUserLevel() == SysUser.UserLevel.salesman.getValue()) {// 业务员
-                if (manageUser.getDataPartnerEmployee() != null) {
-                    if ("partnerEmployee".equals(listType)) {// 代理商员工访问代理商员工分润统计
+            if (SysUserUtil.isPartner(manageUser)) {// 服务商
+                partnerLevel = manageUser.getDataPartner().getLevel();
+                if (partnerLevel == 1 || partnerLevel == 2 || partnerLevel == 3) {
+                    if ("partner".equals(listType)) {// 代理商访问代理商分润统计
                         flag = true;
-                        paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
+                        paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+                        paramMap.put("partnerLevel", partnerLevel);
+                        paramMap.put("partnerId", rptDealerStatVO.getPartnerId());
+                        paramMap.put("currentPartnerId", manageUser.getDataPartner().getPartnerId());
 
-                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4ParnterE(paramMap);
+                        // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Parnter(paramMap);
+                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Parnter(paramMap, 0, -1);
+                    } else if ("partnerEmployee".equals(listType)) {// 代理商访问代理商员工分润统计
+                        flag = true;
+                        paramMap.put("partnerOid", manageUser.getDataPartner().getIwoid());
+                        paramMap.put("partnerEmployeeId", rptDealerStatVO.getPartnerEmployeeId());
+
+                        // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4ParnterE(paramMap);
                         rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4ParnterE(paramMap, 0, -1);
                     }
                 }
-            } else if (manageUser.getUserLevel() == SysUser.UserLevel.dealer.getValue()) {// 商户
-                if (manageUser.getDataDealer() != null) {
-                    paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
-                    // 查询管辖门店集合
-                    storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
+            } else if (SysUserUtil.isPartnerEmployee(manageUser)) {// 业务员
+                if ("partnerEmployee".equals(listType)) {// 代理商员工访问代理商员工分润统计
+                    flag = true;
+                    paramMap.put("partnerEmployeeOid", manageUser.getDataPartnerEmployee().getIwoid());
 
-                    paramMap.put("storeOid", rptDealerStatVO.getStoreOid());
-                    if ("dealer".equals(listType)) {// 商户访问商户门店资金结算
-                        flag = true;
-                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Dealer(paramMap);
-                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Dealer(paramMap, 0, -1);
-                    } else if ("dealerEmployee".equals(listType)) {// 商户访问商户员工资金结算
-                        flag = true;
-                        paramMap.put("dealerEmployeeId", rptDealerStatVO.getDealerEmployeeId());
-                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
-                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
-                    }
+                    // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4ParnterE(paramMap);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4ParnterE(paramMap, 0, -1);
                 }
-            } else if (manageUser.getUserLevel() == SysUser.UserLevel.cashier.getValue()) {// 收银员
-                if (manageUser.getDataDealerEmployee() != null) {
-                    if ("dealerEmployee".equals(listType)) {// 访问商户员工资金结算
-                        flag = true;
-                        paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
+            } else if (SysUserUtil.isDealer(manageUser)) {// 商户
+                paramMap.put("dealerOid", manageUser.getDataDealer().getIwoid());
+                // 查询管辖门店集合
+                storeVoList = storeService.doJoinTransQueryStoreList(paramMap, 0, -1);
 
-                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
-                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
-                    }
+                paramMap.put("storeOid", rptDealerStatVO.getStoreOid());
+                if ("dealer".equals(listType)) {// 商户访问商户门店资金结算
+                    flag = true;
+                    // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Dealer(paramMap);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Dealer(paramMap, 0, -1);
+                } else if ("dealerEmployee".equals(listType)) {// 商户访问商户员工资金结算
+                    flag = true;
+                    paramMap.put("dealerEmployeeId", rptDealerStatVO.getDealerEmployeeId());
+                    // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
                 }
-            } else if (manageUser.getUserLevel() == SysUser.UserLevel.shopManager.getValue()) {// 分店店长
-            	if (manageUser.getDataDealerEmployee() != null && manageUser.getDataDealerEmployee().getStore() != null) {
-            		paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
-            		if ("dealer".equals(listType)) {// 商户访问商户门店资金结算
-                        flag = true;
-                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Dealer(paramMap);
-                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Dealer(paramMap, 0, -1);
-                    } else if ("dealerEmployee".equals(listType)) {// 商户访问商户员工资金结算
-                        flag = true;
-                        paramMap.put("dealerEmployeeId", rptDealerStatVO.getDealerEmployeeId());
-                        //rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
-                        rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
-                    }
+            } else if (SysUserUtil.isStoreManager(manageUser)) {// 分店店长
+                paramMap.put("storeOid", manageUser.getDataDealerEmployee().getStore().getIwoid());
+                if ("dealer".equals(listType)) {// 店长访问商户门店资金结算
+                    flag = true;
+                    // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4Dealer(paramMap);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4Dealer(paramMap, 0, -1);
+                } else if ("dealerEmployee".equals(listType)) {// 商户访问商户员工资金结算
+                    flag = true;
+                    paramMap.put("dealerEmployeeId", rptDealerStatVO.getDealerEmployeeId());
+                    // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
+                }
+            } else if (SysUserUtil.isDealerEmployee(manageUser)) {// 收银员
+                if ("dealerEmployee".equals(listType)) {// 访问商户员工资金结算
+                    flag = true;
+                    paramMap.put("dealerEmployeeOid", manageUser.getDataDealerEmployee().getIwoid());
+                    // rowCount = rptDealerStatService.doJoinTransQueryRptDealerStatCount4DealerE(paramMap);
+                    rptDealerStatVoList = rptDealerStatService.doJoinTransQueryRptDealerStatList4DealerE(paramMap, 0, -1);
                 }
             }
 
@@ -183,7 +171,6 @@ public class RptDealerStatAction
         }
 
         logger.info(logPrefix + "结束");
-
         return result;
     }
 

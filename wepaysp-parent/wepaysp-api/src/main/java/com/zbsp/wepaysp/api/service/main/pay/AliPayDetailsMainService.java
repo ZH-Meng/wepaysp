@@ -58,5 +58,12 @@ public interface AliPayDetailsMainService {
      *  </pre>
      */
     public Map<String, Object> handleAsynNotify(Map<String, String> paramMap);
+    
+    /**
+     * 扫码支付下单
+     * @param payDetailsVO 下单参数
+     * @return
+     */
+	public Map<String, Object> scanPayCreateOrder(AliPayDetailsVO payDetailsVO);
 
 }

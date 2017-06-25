@@ -98,10 +98,10 @@ public class PartnerServiceImpl
         List<PartnerVO> resultList = new ArrayList<PartnerVO>();
 
         /* 在当前用户所属服务商的下级服务商集合中模糊查询 */
-        String loginId = MapUtils.getString(paramMap, "loginId");
-        String contactor = MapUtils.getString(paramMap, "contactor");
+        String loginId = StringUtils.trim(MapUtils.getString(paramMap, "loginId"));
+        String contactor = StringUtils.trim(MapUtils.getString(paramMap, "contactor"));
         String state = MapUtils.getString(paramMap, "state");
-        String company = MapUtils.getString(paramMap, "company");
+        String company = StringUtils.trim(MapUtils.getString(paramMap, "company"));
 
         String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
         //String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
@@ -155,10 +155,10 @@ public class PartnerServiceImpl
 
     @Override
     public int doJoinTransQueryPartnerCount(Map<String, Object> paramMap) {
-        String loginId = MapUtils.getString(paramMap, "loginId");
-        String contactor = MapUtils.getString(paramMap, "contactor");
+        String loginId = StringUtils.trim(MapUtils.getString(paramMap, "loginId"));
+        String contactor = StringUtils.trim(MapUtils.getString(paramMap, "contactor"));
         String state = MapUtils.getString(paramMap, "state");
-        String company = MapUtils.getString(paramMap, "company");
+        String company = StringUtils.trim(MapUtils.getString(paramMap, "company"));
 
         String parentPartnerOid = MapUtils.getString(paramMap, "parentPartnerOid");
         String currentUserOid = MapUtils.getString(paramMap, "currentUserOid");
@@ -218,7 +218,7 @@ public class PartnerServiceImpl
         String sql = "select count(u.iwoid) from SysUser u where u.userId = :USERID and u.state <> :CANCELSTATE ";
 
         Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap.put("USERID", partnerVO.getLoginId());
+        paramMap.put("USERID", StringUtils.trim(partnerVO.getLoginId()));
         paramMap.put("CANCELSTATE", SysUser.State.canceled.getValue());
 
         int idResult = commonDAO.queryObjectCount(sql, paramMap, false);
@@ -258,9 +258,9 @@ public class PartnerServiceImpl
         SysUser newUser = new SysUser();
         newUser.setIwoid(Generator.generateIwoid());
         newUser.setState(SysUser.State.normal.getValue());
-        newUser.setUserId(partnerVO.getLoginId());
+        newUser.setUserId(StringUtils.trim(partnerVO.getLoginId()));
         newUser.setUserName(partnerVO.getContactor());
-        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(partnerVO.getLoginPwd())));
+        newUser.setLoginPwd(DigestHelper.md5Hex(DigestHelper.sha512HexUnicode(StringUtils.trim(partnerVO.getLoginPwd()))));
         newUser.setLineTel(StringUtils.isNotBlank(partnerVO.getMoblieNumber()) ? partnerVO.getMoblieNumber() : partnerVO.getTelephone());
         newUser.setEmail(partnerVO.getEmail());
         newUser.setBuildType(SysUser.BuildType.create.getValue());

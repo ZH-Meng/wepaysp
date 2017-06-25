@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>${dealerName}订单</title>
+		<title>${callBackVO.dealerName}订单</title>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
@@ -18,9 +18,7 @@
 	</head>
 </head>
 <body>
-		<%-- <form id="orderForm" action="<%=request.getContextPath()%>/appid/pay/createOrder"  method="post"> --%>
 		<form id="orderForm" >
-			<%-- <s:hidden name="partnerOid"/> --%>
 			<input type="hidden" value="${callBackVO.dealerOid}"  name="dealerOid" id="dealerOid">
 			<input type="hidden" value="${callBackVO.storeOid}"  name="storeOid" id="storeOid">
 			<input type="hidden" value="${callBackVO.dealerEmployeeOid}"  name="dealerEmployeeOid" id="dealerEmployeeOid">
@@ -28,7 +26,7 @@
 
 			<div class="weui-panel">
 				<div class="company-info">
-					<p class="title1">${dealerName}订单</p>
+					<p class="title1">${callBackVO.dealerName}订单</p>
 				</div>
 				<div class="input-box">
 					<p class="input-title">消费总额</p>
@@ -128,11 +126,8 @@
 			       
 			        function(res){     
 			            if (res.err_msg == "get_brand_wcpay_request:ok" ) {// 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-			           		//TODO 请求系统，根据真实返回结果来响应
-		        			//alert("支付成功");
 		                	window.location.href="<%=request.getContextPath()%>/appid/pay/jsPayResult?weixinPayDetailOid="+payDetailOid+"&payResult=ok";
 			            } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
-				           	//alert("支付过程中用户取消");
 				           	window.location.href="<%=request.getContextPath()%>/appid/pay/jsPayResult?weixinPayDetailOid="+payDetailOid+"&payResult=cancel";
 			            } else {
 			            	alert('支付失败');

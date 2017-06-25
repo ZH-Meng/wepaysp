@@ -24,7 +24,7 @@ public class SysUserUtil {
     }
 
     /**
-     * 是否是代理商
+     * 是否是代理商（含顶级代理商）
      * 
      * @return
      */
@@ -78,7 +78,7 @@ public class SysUserUtil {
     }
     
     /**
-     * 是否是收银员
+     * 是否是收银员（含店长）
      * 
      * @return
      */
@@ -106,7 +106,7 @@ public class SysUserUtil {
             return false;
         } else {
             level = manageUser.getUserLevel();
-            if (level != SysUser.UserLevel.shopManager.getValue() || manageUser.getDataDealerEmployee() == null) {
+            if (level != SysUser.UserLevel.shopManager.getValue() || manageUser.getDataDealerEmployee() == null || manageUser.getDataDealerEmployee().getStore() == null) {
                 return false;
             }
         }

@@ -18,6 +18,7 @@
 		<property name="payClientCheckURL" value="${payClientCheckURL}" />
 		<property name="wxPayCallBackURL" value="${wxPayCallBackURL}" />
 		<property name="wxPayNotifyURL" value="${wxPayNotifyURL}" />
+		<property name="wxPayMessageLinkURL" value="${wxPayMessageLinkURL}" />
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
@@ -102,6 +103,7 @@
 	
 	<bean id="payDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.PayDetailsServiceImpl" parent="baseService">
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
+		<property name="aliPayDetailsService" ref="aliPayDetailsService" />
 	</bean>
 
 	<bean id="aliPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.AliPayDetailsServiceImpl" parent="baseService">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration status="WARN" monitorInterval="3">
 	<properties>
-		<property name="LOG_HOME">/var/wepay/web</property>
+		<property name="LOG_HOME">/mydata/wepay/rest</property>
 		<property name="ALL_FILE_NAME">all/ALL</property>
 		<property name="TIMER_FILE_NAME">timer/TIMER</property>
 		<property name="API_FILE_NAME">api/API</property>

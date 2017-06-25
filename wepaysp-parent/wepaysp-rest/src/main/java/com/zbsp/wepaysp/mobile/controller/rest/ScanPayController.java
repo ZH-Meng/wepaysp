@@ -43,8 +43,11 @@ import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 @RequestMapping("/pay/v1")
 public class ScanPayController extends BaseController {
 
-    /** 目前微信的刷卡支付的条码规则为：以10、11、12、13、14、15开头的18位纯数字 */
+    /** 目前微信的刷卡支付的code规则为：以13开头18位升级到以10、11、12、13、14、15开头的18位纯数字 */
     protected static final String[] WX_AUTH_CODES = { "10", "11", "12", "13", "14", "15" };
+    
+    /** 目前支付宝的条码支付的code规则为：从28开头的16~18位升级到以25~30开头的16~24位纯数字 */
+    protected static final String[] ALI_AUTH_CODES = { "25", "26", "27", "28", "29", "30" };
     
 	@Autowired
 	private WeixinPayDetailsMainService weixinPayDetailsMainService;
@@ -76,6 +79,7 @@ public class ScanPayController extends BaseController {
             response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);
         } else {
             try {
+                request.setAuthCode(StringUtils.trim(request.getAuthCode()));
             	// 根据AuthCode 判断微信或者支付宝支付
                 String authCodeStart = request.getAuthCode().substring(0, 2);
                 if (ArrayUtils.contains(WX_AUTH_CODES, authCodeStart)) {
@@ -110,7 +114,7 @@ public class ScanPayController extends BaseController {
                         response.setTradeStatus(TradeStatusShow.PAY_SUCCESS.getValue());
                         response.setTransTime(DateUtil.getDate(payDetailsVO.getTransBeginTime(), SysEnvKey.TIME_PATTERN_YMD_SLASH_HMS_COLON));
                     }
-                } else if (authCodeStart.equals("28")) {// 支付宝-当面付-条码支付
+				} else if (ArrayUtils.contains(ALI_AUTH_CODES, authCodeStart)) {// 支付宝-当面付-条码支付
                     // 支付宝授权码以28开头，   例：280409337332958977
                     logger.info("检测支付方式：支付宝-当面付-条码支付, 授权码：{}", request.getAuthCode());
                     response = new ScanPayResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc() + "(authCode)", responseId);

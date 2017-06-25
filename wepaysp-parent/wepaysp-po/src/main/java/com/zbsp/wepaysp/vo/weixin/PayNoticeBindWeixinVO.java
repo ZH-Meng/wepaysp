@@ -23,6 +23,10 @@ public class PayNoticeBindWeixinVO
     private String storeId;
     private String storeName;
 
+    private String dealerOid;
+    private String dealerId;
+    private String dealerName;
+
     private String bindDealerEmployeeOid;
     private String bindDealerEmployeeId;
     private String bindDealerEmployeeName;
@@ -159,10 +163,33 @@ public class PayNoticeBindWeixinVO
     public Timestamp getCreateTime() {
         return createTime;
     }
-    
+
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
-    
+
+    public String getDealerOid() {
+        return dealerOid;
+    }
+
+    public void setDealerOid(String dealerOid) {
+        this.dealerOid = dealerOid;
+    }
+
+    public String getDealerId() {
+        return dealerId;
+    }
+
+    public void setDealerId(String dealerId) {
+        this.dealerId = dealerId;
+    }
+
+    public String getDealerName() {
+        return dealerName;
+    }
+
+    public void setDealerName(String dealerName) {
+        this.dealerName = dealerName;
+    }
 
 }

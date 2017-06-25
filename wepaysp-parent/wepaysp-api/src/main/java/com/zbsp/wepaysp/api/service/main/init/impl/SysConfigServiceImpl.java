@@ -29,6 +29,7 @@ public class SysConfigServiceImpl
     private String wxPayCallBackURL;
     private String wxPayNotifyURL;
     private String bindCallBackURL;
+    private String wxPayMessageLinkURL;
     private String qRCodeRootPath;
     private String appidQrCodePath;
     private String serverType;
@@ -81,6 +82,27 @@ public class SysConfigServiceImpl
             initRest();
         }
         
+        // 支付宝支持当面付2.0的应用ID
+        if (StringUtils.isBlank(appId4Face2FacePay)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
+        } else {
+            logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
+            SysConfig.appId4Face2FacePay = appId4Face2FacePay;
+        }
+        
+        // 检查appId4Face2FacePay是否存在
+        Map<String, Object> app = SysConfig.alipayAppMap.get(appId4Face2FacePay);
+        if (app == null) {
+            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
+        }
+        
+        if (onlineFlag && AlipayApp.AppType.SANDBOXIE.toString().equals(app.get(SysEnvKey.ALIPAY_APP_TYPE))) {
+            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，上线不能使用沙箱应用");
+        }
+        
+        // 支付宝支付的配置 FIXME 改为从数据库中读取
+        AliPayUtil.init(app);
+        
     }
     
     /** 
@@ -111,6 +133,13 @@ public class SysConfigServiceImpl
         } else {
             logger.info("初始化系统配置信息：wxPayNotifyURL=" + wxPayNotifyURL);
             SysConfig.wxPayNotifyURL = wxPayNotifyURL;
+        }
+        // 微信公众号收款消息链接URL
+        if (StringUtils.isBlank(wxPayMessageLinkURL)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：wxPayMessageLinkURL");
+        } else {
+            logger.info("初始化系统配置信息：wxPayMessageLinkURL=" + wxPayMessageLinkURL);
+            SysConfig.wxPayMessageLinkURL = wxPayMessageLinkURL;
         }
         
         // 收银员使用微信扫码绑定支付结果发送消息二维码授权回调URL
@@ -154,27 +183,6 @@ public class SysConfigServiceImpl
         
         // 服务商信息
         initTopPartnerInfos();
-        
-        // 支付宝支持当面付2.0的应用ID
-        if (StringUtils.isBlank(appId4Face2FacePay)) {
-            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Face2FacePay");
-        } else {
-            logger.info("初始化系统配置信息：appId4Face2FacePay=" + appId4Face2FacePay);
-            SysConfig.appId4Face2FacePay = appId4Face2FacePay;
-        }
-        
-        // 检查appId4Face2FacePay是否存在
-        Map<String, Object> app = SysConfig.alipayAppMap.get(appId4Face2FacePay);
-        if (app == null) {
-            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
-        }
-        
-        if (onlineFlag && AlipayApp.AppType.SANDBOXIE.toString().equals(app.get(SysEnvKey.ALIPAY_APP_TYPE))) {
-            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，上线不能使用沙箱应用");
-        }
-        
-        // 支付宝支付的配置 FIXME 改为从数据库中读取
-        AliPayUtil.init(app);
     }
 
     /** 
@@ -220,6 +228,7 @@ public class SysConfigServiceImpl
         SysConfig.wxPayCallBackURL = wxPayCallBackURL;
         SysConfig.wxPayNotifyURL = wxPayNotifyURL;
         SysConfig.bindCallBackURL = bindCallBackURL;
+        SysConfig.wxPayMessageLinkURL = wxPayMessageLinkURL;
     }
     
     /**初始化服务商的相关信息*/
@@ -261,10 +270,10 @@ public class SysConfigServiceImpl
                 throw new SystemInitException("服务商(parterOid=" + topPartner.getIwoid() + ")没有配置支付宝信息");
             }
             
-            // 所有服务商所有的应用加载至内存，根据配置文件配置的当面付和手机网站appid获取对应的配置信息
-            Map<String, Object> alipayMap = new HashMap<String, Object>();
-            
             for(AlipayApp app : alipayApps) {
+            	// 所有服务商所有的应用加载至内存，根据配置文件配置的当面付和手机网站appid获取对应的配置信息
+                Map<String, Object> alipayMap = new HashMap<String, Object>();
+                
                 // 校验完整性
                 if (StringUtils.isBlank(app.getAlipayPublicKey()) || StringUtils.isBlank(app.getSignType()) || StringUtils.isBlank(app.getPublicKey()) || 
                     StringUtils.isBlank(app.getPrivateKey()) || app.getMaxQueryRetry() == null || app.getQueryDuration() == null || app.getMaxCancelRetry() == null || app.getCancelDuration() == null){
@@ -293,7 +302,7 @@ public class SysConfigServiceImpl
                 alipayMap.put(SysEnvKey.ALIPAY_APP_CANCEL_DURATION, app.getCancelDuration());
                 
                 SysConfig.alipayAppMap.put(app.getAppId(), alipayMap);
-                logger.warn("配置服务商(parterOid={}))的支付宝应用(appid={})的信息到内存", topPartner.getIwoid(), app.getAppId());
+                logger.info("配置服务商(parterOid={}))的支付宝应用(appid={})的信息到内存", topPartner.getIwoid(), app.getAppId());
             }
             
             logger.info("配置顶级服务商（parterOid={})的微信支付信息到内存：app_id : {}, mch_id : {}", topPartner.getIwoid(), topPartner.getAppId(), topPartner.getMchId());
@@ -423,7 +432,11 @@ public class SysConfigServiceImpl
         this.alipayReportFlag = alipayReportFlag;
     }
 
-    public void setPartnerService(PartnerService partnerService) {
+    public void setWxPayMessageLinkURL(String wxPayMessageLinkURL) {
+		this.wxPayMessageLinkURL = wxPayMessageLinkURL;
+	}
+
+	public void setPartnerService(PartnerService partnerService) {
         this.partnerService = partnerService;
     }
 

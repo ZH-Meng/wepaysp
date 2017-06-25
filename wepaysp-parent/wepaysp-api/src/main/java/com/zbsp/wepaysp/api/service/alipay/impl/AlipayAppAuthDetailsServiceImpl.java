@@ -72,7 +72,7 @@ public class AlipayAppAuthDetailsServiceImpl
                 logger.info("商户(oid={}) - 支付宝授权更换支付宝账户，原有PID：{}, 新的PID：{}", dealer.getAlipayUserId(), appAuthDetailsVO.getAuthUserId());
             }
             String oldDealerStr = dealer.toString();
-            dealer.setAlipayUserId(appAuthDetailsVO.getAuthUserId());
+            //dealer.setAlipayUserId(appAuthDetailsVO.getAuthUserId());
             commonDAO.update(dealer);
             // 记录修改日志
             sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "修改商户信息[alipayUserId=" + dealer.getAlipayUserId() + "]", 
@@ -140,16 +140,17 @@ public class AlipayAppAuthDetailsServiceImpl
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid为空");
         Validator.checkArgument(StringUtils.isBlank(appId), "appId为空");
         
-        AlipayAppAuthDetailsVO appAuthDetailsVO = new AlipayAppAuthDetailsVO();
-        
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         String jpql = "from AlipayAppAuthDetails a where a.dealer.iwoid=:DEALEROID and a.alipayApp.appId=:APPID and a.status=:STATUS";
         jpqlMap.put("DEALEROID", dealerOid);
         jpqlMap.put("APPID", appId);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         AlipayAppAuthDetails appAuthDetails = commonDAO.findObject(jpql, jpqlMap, false);
-        BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
-        
+        AlipayAppAuthDetailsVO appAuthDetailsVO = null;
+        if (appAuthDetails != null) {
+        	appAuthDetailsVO = new AlipayAppAuthDetailsVO();
+        	BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
+        }
         return appAuthDetailsVO;
     }
 

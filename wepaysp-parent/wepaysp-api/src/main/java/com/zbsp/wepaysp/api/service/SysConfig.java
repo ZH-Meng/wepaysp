@@ -19,6 +19,9 @@ public class SysConfig {
     /**微信支付统一下单通知URL*/
     public static String wxPayNotifyURL;
     
+    /**微信公众号收款消息链接URL*/
+    public static String wxPayMessageLinkURL;
+    
     /**收银员绑定微信支付通知：扫码后微信回调系统地址*/
     public static String bindCallBackURL;
     

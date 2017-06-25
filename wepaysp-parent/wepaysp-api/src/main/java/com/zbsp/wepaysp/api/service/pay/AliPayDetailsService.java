@@ -23,7 +23,6 @@ public interface AliPayDetailsService {
      */
     public AliPayDetailsVO doTransCreatePayDetails(AliPayDetailsVO payDetailsVO);
 
-
     /**
      * 更新当面付-条码支付结果
      * 
@@ -103,7 +102,6 @@ public interface AliPayDetailsService {
      */
     public int doJoinTransQueryAliPayDetailsCount(Map<String, Object> paramMap);
 
-
     /**
      * 根据商户订单号或者支付宝交易号查询交易明细，outTradeNo查询为先，outTradeNo为空或者查询结果为空再以tradeNo查询
      * @param outTradeNo 商户订单号
@@ -121,14 +119,12 @@ public interface AliPayDetailsService {
      */
     public AliPayDetails doJoinTransQueryAliPayDetailsByNum(String outTradeNo, String tradeNo, LockModeType lockModeType);
 
-
     /**
      * 更新查询交易结果，交易成功时调用，和当面付支付更新结果基本一致，可以考虑合并//TODO
      * @param queryPayResultVO 查询支付结果
      * @return AliPayDetailsVO 更新的支付明细
      */
     public AliPayDetailsVO doTransUpdateQueryTradeSuccessResult(AliPayDetailsVO queryPayResultVO);
-
 
     /**
      * 更新异步通知结果
@@ -137,5 +133,8 @@ public interface AliPayDetailsService {
      * @param remark 更新的备注
      */
     public void doTransUpdateNotifyResult(AlipayWapPayNotifyVO notifyVO, TradeStatus tradeStatus, String remark);
+
+    /**更新扫码预下单结果*/
+	public void doTransUpdateScanPrecreateResult(String outTradeNo, String code ,String msg, String subCode, String subMsg);
 
 }

@@ -25,9 +25,11 @@ import com.zbsp.alipay.trade.model.TradeStatus;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradePrecreateRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
+import com.zbsp.alipay.trade.model.result.AlipayF2FPrecreateResult;
 import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
 import com.zbsp.alipay.trade.service.AlipayMonitorService;
 import com.zbsp.alipay.trade.service.AlipayTradeService;
@@ -156,6 +158,31 @@ public class AliPayUtil {
         } else {
             payResult = AliPayUtil.tradeService.tradePay(builder);
         }
+        return payResult;
+    }
+    
+    /**
+     * 当面付支付2.0，预下单
+     * @param payDetailsVO
+     * @return
+     */
+    public static AlipayF2FPrecreateResult tradePrecreate(AliPayDetailsVO payDetailsVO) {
+        Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
+
+        logger.info("支付明细转换扫码支付预下单请求包构造器 - 开始");
+        // 支付请求构造器
+        AlipayTradePrecreateRequestBuilder builder = AliPayPackConverter.aliPayDetailsVO2AlipayTradePrecreateRequestBuilder(payDetailsVO);
+        // 设置异步通知地址
+        builder.setNotifyUrl(SysConfig.alipayWapPayNotifyURL);
+        logger.info("支付明细转换扫码支付预下单请求包构造器  - 成功");
+        
+        AlipayF2FPrecreateResult payResult = null;
+        if (SysConfig.alipayReportFlag) {
+            payResult = AliPayUtil.tradeWithHBService.tradePrecreate(builder);
+        } else {
+            payResult = AliPayUtil.tradeService.tradePrecreate(builder);
+        }
+        logger.info("AlipayF2FPrecreateResult :" + JSONUtil.toJSONString(payResult, true));
         return payResult;
     }
     
@@ -319,7 +346,7 @@ public class AliPayUtil {
             .setFormat("json")
             .build();
         
-        client = new DefaultAlipayClient(Configs.getOpenApiDomain(), appid, privateKey, "json", "utf-8", alipayPublicKey, signType);
+        client = new DefaultAlipayClient(openApiDomain, appid, privateKey, "json", "utf-8", alipayPublicKey, signType);
     }
     
 }

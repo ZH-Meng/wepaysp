@@ -7,24 +7,26 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
-import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.model.result.AlipayF2FPayResult;
+import com.zbsp.alipay.trade.model.result.AlipayF2FPrecreateResult;
 import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayPackConverter;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
-import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AsynNotifyHandleResult;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.GateWayResponse;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
+import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
@@ -367,16 +369,16 @@ public class AliPayDetailsMainServiceImpl
         Validator.checkArgument(paramMap == null, "paramMap为空");
         Map<String, Object> resultMap = new HashMap<String, Object>();
         
-        String logPrefix = "处理支付宝手机网站支付异步通知请求 - ";
+        String logPrefix = "处理支付宝支付结果异步通知请求 - ";
         
         // 通过验签（验证通知中的sign参数）来确保支付通知是由支付宝发送的
         logger.info(logPrefix + "验签 - 开始");
         boolean flag = false;
         String result  = AsynNotifyHandleResult.FAILURE.toString();
         try {
-            String sign = paramMap.get("sign");
-            logger.info(logPrefix + "验签 -异步通知请求参数sign：{}", sign);
-            if (!AlipaySignature.rsaCheckV1(paramMap, Configs.getAlipayPublicKey(), "utf-8", Configs.getSignType())) {
+            String signType = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Face2FacePay), SysEnvKey.ALIPAY_APP_SIGN_TYPE);
+            String alipayPublicKey = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Face2FacePay), SysEnvKey.ALIPAY_PUBLIC_KEY);
+            if (!AlipaySignature.rsaCheckV1(paramMap, alipayPublicKey, "utf-8", signType)) {
                 logger.error(logPrefix + "验签 - 签名错误");
             } else {
                 logger.info(logPrefix + "验签 - 签名正确");
@@ -445,7 +447,7 @@ public class AliPayDetailsMainServiceImpl
                     flag = false;
                 }
                 
-                if (!StringUtils.equals(notifyVO.getSeller_id(), payDetailsVO.getSellerId())) {
+                if (StringUtils.isNotBlank(payDetailsVO.getSellerId()) && StringUtils.isNotBlank(notifyVO.getSeller_id()) && !StringUtils.equals(notifyVO.getSeller_id(), payDetailsVO.getSellerId())) {
                     logger.warn(logPrefix + "检查通知内容 - 失败 - seller_id不一致，通知seller_id={}, 支付明细seller_id={}", notifyVO.getSeller_id(), payDetailsVO.getSellerId());
                     flag = false;
                 }
@@ -463,10 +465,20 @@ public class AliPayDetailsMainServiceImpl
                     result = AsynNotifyHandleResult.SUCCESS.toString();
                     
                     String updateRemark = "";
+                    
                     // notify_id比较
-                    if (payDetailsVO.getNotifyId() == null) {
-                        logger.info(logPrefix + "检查notify_id - 首次处理异步通知");
-                        updateRemark = "首次处理异步通知，";
+                    if (StringUtils.equals(notifyId, payDetailsVO.getNotifyId())) {
+                        logger.warn(logPrefix + "检查notify_id - 已被处理过，忽略");
+                        result =AsynNotifyHandleResult.FAILURE.toString();
+                    } else {
+                        if (payDetailsVO.getNotifyId() == null) {
+                            logger.info(logPrefix + "检查notify_id - 首次处理异步通知");
+                            updateRemark = "首次处理异步通知，";
+                        } else {// 二次通知，可能会是交易已经成功并且已经超过可退款期限，
+                            logger.info(logPrefix + "检查notify_id - 二次通知，当前notify_id : {}，新的notify_id : {}", payDetailsVO.getNotifyId(), notifyId);
+                            logger.info(logPrefix + "检查notify_id - 二次通知，当前状态 : {}，通知交易状态: {}", payDetailsVO.getTradeStatus(), tradeStatusNotify);
+                            updateRemark = "异步通知第二次，";// 也可能是多次通知
+                        }
                         
                         if (TradeStatus.TRADEING.getValue() != payDetailsVO.getTradeStatus()) {// 前台回跳在前已通过查询接口更新了交易结果
                             logger.info(logPrefix + "({})当前交易状态为{} - 异步通知之前已被处理，更新通知信息(不含状态)", outTradeNo, payDetailsVO.getTradeStatus());
@@ -486,23 +498,14 @@ public class AliPayDetailsMainServiceImpl
                             } else if (TradeState4AliPay.TRADE_SUCCESS.toString().equals(tradeStatusNotify)) {// 交易成功
                                 logger.info(logPrefix + "异步通知交易成功，准备更新交易状态为成功");
                                 aliPayDetailsService.doTransUpdateNotifyResult(notifyVO, TradeStatus.TRADE_SUCCESS, updateRemark + "通知交易成功，更新交易状态为成功；");
-                            } else {// WAIT_BUYER_PAY，不会通知此状态
+                            } else if (TradeState4AliPay.WAIT_BUYER_PAY.toString().equals(tradeStatusNotify)) {// WAIT_BUYER_PAY，不会通知此状态
+                                // 20170623，扫码支付异步通知出现"trade_status":"WAIT_BUYER_PAY"，更新交易状态处理中，和其他订单信息
+                                logger.info(logPrefix + "异步通知WAIT_BUYER_PAY，准备更新交易信息，状态仍为处理中");
+                                aliPayDetailsService.doTransUpdateNotifyResult(notifyVO, TradeStatus.TRADEING, updateRemark + "准备更新交易WAIT_BUYER_PAY，状态仍为处理中；");
+                            } else {
                                 logger.warn(logPrefix + "异步通知交易({})，忽略处理", tradeStatusNotify);
                                 result =AsynNotifyHandleResult.FAILURE.toString();
                             }
-                        }
-                    } else if (StringUtils.equals(notifyId, payDetailsVO.getNotifyId())) {
-                        logger.warn(logPrefix + "检查notify_id - 已被处理过，忽略");
-                        result =AsynNotifyHandleResult.FAILURE.toString();
-                    } else if (!StringUtils.equals(notifyId, payDetailsVO.getNotifyId())) {// 二次通知，可能会是交易已经成功并且已经超过可退款期限
-                        logger.info(logPrefix + "检查notify_id - 二次通知，当前notify_id : {}，新的notify_id : {}", payDetailsVO.getNotifyId(), notifyId);
-                        logger.info(logPrefix + "检查notify_id - 二次通知，当前状态 : {}，通知交易状态: {}", payDetailsVO.getTradeStatus(), tradeStatusNotify);
-                        updateRemark = "异步通知第二次，";
-                        if (TradeState4AliPay.TRADE_FINISHED.toString().equals(tradeStatusNotify)) {
-                            logger.info(logPrefix + "二次通知交易TRADE_FINISHED，准备更新交易状态为成功");
-                            aliPayDetailsService.doTransUpdateNotifyResult(notifyVO, TradeStatus.TRADE_SUCCESS, updateRemark + "通知交易TRADE_FINISHED，更新交易状态为成功；");//FIXME 考虑增加交易状态类别
-                        } else {// 理论不会出现，暂不处理
-                            logger.error(AlarmLogPrefix.handleAliPayResultErr + "异步二次通知(notifyId=)，通知(状态=)未处理", notifyId, tradeStatusNotify);
                         }
                     }
                 } else {
@@ -519,5 +522,80 @@ public class AliPayDetailsMainServiceImpl
         resultMap.put("result", result);
         return resultMap;
     }
+
+	@Override
+	public Map<String, Object> scanPayCreateOrder(AliPayDetailsVO payDetailsVO) {
+        String logPrefix = "扫码支付 - ";
+        // 生成保存支付明细；
+        logger.info(logPrefix + "生成支付宝支付明细 - 开始");
+        String resCode = AliPayResult.ERROR.getCode();
+        String resDesc = AliPayResult.ERROR.getDesc();
+        
+        // 声明返回Map
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put("resultCode", resCode);
+        resultMap.put("resultDesc", resDesc);
+        boolean flag = false;
+        try {
+            payDetailsVO = aliPayDetailsService.doTransCreatePayDetails(payDetailsVO);
+            resultMap.put("aliPayDetailsVO", payDetailsVO);
+            flag = true;
+            logger.info(logPrefix + "生成支付宝支付明细 - 成功，系统订单号：{}", payDetailsVO.getOutTradeNo());
+        } catch (Exception e) {
+            logger.error(logPrefix + "生成支付宝支付明细 - 失败：{}", e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "生成支付宝支付明细 - 结束");
+            if (!flag) {
+                return resultMap;
+            }
+        }
+        String outTradeNo = payDetailsVO.getOutTradeNo();
+        
+        // -------------创建成功后调用扫码预下单接口--------------- //
+        logger.info(logPrefix + "调用扫码预下单接口 - 开始");
+        
+        flag = false;
+        boolean updateFlag = false;
+        AlipayF2FPrecreateResult precreateResult = null;
+        try {
+            // 调用预下单
+        	precreateResult = AliPayUtil.tradePrecreate(payDetailsVO);
+            // 打印应答
+			switch (precreateResult.getTradeStatus()) {
+			case SUCCESS:
+				logger.info(logPrefix + "调用扫码预下单接口 - 成功，response:{}", JSONUtil.toJSONString(precreateResult.getResponse(), true));
+				resultMap.put("qrCode", precreateResult.getResponse().getQrCode());
+				flag = true;
+				updateFlag = true;
+				break;
+			case FAILED:
+				logger.warn(logPrefix + "调用扫码预下单接口 - 失败");
+				updateFlag = true;
+				break;
+			case UNKNOWN:
+				logger.warn(logPrefix + "调用扫码预下单接口 - 异常，ouTradeNo={}, 支付状态置为待关闭", outTradeNo);
+				aliPayDetailsService.doTransUpdatePayDetailState(outTradeNo, TradeStatus.TRADE_TO_BE_CLOSED.getValue(), "扫码预下单异常，更新状态为待关闭；");
+				break;
+			}
+			if (updateFlag) {
+		        logger.info(logPrefix + "更新预下单结果 - 开始");
+				aliPayDetailsService.doTransUpdateScanPrecreateResult(outTradeNo, precreateResult.getResponse().getCode(), precreateResult.getResponse().getMsg(),
+						precreateResult.getResponse().getSubCode(), precreateResult.getResponse().getSubMsg());
+		        logger.info(logPrefix + "更新预下单结果 - 结束");
+			}
+        } catch (ConvertPackException e) {
+            logger.error(logPrefix + AlarmLogPrefix.sendAliPayRequestException + "支付明细转换预下单请求包构造器(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage());
+        } catch (Exception e) {
+            logger.error(logPrefix + AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "调用预下单接口(ouTradeNo={}) - 异常 : {}", outTradeNo, e.getMessage(), e);
+        } finally {
+            logger.info(logPrefix + "调用扫码预下单接口 -结束");
+        }
+        
+        if (flag) {
+            resultMap.put("resultCode", AliPayResult.SUCCESS.getCode());// 下单成功
+            resultMap.put("resultDesc", AliPayResult.SUCCESS.getDesc());
+        }
+        return resultMap;
+	}
 
 }

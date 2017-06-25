@@ -53,7 +53,7 @@ public class UserRestController
             response = new UserLoginResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
         } else {
             try {
-                response = sysUserService.doTransUserLogin4Client(request.getUserId(), DigestHelper.sha512Hex(request.getPasswd()));
+                response = sysUserService.doTransUserLogin4Client(StringUtils.trim(request.getUserId()), DigestHelper.sha512Hex(StringUtils.trim(request.getPasswd())));
             } catch (IllegalArgumentException e) {
                 logger.warn(logPrefix + "警告：{}", e.getMessage());
                 response = new UserLoginResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);

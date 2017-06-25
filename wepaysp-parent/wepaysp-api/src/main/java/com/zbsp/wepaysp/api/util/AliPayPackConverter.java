@@ -9,6 +9,7 @@ import com.alipay.api.response.AlipayTradePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.zbsp.alipay.trade.model.ExtendParams;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradePrecreateRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
@@ -221,5 +222,37 @@ public class AliPayPackConverter {
             throw new ConvertPackException(e.getMessage());
         }
         return vo;
+    }
+
+    public static AlipayTradePrecreateRequestBuilder aliPayDetailsVO2AlipayTradePrecreateRequestBuilder(AliPayDetailsVO payDetailsVO) {
+        AlipayTradePrecreateRequestBuilder builder = new AlipayTradePrecreateRequestBuilder();
+        try {
+            // (必填) 订单总金额，单位为元，不能超过1亿元
+            String totalAmount = new BigDecimal(payDetailsVO.getTotalAmount()).divide(new BigDecimal(100)).toString();
+        
+            // 卖家支付宝账号ID
+            String sellerId = payDetailsVO.getSellerId();
+
+            // 业务扩展参数
+            ExtendParams extendParams = new ExtendParams();
+            // 设置返佣帐号，支付宝分配的系统商编号(通过setSysServiceProviderId方法)
+            extendParams.setSysServiceProviderId(payDetailsVO.getIsvPartnerId());
+            // 扫码支付2小时有效
+            
+            // 创建条码支付请求builder，设置请求参数
+            builder.setAppAuthToken(payDetailsVO.getAppAuthToken())
+                .setOutTradeNo(payDetailsVO.getOutTradeNo())
+                .setSubject(payDetailsVO.getSubject())
+                .setBody(payDetailsVO.getBody())
+                .setSellerId(sellerId)
+                .setTotalAmount(totalAmount)
+                .setUndiscountableAmount(null)
+                .setStoreId(payDetailsVO.getStoreId())            
+                .setExtendParams(extendParams)
+                .setGoodsDetailList(null);
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return builder;
     }
 }

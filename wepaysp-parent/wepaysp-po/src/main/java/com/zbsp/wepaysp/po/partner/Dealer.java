@@ -43,7 +43,7 @@ public class Dealer
     private String modifier;
     private Timestamp modifyTime;
     private String remark;
-    
+    private String bindQrCodePath;
     private String alipayAuthCodePath;
 
     public Dealer() {
@@ -250,6 +250,15 @@ public class Dealer
     
     public void setQrCodePath(String qrCodePath) {
         this.qrCodePath = qrCodePath;
+    }
+    
+    @Column(name = "bind_qr_code_path", length = 256)
+    public String getBindQrCodePath() {
+        return bindQrCodePath;
+    }
+    
+    public void setBindQrCodePath(String bindQrCodePath) {
+        this.bindQrCodePath = bindQrCodePath;
     }
     
     @Column(name = "alipay_user_id", length = 16)

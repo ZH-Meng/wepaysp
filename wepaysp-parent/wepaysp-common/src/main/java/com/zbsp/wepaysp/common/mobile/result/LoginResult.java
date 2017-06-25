@@ -10,7 +10,10 @@ public enum LoginResult {
     LOGIN_ID_PASSWD_FAIL(1010,"ID或密码不正确"),
     
     /**"账户冻结*/
-    USER_FROZEN(1020,"账户冻结");
+    USER_FROZEN(1020,"账户冻结"),
+    
+    /**"非收银员*/
+    NOT_IS_CASHIER(1030,"非收银员");
     
     private int code;
     

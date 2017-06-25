@@ -66,8 +66,8 @@ public class StoreServiceImpl
 
         /* 所属某商户下的所有门店查询 */
         // String state = MapUtils.getString(paramMap, "state");
-        String storeName = MapUtils.getString(paramMap, "storeName");
-        String storeTel = MapUtils.getString(paramMap, "storeTel");
+        String storeName = StringUtils.trim(MapUtils.getString(paramMap, "storeName"));
+        String storeTel = StringUtils.trim(MapUtils.getString(paramMap, "storeTel"));
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "商户Oid不能为空！");
 
@@ -111,8 +111,8 @@ public class StoreServiceImpl
     public int doJoinTransQueryStoreCount(Map<String, Object> paramMap) {
         /* 所属某商户下的所有门店查询 */
         // String state = MapUtils.getString(paramMap, "state");
-        String storeName = MapUtils.getString(paramMap, "storeName");
-        String storeTel = MapUtils.getString(paramMap, "storeTel");
+        String storeName = StringUtils.trim(MapUtils.getString(paramMap, "storeName"));
+        String storeTel = StringUtils.trim(MapUtils.getString(paramMap, "storeTel"));
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "商户Oid不能为空！");
 
