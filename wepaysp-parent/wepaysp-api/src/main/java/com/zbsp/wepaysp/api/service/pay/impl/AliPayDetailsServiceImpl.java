@@ -822,10 +822,12 @@ public class AliPayDetailsServiceImpl
             DealerEmployee de = payDetails.getDealerEmployee();
             payDetailVO.setDealerEmployeeName(de != null ? de.getEmployeeName() : "");
             payDetailVO.setDealerEmployeeId(de != null ? de.getDealerEmployeeId() : "");
+            payDetailVO.setDealerEmployeeOid(de != null ? de.getIwoid() : "");
             
             Store store = payDetails.getStore();
             payDetailVO.setStoreName(store != null ? store.getStoreName() : (de != null ? de.getStore().getStoreName() : ""));
             payDetailVO.setStoreId(store != null ? store.getStoreId() : (de != null ? de.getStore().getStoreId() : ""));
+            payDetailVO.setStoreOid(store != null ? store.getIwoid() : "");
             
             Dealer dealer = payDetails.getDealer();
             payDetailVO.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
