@@ -1,6 +1,7 @@
 package com.zbsp.wepaysp.api.util;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,15 +22,14 @@ import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenRe
 import com.tencent.protocol.appid.sns_access_token_protocol.GetAuthAccessTokenResData;
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.SysConfig;
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 /**
  * 微信接口工具类
@@ -64,14 +64,29 @@ public class WeixinUtil {
      * @return 发送消息结果（不能判断是否下发至微信用户）
      * @throws Exception
      */
-    public static SendTemplateMsgResData sendPaySuccessNotice(WeixinPayDetailsVO payResultVO, String touser, String certLocalPath, String certPassword, String accessToken, String messageUrl) throws Exception {
-        Validator.checkArgument(payResultVO == null, "发送支付通知payResultVO不能为空");
+    public static SendTemplateMsgResData sendPaySuccessNotice(Map<String, Object> payResultMap, String touser, String certLocalPath, String certPassword, String accessToken, String messageUrl) throws Exception {
+        Validator.checkArgument(payResultMap == null, "发送支付通知payResultMap不能为空");
         Validator.checkArgument(StringUtils.isBlank(touser),"发送支付通知touser不能为空");
         Validator.checkArgument(StringUtils.isBlank(certLocalPath),"发送支付通知certLocalPath不能为空");
         Validator.checkArgument(StringUtils.isBlank(certPassword),"发送支付通知certPassword不能为空");
         Validator.checkArgument(StringUtils.isBlank(accessToken),"发送支付通知accessToken不能为空");
-        Validator.checkArgument(StringUtils.isBlank(payResultVO.getOutTradeNo()),"发送支付通知系统订单号不能为空");
-        Validator.checkArgument(payResultVO.getTotalFee() == null, "发送支付通知消费金额不能为空");
+        String outTradeNo = MapUtils.getString(payResultMap, "outTradeNo");
+        Integer totalFee = MapUtils.getInteger(payResultMap, "totalFee");
+        if (totalFee== null) {
+    		totalFee = MapUtils.getInteger(payResultMap, "totalAmount");
+		}
+		Object transBeginTime = MapUtils.getObject(payResultMap, "transBeginTime"); // FIXME
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo),"发送支付通知系统订单号不能为空");
+        Validator.checkArgument(totalFee == null, "发送支付通知totalFee不能为空");
+        Validator.checkArgument(transBeginTime == null, "发送支付通知transBeginTime不能为空");
+        String dealerName = MapUtils.getString(payResultMap, "dealerName");
+        String storeName = MapUtils.getString(payResultMap, "storeName");
+        Date transTime = null;
+        if (transBeginTime instanceof Date) {
+        	transTime = (Date) transBeginTime;
+        } else if (transBeginTime instanceof Timestamp) { 
+        	transTime = new Date(((Timestamp) transBeginTime).getTime());
+        }
         
         // 构造模版数据
         Map<String, TemplateData> dataMap = new HashMap<String,TemplateData>();
@@ -83,11 +98,11 @@ public class WeixinUtil {
       	DecimalFormat myformat = new DecimalFormat();
     	myformat.applyPattern("###,###,##0.00");
     	
-        TemplateData keyword1 = new TemplateData(payResultVO.getOutTradeNo(), "#000000");
-        TemplateData keyword2 = new TemplateData(myformat.format(new BigDecimal(payResultVO.getTotalFee()).divide(new BigDecimal(100))) + "元", "#000000");
-        TemplateData keyword3 = new TemplateData(myformat.format(new BigDecimal(payResultVO.getTotalFee()).divide(new BigDecimal(100))) + "元", "#000000");
-        TemplateData keyword4 = new TemplateData(payResultVO.getDealerName() + "-" + payResultVO.getStoreName(), "#000000");
-        TemplateData keyword5 = new TemplateData(DateUtil.getDate(payResultVO.getTransBeginTime(), "yyyy-MM-dd HH:mm:ss"));
+        TemplateData keyword1 = new TemplateData(outTradeNo, "#000000");
+        TemplateData keyword2 = new TemplateData(myformat.format(new BigDecimal(totalFee).divide(new BigDecimal(100))) + "元", "#000000");
+        TemplateData keyword3 = new TemplateData(myformat.format(new BigDecimal(totalFee).divide(new BigDecimal(100))) + "元", "#000000");
+        TemplateData keyword4 = new TemplateData(dealerName + "-" + storeName, "#000000");
+        TemplateData keyword5 = new TemplateData(DateUtil.getDate(transTime, "yyyy-MM-dd HH:mm:ss"));
         dataMap.put("keyword1", keyword1);
         dataMap.put("keyword2", keyword2);
         dataMap.put("keyword3", keyword3);

@@ -19,6 +19,7 @@ import com.zbsp.alipay.trade.model.result.AlipayF2FPrecreateResult;
 import com.zbsp.alipay.trade.model.result.AlipayF2FQueryResult;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.api.service.main.message.WxAppidMessageService;
 import com.zbsp.wepaysp.api.service.pay.AliPayDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayPackConverter;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
@@ -33,6 +34,8 @@ import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.MapUtil;
+import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.vo.alipay.AlipayWapPayNotifyVO;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
@@ -42,6 +45,7 @@ public class AliPayDetailsMainServiceImpl
     implements AliPayDetailsMainService {
 
     private AliPayDetailsService aliPayDetailsService;
+    private WxAppidMessageService wxAppidMessageService;
     
     public void setAliPayDetailsService(AliPayDetailsService aliPayDetailsService) {
         this.aliPayDetailsService = aliPayDetailsService;
@@ -364,7 +368,8 @@ public class AliPayDetailsMainServiceImpl
         return resultMap;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public Map<String, Object> handleAsynNotify(Map<String, String> paramMap) {
         Validator.checkArgument(paramMap == null, "paramMap为空");
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -498,6 +503,13 @@ public class AliPayDetailsMainServiceImpl
                             } else if (TradeState4AliPay.TRADE_SUCCESS.toString().equals(tradeStatusNotify)) {// 交易成功
                                 logger.info(logPrefix + "异步通知交易成功，准备更新交易状态为成功");
                                 aliPayDetailsService.doTransUpdateNotifyResult(notifyVO, TradeStatus.TRADE_SUCCESS, updateRemark + "通知交易成功，更新交易状态为成功；");
+                                try {
+                                	// 向微信 发送支付通知
+									wxAppidMessageService.sendPayResultNotice(MapUtil.convertBean(payDetailsVO));
+								} catch (Exception e) {
+									logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
+											"支付宝支付成功，向微信公众号发送支付成功通知错误，异常信息：" + e.getMessage()));
+								}
                             } else if (TradeState4AliPay.WAIT_BUYER_PAY.toString().equals(tradeStatusNotify)) {// WAIT_BUYER_PAY，不会通知此状态
                                 // 20170623，扫码支付异步通知出现"trade_status":"WAIT_BUYER_PAY"，更新交易状态处理中，和其他订单信息
                                 logger.info(logPrefix + "异步通知WAIT_BUYER_PAY，准备更新交易信息，状态仍为处理中");
@@ -596,6 +608,10 @@ public class AliPayDetailsMainServiceImpl
             resultMap.put("resultDesc", AliPayResult.SUCCESS.getDesc());
         }
         return resultMap;
+	}
+
+	public void setWxAppidMessageService(WxAppidMessageService wxAppidMessageService) {
+		this.wxAppidMessageService = wxAppidMessageService;
 	}
 
 }

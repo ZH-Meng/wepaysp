@@ -62,7 +62,8 @@ public class AliPayDetailsVO
     // private String storeName;
     private String dealerEmployeeName;
     private String dealerEmployeeId;
-
+    
+    private String partner1Oid;
     private String partner2Oid;
     private String partner3Oid;
     private String partnerEmployeeId;
@@ -518,5 +519,13 @@ public class AliPayDetailsVO
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
+	public String getPartner1Oid() {
+		return partner1Oid;
+	}
+
+	public void setPartner1Oid(String partner1Oid) {
+		this.partner1Oid = partner1Oid;
+	}
 
 }

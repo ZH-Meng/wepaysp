@@ -281,6 +281,8 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
 					data.setPayType(PayType.ALI_FACE_BAR.getDesc());
 				} else if (PayType.ALI_H5.getValue().equals(type)) {
 					data.setPayType(PayType.ALI_H5.getDesc());
+				} else if (PayType.ALI_SCAN.getValue().equals(type)) {
+					data.setPayType(PayType.ALI_SCAN.getDesc());
 				}
                 
                 data.setIndex(++i);

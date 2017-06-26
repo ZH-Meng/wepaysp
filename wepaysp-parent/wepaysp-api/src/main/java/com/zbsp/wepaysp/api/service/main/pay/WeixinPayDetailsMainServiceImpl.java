@@ -1,8 +1,6 @@
 package com.zbsp.wepaysp.api.service.main.pay;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
@@ -11,40 +9,35 @@ import org.apache.commons.lang.StringUtils;
 import com.tencent.WXPay;
 import com.tencent.common.Signature;
 import com.tencent.common.Util;
-import com.tencent.protocol.appid.send_template_msg_protocol.SendTemplateMsgResData;
 import com.tencent.protocol.unified_order_protocol.JSPayReqData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyResultData;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
-import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
-import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
-import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
-import com.zbsp.wepaysp.common.constant.WxEnums.OrderQueryErr;
-import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
-import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
-import com.zbsp.wepaysp.common.constant.WxEnums.SendTempMsgErr;
-import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
-import com.zbsp.wepaysp.common.exception.DataStateException;
-import com.zbsp.wepaysp.common.exception.NotExistsException;
-import com.zbsp.wepaysp.common.util.StringHelper;
-import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.api.util.WeixinPackConverter;
-import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.api.listener.DefaultOrderQueryBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultScanPayBusinessResultListener;
 import com.zbsp.wepaysp.api.listener.DefaultUnifiedOrderBusinessResultListener;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.api.service.BaseService;
-import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
+import com.zbsp.wepaysp.api.service.main.message.WxAppidMessageService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
-import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
+import com.zbsp.wepaysp.api.util.WeixinPackConverter;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.constant.WxEnums.OrderQueryErr;
+import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
+import com.zbsp.wepaysp.common.exception.DataStateException;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.util.MapUtil;
+import com.zbsp.wepaysp.common.util.StringHelper;
+import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
-import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 
 public class WeixinPayDetailsMainServiceImpl
@@ -53,7 +46,7 @@ public class WeixinPayDetailsMainServiceImpl
 
 	private SysConfigService sysConfigService;
     private WeixinPayDetailsService weixinPayDetailsService;
-    private PayNoticeBindWeixinService payNoticeBindWeixinService;
+    private WxAppidMessageService wxAppidMessageService;
 	
     @Override
     public Map<String, Object> createPayAndInvokeWxPay(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid) {
@@ -151,7 +144,8 @@ public class WeixinPayDetailsMainServiceImpl
         return resultMap;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public String handleWxPayNotify(String respXmlString) {
         Validator.checkArgument(StringUtils.isBlank(respXmlString), "支付结果通知字串不能为空");
         logger.info("微信支付结果通知处理API开始处理.");
@@ -190,7 +184,7 @@ public class WeixinPayDetailsMainServiceImpl
 								logger.info("微信异步通知支付成功，向收银员/商户发送支付成功通知");
 								// 发送支付结果公众号信息（支付成功）
 								try {
-									sendPayResultNotice(payResultVO);
+									wxAppidMessageService.sendPayResultNotice(MapUtil.convertBean(payResultVO));
 								} catch (Exception e) {
 									logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
 											"发送支付成功通知错误，异常信息：" + e.getMessage()));
@@ -310,7 +304,8 @@ public class WeixinPayDetailsMainServiceImpl
         return resultMap;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void handleOrderQueryResult(String resultCode, WeixinPayDetailsVO queryResultVO) {
         Validator.checkArgument(queryResultVO == null, "调用订单查询API结果queryResultVO不能为空");
         Validator.checkArgument(StringUtils.isBlank(queryResultVO.getOutTradeNo()), "系统订单ID不能为空");
@@ -329,7 +324,7 @@ public class WeixinPayDetailsMainServiceImpl
                 if (payResultVO != null && TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
                     logger.info("订单查询结果为支付成功，向收银员/商户发送支付成功通知");
                     try {
-                        sendPayResultNotice(payResultVO);
+						wxAppidMessageService.sendPayResultNotice(MapUtil.convertBean(payResultVO));
                     } catch (Exception e) {
                         logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), 
                                 "发送支付成功通知错误，异常信息：" + e.getMessage()), e);
@@ -388,71 +383,6 @@ public class WeixinPayDetailsMainServiceImpl
     	weixinPayDetailsService.doTransUpdatePayResult(returnCode, resultCode, payResultVO);
     	// 刷卡支付不发送支付通知
     }
-
-    private void sendPayResultNotice(WeixinPayDetailsVO payDetailsVO) throws Exception {
-    	// 检查发送支付信息完整性
-    	Validator.checkArgument(payDetailsVO == null, "payDetailsVO不能为空");
-    	Validator.checkArgument(payDetailsVO.getTotalFee() == null, "金额不能为空");
-    	Validator.checkArgument(payDetailsVO.getTransBeginTime() == null, "金额不能为空");
-    	Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getOutTradeNo()), "系统订单号不能为空");
-    	Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getPartner1Oid()), "partner1Oid不能为空");
-    	
-    	// 查找需要收到支付通知的人员touser
-    	Map<String, Object> queryMap = new HashMap<String, Object>(); 
-    	if (StringUtils.isNotBlank(payDetailsVO.getStoreOid())) {
-    		if (StringUtils.isNotBlank(payDetailsVO.getDealerEmployeeOid())) {// 收银员级别扫码
-	    		queryMap.put("type", PayNoticeBindWeixin.Type.dealerEmployee.getValue());
-	    		queryMap.put("dealerEmployeeOid", payDetailsVO.getDealerEmployeeOid());
-    		} else {// 门店级别扫码
-    			queryMap.put("type", PayNoticeBindWeixin.Type.store.getValue());
-    			queryMap.put("storeOid", payDetailsVO.getStoreOid());
-    		}
-    	} else {
-    		throw new RuntimeException("支付订单数据异常：storeOid不能为空");
-    	}
-    	queryMap.put("state", PayNoticeBindWeixin.State.open.getValue());
-    	List<PayNoticeBindWeixinVO> toUserList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(queryMap);
-    	
-    	if (toUserList != null && !toUserList.isEmpty()) {
-    		int count = 0;
-    		logger.info("订单（ID=" + payDetailsVO.getOutTradeNo() + "）需要向（" + toUserList.size() + "人）发送支付成功通知");
-    		// 准备发送消息的参数（服务商配置信息）
-    		String certLocalPath = null;
-    		String certPassword = null;
-    		String accessToken = null;
-    		Map<String, Object> partnerMap = sysConfigService.getPartnerCofigInfoByPartnerOid(payDetailsVO.getPartner1Oid());
-    		if (partnerMap != null && !partnerMap.isEmpty()) {
-    			certLocalPath = MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH);
-    			certPassword = MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD);
-        		// 获取Base_acction_token
-    			accessToken = new WeixinUtil().getBaseAccessToken(payDetailsVO.getPartner1Oid());
-    		} else {
-    			throw new RuntimeException("系统数据异常，服务商配置信息不存在");
-    		}
-    		
-    		for(PayNoticeBindWeixinVO toUser : toUserList) {
-    			if (toUser != null && StringUtils.isNotBlank(toUser.getOpenid())) {
-    				String messageURL = MessageFormat.format(SysConfig.wxPayMessageLinkURL, toUser.getOpenid(), payDetailsVO.getDealerOid(), payDetailsVO.getStoreOid(), payDetailsVO.getDealerEmployeeOid());
-					SendTemplateMsgResData sendResult = WeixinUtil.sendPaySuccessNotice(payDetailsVO, toUser.getOpenid(), certLocalPath, certPassword, accessToken, messageURL);
-					if (SendTempMsgErr.SUCCESS.getValue().equals(sendResult.getErrcode())) {// 发送成功
-						logger.info("订单（ID=" + payDetailsVO.getOutTradeNo() + "）向（" + toUser.getNickname() + "(openid=" + toUser.getOpenid() + ")）发送支付成功通知成功");
-						count ++;
-					} else {
-						logger.info("订单（ID=" + payDetailsVO.getOutTradeNo() + "）向（" + toUser.getNickname() + "(openid=" + toUser.getOpenid() + ")）发送支付成功通知失败");
-					}
-    			}
-    		}
-    		logger.info("订单（ID=" + payDetailsVO.getOutTradeNo() + "）成功向（" + count + "人）发送支付成功通知");
-    	} else {
-    	    String temp = "";
-    	    if (StringUtils.isNotBlank(payDetailsVO.getDealerEmployeeOid())) {
-    	        temp = "收银员-" + payDetailsVO.getDealerEmployeeName() + "（ID=" + payDetailsVO.getDealerEmployeeId() + "）"; 
-    	    } else {
-    	        temp = "门店-" + payDetailsVO.getStoreName() + "（ID=" + payDetailsVO.getStoreId() + "）";
-    	    }
-    	    logger.info(temp + "没有启用的支付通知绑定人"+"，订单（ID=" + payDetailsVO.getOutTradeNo() + "）不需要发送支付成功通知");
-    	}
-	}
     
     public void setSysConfigService(SysConfigService sysConfigService) {
 		this.sysConfigService = sysConfigService;
@@ -462,8 +392,8 @@ public class WeixinPayDetailsMainServiceImpl
         this.weixinPayDetailsService = weixinPayDetailsService;
     }
 
-	public void setPayNoticeBindWeixinService(PayNoticeBindWeixinService payNoticeBindWeixinService) {
-		this.payNoticeBindWeixinService = payNoticeBindWeixinService;
+	public void setWxAppidMessageService(WxAppidMessageService wxAppidMessageService) {
+		this.wxAppidMessageService = wxAppidMessageService;
 	}
-    
+	
 }
