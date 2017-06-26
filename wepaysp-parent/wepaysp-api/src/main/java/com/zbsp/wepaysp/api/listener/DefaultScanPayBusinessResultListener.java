@@ -128,6 +128,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
      */
     public void onSuccess(ScanPayResData scanPayResData, String transID) {
         logger.info("微信刷卡支付成功：系统订单ID=" + scanPayResData.getOut_trade_no() + "，金额：" + scanPayResData.getTotal_fee());
+        scanPayResData.setTransaction_id(transID);
         updatePayResult(scanPayResData);
         result = ON_SUCCESS;
         transcationID = transID;
