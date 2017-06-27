@@ -126,6 +126,7 @@ public class AliPayDetailsAction
             paramMap.put("storeId", aliPayDetailsVO.getStoreId());
             paramMap.put("outTradeNo", aliPayDetailsVO.getOutTradeNo());
             paramMap.put("tradeNo", aliPayDetailsVO.getTradeNo());
+            paramMap.put("minAmout", aliPayDetailsVO.getTotalAmount());
             
             rowCount = aliPayDetailsService.doJoinTransQueryAliPayDetailsCount(paramMap);
             if (rowCount > 0) {

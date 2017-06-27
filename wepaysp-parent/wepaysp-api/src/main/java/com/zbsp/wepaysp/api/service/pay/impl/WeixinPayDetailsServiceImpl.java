@@ -91,7 +91,8 @@ public class WeixinPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
-
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
+        
         //StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p and w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         String jpqlSelect = "select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         StringBuffer conditionSB = new StringBuffer();
@@ -164,6 +165,10 @@ public class WeixinPayDetailsServiceImpl
         if (StringUtils.isNotBlank(transactionId)) {
             conditionSB.append(" and w.transactionId = :TRANSACTIONID");
             jpqlMap.put("TRANSACTIONID", transactionId);
+        }
+        if (minAmout != null ) {
+            conditionSB.append(" and w.totalFee >=:MINAMOUT ");
+            jpqlMap.put("MINAMOUT", minAmout);
         }
 
         conditionSB.append(" order by w.transBeginTime desc");
@@ -252,7 +257,8 @@ public class WeixinPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
-
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
+        
         //StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p, w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
         
@@ -327,7 +333,10 @@ public class WeixinPayDetailsServiceImpl
             sql.append(" and w.transactionId = :TRANSACTIONID");
             sqlMap.put("TRANSACTIONID", transactionId);
         }
-        
+        if (minAmout != null ) {
+        	sql.append(" and w.totalFee >=:MINAMOUT ");
+        	sqlMap.put("MINAMOUT", minAmout);
+        }
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 

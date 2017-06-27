@@ -85,7 +85,7 @@
 	<bean id="weixinPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainServiceImpl" parent="baseService" >
 		<property name="weixinPayDetailsService" ref="weixinPayDetailsService" />
 		<property name="sysConfigService" ref="sysConfigService" />
-		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
+		<property name="wxAppidMessageService" ref="wxAppidMessageService" />
 	</bean>
 	
 	<bean id="weixinRefundDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainServiceImpl" parent="baseService" >
@@ -111,6 +111,7 @@
 	
 	<bean id="aliPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainServiceImpl" parent="baseService">
 		<property name="aliPayDetailsService" ref="aliPayDetailsService" />
+		<property name="wxAppidMessageService" ref="wxAppidMessageService" />
 	</bean>
 	
 	<bean id="alipayAppAuthDetailsService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppAuthDetailsServiceImpl" parent="baseService">
@@ -118,6 +119,11 @@
 	</bean>
 	
 	<bean id="alipayAppService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppServiceImpl" parent="baseService">
+	</bean>
+	
+	<bean id="wxAppidMessageService" class="com.zbsp.wepaysp.api.service.main.message.WxAppidMessageServiceImpl" >
+		<property name="sysConfigService" ref="sysConfigService" />
+		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
 </beans>

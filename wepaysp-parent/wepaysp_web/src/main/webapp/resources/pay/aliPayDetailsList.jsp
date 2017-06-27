@@ -77,6 +77,11 @@
 								<span class="field_label">商户订单号</span>
 								<s:textfield name="aliPayDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
 							</div>
+							<div class="condition_field">
+								<span class="field_label">最小支付金额</span>
+								<input type="hidden" name="aliPayDetailsVO.totalAmount" id="totalAmountStr" value=""/>
+								<s:textfield id="totalAmount" maxlength="8"/>
+							</div>
 						</div>
 					</li>
 					<li class="bg_button">
@@ -251,6 +256,11 @@
 				alert("不能跨月查询");
 				return;
 			}
+			if("^\d{0,8}\.{0,1}(\d{1,2})?$".test($("#totalAmount").val())) {
+				alert("输入金额无效");
+				return;
+			}
+			$("#totalAmountStr").val($("#totalAmount").val()*100);
 			invokeAction(method);
 		}
 	

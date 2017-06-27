@@ -126,6 +126,7 @@ public class WeixinPayDetailsAction
             paramMap.put("storeId", weixinPayDetailsVO.getStoreId());
             paramMap.put("outTradeNo", weixinPayDetailsVO.getOutTradeNo());
             paramMap.put("transactionId", weixinPayDetailsVO.getTransactionId());
+            paramMap.put("minAmout", weixinPayDetailsVO.getTotalFee());
             
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
             if (rowCount > 0) {

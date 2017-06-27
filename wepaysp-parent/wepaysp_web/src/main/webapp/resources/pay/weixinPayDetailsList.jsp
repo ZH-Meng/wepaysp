@@ -83,6 +83,11 @@
 								<span class="field_label">商户订单号</span>
 								<s:textfield name="weixinPayDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
 							</div>
+							<div class="condition_field">
+								<span class="field_label">最小支付金额</span>
+								<input type="hidden" name="weixinPayDetailsVO.totalFee" id="totalFeeStr" value=""/>
+								<s:textfield id="totalFee" maxlength="8"/>
+							</div>
 						</div>
 					</li>
 					<li class="bg_button">
@@ -256,6 +261,12 @@
 				alert("不能跨月查询");
 				return;
 			}
+			var fee = $("#totalFee").val();
+			if(!isBlank(fee) && /^\d{0,8}\.{0,1}(\d{1,2})?$/.test()) {
+				alert("输入金额无效");
+				return;
+			}
+			$("#totalFeeStr").val($("#totalFee").val()*100);
 			invokeAction(method);
 		}
 	

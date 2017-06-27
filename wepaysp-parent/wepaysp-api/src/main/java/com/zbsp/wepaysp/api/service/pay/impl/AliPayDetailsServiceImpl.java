@@ -572,6 +572,7 @@ public class AliPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
         
         String jpqlSelect = "select distinct(w) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         
@@ -645,6 +646,10 @@ public class AliPayDetailsServiceImpl
         if (StringUtils.isNotBlank(tradeNo)) {
             conditionSB.append(" and w.tradeNo = :TRADENO");
             jpqlMap.put("TRADENO", tradeNo);
+        }
+        if (minAmout != null ) {
+        	conditionSB.append(" and w.totalAmount >=:MINAMOUT ");
+        	jpqlMap.put("MINAMOUT", minAmout);
         }
 
         conditionSB.append(" order by w.transBeginTime desc");
@@ -729,6 +734,7 @@ public class AliPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
 
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
         // 只查交易成功的
@@ -800,6 +806,10 @@ public class AliPayDetailsServiceImpl
         if (StringUtils.isNotBlank(tradeNo)) {
             sql.append(" and w.tradeNo = :TRADENO");
             jpqlMap.put("TRADENO", tradeNo);
+        }
+        if (minAmout != null ) {
+        	sql.append(" and w.totalAmount >=:MINAMOUT ");
+        	jpqlMap.put("MINAMOUT", minAmout);
         }
         
         return commonDAO.queryObjectCount(sql.toString(), jpqlMap, false);
