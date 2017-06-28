@@ -546,6 +546,8 @@ public class DealerAction
     		 } else {
     		     authStatusDesc = "未授权";
     		 }
+    		 // 商户信息
+    		 dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerOid);
         } catch (Exception e) {
             logger.error("跳转商户管理支付宝页面错误：" + e.getMessage());
             setAlertMessage("跳转商户管理支付宝页面错误！");

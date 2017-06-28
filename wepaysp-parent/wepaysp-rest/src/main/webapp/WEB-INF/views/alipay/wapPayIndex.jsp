@@ -10,13 +10,17 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title>${indexVO.dealerName}订单</title>
+		<title>支付宝支付</title>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/weui.min.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/font/iconfont.css"/>
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/resources/css/main.css"/>
 		<script  src="<%=request.getContextPath()%>/resources/js/jquery-1.9.1.min.js"></script>
 		<script src="<%=request.getContextPath()%>/resources/js/keyboard.js"></script>
 	    <script type="text/javascript" src="<%=request.getContextPath()%>/resources/js/check.js"></script>
+	    <style type="text/css">
+	    	.weui_btn_primary {background-color: #10a6e2;}
+			.weui_btn_primary:disabled {color: #888888; background-color: #dddddd;}
+	    </style>
 	</head>
 </head>
 <body>

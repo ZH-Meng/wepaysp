@@ -648,7 +648,7 @@ public class AliPayDetailsServiceImpl
             jpqlMap.put("TRADENO", tradeNo);
         }
         if (minAmout != null ) {
-        	conditionSB.append(" and w.totalAmount >=:MINAMOUT ");
+        	conditionSB.append(" and w.totalAmount >:MINAMOUT ");
         	jpqlMap.put("MINAMOUT", minAmout);
         }
 
@@ -808,7 +808,7 @@ public class AliPayDetailsServiceImpl
             jpqlMap.put("TRADENO", tradeNo);
         }
         if (minAmout != null ) {
-        	sql.append(" and w.totalAmount >=:MINAMOUT ");
+        	sql.append(" and w.totalAmount >:MINAMOUT ");
         	jpqlMap.put("MINAMOUT", minAmout);
         }
         

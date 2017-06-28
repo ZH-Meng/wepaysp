@@ -167,7 +167,7 @@ public class WeixinPayDetailsServiceImpl
             jpqlMap.put("TRANSACTIONID", transactionId);
         }
         if (minAmout != null ) {
-            conditionSB.append(" and w.totalFee >=:MINAMOUT ");
+            conditionSB.append(" and w.totalFee >:MINAMOUT ");
             jpqlMap.put("MINAMOUT", minAmout);
         }
 
@@ -257,7 +257,7 @@ public class WeixinPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
-        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额，大于且不等于
         
         //StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p, w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
@@ -334,7 +334,7 @@ public class WeixinPayDetailsServiceImpl
             sqlMap.put("TRANSACTIONID", transactionId);
         }
         if (minAmout != null ) {
-        	sql.append(" and w.totalFee >=:MINAMOUT ");
+        	sql.append(" and w.totalFee >:MINAMOUT ");
         	sqlMap.put("MINAMOUT", minAmout);
         }
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);

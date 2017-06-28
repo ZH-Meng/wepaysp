@@ -40,6 +40,7 @@ public class AliPayDetailsAction
     private int partnerVoListLevel;
     private String listType;
     private PayTotalVO totalVO;
+    private String queryMinAmount;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -237,6 +238,14 @@ public class AliPayDetailsAction
 
     public PayTotalVO getTotalVO() {
         return totalVO;
+    }
+    
+    public String getQueryMinAmount() {
+        return queryMinAmount;
+    }
+
+    public void setQueryMinAmount(String queryMinAmount) {
+        this.queryMinAmount = queryMinAmount;
     }
 
 }

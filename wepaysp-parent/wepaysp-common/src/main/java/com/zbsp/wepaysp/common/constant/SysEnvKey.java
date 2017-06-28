@@ -78,7 +78,7 @@ public class SysEnvKey {
     public static final String ALIPAY_AUTH_APP_URL_DEV= "https://openauth.alipaydev.com/oauth2/appToAppAuth.htm?app_id=APPID&redirect_uri=REDIRECT_URI";
 
     /**正则，金额，大于0的整数或者小数，小数时 两位有效数字，例如：0.01或者200*/
-    public static final String REGEX_￥_POSITIVE_FLOAT_2BIT= "^((0{1}[1-9]*)|([1-9]{1}[0-9]*))\\.?\\d{0,2}$";
+    public static final String REGEX_￥_POSITIVE_FLOAT_2BIT= "^((0{1}(\\.((0{1}[1-9]{1})|([1-9]{1}\\d?)))?)|([1-9]{1}\\d*(\\.\\d{1,2})?))$";
     
     /**正则，金额，整数*/
     public static final String REGEX_￥_INTEGER="^\\d+$";
