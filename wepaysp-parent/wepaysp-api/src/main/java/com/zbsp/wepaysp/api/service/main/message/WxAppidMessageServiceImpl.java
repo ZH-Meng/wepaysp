@@ -73,7 +73,7 @@ public class WxAppidMessageServiceImpl implements WxAppidMessageService {
     			certLocalPath = MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH);
     			certPassword = MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD);
         		// 获取Base_acction_token
-    			accessToken = new WeixinUtil().getBaseAccessToken(partner1Oid);
+    			accessToken = WeixinUtil.getBaseAccessToken(partner1Oid);
     		} else {
     			throw new RuntimeException("系统数据异常，服务商配置信息不存在");
     		}

@@ -540,7 +540,7 @@ public class DealerAction
                 SysConfig.appId4Face2FacePay, SysConfig.alipayAuthCallBackURL, urlParamMap);
     		 
     		 // 查看商户是否授权当面付应用
-    		 AlipayAppAuthDetailsVO authDetailsVO = alipayAppAuthDetailsService.doJoinTranQueryAppAuthDetailByDealer(dealerOid, SysConfig.appId4Face2FacePay);
+    		 AlipayAppAuthDetailsVO authDetailsVO = alipayAppAuthDetailsService.doJoinTransQueryAppAuthDetailByDealer(dealerOid, SysConfig.appId4Face2FacePay);
     		 if (authDetailsVO != null && AlipayAppAuthDetails.AppAuthStatus.VALID.toString().equals(authDetailsVO.getStatus())) {
     		     authStatusDesc = "已授权";
     		 } else {

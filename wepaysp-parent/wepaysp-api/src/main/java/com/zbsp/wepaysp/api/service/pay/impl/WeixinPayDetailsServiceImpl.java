@@ -1029,12 +1029,10 @@ public class WeixinPayDetailsServiceImpl
         StringBuffer logDescBuffer = new StringBuffer("修改微信支付明细[");
         
         payDetails.setTradeStatus(tradeStatus.getValue());
-        payDetails.setRemark(payDetails.getRemark() + remark);
-        
         logDescBuffer.append(", tradeStatus：");
         logDescBuffer.append(payDetails.getTradeStatus());
         if (StringUtils.isNotBlank(remark)) {
-            payDetails.setRemark(payDetails.getRemark() + remark);
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + remark);
             logDescBuffer.append(", remark：");
             logDescBuffer.append(remark);
         }

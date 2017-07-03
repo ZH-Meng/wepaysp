@@ -38,8 +38,10 @@ import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.vo.alipay.AlipayAppAuthDetailsVO;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 /**
@@ -110,6 +112,54 @@ public class AliPayUtil {
         return response;
     }
     
+    /**使用app_auth_code换取app_auth_token或者AppRefreshToken刷新token，获取token接着查询授权信息
+     */
+    public static AlipayAppAuthDetailsVO getOrRefreshAppAuthToken(AlipayOpenAuthTokenAppRequestBuilder builder) {
+        AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
+        // 设置平台参数
+        
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AuthTokenAppRequest bizContent:" + request.getBizContent());
+        AlipayOpenAuthTokenAppResponse response = null;
+        AlipayAppAuthDetailsVO appAuthDetailsVO = null;
+        for (int i = 1; i < 3; i++) {
+            response = getResponse(client, request);
+            logger.info("AuthTokenAppResponse :" + response == null ? null : JSONUtil.toJSONString(response, true));
+            if (response != null && Constants.SUCCESS.equals(response.getCode())) {
+                logger.info("应用授权使用app_auth_code换取app_auth_token成功");
+                
+                appAuthDetailsVO = new AlipayAppAuthDetailsVO();
+                appAuthDetailsVO.setAppAuthToken(response.getAppAuthToken());
+                appAuthDetailsVO.setAppRefreshToken(response.getAppRefreshToken());
+                appAuthDetailsVO.setExpiresIn(Integer.valueOf(response.getExpiresIn()));
+                appAuthDetailsVO.setReExpiresIn(Integer.valueOf(response.getReExpiresIn()));
+                appAuthDetailsVO.setAuthAppId(response.getAuthAppId());
+                appAuthDetailsVO.setAuthUserId(response.getUserId());
+                
+                //  立即查询授权信息 
+                AlipayOpenAuthTokenAppQueryResponse authQueryResponse= AliPayUtil.authTokenAppQuery(
+                    new AlipayOpenAuthTokenAppQueryRequestBuilder().setAppAuthToken(response.getAppAuthToken()));
+                if (authQueryResponse != null && Constants.SUCCESS.equals(authQueryResponse.getCode())) {
+                    String authMethods = authQueryResponse.getAuthMethods() == null ? "[]" : authQueryResponse.getAuthMethods().toString();
+                    appAuthDetailsVO.setAuthMethods(authMethods.substring(1, authMethods.length() - 1));// 当前app_auth_token的授权接口列表
+                    appAuthDetailsVO.setAuthStart(authQueryResponse.getAuthStart());// 授权生效时间
+                    appAuthDetailsVO.setAuthEnd(authQueryResponse.getAuthEnd());// 授权失效时间
+                    appAuthDetailsVO.setStatus(authQueryResponse.getStatus());
+                } else {
+                    logger.error(AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "查询授权信息(app_auth_token={})  - 失败", response.getAppAuthToken());
+                }
+                break;
+            } else if (response != null && Constants.FAILED.equals(response.getCode())) {
+                logger.warn("应用授权使用app_auth_code换取app_auth_token失败");
+                break;
+            } else {
+                logger.warn("应用授权使用app_auth_code换取app_auth_token异常");
+            }
+        }
+        return appAuthDetailsVO;
+    }
+    
     /**查询授权信息，接口名称：alipay.open.auth.token.app.query<br>
      * 当商户把服务窗、店铺等接口的权限授权给ISV之后，支付宝会给ISV颁发一个app_auth_token。
      * 如若授权成功之后，ISV想知道用户的授权信息，如授权者、授权接口列表等信息，可以调用本接口查询某个app_auth_token对应的授权信息。
@@ -120,6 +170,7 @@ public class AliPayUtil {
 
         // 设置业务参数
         request.setBizContent(builder.toJsonString());
+        logger.info("查询授权信息(app_auth_token={})  - 开始", builder.getAppAuthToken());
         logger.info("AuthTokenAppRequest bizContent:" + request.getBizContent());
         AlipayOpenAuthTokenAppQueryResponse response = null;
         for (int i = 1; i < 3; i++) {

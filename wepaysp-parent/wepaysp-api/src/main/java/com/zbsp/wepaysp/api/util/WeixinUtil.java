@@ -36,14 +36,12 @@ import com.zbsp.wepaysp.common.util.Validator;
  * 
  * @author 孟郑宏
  */
-public class WeixinUtil {
+public final class WeixinUtil {
     
     /**日志对象*/
-    protected static final Logger logger = LogManager.getLogger(WeixinUtil.class);
+    private static final Logger logger = LogManager.getLogger(WeixinUtil.class);
     
-    private int refreshLimitErrorCount = 3;
-    private long expire_time;
-    private String access_token;
+    private final static int refreshLimitErrorCount = 3;
 	
     /**FIXME 可以在数据库中灵活配置需要通知的业务和模版ID的对应关系，以及模版ID的启用停用*/
     private static String TEMPLATE_ID_PAY_SUCCESS = "nJWFUU8wDvd7elT4znZivLLHmMYl_ajID6cd4OujHa0";
@@ -121,7 +119,7 @@ public class WeixinUtil {
      * @param partner1Oid
      * @return
      */
-    public String getBaseAccessToken(String partner1Oid) {
+    public static synchronized String getBaseAccessToken(String partner1Oid) {
     	Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid); 
     	String accessToken = MapUtils.getString(partnerMap, SysEnvKey.WX_BASE_ACCESS_TOKEN);
 		Long expireTime = MapUtils.getLong(partnerMap, SysEnvKey.WX_BASE_EXPIRE_TIME);
@@ -146,7 +144,7 @@ public class WeixinUtil {
      * 刷新Base_access_token
      * @param partner1Oid 服务商Oid
      */
-    public String refreshBaseAccessToken(String partner1Oid) {
+    public static String refreshBaseAccessToken(String partner1Oid) {
     	Validator.checkArgument(StringUtils.isBlank(partner1Oid), "partner1Oid不能为空");
     	Map<String, Object> partnerMap = SysConfig.partnerConfigMap.get(partner1Oid); 
     	String appid = MapUtils.getString(partnerMap, SysEnvKey.WX_APP_ID);
@@ -155,65 +153,34 @@ public class WeixinUtil {
 		String secret= MapUtils.getString(partnerMap, SysEnvKey.WX_SECRET);
 		String certLocalPath= MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_LOCAL_PATH);
 		String certPassword= MapUtils.getString(partnerMap, SysEnvKey.WX_CERT_PASSWORD);
-		boolean result = false;
 		for (int i = 1; i <= refreshLimitErrorCount; i++) {
-			if (getBaseAccessToken(appid, secret, certLocalPath, certPassword)) {
-				logger.info("服务商（"+ appid  +"）获取/刷新Access_token成功");
-				result = true;
-				// 缓存access_token 和 expire_time
-				partnerMap.put(SysEnvKey.WX_BASE_ACCESS_TOKEN, access_token);
-				partnerMap.put(SysEnvKey.WX_BASE_EXPIRE_TIME, expire_time);
-				
-				logger.info("服务商（"+ appid +"）分别更新以partner1Oid、appid为key的Map配置");
-				SysConfig.partnerConfigMap.put(partner1Oid, partnerMap);
-				SysConfig.partnerConfigMap2.put(appid, partnerMap);
-				return access_token;
-			} else {
-				logger.error("服务商（"+ appid  +"）获取/刷新Access_token失败第" + i + "次");
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		if (!result) {
-			logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
-					"服务商（"+ appid  +"）获取/刷新Access_token失败"));
-		}
-		return null;
-    }
-    
-    /**
-     * 根据服务商信息获取基础接口access_token
-     * @param appid
-     * @param secret
-     * @param certLocalPath
-     * @param certPassword
-     * @return
-     */
-    private boolean getBaseAccessToken(String appid, String secret, String certLocalPath, String certPassword) {
-        try {
-            String jsonResult = WXPay.requestGetBaseAccessTokenService(new GetBaseAccessTokenReqData(appid, secret), certLocalPath, certPassword);
-            // 转化JSON结果
-            GetBaseAccessTokenResData accessTokenResult = JSONUtil.parseObject(jsonResult, GetBaseAccessTokenResData.class);
-            // 校验获取access_token
-            if (checkBaseAccessTokenResult(accessTokenResult)) {
-                access_token = accessTokenResult.getAccess_token();
-                logger.info("access_token：" + accessTokenResult.getAccess_token() + "，expires_in：" + accessTokenResult.getExpires_in());
-                // 设置过期时间
-                expire_time = new Date().getTime() + accessTokenResult.getExpires_in() * 1000;
-                return true;
-            } else {
-                logger.error("获取/刷新Access_token失败，错误码：" + accessTokenResult.getErrcode() + "，错误描述：" + accessTokenResult.getErrmsg());
-                return false;
+		    try {
+	            String jsonResult = WXPay.requestGetBaseAccessTokenService(new GetBaseAccessTokenReqData(appid, secret), certLocalPath, certPassword);
+	            // 转化JSON结果
+	            GetBaseAccessTokenResData accessTokenResult = JSONUtil.parseObject(jsonResult, GetBaseAccessTokenResData.class);
+	            // 校验获取access_token
+	            if (checkBaseAccessTokenResult(accessTokenResult)) {
+	                logger.info("服务商（"+ appid  +"）获取/刷新Access_token成功，access_token：" + accessTokenResult.getAccess_token() + "，expires_in：" + accessTokenResult.getExpires_in());
+	                // 缓存access_token 和 expire_time
+	                partnerMap.put(SysEnvKey.WX_BASE_ACCESS_TOKEN, accessTokenResult.getAccess_token());
+	                partnerMap.put(SysEnvKey.WX_BASE_EXPIRE_TIME, new Date().getTime() + accessTokenResult.getExpires_in() * 1000);
+	                logger.info("服务商（"+ appid +"）分别更新以partner1Oid、appid为key的Map配置");
+	                SysConfig.partnerConfigMap.put(partner1Oid, partnerMap);
+	                SysConfig.partnerConfigMap2.put(appid, partnerMap);
+	                break;
+	            } else {
+	                logger.error("服务商（"+ appid  +"）获取/刷新Access_token失败第" + i + "次，错误码：" + accessTokenResult.getErrcode() + "，错误描述：" + accessTokenResult.getErrmsg());
+	                try {
+	                    Thread.sleep(3000);
+	                } catch (InterruptedException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+            } catch (Exception e) {
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(), "获取/刷新Access_token失败", "，异常信息：" + e.getMessage()), e);
             }
-        } catch (Exception e) {
-            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxJSAPIErr.getValue(),
-                "获取/刷新Access_token失败", "，异常信息：" + e.getMessage()));
-            logger.error(e.getMessage(), e);
-            return false;
-        }
+		}
+		return MapUtils.getString(partnerMap, SysEnvKey.WX_BASE_ACCESS_TOKEN);
     }
     
     /**

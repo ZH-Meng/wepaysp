@@ -6,10 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
-import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.zbsp.alipay.trade.config.Constants;
-import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
 import com.zbsp.wepaysp.api.service.alipay.AlipayAppAuthDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
@@ -65,37 +62,13 @@ public class AlipayOpenAuthController
             }
 
             // 使用app_auth_code换取app_auth_token
-            AlipayOpenAuthTokenAppResponse authResponse = AliPayUtil.authTokenApp(
+            AlipayAppAuthDetailsVO appAuthDetailsVO = AliPayUtil.getOrRefreshAppAuthToken(
                 new AlipayOpenAuthTokenAppRequestBuilder().setCode(callBackVO.getApp_auth_code()).setGrantType(Constants.GRANT_TYPE_AUTHORIZATION_CODE));
-            logger.info("(appid={})换取app_auth_token - 开始", callBackVO.getApp_id());
-            if (authResponse != null && Constants.SUCCESS.equals(authResponse.getCode())) {
+            if (appAuthDetailsVO != null) {
                 logger.info("(appid={})换取app_auth_token - 成功", callBackVO.getApp_id());
 
-                // 保存商户授权应用令牌信息
-                AlipayAppAuthDetailsVO appAuthDetailsVO = new AlipayAppAuthDetailsVO();
                 appAuthDetailsVO.setDealerOid(callBackVO.getDealerOid());// 商户
                 appAuthDetailsVO.setAppId(callBackVO.getApp_id());// 应用
-                appAuthDetailsVO.setAppAuthToken(authResponse.getAppAuthToken());
-                appAuthDetailsVO.setAppRefreshToken(authResponse.getAppRefreshToken());
-                appAuthDetailsVO.setExpiresIn(Integer.valueOf(authResponse.getExpiresIn()));
-                appAuthDetailsVO.setReExpiresIn(Integer.valueOf(authResponse.getReExpiresIn()));
-                appAuthDetailsVO.setAuthAppId(authResponse.getAuthAppId());
-                appAuthDetailsVO.setAuthUserId(authResponse.getUserId());
-                
-                //  立即查询授权信息 FIXME 考虑到查询结果的authMethods可能会有用。
-                logger.info("查询授权信息(appid={}, app_auth_token={})  - 开始", callBackVO.getApp_id(), authResponse.getAppAuthToken());
-                AlipayOpenAuthTokenAppQueryResponse authQueryResponse= AliPayUtil.authTokenAppQuery(
-                    new AlipayOpenAuthTokenAppQueryRequestBuilder().setAppAuthToken(authResponse.getAppAuthToken()));
-                if (authQueryResponse != null && Constants.SUCCESS.equals(authQueryResponse.getCode())) {
-                    logger.info("查询授权信息(appid={}, app_auth_token={})  - 成功", callBackVO.getApp_id(), authResponse.getAppAuthToken());
-                    String authMethods = authQueryResponse.getAuthMethods() == null ? "[]" : authQueryResponse.getAuthMethods().toString();
-                    appAuthDetailsVO.setAuthMethods(authMethods.substring(1, authMethods.length() - 1));
-                    appAuthDetailsVO.setAuthStart(authQueryResponse.getAuthStart());
-                    appAuthDetailsVO.setAuthEnd(authQueryResponse.getAuthEnd());
-                    appAuthDetailsVO.setStatus(authQueryResponse.getStatus());
-                } else {
-                    logger.error(AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "查询授权信息(appid={}, app_auth_token={})  - 失败", callBackVO.getApp_id(), authResponse.getAppAuthToken());
-                }
                 
                 try {
                     logger.info("保存商户授权应用令牌信息 - 开始");

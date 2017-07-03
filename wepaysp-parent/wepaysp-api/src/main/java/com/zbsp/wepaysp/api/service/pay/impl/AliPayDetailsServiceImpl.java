@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.pay.impl;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,6 +50,8 @@ import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 public class AliPayDetailsServiceImpl
     extends BaseService
     implements AliPayDetailsService {
+    
+    private final static BigDecimal TIMES_100 = new BigDecimal(100);
     
     private SysLogService sysLogService;
     
@@ -524,12 +527,10 @@ public class AliPayDetailsServiceImpl
         StringBuffer logDescBuffer = new StringBuffer("修改支付宝明细[");
         
         payDetails.setTradeStatus(tradeStatus);
-        payDetails.setRemark(payDetails.getRemark() + remark);
-        
         logDescBuffer.append(", tradeStatus：");
         logDescBuffer.append(payDetails.getTradeStatus());
         if (StringUtils.isNotBlank(remark)) {
-            payDetails.setRemark(payDetails.getRemark() + remark);
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + remark);
             logDescBuffer.append(", remark：");
             logDescBuffer.append(remark);
         }
@@ -931,7 +932,7 @@ public class AliPayDetailsServiceImpl
             tradeStatus = TradeStatus.MANUAL_HANDLING.getValue();
             payDetails.setRemark((StringUtils.isBlank(payDetails.getRemark()) ? "查询支付宝交易响应成功，但" : (payDetails.getRemark() +",")) + "金额不一致");
         } else {
-            payDetails.setRemark(payDetails.getRemark() + queryPayResultVO.getRemark());
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + queryPayResultVO.getRemark());
         }
         //TODO 其他金额校验
         
@@ -1027,10 +1028,14 @@ public class AliPayDetailsServiceImpl
         payDetails.setBuyerUserId(notifyVO.getBuyer_id());
         payDetails.setBuyerLogonId(notifyVO.getBuyer_logon_id());
         payDetails.setSellerId(notifyVO.getSeller_id());
-        payDetails.setReceiptAmount(NumberUtils.toInt(notifyVO.getReceipt_amount()));
-        payDetails.setInvoiceAmount(NumberUtils.toInt(notifyVO.getInvoice_amount()));
-        payDetails.setBuyerPayAmount(NumberUtils.toInt(notifyVO.getBuyer_pay_amount()));
-        payDetails.setPointAmount(NumberUtils.toInt(notifyVO.getPoint_amount()));
+        payDetails.setReceiptAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getReceipt_amount())).multiply(TIMES_100).intValue());
+        payDetails.setInvoiceAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getInvoice_amount())).multiply(TIMES_100).intValue());
+        payDetails.setBuyerPayAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getBuyer_pay_amount())).multiply(TIMES_100).intValue());
+        payDetails.setPointAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getPoint_amount())).multiply(TIMES_100).intValue());
+
+        if (notifyVO.getGmt_payment() != null) {
+            payDetails.setGmtPayment(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_payment(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
+        }
         if (notifyVO.getGmt_refund() != null) {
             payDetails.setGmtRefund(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_refund(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
         }
@@ -1047,7 +1052,7 @@ public class AliPayDetailsServiceImpl
             }
         }
         if (StringUtils.isNotBlank(remark)) {
-            payDetails.setRemark(payDetails.getRemark() + remark);
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + remark);
         }
         commonDAO.update(payDetails);
     }
