@@ -37,27 +37,25 @@ public class RefreshAppAuthTokenTask
         
         if (authDetailsList != null && !authDetailsList.isEmpty()) {
             for (AlipayAppAuthDetails authDetails : authDetailsList) {
-                if ("201706BB6367d7f714604a36bc60e0b94dd24X47".equalsIgnoreCase(authDetails.getAppAuthToken())) {
-                    try {
-                        logger.info(LOG_PREFIX + "商户{}授权应用AppAuthToken{}即将过期过期，准备刷新", authDetails.getDealer().getCompany(), authDetails.getAppAuthToken());
-                        AlipayAppAuthDetailsVO appAuthDetailsVO = AliPayUtil
-                            .getOrRefreshAppAuthToken(new AlipayOpenAuthTokenAppRequestBuilder().setGrantType(Constants.GRANT_TYPE_REFRESH_TOKEN).setRefreshToken(authDetails.getAppRefreshToken()));
-                        if (appAuthDetailsVO == null) {
-                            logger.error(LOG_PREFIX + AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "刷新商户{}授权应用AppAuthToken{}  - 失败", authDetails.getDealer().getCompany(), authDetails.getAppAuthToken());
-                        } else {
-                            authDetails.setAuthAppId(appAuthDetailsVO.getAuthAppId());
-                            authDetails.setAppAuthToken(appAuthDetailsVO.getAppAuthToken());
-                            authDetails.setAppRefreshToken(appAuthDetailsVO.getAppRefreshToken());
-                            authDetails.setExpiresIn(appAuthDetailsVO.getExpiresIn());
-                            authDetails.setReExpiresIn(appAuthDetailsVO.getReExpiresIn());
-                            authDetails.setAuthEnd(appAuthDetailsVO.getAuthEnd());
-                            authDetails.setAuthStart(appAuthDetailsVO.getAuthStart());
-                            authDetails.setAuthMethods(appAuthDetailsVO.getAuthMethods());
-                            alipayAppAuthDetailsService.doTransUpdateAppAuthDetail(authDetails);
-                        }
-                    } catch (Exception e) {
-                        logger.error(LOG_PREFIX + "刷新商户授权应用异常：" + e.getMessage(), e);
+                try {
+                    logger.info(LOG_PREFIX + "商户{}授权应用AppAuthToken{}即将过期过期，准备刷新", authDetails.getDealer().getCompany(), authDetails.getAppAuthToken());
+                    AlipayAppAuthDetailsVO appAuthDetailsVO = AliPayUtil
+                        .getOrRefreshAppAuthToken(new AlipayOpenAuthTokenAppRequestBuilder().setGrantType(Constants.GRANT_TYPE_REFRESH_TOKEN).setRefreshToken(authDetails.getAppRefreshToken()));
+                    if (appAuthDetailsVO == null) {
+                        logger.error(LOG_PREFIX + AlarmLogPrefix.invokeAliPayAPIErr.getValue() + "刷新商户{}授权应用AppAuthToken{}  - 失败", authDetails.getDealer().getCompany(), authDetails.getAppAuthToken());
+                    } else {
+                        authDetails.setAuthAppId(appAuthDetailsVO.getAuthAppId());
+                        authDetails.setAppAuthToken(appAuthDetailsVO.getAppAuthToken());
+                        authDetails.setAppRefreshToken(appAuthDetailsVO.getAppRefreshToken());
+                        authDetails.setExpiresIn(appAuthDetailsVO.getExpiresIn());
+                        authDetails.setReExpiresIn(appAuthDetailsVO.getReExpiresIn());
+                        authDetails.setAuthEnd(appAuthDetailsVO.getAuthEnd());
+                        authDetails.setAuthStart(appAuthDetailsVO.getAuthStart());
+                        authDetails.setAuthMethods(appAuthDetailsVO.getAuthMethods());
+                        alipayAppAuthDetailsService.doTransUpdateAppAuthDetail(authDetails);
                     }
+                } catch (Exception e) {
+                    logger.error(LOG_PREFIX + "刷新商户授权应用异常：" + e.getMessage(), e);
                 }
             }
         }
