@@ -1075,4 +1075,31 @@ public class AliPayDetailsServiceImpl
         commonDAO.update(payDetails);
 	}
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AliPayDetails> doJoinTransQueryAliPayDetailsByState(int[] stateArr, long intervalTime) {
+        Validator.checkArgument(null == stateArr || stateArr.length == 0, "查询状态不能为空");
+        String jpql = "from AliPayDetails w where w.transBeginTime <= :TRANSBEGINTIME";
+        Timestamp beginTime = new Timestamp(new Date().getTime() - intervalTime * 1000);
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        if (stateArr.length == 1) {
+            jpql += " and w.tradeStatus = :TRADESTATUS";
+            paramMap.put("TRADESTATUS", stateArr[0]);
+        } else if (stateArr.length > 1) {
+            jpql += " and w.tradeStatus in (";
+            for (int i = 0; i < stateArr.length; i++) {
+                if (i != stateArr.length - 1) {
+                    jpql += ":TRADESTATUS" + i + ",";
+                } else {
+                    jpql += ":TRADESTATUS" + i;
+                }
+                paramMap.put("TRADESTATUS" + i, stateArr[i]);
+            }
+            jpql += ")";
+        }
+        paramMap.put("TRANSBEGINTIME", beginTime);
+
+        return (List<AliPayDetails>) super.commonDAO.findObjectList(jpql, paramMap, false);
+    }
+
 }

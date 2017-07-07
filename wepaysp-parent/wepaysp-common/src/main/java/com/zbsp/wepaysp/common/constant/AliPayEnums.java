@@ -119,4 +119,45 @@ public class AliPayEnums {
         SUCCESS, FAILURE;
     }
     
+    /**支付宝撤销交易业务结果 */
+    public static enum TradeCancelResult{
+        SYSTEM_ERROR("AQC.SYSTEM_ERROR", "系统错误", "请使用相同的参数再次调用"),
+        INVALID_PARAMETER("ACQ.INVALID_PARAMETER", "参数无效", "请求参数有错，重新检查请求后，再调用撤销"),
+        SELLER_BALANCE_NOT_ENOUGH("ACQ.SELLER_BALANCE_NOT_ENOUGH", "商户的支付宝账户中无足够的资金进行撤销", "商户支付宝账户充值后重新发起撤销即可"),
+        REASON_TRADE_BEEN_FREEZEN("ACQ.REASON_TRADE_BEEN_FREEZEN", "当前交易被冻结，不允许进行撤销", "联系支付宝小二，确认该笔交易的具体情况"),
+        TRADE_CANCEL_TIME_OUT("ACQ.TRADE_CANCEL_TIME_OUT", "交易超过了撤销的时间范围", "官方未说明，经测试关闭订单可以");
+
+        private String code;
+        private String desc;
+        private String todo;
+        
+        private TradeCancelResult(String code, String desc, String todo) {
+            this.code = code;
+            this.desc = desc;
+            this.todo = todo;
+        }
+        
+        public String getValue() {
+            return code;
+        }
+        
+        public String getCode() {
+            return code;
+        }
+        
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getTodo() {
+            return todo;
+        }
+    }
+    
+    /**支付宝撤销触发的交易动作 */
+    public static enum TradeCancelAction {
+        close,// 关闭交易，无退款  
+        refund;// 产生了退款
+    }
+    
 }

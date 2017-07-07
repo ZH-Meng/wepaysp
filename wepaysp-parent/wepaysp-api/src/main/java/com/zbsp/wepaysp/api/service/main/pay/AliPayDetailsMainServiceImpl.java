@@ -217,7 +217,7 @@ public class AliPayDetailsMainServiceImpl
     private Integer queryTradeStatusAfterCancelUnknown(AliPayDetailsVO payDetailsVO) {
         logger.info("撤销后调用支付宝支付查询接口 - 开始");
         try {
-            AlipayF2FQueryResult queryTradeResult = AliPayUtil.tradeQuery(payDetailsVO);
+            AlipayF2FQueryResult queryTradeResult = AliPayUtil.tradeQuery(payDetailsVO.getOutTradeNo(), payDetailsVO.getTradeNo(), payDetailsVO.getAppAuthToken());
             logger.info("撤销后调用支付宝支付查询接口 - 结果 - 订单支付结果 : {}, outTradeNo : {}", queryTradeResult.getTradeStatus(), payDetailsVO.getOutTradeNo());
             // 由于已知调用过撤销。直接查看是否交易关闭
             if (queryTradeResult.getResponse() != null) {
@@ -335,7 +335,7 @@ public class AliPayDetailsMainServiceImpl
             updateRemark = "当前状态处理中，主动查询交易，"; 
             
             // 交易状态处理中，查询支付宝
-            AlipayF2FQueryResult queryTradeResult = AliPayUtil.tradeQuery(payDetailsVO);
+            AlipayF2FQueryResult queryTradeResult = AliPayUtil.tradeQuery(payDetailsVO.getOutTradeNo(), payDetailsVO.getTradeNo(), payDetailsVO.getAppAuthToken());
             logger.info(logPrefix + "调用查询接口 - 交易状态 : {}", queryTradeResult.getTradeStatus());
 
             // 前台回跳说明支付完成，正常不会出现支付中状态，所以直接将查询结果交易状态更新并返回

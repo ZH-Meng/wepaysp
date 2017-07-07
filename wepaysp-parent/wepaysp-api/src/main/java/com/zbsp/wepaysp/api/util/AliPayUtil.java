@@ -14,16 +14,21 @@ import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
-import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.request.AlipayTradeCancelRequest;
+import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
+import com.alipay.api.response.AlipayTradeCancelResponse;
+import com.alipay.api.response.AlipayTradeCloseResponse;
 import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.zbsp.alipay.trade.config.Configs;
 import com.zbsp.alipay.trade.config.Constants;
 import com.zbsp.alipay.trade.model.TradeStatus;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeCancelRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeCloseRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePrecreateRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeQueryRequestBuilder;
@@ -37,8 +42,8 @@ import com.zbsp.alipay.trade.service.impl.AlipayMonitorServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
 import com.zbsp.wepaysp.api.service.SysConfig;
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.vo.alipay.AlipayAppAuthDetailsVO;
@@ -285,22 +290,16 @@ public class AliPayUtil {
      * @param outTradeNo
      * @return
      */
-    public static AlipayF2FQueryResult tradeQuery(AliPayDetailsVO payDetailsVO) {
-        Validator.checkArgument(payDetailsVO == null, "payDetailsVO为空");
-        Validator.checkArgument(StringUtils.isBlank(payDetailsVO.getOutTradeNo()), "payDetailsVO.outTradeNo为空");
-        
-        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
-        
+    public static AlipayF2FQueryResult tradeQuery(String outTradeNo, String tradeNo, String appAuthToken) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo) && StringUtils.isBlank(tradeNo), "outTradeNo和tradeNo不能都为空");
         AlipayTradeQueryRequestBuilder builder = new AlipayTradeQueryRequestBuilder();
-        builder.setOutTradeNo(payDetailsVO.getOutTradeNo());
-        builder.setTradeNo(payDetailsVO.getTradeNo());
-        builder.setAppAuthToken(payDetailsVO.getAppAuthToken());
+        builder.setOutTradeNo(outTradeNo);
+        builder.setTradeNo(tradeNo);
+        builder.setAppAuthToken(appAuthToken);
         
-        request.setBizContent(builder.toJsonString());
-        
-        logger.info("AlipayTradeQueryRequest bizContent:" + request.getBizContent());
+        logger.info("AlipayTradeQueryRequest bizContent:" + builder.toJsonString());
         AlipayF2FQueryResult queryTradeResult = null;
-        for (int i = 1; i < 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             // 查询
             queryTradeResult = tradeService.queryTradeResult(builder);
             if (TradeStatus.UNKNOWN.equals(queryTradeResult.getTradeStatus())) {
@@ -310,7 +309,8 @@ public class AliPayUtil {
                     e.printStackTrace();
                 }
                 continue;
-            }
+            } 
+            break;
         }
         
         logger.info("queryTradeResult : {}", JSONUtil.toJSONString(queryTradeResult, true));
@@ -319,10 +319,44 @@ public class AliPayUtil {
         } else if (TradeStatus.UNKNOWN.equals(queryTradeResult.getTradeStatus())) {
             logger.warn("支付宝交易查询结果：交易状态未知（outTradeNo={}）", builder.getOutTradeNo());
         } else {
-            logger.warn("支付宝交易查询结果：交易失败（outTradeNo={}）", builder.getOutTradeNo());
+            logger.warn("支付宝交易查询结果：交易未成功（outTradeNo={}），TradeStatus={}", builder.getOutTradeNo(), queryTradeResult.getResponse().getTradeStatus());
         }
         
         return queryTradeResult;
+    }
+    
+    /** 交易撤销（关闭或发生退款） 
+     * 
+     * 未支付订单请及时撤销<br>
+     * 原因：未支付订单如果不及时关闭，顾客可能会误支付，从而导致顾客资损，引起单边账<br>
+     * 建议方案：对于未支付的订单，请及时通过调用撤销接口关闭订单（注意：超过24H的订单无法撤销）；另外一种方法是为每笔订单设置超时时间，超过时间未支付的订单会自动关闭。
+     */
+    public static AlipayTradeCancelResponse tradeCancel(String outTradeNo, String appAuthToken) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo不能为空");
+        AlipayTradeCancelRequestBuilder builder = new AlipayTradeCancelRequestBuilder().setOutTradeNo(outTradeNo).setAppAuthToken(appAuthToken);
+        AlipayTradeCancelRequest request = new AlipayTradeCancelRequest();
+        request.setBizContent(builder.toJsonString());
+        request.putOtherTextParam("app_auth_token", builder.getAppAuthToken());
+        
+        logger.info("AlipayTradeCancelRequest bizContent:" + request.getBizContent());
+        AlipayTradeCancelResponse response = getResponse(client, request);
+        if (response == null || "Y".equals(response.getRetryFlag())) {
+            logger.warn("支付宝交易撤销需要重试，outTradeNo={}", outTradeNo);
+            response = getResponse(client, request);
+        }
+        return response;
+    }
+    
+    /** 交易撤销（关闭或发生退款） */
+    public static AlipayTradeCloseResponse tradeClose(String outTradeNo, String appAuthToken) {
+        Validator.checkArgument(StringUtils.isBlank(outTradeNo), "outTradeNo不能为空");
+        AlipayTradeCloseRequestBuilder builder = new AlipayTradeCloseRequestBuilder().setOutTradeNo(outTradeNo).setAppAuthToken(appAuthToken);
+        AlipayTradeCloseRequest request = new AlipayTradeCloseRequest();
+        request.setBizContent(builder.toJsonString());
+        request.putOtherTextParam("app_auth_token", builder.getAppAuthToken());
+        
+        logger.info("AlipayTradeCloseRequest bizContent:" + request.getBizContent());
+        return getResponse(client, request);
     }
 
     @Deprecated
