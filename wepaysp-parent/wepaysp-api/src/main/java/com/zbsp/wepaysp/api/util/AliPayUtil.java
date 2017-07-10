@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.util;
 
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
@@ -12,11 +13,13 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.AlipayRequest;
 import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayDataDataserviceBillDownloadurlQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipayTradeCancelRequest;
 import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayDataDataserviceBillDownloadurlQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipayTradeCancelResponse;
@@ -27,6 +30,7 @@ import com.zbsp.alipay.trade.config.Constants;
 import com.zbsp.alipay.trade.model.TradeStatus;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayOpenAuthTokenAppRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayTradeBillDownloadUrlQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeCancelRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeCloseRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
@@ -42,8 +46,10 @@ import com.zbsp.alipay.trade.service.impl.AlipayMonitorServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeServiceImpl;
 import com.zbsp.alipay.trade.service.impl.AlipayTradeWithHBServiceImpl;
 import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.common.constant.AliPayEnums.BillType;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.vo.alipay.AlipayAppAuthDetailsVO;
@@ -356,6 +362,28 @@ public class AliPayUtil {
         request.putOtherTextParam("app_auth_token", builder.getAppAuthToken());
         
         logger.info("AlipayTradeCloseRequest bizContent:" + request.getBizContent());
+        return getResponse(client, request);
+    }
+    
+    /** 交易账单下载地址查询
+     * @param billType：trade/signcustomer，trade指商户基于支付宝交易收单的业务账单；signcustomer是指基于商户支付宝余额收入及支出等资金变动的帐务账单；
+     * @param billDateType： day/month，缺省为日账单
+     */
+    public static AlipayDataDataserviceBillDownloadurlQueryResponse billDowndloadUrlQuery(BillType billType, String billDateType, Date billDate, String appAuthToken) {
+        Validator.checkArgument(billType == null, "billType不能为空");
+        Validator.checkArgument(billDate == null, "billDate不能为空");
+        String billDateStr = "";
+        if ("month".equalsIgnoreCase(billDateType))
+            billDateStr = DateUtil.getDate(billDate, "yyyy-MM");
+        else
+            billDateStr = DateUtil.getDate(billDate, "yyyy-MM-dd");
+        AlipayTradeBillDownloadUrlQueryRequestBuilder builder = new AlipayTradeBillDownloadUrlQueryRequestBuilder().setBillType(billType.toString()).setBillDate(billDateStr)
+            .setAppAuthToken(appAuthToken);
+        AlipayDataDataserviceBillDownloadurlQueryRequest request = new AlipayDataDataserviceBillDownloadurlQueryRequest();
+        request.setBizContent(builder.toJsonString());
+        request.putOtherTextParam("app_auth_token", builder.getAppAuthToken());
+
+        logger.info("AlipayDataDataserviceBillDownloadurlQueryRequest bizContent:" + request.getBizContent());
         return getResponse(client, request);
     }
 

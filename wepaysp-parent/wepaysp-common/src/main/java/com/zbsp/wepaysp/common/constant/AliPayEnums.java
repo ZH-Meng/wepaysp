@@ -160,4 +160,10 @@ public class AliPayEnums {
         refund;// 产生了退款
     }
     
+    /**支付宝支付账单类型 */
+    public static enum BillType {
+        trade,// 指商户基于支付宝交易收单的业务账单
+        signcustomer;//指基于商户支付宝余额收入及支出等资金变动的帐务账单
+    }
+    
 }

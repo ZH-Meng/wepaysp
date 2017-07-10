@@ -22,7 +22,7 @@ public class AlipayTradeCloseRequestBuilder extends RequestBuilder {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("AlipayTradeCancelRequestBuilder{");
+        final StringBuilder sb = new StringBuilder("AlipayTradeCloseRequestBuilder{");
         sb.append("bizContent=").append(bizContent);
         sb.append(", super=").append(super.toString());
         sb.append('}');
