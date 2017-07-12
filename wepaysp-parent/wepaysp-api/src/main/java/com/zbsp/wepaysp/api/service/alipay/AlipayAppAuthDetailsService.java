@@ -36,5 +36,12 @@ public interface AlipayAppAuthDetailsService {
 
     /**更新刷新后的应用授权信息*/
     public void doTransUpdateAppAuthDetail(AlipayAppAuthDetails appAuthDetails);
+
+    /***
+     * 查找某应用有效的应用授权信息
+     * @param appid 应用ID 
+     * @return 有效的授权记录集合
+     */
+	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid);
     
 }

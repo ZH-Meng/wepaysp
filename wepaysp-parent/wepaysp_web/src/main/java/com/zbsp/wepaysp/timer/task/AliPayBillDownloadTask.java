@@ -20,21 +20,25 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.jdbc.naming.GenericNamingResourcesFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alipay.api.response.AlipayDataDataserviceBillDownloadurlQueryResponse;
+import com.zbsp.wepaysp.api.service.SysConfig;
+import com.zbsp.wepaysp.api.service.alipay.AlipayAppAuthDetailsService;
 import com.zbsp.wepaysp.api.service.pay.AlipayBillDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
+import com.zbsp.wepaysp.common.constant.AliPayEnums;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.BillType;
+import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.CHZipUtils;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.po.alipay.AlipayAppAuthDetails;
 import com.zbsp.wepaysp.po.pay.AlipayBillDetails;
 
 /**
@@ -60,10 +64,12 @@ public class AliPayBillDownloadTask
     @Value("${downloadBillDays}")
     private Integer downloadBillDays = 1;
 
-    private final String billFileNamePrefix = "alipay_trade_bill";
+    private final String billFileNamePrefix = "alipay_trade_bill_";
 
     private static final String FILE_POSTFIX_ZIP = ".csv.zip";
-    private static final String FILE_POSTFIX_CSV = ".csv";
+    
+    @Autowired
+    private AlipayAppAuthDetailsService alipayAppAuthDetailsService;
     @Autowired
     private AlipayBillDetailsService alipayBillDetailsService;
     
@@ -89,69 +95,89 @@ public class AliPayBillDownloadTask
         } else {
             billDate = DateUtil.getDate(downloadBillDate, "yyyy-MM-dd");
         }
-
-        String appAuthToken = null;
-        String billDateType = "day";
-        int days = downloadBillDays;
-        while (true) {
-            days--;
-            
-            Integer compareValue = TimeUtil.timeCompare(TimeUtil.getDayStart(billDate), TimeUtil.getDayStart(new Date()));
-            if (compareValue == 1 || compareValue == 0) {
-                logger.warn(StringHelper.combinedString(LOG_PREFIX, "只能下载当前之前的账单"));
-                break;
-            }
-            
-            // 查询账单下载地址
-            AlipayDataDataserviceBillDownloadurlQueryResponse urlQueryResponse = AliPayUtil.billDowndloadUrlQuery(BillType.signcustomer, "day", billDate, appAuthToken);
-
-            String billDateStr = "";
-            if ("month".equalsIgnoreCase(billDateType))
-                billDateStr = DateUtil.getDate(billDate, "yyyyMM");
-            else
-                billDateStr = DateUtil.getDate(billDate, "yyyyMMdd");
-
-            if (urlQueryResponse != null && urlQueryResponse.isSuccess()) {
-                logger.info(StringHelper.combinedString(LOG_PREFIX, "[查询账单({})下载地址]", "-[成功]"), billDateStr);
-
-                // 指定希望保存的文件路径
-                String zipFilePath = zipFileDir.getAbsolutePath().concat(File.separator).concat(billFileNamePrefix).concat(billDateStr).concat(FILE_POSTFIX_ZIP);
-                String csvFilePath = csvFileDir.getAbsolutePath().concat(File.separator).concat(billDateStr).concat(File.separator);
-
-                boolean flag = false;
-                try { // 下载账单
-                    logger.info(StringHelper.combinedString(LOG_PREFIX, "下载账单{}", "-[开始]"), billDateStr);
-                    downloadBill(urlQueryResponse.getBillDownloadUrl(), zipFilePath);
-                    logger.info(StringHelper.combinedString(LOG_PREFIX, "下载账单{}", "-[成功]"), billDateStr);
-                    flag = true;
-                } catch (Exception e) {
-                    logger.error(StringHelper.combinedString(LOG_PREFIX, "下载账单-{}", "[失败]"), billDateStr, e);
+        
+        List<AlipayAppAuthDetails> appAuthList = alipayAppAuthDetailsService.doJoinTransQueryValidAppAuthDetails(SysConfig.appId4Face2FacePay);
+        
+        if (appAuthList == null || appAuthList.isEmpty()) {
+        	logger.warn(StringHelper.combinedString(LOG_PREFIX, "当前应用没有被商户授权"));
+        } else {
+        	logger.info(StringHelper.combinedString(LOG_PREFIX, "当前应用被{}个商户授权"), appAuthList.size());
+        	
+            String billDateType = "day";
+            int days = downloadBillDays;
+            while (true) {
+                days--;
+                Integer compareValue = TimeUtil.timeCompare(TimeUtil.getDayStart(billDate), TimeUtil.getDayStart(new Date()));
+                if (compareValue == 1 || compareValue == 0) {
+                    logger.warn(StringHelper.combinedString(LOG_PREFIX, "只能下载当前之前的账单"));
+                    break;
                 }
+                
+                for (AlipayAppAuthDetails appAuth : appAuthList) {
+                	String mark = "";
+                    String billDateStr = "";
+                    if ("month".equalsIgnoreCase(billDateType))
+                        billDateStr = DateUtil.getDate(billDate, "yyyyMM");
+                    else
+                        billDateStr = DateUtil.getDate(billDate, "yyyyMMdd");
+                    
+                    mark = appAuth.getDealer().getCompany() + "(" + appAuth.getDealer().getDealerId() + ")--" + billDateStr;
+                    
+                    // 查询账单下载地址
+                    AlipayDataDataserviceBillDownloadurlQueryResponse urlQueryResponse = AliPayUtil.billDowndloadUrlQuery(BillType.trade, "day", billDate, appAuth.getAppAuthToken());
 
-                if (flag) {// 解压账单ZIP
-                    logger.info(StringHelper.combinedString(LOG_PREFIX, "解压账单-{}", "[开始]"), billDateStr);
-                    try {
-                        CHZipUtils.unZip(zipFilePath, csvFilePath);
-                        logger.info(StringHelper.combinedString(LOG_PREFIX, "解压账单-{}", "[成功]"), billDateStr);
-                    } catch (Exception e) {
-                        logger.error(StringHelper.combinedString(LOG_PREFIX, "解压账单-{}", "[失败]"), billDateStr, e);
-                        flag = false;
+                    if (urlQueryResponse == null) {
+                    	logger.error(StringHelper.combinedString(LOG_PREFIX, AlarmLogPrefix.invokeAliPayAPIErr, "[查询账单({})下载地址]", "-[失败]"), mark);
+        			} else if (urlQueryResponse.isSuccess()) {
+                        logger.info(StringHelper.combinedString(LOG_PREFIX, "[查询账单({})下载地址]", "-[成功]"), mark);
+
+                        // 指定希望保存的文件路径
+                        String zipFilePath = zipFileDir.getAbsolutePath().concat(File.separator).concat(billFileNamePrefix).concat(billDateStr).concat("-").concat(appAuth.getDealer().getDealerId()).concat(FILE_POSTFIX_ZIP);
+                        String csvFilePath = csvFileDir.getAbsolutePath().concat(File.separator).concat(billDateStr).concat(File.separator).concat(appAuth.getDealer().getDealerId()).concat(File.separator);
+
+                        boolean flag = false;
+                        int times = 0;
+                        while(true) {
+                        	if (times == 2) break;
+                        	try { // 下载账单
+                        		logger.info(StringHelper.combinedString(LOG_PREFIX, "下载账单{}", "-[开始]"), mark);
+                        		downloadBill(urlQueryResponse.getBillDownloadUrl(), zipFilePath);
+                        		logger.info(StringHelper.combinedString(LOG_PREFIX, "下载账单{}", "-[成功]"), mark);
+                        		flag = true;
+                        		break;
+                        	} catch (Exception e) {
+                        		logger.error(StringHelper.combinedString(LOG_PREFIX, "下载账单-{}", "[失败]"), mark, e);
+                        		times++;
+                        	}
+                        }
+
+                        if (flag) {// 解压账单ZIP
+                            logger.info(StringHelper.combinedString(LOG_PREFIX, "解压账单-{}", "[开始]"), mark);
+                            try {
+                                CHZipUtils.unZip(zipFilePath, csvFilePath);
+                                logger.info(StringHelper.combinedString(LOG_PREFIX, "解压账单-{}", "[成功]"), mark);
+                            } catch (Exception e) {
+                                logger.error(StringHelper.combinedString(LOG_PREFIX, "解压账单-{}", "[失败]"), mark, e);
+                                flag = false;
+                            }
+                        }
+                        // CSV导致DB
+                        if (flag) {
+                            readAndImport(csvFilePath);
+                        }
+                    } else if (AliPayEnums.BillDownloadUrlQueryResult.BILL_NOT_EXIST.getCode().equalsIgnoreCase(urlQueryResponse.getSubCode())){
+                        logger.warn(StringHelper.combinedString(LOG_PREFIX, "[查询账单({})下载地址]", "-[不存在]"), mark);
+                    } else {
+                    	logger.warn(StringHelper.combinedString(LOG_PREFIX, "[查询账单({})下载地址]", "-[失败]"), mark);
                     }
+				}
+                
+                if (days == 0) {
+                	break;
                 }
-                // CSV导致DB
-                if (flag) {
-                    readAndImport(csvFilePath);
-                }
-            } else {
-                logger.warn(StringHelper.combinedString(LOG_PREFIX, "[查询账单({})下载地址]", "-[失败]"), billDateStr);
+                billDate = TimeUtil.plusSeconds(billDate, 60 * 60 * 24);
             }
-            
-            if (days == 0) {
-                break;
-            }
-            billDate = TimeUtil.plusSeconds(billDate, 60 * 60 * 24);
         }
-
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[结束]"));
     }
 
@@ -219,7 +245,7 @@ public class AliPayBillDownloadTask
                 logger.error(StringHelper.combinedString(LOG_PREFIX, "读取{}", "[失败]"), files[0].getName(), e);
             }
         } else {
-            logger.error(StringHelper.combinedString(LOG_PREFIX, "目录：{}不存在“******业务明细.csv”"), csvFilePath);
+            logger.warn(StringHelper.combinedString(LOG_PREFIX, "目录：{}不存在“******业务明细.csv”"), csvFilePath);
         }
     }
 

@@ -154,6 +154,39 @@ public class AliPayEnums {
         }
     }
     
+    /**支付宝撤销交易业务结果 */
+    public static enum BillDownloadUrlQueryResult{
+    	SYSTEM_ERROR("ISP.NVAILID_ARGUMENTS", "入参不合法", "确认参数后重新查询"),
+    	BILL_NOT_EXIST("ISP.BILL_NOT_EXIST", "账单不存在", "确认参数后重新查询"),
+    	UNKNOWN_ERROR("ISP.UNKNOWN_ERROR", "未知错误", "稍后重试或联系小二排查问题");
+    	
+        private String code;
+        private String desc;
+        private String todo;
+        
+        private BillDownloadUrlQueryResult(String code, String desc, String todo) {
+            this.code = code;
+            this.desc = desc;
+            this.todo = todo;
+        }
+        
+        public String getValue() {
+            return code;
+        }
+        
+        public String getCode() {
+            return code;
+        }
+        
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getTodo() {
+            return todo;
+        }
+    }
+    
     /**支付宝撤销触发的交易动作 */
     public static enum TradeCancelAction {
         close,// 关闭交易，无退款  

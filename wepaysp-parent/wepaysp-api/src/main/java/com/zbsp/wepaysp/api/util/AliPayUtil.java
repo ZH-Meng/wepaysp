@@ -384,7 +384,20 @@ public class AliPayUtil {
         request.putOtherTextParam("app_auth_token", builder.getAppAuthToken());
 
         logger.info("AlipayDataDataserviceBillDownloadurlQueryRequest bizContent:" + request.getBizContent());
-        return getResponse(client, request);
+        AlipayDataDataserviceBillDownloadurlQueryResponse response = null;
+		for (int i = 1; i <= 3; i++) {
+        	response = getResponse(client, request);
+            if (response == null) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            } 
+            break;
+        }
+        return response;
     }
 
     @Deprecated

@@ -178,4 +178,15 @@ public class AlipayAppAuthDetailsServiceImpl
         this.sysLogService = sysLogService;
     }
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid) {
+		 Validator.checkArgument(StringUtils.isBlank(appid), "appid为空");
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayAppAuthDetails a left join fetch a.dealer where a.appId=:APPID and a.status=:STATUS";
+        jpqlMap.put("APPID", appid);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        return (List<AlipayAppAuthDetails>) commonDAO.findObjectList(jpql, jpqlMap, false);
+	}
+
 }
