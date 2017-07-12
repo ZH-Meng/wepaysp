@@ -126,4 +126,7 @@
 		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
+	<bean id="alipayBillDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.AlipayBillDetailsServiceImpl" parent="baseService">
+	</bean>	
+	
 </beans>

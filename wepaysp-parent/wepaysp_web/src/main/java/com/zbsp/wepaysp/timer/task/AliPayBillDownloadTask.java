@@ -2,29 +2,40 @@ package com.zbsp.wepaysp.timer.task;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Time;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.jdbc.naming.GenericNamingResourcesFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alipay.api.response.AlipayDataDataserviceBillDownloadurlQueryResponse;
+import com.zbsp.wepaysp.api.service.pay.AlipayBillDetailsService;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.BillType;
 import com.zbsp.wepaysp.common.util.CHZipUtils;
 import com.zbsp.wepaysp.common.util.DateUtil;
+import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.common.util.ZipUtil;
+import com.zbsp.wepaysp.po.pay.AlipayBillDetails;
 
 /**
  * 支付宝交易账单下载任务
@@ -53,6 +64,8 @@ public class AliPayBillDownloadTask
 
     private static final String FILE_POSTFIX_ZIP = ".csv.zip";
     private static final String FILE_POSTFIX_CSV = ".csv";
+    @Autowired
+    private AlipayBillDetailsService alipayBillDetailsService;
     
     @PostConstruct
     public void init() {
@@ -127,7 +140,7 @@ public class AliPayBillDownloadTask
                 }
                 // CSV导致DB
                 if (flag) {
-
+                    readAndImport(csvFilePath);
                 }
             } else {
                 logger.warn(StringHelper.combinedString(LOG_PREFIX, "[查询账单({})下载地址]", "-[失败]"), billDateStr);
@@ -140,6 +153,74 @@ public class AliPayBillDownloadTask
         }
 
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[结束]"));
+    }
+
+    private void readAndImport(String csvFilePath) {
+        File csvDir = new File(csvFilePath);
+        // 查找业务明细文件
+        File[] files = csvDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                if (name.indexOf("业务明细.csv") != -1)
+                    return true;
+                else
+                    return false;
+            }
+        });
+        if (files != null && files.length == 1) {
+            try {
+                logger.info(StringHelper.combinedString(LOG_PREFIX, "读取{}", "[开始]"), files[0].getName());
+                CSVParser csvParser = CSVParser.parse(files[0], Charset.forName("GBK"), CSVFormat.DEFAULT);
+                
+                List<CSVRecord> records = csvParser.getRecords();
+                List<AlipayBillDetails> billList = new ArrayList<AlipayBillDetails>();
+                for (CSVRecord record :  records) {
+                    if (record.getRecordNumber() > 5 && record.getRecordNumber() <= (records.size() - 4)) {
+                        AlipayBillDetails billDetails = new AlipayBillDetails();
+                        billDetails.setIwoid(Generator.generateIwoid());
+                        billDetails.setTradeNo(StringUtils.trim(record.get(0)));
+                        billDetails.setOutTradeNo(StringUtils.trim(record.get(1)));
+                        if ("交易".equals(StringUtils.trim(record.get(2)))) {
+                            billDetails.setBillType("1");
+                        } else if ("退款".equals(StringUtils.trim(record.get(2)))) {
+                            billDetails.setBillType("2");
+                        }
+                        billDetails.setSubject(StringUtils.trim(record.get(3)));
+                        billDetails.setGmtCreate(DateUtil.getDate(StringUtils.trim(record.get(4)), "yyyy/MM/dd HH:mm:ss"));
+                        billDetails.setGmtClose(DateUtil.getDate(StringUtils.trim(record.get(5)), "yyyy/MM/dd HH:mm:ss"));
+                        billDetails.setStoreId(StringUtils.trim(record.get(6)));
+                        billDetails.setStoreName(StringUtils.trim(record.get(7)));
+                        billDetails.setOperatorId(StringUtils.trim(record.get(8)));
+                        billDetails.setTerminalId(StringUtils.trim(record.get(9)));
+                        billDetails.setBuyerLogon(StringUtils.trim(record.get(10)));
+                        billDetails.setTotalAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(11)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setReceiptAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(12)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setAlipayRedEnvelopAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(13)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setPointAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(14)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setAlipayDiscountableAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(15)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setDealerDiscountableAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(16)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setCouponAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(17)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setCouponName(StringUtils.trim(record.get(18)));
+                        billDetails.setDealerRedEnvelopAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(19)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setCardAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(20)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setRefundNo(StringUtils.trim(record.get(21)));
+                        billDetails.setServiceAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(22)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setProfitAmount(new BigDecimal(Double.valueOf(StringUtils.trim(record.get(23)))).multiply(new BigDecimal(100)).intValue());
+                        billDetails.setBillRemark(StringUtils.trim(record.get(24)));
+                        billList.add(billDetails);
+                    }
+                }
+                logger.info(StringHelper.combinedString(LOG_PREFIX, "读取{}", "[成功]"), files[0].getName());
+                
+                logger.info(StringHelper.combinedString(LOG_PREFIX, "批量保存账单明细{}", "[开始]"), files[0].getName());
+                alipayBillDetailsService.doTransBatchAdd(billList);
+                logger.info(StringHelper.combinedString(LOG_PREFIX, "批量保存账单明细{}", "[成功]"), files[0].getName());
+            } catch (IOException e) {
+                logger.error(StringHelper.combinedString(LOG_PREFIX, "读取{}", "[失败]"), files[0].getName(), e);
+            }
+        } else {
+            logger.error(StringHelper.combinedString(LOG_PREFIX, "目录：{}不存在“******业务明细.csv”"), csvFilePath);
+        }
     }
 
     private void downloadBill(String downloadUrl, String pathName)
