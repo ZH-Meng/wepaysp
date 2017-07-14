@@ -105,6 +105,12 @@
 			<div class="succ-item">
 				交易时间<span class="fr"><fmt:formatDate value="${weixinPayDetailsVO.transBeginTime}" pattern="yyyy-MM-dd HH:mm:ss" /></span>
 			</div>
+			
+			<div class="succ-item">
+				<a href="http://s.wcd.im/v/22etpZ3h/">
+					<img alt="" src="<%=request.getContextPath()%>/resources/images/ads/givemoney.png" height="100" width="375" style="display:block; margin:auto;">
+				</a>
+			</div>
 			<div class="pay-method">
 				<i class="icon iconfont icon-weixinzhifu"></i>微信支付
 			</div>
