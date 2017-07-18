@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.api.service.main.pay;
 import java.util.Map;
 
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 public interface WeixinRefundDetailsMainService {
 
@@ -24,5 +25,9 @@ public interface WeixinRefundDetailsMainService {
      * @return 退款返回保存Map集合
      */
     public Map<String, Object> cashierDeskRefund(WeixinPayDetailsVO weixinPayDetailsVO, String creator, String operatorUserOid, String logFunctionOid);
+
+    public Map<String, Object> reverseOrder(String outTradeNo);
+
+    public void reverseResult(WeixinRefundDetailsVO refundDetailsVO);
 
 }

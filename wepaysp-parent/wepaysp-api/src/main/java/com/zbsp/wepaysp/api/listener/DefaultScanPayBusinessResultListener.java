@@ -34,6 +34,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
 
     public static final String ON_FAIL = "on_fail";
     public static final String ON_SUCCESS = "on_success";
+    public static final String ON_USER_PAYING= "on_user_paying";
 
     private String result = "";
     private String transcationID = "";
@@ -132,6 +133,13 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
         updatePayResult(scanPayResData);
         result = ON_SUCCESS;
         transcationID = transID;
+    }
+    
+    @Override
+    public void onUserPaying(ScanPayResData scanPayResData) {
+        logger.info("微信刷卡支付-用户支付中：系统订单ID=" + scanPayResData.getOut_trade_no() + "，金额：" + scanPayResData.getTotal_fee());
+        updatePayResult(scanPayResData);
+        result = ON_USER_PAYING;
     }
 
     public String getResult() {

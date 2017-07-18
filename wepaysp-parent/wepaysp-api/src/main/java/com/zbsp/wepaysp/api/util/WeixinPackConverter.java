@@ -8,6 +8,8 @@ import com.tencent.protocol.pay_protocol.ScanPayReqData;
 import com.tencent.protocol.pay_protocol.ScanPayResData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryReqData;
 import com.tencent.protocol.pay_query_protocol.ScanPayQueryResData;
+import com.tencent.protocol.reverse_protocol.ReverseReqData;
+import com.tencent.protocol.reverse_protocol.ReverseResData;
 import com.tencent.protocol.unified_order_protocol.UnifiedOrderReqData;
 import com.tencent.protocol.unified_order_protocol.UnifiedOrderResData;
 import com.tencent.protocol.unified_order_protocol.WxPayNotifyData;
@@ -15,6 +17,7 @@ import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
 import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
+import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 /**
  * 微信支付HTTP请求/响应包与系统VO转换器
@@ -301,4 +304,44 @@ public class WeixinPackConverter {
         return reqData;
     }
     
+    /**
+     * 撤销明细VO转换为撤销请求包
+     * @param payDetailVO
+     * @return 撤销请求包 reverseReqData
+     */
+    public static ReverseReqData weixinRefundDetailsVO2ReverseReq(WeixinRefundDetailsVO refundDetailVO) {
+        ReverseReqData reqData = new ReverseReqData(
+            refundDetailVO.getTransactionId(),
+            refundDetailVO.getOutTradeNo(), 
+            refundDetailVO.getKeyPartner(), 
+            refundDetailVO.getAppid(), 
+            refundDetailVO.getMchId(), 
+            refundDetailVO.getSubMchId()); 
+        return reqData;
+    }
+    
+    /**
+     * 刷卡支付响应包转换成微信支付明细VO
+     * 
+     * @param scanPayResData 刷卡支付响应包
+     * @return 微信支付明细VO
+     */
+    public static WeixinRefundDetailsVO reverseRes2WeixinRefundDetailsVO(ReverseResData reverseResData) {
+        WeixinRefundDetailsVO vo = new WeixinRefundDetailsVO();
+        // 协议层
+        vo.setReturnCode(reverseResData.getReturn_code());
+        vo.setReturnMsg(reverseResData.getReturn_msg());
+
+        // 协议返回的具体数据（以下字段在return_code 为SUCCESS 的时候有返回）
+        if (ReturnCode.SUCCESS.toString().equals(reverseResData.getReturn_code())) {
+            vo.setAppid(reverseResData.getAppid());
+            vo.setMchId(reverseResData.getMch_id());
+            vo.setNonceStr(reverseResData.getNonce_str());
+            vo.setSign(reverseResData.getSign());
+            vo.setResultCode(reverseResData.getResult_code());
+            vo.setErrCode(reverseResData.getErr_code());
+            vo.setErrCodeDes(reverseResData.getErr_code_des());
+        }
+        return vo;
+    }
 }

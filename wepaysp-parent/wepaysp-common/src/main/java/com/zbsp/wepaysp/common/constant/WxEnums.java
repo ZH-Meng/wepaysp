@@ -203,4 +203,54 @@ public class WxEnums {
         USERPAYING;
     }
     
+    /**撤销结果*/
+    public static enum WxReverseResult {
+        FAIL("fail", "撤销失败", null),
+        SUCCESS("success", "撤销成功", null),
+        SYSTEMERROR("SYSTEMERROR", "接口返回错误", "系统超时"), 
+        INVALID_TRANSACTIONID("INVALID_TRANSACTIONID", "无效transaction_id", " 请求参数未按指引进行填写 参数错误，请重新检查"), 
+        PARAM_ERROR("PARAM_ERROR", "参数错误", "请求参数未按指引进行填写 请根据接口返回的详细信息检查您的程序"), 
+        REQUIRE_POST_METHOD("REQUIRE_POST_METHOD", "请使用post方法", "未使用post传递参数 请检查请求参数是否通过post方法提交"),
+        SIGNERROR("SIGNERROR", "签名错误", "参数签名结果不正确  请检查签名参数和方法是否都符合签名算法要求"), 
+        REVERSE_EXPIRE("REVERSE_EXPIRE", "订单无法撤销", "订单有7天的撤销有效期，过期将不能撤销 请检查需要撤销的订单是否超过可撤销有效期"); 
+        
+        private String code;
+        private String desc;
+        private String cause;
+
+        public String getValue() {
+            return code;
+        }
+        
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public String getCause() {
+            return cause;
+        }
+
+        public void setCause(String cause) {
+            this.cause = cause;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+
+        private WxReverseResult(String code, String desc, String cause) {
+            this.code = code;
+            this.desc = desc;
+            this.cause = cause;
+        }
+    }
+    
 }

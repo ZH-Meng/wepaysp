@@ -43,7 +43,23 @@ public class AlipayBillDetails
     private String modifier;
     private Date modifyTime;
     private String remark;
+    private String sourceId;
 
+    /**明细来源*/
+    public static enum SourceId {
+        /**本系统 1*/ self("1"),
+        /**外部 2*/ outer("2");
+        
+        private String value;
+        public String getValue() {
+            return this.value;
+        }
+        
+        private SourceId(String value) {
+            this.value = value;
+        }
+    }
+    
     public AlipayBillDetails() {
     }
 
@@ -325,6 +341,15 @@ public class AlipayBillDetails
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+    
+    @Column(name = "SOURCE_ID", length = 1)
+    public String getSourceId() {
+        return sourceId;
+    }
+    
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
     }
 
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
+import com.zbsp.wepaysp.api.service.main.pay.WeixinRefundDetailsMainService;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
@@ -21,12 +22,14 @@ import com.zbsp.wepaysp.mo.base.MobileRequest;
 import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayRequest;
 import com.zbsp.wepaysp.mo.pay.v1_0.ScanPayResponse;
 import com.zbsp.wepaysp.mo.refund.v1_0.ScanRefundRequest;
+import com.zbsp.wepaysp.mo.refund.v1_0.ScanRefundResponse;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.AliPayResult;
 import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayPlatform;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
+import com.zbsp.wepaysp.common.constant.WxEnums.WxReverseResult;
 import com.zbsp.wepaysp.common.mobile.result.CommonResult;
 import com.zbsp.wepaysp.common.mobile.result.PayResult;
 import com.zbsp.wepaysp.common.security.Signature;
@@ -51,6 +54,8 @@ public class ScanPayController extends BaseController {
     
 	@Autowired
 	private WeixinPayDetailsMainService weixinPayDetailsMainService;
+	@Autowired
+    private WeixinRefundDetailsMainService weixinRefundDetailsMainService;
 	
 	@Autowired
 	private AliPayDetailsMainService aliPayDetailsMainService;
@@ -192,6 +197,50 @@ public class ScanPayController extends BaseController {
             } catch (Exception e) {
                 logger.error(logPrefix + "异常：{}", e.getMessage(), e);
                 response = new ScanPayResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
+            }
+        }
+        response = response.build(KEY);
+        logger.info("response Data is {}", response.toString());
+        logger.info(logPrefix + "结束");
+        return response;
+    }
+	
+    @RequestMapping(value = "reverse", method = RequestMethod.POST)
+    @ResponseBody
+    public ScanRefundResponse reverse(@RequestBody ScanRefundRequest request) {
+        String logPrefix = "处理扫码退款明细请求 - ";
+        if (DEV_FLAG) {// 开发阶段：模拟设置sign
+            request.build(KEY);
+        }
+
+        logger.info(logPrefix + "开始");
+        logger.info("request Data is {}", request.toString());
+        ScanRefundResponse response = null;
+        String responseId = Generator.generateIwoid();
+        if (!Signature.checkIsSignValidFromRequest(request, KEY)) {
+            response = new ScanRefundResponse(CommonResult.PARSE_ERROR.getCode(), CommonResult.PARSE_ERROR.getDesc(), responseId);
+        } else if (!Validator.contains(MobileRequest.AppType.class, request.getAppType())) {
+            response = new ScanRefundResponse(CommonResult.INVALID_APPTYPE.getCode(), CommonResult.INVALID_APPTYPE.getDesc(), responseId);
+        } else if (StringUtils.isBlank(request.getRequestId()) || StringUtils.isBlank(request.getOutTradeNo())) {
+            response = new ScanRefundResponse(CommonResult.ARGUMENT_MISS.getCode(), CommonResult.ARGUMENT_MISS.getDesc(), responseId);
+        } else {
+            try {
+                // 撤销订单
+                Map<String, Object> resultMap = weixinRefundDetailsMainService.reverseOrder(request.getOutTradeNo());
+                String resCode = MapUtils.getString(resultMap, "resultCode");
+                String resDesc = MapUtils.getString(resultMap, "resultDesc");
+                if (!StringUtils.equalsIgnoreCase(WxReverseResult.SUCCESS.getCode(), resCode)) {
+                    logger.warn(logPrefix + "微信刷卡支付撤销失败，错误码：" + resCode + "，错误描述：" + resDesc);
+                    response = new ScanRefundResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
+                } else {
+                    response = new ScanRefundResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);
+                }
+            } catch (IllegalArgumentException e) {
+                logger.warn(logPrefix + "警告：{}", e.getMessage());
+                response = new ScanRefundResponse(CommonResult.INVALID_ARGUMENT.getCode(), CommonResult.INVALID_ARGUMENT.getDesc(), responseId);
+            } catch (Exception e) {
+                logger.error(logPrefix + "异常：{}", e.getMessage(), e);
+                response = new ScanRefundResponse(CommonResult.SYS_ERROR.getCode(), CommonResult.SYS_ERROR.getDesc(), responseId);
             }
         }
         response = response.build(KEY);

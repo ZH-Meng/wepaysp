@@ -36,6 +36,19 @@ public class SysEnums {
         }
     }
     
+    /**退款方式*/
+    public static enum RefundType {
+        /**撤销：1*/        REVERSE(1),
+        /**退款：2*/        REFUND(2);
+        private int value;
+        public int getValue() {
+            return value;
+        }
+        private RefundType(int value) {
+            this.value = value;
+        }
+    }
+    
     /**
      * 支付平台：适用用于汇总展示支付类型，PayType（1~5对应PayPlatformType=1，6~10对应PayPlatformType=2）
      */
@@ -62,7 +75,7 @@ public class SysEnums {
     }
     
     /**
-     * 交易状态
+     * 交易状态，支付、退款公用
      */
     public static enum TradeStatus {
         /** 0：交易中 */                                        
@@ -77,6 +90,8 @@ public class SysEnums {
         TRADE_CLOSED(4),
         /** 5：交易待关闭 */  
         TRADE_TO_BE_CLOSED(5),
+        /** 6：交易待支付（用户支付中） */        
+        TRADE_PAYING(6),
         
         /** 99 人工处理*/
         MANUAL_HANDLING(99);

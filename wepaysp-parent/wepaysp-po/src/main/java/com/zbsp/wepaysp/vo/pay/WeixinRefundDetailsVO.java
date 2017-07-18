@@ -32,7 +32,20 @@ public class WeixinRefundDetailsVO
     private String dealerEmployeeId;
     private String partnerId;
     private String transactionId;
-    
+
+    private String keyPartner;
+    private String appid;
+    private String subAppid;
+    private String mchId;
+    private String subMchId;
+    private String deviceInfo;
+    private String nonceStr;
+    private String sign;
+    private String returnCode;
+    private String returnMsg;
+    private String errCode;
+    private String errCodeDes;
+
     public String getIwoid() {
         return iwoid;
     }
@@ -124,7 +137,7 @@ public class WeixinRefundDetailsVO
     public Date getTransBeginTime() {
         return transBeginTime;
     }
-    
+
     public void setTransBeginTime(Date transBeginTime) {
         this.transBeginTime = transBeginTime;
     }
@@ -145,76 +158,172 @@ public class WeixinRefundDetailsVO
         this.endTime = endTime;
     }
 
-	public String getRefundEmployeeName() {
-		return refundEmployeeName;
-	}
+    public String getRefundEmployeeName() {
+        return refundEmployeeName;
+    }
 
-	public void setRefundEmployeeName(String refundEmployeeName) {
-		this.refundEmployeeName = refundEmployeeName;
-	}
+    public void setRefundEmployeeName(String refundEmployeeName) {
+        this.refundEmployeeName = refundEmployeeName;
+    }
 
-	public String getPartner2Oid() {
-		return partner2Oid;
-	}
+    public String getPartner2Oid() {
+        return partner2Oid;
+    }
 
-	public void setPartner2Oid(String partner2Oid) {
-		this.partner2Oid = partner2Oid;
-	}
+    public void setPartner2Oid(String partner2Oid) {
+        this.partner2Oid = partner2Oid;
+    }
 
-	public String getPartner3Oid() {
-		return partner3Oid;
-	}
+    public String getPartner3Oid() {
+        return partner3Oid;
+    }
 
-	public void setPartner3Oid(String partner3Oid) {
-		this.partner3Oid = partner3Oid;
-	}
+    public void setPartner3Oid(String partner3Oid) {
+        this.partner3Oid = partner3Oid;
+    }
 
-	public String getPartnerEmployeeId() {
-		return partnerEmployeeId;
-	}
+    public String getPartnerEmployeeId() {
+        return partnerEmployeeId;
+    }
 
-	public void setPartnerEmployeeId(String partnerEmployeeId) {
-		this.partnerEmployeeId = partnerEmployeeId;
-	}
+    public void setPartnerEmployeeId(String partnerEmployeeId) {
+        this.partnerEmployeeId = partnerEmployeeId;
+    }
 
-	public String getDealerId() {
-		return dealerId;
-	}
+    public String getDealerId() {
+        return dealerId;
+    }
 
-	public void setDealerId(String dealerId) {
-		this.dealerId = dealerId;
-	}
+    public void setDealerId(String dealerId) {
+        this.dealerId = dealerId;
+    }
 
-	public String getStoreId() {
-		return storeId;
-	}
+    public String getStoreId() {
+        return storeId;
+    }
 
-	public void setStoreId(String storeId) {
-		this.storeId = storeId;
-	}
+    public void setStoreId(String storeId) {
+        this.storeId = storeId;
+    }
 
-	public String getDealerEmployeeId() {
-		return dealerEmployeeId;
-	}
+    public String getDealerEmployeeId() {
+        return dealerEmployeeId;
+    }
 
-	public void setDealerEmployeeId(String dealerEmployeeId) {
-		this.dealerEmployeeId = dealerEmployeeId;
-	}
-	
-	public String getPartnerId() {
-		return partnerId;
-	}
+    public void setDealerEmployeeId(String dealerEmployeeId) {
+        this.dealerEmployeeId = dealerEmployeeId;
+    }
 
-	public void setPartnerId(String partnerId) {
-		this.partnerId = partnerId;
-	}
+    public String getPartnerId() {
+        return partnerId;
+    }
+
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
+    }
 
     public String getTransactionId() {
         return transactionId;
     }
-    
+
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getKeyPartner() {
+        return keyPartner;
+    }
+
+    public void setKeyPartner(String keyPartner) {
+        this.keyPartner = keyPartner;
+    }
+
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
+    }
+
+    public String getSubAppid() {
+        return subAppid;
+    }
+
+    public void setSubAppid(String subAppid) {
+        this.subAppid = subAppid;
+    }
+
+    public String getMchId() {
+        return mchId;
+    }
+
+    public void setMchId(String mchId) {
+        this.mchId = mchId;
+    }
+
+    public String getSubMchId() {
+        return subMchId;
+    }
+
+    public void setSubMchId(String subMchId) {
+        this.subMchId = subMchId;
+    }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
+
+    public String getNonceStr() {
+        return nonceStr;
+    }
+
+    public void setNonceStr(String nonceStr) {
+        this.nonceStr = nonceStr;
+    }
+
+    public String getSign() {
+        return sign;
+    }
+
+    public void setSign(String sign) {
+        this.sign = sign;
+    }
+
+    public String getReturnCode() {
+        return returnCode;
+    }
+
+    public void setReturnCode(String returnCode) {
+        this.returnCode = returnCode;
+    }
+
+    public String getReturnMsg() {
+        return returnMsg;
+    }
+
+    public void setReturnMsg(String returnMsg) {
+        this.returnMsg = returnMsg;
+    }
+
+    public String getErrCode() {
+        return errCode;
+    }
+
+    public void setErrCode(String errCode) {
+        this.errCode = errCode;
+    }
+
+    public String getErrCodeDes() {
+        return errCodeDes;
+    }
+
+    public void setErrCodeDes(String errCodeDes) {
+        this.errCodeDes = errCodeDes;
     }
 
 }

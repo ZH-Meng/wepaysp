@@ -20,6 +20,7 @@ import com.zbsp.wepaysp.api.service.pay.PayDetailsService;
 import com.zbsp.wepaysp.api.service.report.RptDealerStatService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.api.util.SysUserUtil;
+import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatusShow;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.mobile.common.constant.H5CommonResult;
@@ -147,6 +148,7 @@ public class AppIdCollectionController extends BaseController {
                     paramMap.put("beginTime", TimeUtil.getDayStart(date));
                     paramMap.put("endTime", TimeUtil.getDayEnd(date));
                 }
+                paramMap.put("tradeStatus", TradeStatusShow.PAY_SUCCESS.getValue());
                 resultMap = payDetailsService.doJoinTransAppIdQueryList(paramMap, startIndex, maxResult);
             }
         }
