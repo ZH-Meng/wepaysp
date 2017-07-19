@@ -172,7 +172,8 @@
 						  				<s:set var="payTypeStr">刷卡支付</s:set>
 						  			</s:if>
 						  			<s:elseif test="#weixinPayDetailsVo.payType == 2">
-						  				<s:set var="payTypeStr">公众号支付</s:set>
+						  				<%--公众号 --%>
+						  				<s:set var="payTypeStr">扫码支付</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinPayDetailsVo.payType == 3">
 						  				<s:set var="payTypeStr">扫码支付</s:set>

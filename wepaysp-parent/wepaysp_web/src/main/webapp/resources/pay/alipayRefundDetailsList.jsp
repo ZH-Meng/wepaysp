@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>微信退款明细</title>
+	<title>支付宝退款明细</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
@@ -17,7 +17,7 @@
 		<s:elseif test="userLevel == 3 || userLevel == 4 || userLevel == 5">
 			<s:set name="navTag">资金结算</s:set>
 		</s:elseif>--%>
-		<div class="bgposition">您现在的位置：交易查询&gt;微信退款明细</div>
+		<div class="bgposition">您现在的位置：交易查询&gt;支付宝退款明细</div>
 		<s:form id="queryForm" method="post">
 			<div class="bgtj">
 				<ul class="tj_title">
@@ -32,35 +32,35 @@
 									<s:if test="partnerVoListLevel == 2">
 										<div class="condition_field">
 											<span class="field_label">服务商</span>
-		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinRefundDetailsVO.partner2Oid"  id="partner2Oid" headerKey="" headerValue="全部"/>
+		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="alipayRefundDetailsVO.partner2Oid"  id="partner2Oid" headerKey="" headerValue="全部"/>
 	                                	</div>
 									</s:if>
 									<s:elseif test="partnerVoListLevel == 3">
 										<div class="condition_field">
 											<span class="field_label">服务商</span>
-		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="weixinRefundDetailsVO.partner3Oid"  id="partner3Oid" headerKey="" headerValue="全部"/>
+		                                	<s:select list="partnerVoList" listKey="iwoid" listValue="company" name="alipayRefundDetailsVO.partner3Oid"  id="partner3Oid" headerKey="" headerValue="全部"/>
 	                                	</div>
 									</s:elseif>
 									<div class="condition_field">
 										<span class="field_label">业务员ID</span>
-										<s:textfield name="weixinRefundDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
+										<s:textfield name="alipayRefundDetailsVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
 									</div>
 								</s:if>
 								<s:if test="userLevel  == 1 || userLevel  == 2">
 									<div class="condition_field">
 										<span class="field_label">商家ID</span>
-										<s:textfield name="weixinRefundDetailsVO.dealerId" id="dealerId" maxlength="9"/>
+										<s:textfield name="alipayRefundDetailsVO.dealerId" id="dealerId" maxlength="9"/>
 									</div>
 								</s:if>
 								<s:if test="userLevel  == 1 || userLevel  == 2 || userLevel  == 3">
 									<div class="condition_field">
 										<span class="field_label">门店ID</span>
-										<s:textfield name="weixinRefundDetailsVO.storeId" id="storeId" maxlength="9"/>
+										<s:textfield name="alipayRefundDetailsVO.storeId" id="storeId" maxlength="9"/>
 									</div>
 								</s:if>
 								<div class="condition_field">
 									<span class="field_label">收银员ID</span>
-									<s:textfield name="weixinRefundDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
+									<s:textfield name="alipayRefundDetailsVO.dealerEmployeeId" id="dealerEmployeeId" maxlength="10"/>
 								</div>
 							</s:if>
 							<div class="condition_field">
@@ -76,12 +76,12 @@
 								<span class="tj_bt">*</span>
 							</div>
 							<div class="condition_field">
-								<span class="field_label">微信支付单号</span>
-								<s:textfield name="weixinRefundDetailsVO.transactionId" id="transactionId" maxlength="28" cssStyle="width:200px;"/>
+								<span class="field_label">支付宝支付单号</span>
+								<s:textfield name="alipayRefundDetailsVO.tradeNo" id="tradeNo" maxlength="28" cssStyle="width:200px;"/>
 							</div>
 							<div class="condition_field">
 								<span class="field_label">商户订单号</span>
-								<s:textfield name="weixinRefundDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
+								<s:textfield name="alipayRefundDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
 							</div>
 						</div>
 					</li>
@@ -134,63 +134,63 @@
 	                            </tr>
 	                        </thead>
 	                        <tbody>
-	                        <s:if test="weixinRefundDetailsVoList != null && weixinRefundDetailsVoList.size() > 0">
-			  					<s:iterator value="weixinRefundDetailsVoList" var="weixinRefundDetailsVo" status="rowStatus">
+	                        <s:if test="alipayRefundDetailsVoList != null && alipayRefundDetailsVoList.size() > 0">
+			  					<s:iterator value="alipayRefundDetailsVoList" var="alipayRefundDetailsVo" status="rowStatus">
 						  		<tr>
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.outTradeNo" />">
-						  				<s:property value="#weixinRefundDetailsVo.outTradeNo" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.outTradeNo" />">
+						  				<s:property value="#alipayRefundDetailsVo.outTradeNo" />
 						  			</td>
 						  			<s:if test="userLevel  < 3">
-						  				<td title="<s:property value="#weixinRefundDetailsVo.partnerId" />">
-							  				<s:property value="#weixinRefundDetailsVo.partnerId" />
+						  				<td title="<s:property value="#alipayRefundDetailsVo.partnerId" />">
+							  				<s:property value="#alipayRefundDetailsVo.partnerId" />
 							  			</td>
-							  			<td title="<s:property value="#weixinRefundDetailsVo.partnerName" />">
-							  				<s:property value="#weixinRefundDetailsVo.partnerName" />
+							  			<td title="<s:property value="#alipayRefundDetailsVo.partnerName" />">
+							  				<s:property value="#alipayRefundDetailsVo.partnerName" />
 							  			</td>
-							  			<td title="<s:property value="#weixinRefundDetailsVo.partnerEmployeeId" />">
-							  				<s:property value="#weixinRefundDetailsVo.partnerEmployeeId" />
+							  			<td title="<s:property value="#alipayRefundDetailsVo.partnerEmployeeId" />">
+							  				<s:property value="#alipayRefundDetailsVo.partnerEmployeeId" />
 							  			</td>
-							  			<td title="<s:property value="#weixinRefundDetailsVo.partnerEmployeeName" />">
-							  				<s:property value="#weixinRefundDetailsVo.partnerEmployeeName" />
+							  			<td title="<s:property value="#alipayRefundDetailsVo.partnerEmployeeName" />">
+							  				<s:property value="#alipayRefundDetailsVo.partnerEmployeeName" />
 							  			</td>
 							  		</s:if>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerId" />">
-						  				<s:property value="#weixinRefundDetailsVo.dealerId" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.dealerId" />">
+						  				<s:property value="#alipayRefundDetailsVo.dealerId" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerName" />">
-						  				<s:property value="#weixinRefundDetailsVo.dealerName" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.dealerName" />">
+						  				<s:property value="#alipayRefundDetailsVo.dealerName" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.storeId" />">
-						  				<s:property value="#weixinRefundDetailsVo.storeId" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.storeId" />">
+						  				<s:property value="#alipayRefundDetailsVo.storeId" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.storeName" />">
-						  				<s:property value="#weixinRefundDetailsVo.storeName" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.storeName" />">
+						  				<s:property value="#alipayRefundDetailsVo.storeName" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerEmployeeId" />">
-						  				<s:property value="#weixinRefundDetailsVo.dealerEmployeeId" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.dealerEmployeeId" />">
+						  				<s:property value="#alipayRefundDetailsVo.dealerEmployeeId" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerEmployeeName" />">
-						  				<s:property value="#weixinRefundDetailsVo.dealerEmployeeName" />
+						  			<td title="<s:property value="#alipayRefundDetailsVo.dealerEmployeeName" />">
+						  				<s:property value="#alipayRefundDetailsVo.dealerEmployeeName" />
 						  			</td>
-<%-- 						  			<td title="<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />">
-						  				<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />
+<%-- 						  			<td title="<s:property value="#alipayRefundDetailsVo.refundEmployeeName" />">
+						  				<s:property value="#alipayRefundDetailsVo.refundEmployeeName" />
 						  			</td> --%>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
-						  				<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${alipayRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${alipayRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>">
-						  				<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
+						  			<td class="bgright" title="<fmt:formatNumber value="${alipayRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>">
+						  				<fmt:formatNumber value="${alipayRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-						  			<s:if test="#weixinRefundDetailsVo.tradeStatus == 0">
+						  			<s:if test="#alipayRefundDetailsVo.tradeStatus == 0">
 					  				<s:set var="tradeStatusStr">交易中</s:set>
 						  			</s:if>
-						  			<s:elseif test="#weixinRefundDetailsVo.tradeStatus == 1">
+						  			<s:elseif test="#alipayRefundDetailsVo.tradeStatus == 1">
 						  				<s:set var="tradeStatusStr">交易成功</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinRefundDetailsVo.tradeStatus == 2">
+						  			<s:elseif test="#alipayRefundDetailsVo.tradeStatus == 2">
 						  				<s:set var="tradeStatusStr">交易失败</s:set>
 						  			</s:elseif>
 									<s:else>
@@ -199,8 +199,8 @@
 						  			<td title="<s:property value="tradeStatusStr" />">
 						  				<s:property value="#tradeStatusStr" />
 						  			</td>
-						  			<td title="<s:date name="#weixinRefundDetailsVo.transEndTime" format="yyyy-MM-dd HH:mm:ss"/>">
-						  				<s:date name="#weixinRefundDetailsVo.transEndTime" format="yyyy-MM-dd HH:mm:ss"/>
+						  			<td title="<s:date name="#alipayRefundDetailsVo.transEndTime" format="yyyy-MM-dd HH:mm:ss"/>">
+						  				<s:date name="#alipayRefundDetailsVo.transEndTime" format="yyyy-MM-dd HH:mm:ss"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -255,7 +255,7 @@
 			$("#dealerId").val("");
 			$("#storeId").val("");
 			$("#dealerEmployeeId").val("");
-			$("#transactionId").val("");
+			$("#tradeNo").val("");
 			$("#outTradeNo").val("");
 			//$("#beginTime").val("");
 			//$("#endTime").val("");

@@ -40,8 +40,9 @@ public interface AlipayAppAuthDetailsService {
     /***
      * 查找某应用有效的应用授权信息
      * @param appid 应用ID 
+     * @param dealerId
      * @return 有效的授权记录集合
      */
-	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid);
+	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid, String dealerId);
     
 }

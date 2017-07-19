@@ -180,10 +180,14 @@ public class AlipayAppAuthDetailsServiceImpl
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid) {
+	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid, String dealerId) {
 		 Validator.checkArgument(StringUtils.isBlank(appid), "appid为空");
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from AlipayAppAuthDetails a left join fetch a.dealer where a.appId=:APPID and a.status=:STATUS";
+        String jpql = "from AlipayAppAuthDetails a left join fetch a.dealer where a.appId=:APPID and a.status=:STATUS ";
+        if (StringUtils.isNotBlank(dealerId)) {
+            jpql += " and a.dealer.dealerId=:DEALERID";
+            jpqlMap.put("DEALERID", dealerId);
+        }
         jpqlMap.put("APPID", appid);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         return (List<AlipayAppAuthDetails>) commonDAO.findObjectList(jpql, jpqlMap, false);

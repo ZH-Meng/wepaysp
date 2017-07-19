@@ -163,7 +163,8 @@
 						  				<s:property value="#aliPayDetailsVo.dealerEmployeeName" />
 						  			</td>						  			
 						  			<s:if test="#aliPayDetailsVo.payType == 6">
-						  				<s:set var="payTypeStr">当面付-条码支付</s:set>
+						  				<%--当面付-条码支付 --%>
+						  				<s:set var="payTypeStr">刷卡支付</s:set>
 						  			</s:if>
 						  			<s:elseif test="#aliPayDetailsVo.payType == 7">
 						  				<s:set var="payTypeStr">扫码支付</s:set>

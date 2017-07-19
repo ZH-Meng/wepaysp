@@ -23,5 +23,10 @@
 			<result name="aliPayDetailsList">/resources/pay/aliPayDetailsList.jsp</result>
 		</action>
 		
+		<!-- 支付宝退款明细 -->
+		<action name="alipayrefunddetails" class="alipayRefundDetailsAction">
+			<result name="alipayRefundDetailsList">/resources/pay/alipayRefundDetailsList.jsp</result>
+		</action>
+		
 	</package>
 </struts>

@@ -3,10 +3,10 @@ package com.zbsp.wepaysp.vo.pay;
 import java.io.Serializable;
 import java.util.Date;
 
-public class WeixinRefundDetailsVO
+public class AlipayRefundDetailsVO
     implements Serializable {
 
-    private static final long serialVersionUID = 8467137862008977835L;
+    private static final long serialVersionUID = 548084412168025790L;
     private String iwoid;
     private String partnerOid;
     private String partnerName;
@@ -18,7 +18,7 @@ public class WeixinRefundDetailsVO
     private Integer totalFee;
     private Integer refundFee;
     private String resultCode;
-    private Date TransEndTime;
+    private Date transEndTime;
     private Integer tradeStatus;
     
     private Date beginTime;
@@ -32,20 +32,7 @@ public class WeixinRefundDetailsVO
     private String storeId;
     private String dealerEmployeeId;
     private String partnerId;
-    private String transactionId;
-
-    private String keyPartner;
-    private String appid;
-    private String subAppid;
-    private String mchId;
-    private String subMchId;
-    private String deviceInfo;
-    private String nonceStr;
-    private String sign;
-    private String returnCode;
-    private String returnMsg;
-    private String errCode;
-    private String errCodeDes;
+    private String tradeNo;// 支付宝订单号
 
     public String getIwoid() {
         return iwoid;
@@ -136,11 +123,11 @@ public class WeixinRefundDetailsVO
     }
 
     public Date getTransEndTime() {
-        return TransEndTime;
+        return transEndTime;
     }
 
     public void setTransEndTime(Date transEndTime) {
-        TransEndTime = transEndTime;
+        this.transEndTime = transEndTime;
     }
 
     public Date getBeginTime() {
@@ -223,108 +210,12 @@ public class WeixinRefundDetailsVO
         this.partnerId = partnerId;
     }
 
-    public String getTransactionId() {
-        return transactionId;
+    public String getTradeNo() {
+        return tradeNo;
     }
 
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getKeyPartner() {
-        return keyPartner;
-    }
-
-    public void setKeyPartner(String keyPartner) {
-        this.keyPartner = keyPartner;
-    }
-
-    public String getAppid() {
-        return appid;
-    }
-
-    public void setAppid(String appid) {
-        this.appid = appid;
-    }
-
-    public String getSubAppid() {
-        return subAppid;
-    }
-
-    public void setSubAppid(String subAppid) {
-        this.subAppid = subAppid;
-    }
-
-    public String getMchId() {
-        return mchId;
-    }
-
-    public void setMchId(String mchId) {
-        this.mchId = mchId;
-    }
-
-    public String getSubMchId() {
-        return subMchId;
-    }
-
-    public void setSubMchId(String subMchId) {
-        this.subMchId = subMchId;
-    }
-
-    public String getDeviceInfo() {
-        return deviceInfo;
-    }
-
-    public void setDeviceInfo(String deviceInfo) {
-        this.deviceInfo = deviceInfo;
-    }
-
-    public String getNonceStr() {
-        return nonceStr;
-    }
-
-    public void setNonceStr(String nonceStr) {
-        this.nonceStr = nonceStr;
-    }
-
-    public String getSign() {
-        return sign;
-    }
-
-    public void setSign(String sign) {
-        this.sign = sign;
-    }
-
-    public String getReturnCode() {
-        return returnCode;
-    }
-
-    public void setReturnCode(String returnCode) {
-        this.returnCode = returnCode;
-    }
-
-    public String getReturnMsg() {
-        return returnMsg;
-    }
-
-    public void setReturnMsg(String returnMsg) {
-        this.returnMsg = returnMsg;
-    }
-
-    public String getErrCode() {
-        return errCode;
-    }
-
-    public void setErrCode(String errCode) {
-        this.errCode = errCode;
-    }
-
-    public String getErrCodeDes() {
-        return errCodeDes;
-    }
-
-    public void setErrCodeDes(String errCodeDes) {
-        this.errCodeDes = errCodeDes;
+    public void setTradeNo(String tradeNo) {
+        this.tradeNo = tradeNo;
     }
     
     public Integer getTradeStatus() {

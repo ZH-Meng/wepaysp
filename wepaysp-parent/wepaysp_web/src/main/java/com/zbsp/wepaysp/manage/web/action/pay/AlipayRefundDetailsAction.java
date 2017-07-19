@@ -15,25 +15,25 @@ import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
-import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
+import com.zbsp.wepaysp.api.service.pay.AlipayRefundDetailsService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
 import com.zbsp.wepaysp.vo.pay.RefundTotalVO;
-import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
+import com.zbsp.wepaysp.vo.pay.AlipayRefundDetailsVO;
 
 /**
- * 微信退款明细
+ * 支付宝退款明细
  * 
  * @author 孟郑宏
  */
-public class WeixinRefundDetailsAction
+public class AlipayRefundDetailsAction
     extends PageAction  {
 
     private static final long serialVersionUID = -4213656644621035327L;
-    private WeixinRefundDetailsVO weixinRefundDetailsVO;
+    private AlipayRefundDetailsVO alipayRefundDetailsVO;
     private String beginTime;
     private String endTime;
-    private List<WeixinRefundDetailsVO> weixinRefundDetailsVoList;
-    private WeixinRefundDetailsService weixinRefundDetailsService;
+    private List<AlipayRefundDetailsVO> alipayRefundDetailsVoList;
+    private AlipayRefundDetailsService alipayRefundDetailsService;
     private List<PartnerVO> partnerVoList;
     private PartnerService partnerService;
     private int userLevel;
@@ -48,8 +48,8 @@ public class WeixinRefundDetailsAction
         
         try {
             ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (weixinRefundDetailsVO == null) {
-                weixinRefundDetailsVO = new WeixinRefundDetailsVO();
+            if (alipayRefundDetailsVO == null) {
+                alipayRefundDetailsVO = new AlipayRefundDetailsVO();
             }
             // 初始化查询参数默认值
             initDefaultDatesArgs();
@@ -69,7 +69,7 @@ public class WeixinRefundDetailsAction
                             partnerVoList = partnerService.doJoinTransQueryPartnerList(paramMap, 0, -1);
                             // 当前台查询条件选择某个二级服务商
                             paramMap.clear();
-                            paramMap.put("partner2Oid", weixinRefundDetailsVO.getPartner2Oid());
+                            paramMap.put("partner2Oid", alipayRefundDetailsVO.getPartner2Oid());
                         } else if (partnerLevel == 2) {// 二级服务商
                             partnerVoListLevel = 3;
                             
@@ -78,7 +78,7 @@ public class WeixinRefundDetailsAction
                             partnerVoList = partnerService.doJoinTransQueryPartnerList(paramMap, 0, -1);
                             // 当前台查询条件选择某个三级服务商
                             paramMap.clear();
-                            paramMap.put("partner3Oid", weixinRefundDetailsVO.getPartner3Oid());
+                            paramMap.put("partner3Oid", alipayRefundDetailsVO.getPartner3Oid());
                         }
                         
                         paramMap.put("partner" + partnerLevel + "Oid", manageUser.getDataPartner().getIwoid());
@@ -118,28 +118,28 @@ public class WeixinRefundDetailsAction
             paramMap.put("beginTime", TimeUtil.getDayStart(convertS2D(beginTime)));
             paramMap.put("endTime", TimeUtil.getDayEnd(convertS2D(endTime)));
             
-            paramMap.put("partnerEmployeeId", weixinRefundDetailsVO.getPartnerEmployeeId());
-            paramMap.put("dealerId", weixinRefundDetailsVO.getDealerId());
-            paramMap.put("dealerEmployeeId", weixinRefundDetailsVO.getDealerEmployeeId());
-            paramMap.put("storeId", weixinRefundDetailsVO.getStoreId());
-            paramMap.put("outTradeNo", weixinRefundDetailsVO.getOutTradeNo());
-            paramMap.put("transactionId", weixinRefundDetailsVO.getTransactionId());
+            paramMap.put("partnerEmployeeId", alipayRefundDetailsVO.getPartnerEmployeeId());
+            paramMap.put("dealerId", alipayRefundDetailsVO.getDealerId());
+            paramMap.put("dealerEmployeeId", alipayRefundDetailsVO.getDealerEmployeeId());
+            paramMap.put("storeId", alipayRefundDetailsVO.getStoreId());
+            paramMap.put("outTradeNo", alipayRefundDetailsVO.getOutTradeNo());
+            paramMap.put("tradeNo", alipayRefundDetailsVO.getTradeNo());
             
-            rowCount = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetailsCount(paramMap);
+            rowCount = alipayRefundDetailsService.doJoinTransQueryAlipayRefundDetailsCount(paramMap);
             if (rowCount > 0) {
-                Map<String, Object> resultMap = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetails(paramMap, start, size);
-                weixinRefundDetailsVoList = (List<WeixinRefundDetailsVO>) MapUtils.getObject(resultMap, "refundList");
+                Map<String, Object> resultMap = alipayRefundDetailsService.doJoinTransQueryAlipayRefundDetails(paramMap, start, size);
+                alipayRefundDetailsVoList = (List<AlipayRefundDetailsVO>) MapUtils.getObject(resultMap, "refundList");
                 // 合计
                 totalVO = (RefundTotalVO) MapUtils.getObject(resultMap, "total");
             } else {
                 totalVO = new RefundTotalVO();
             }
         } catch (Exception e) {
-            logger.error("微信退款明细查询列表错误：" + e.getMessage());
-            setAlertMessage("微信退款明细查询列表错误！");
+            logger.error("支付宝退款明细查询列表错误：" + e.getMessage());
+            setAlertMessage("支付宝退款明细查询列表错误！");
         }
         
-        return "weixinRefundDetailsList";
+        return "alipayRefundDetailsList";
     }
 
     /**
@@ -180,12 +180,12 @@ public class WeixinRefundDetailsAction
         return DateUtil.getDate(dateStr, "yyyy-MM-dd HH:mm:ss");
     }
 
-    public WeixinRefundDetailsVO getWeixinRefundDetailsVO() {
-        return weixinRefundDetailsVO;
+    public AlipayRefundDetailsVO getAlipayRefundDetailsVO() {
+        return alipayRefundDetailsVO;
     }
 
-    public void setWeixinRefundDetailsVO(WeixinRefundDetailsVO weixinRefundDetailsVO) {
-        this.weixinRefundDetailsVO = weixinRefundDetailsVO;
+    public void setAlipayRefundDetailsVO(AlipayRefundDetailsVO alipayRefundDetailsVO) {
+        this.alipayRefundDetailsVO = alipayRefundDetailsVO;
     }
 
     public String getBeginTime() {
@@ -204,12 +204,12 @@ public class WeixinRefundDetailsAction
         this.endTime = endTime;
     }
     
-    public List<WeixinRefundDetailsVO> getWeixinRefundDetailsVoList() {
-        return weixinRefundDetailsVoList;
+    public List<AlipayRefundDetailsVO> getAlipayRefundDetailsVoList() {
+        return alipayRefundDetailsVoList;
     }
 
-    public void setWeixinRefundDetailsService(WeixinRefundDetailsService weixinRefundDetailsService) {
-        this.weixinRefundDetailsService = weixinRefundDetailsService;
+    public void setAlipayRefundDetailsService(AlipayRefundDetailsService alipayRefundDetailsService) {
+        this.alipayRefundDetailsService = alipayRefundDetailsService;
     }
 
     public List<PartnerVO> getPartnerVoList() {

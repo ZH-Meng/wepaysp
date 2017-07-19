@@ -137,7 +137,7 @@ public class DefaultScanPayBusinessResultListener implements ScanPayBusiness.Res
     
     @Override
     public void onUserPaying(ScanPayResData scanPayResData) {
-        logger.info("微信刷卡支付-用户支付中：系统订单ID=" + scanPayResData.getOut_trade_no() + "，金额：" + scanPayResData.getTotal_fee());
+        logger.info("微信刷卡支付-用户支付中：系统订单ID=" + scanPayResData.getOut_trade_no());
         updatePayResult(scanPayResData);
         result = ON_USER_PAYING;
     }

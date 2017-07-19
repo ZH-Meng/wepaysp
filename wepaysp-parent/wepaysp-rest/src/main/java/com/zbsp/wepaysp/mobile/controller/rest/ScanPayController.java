@@ -105,7 +105,12 @@ public class ScanPayController extends BaseController {
                     
                     if (!StringUtils.equalsIgnoreCase(WxPayResult.SUCCESS.getCode(), resCode)) {// 支付失败
                         logger.warn(logPrefix + "微信刷卡支付失败，错误码：" + resCode + "，错误描述：" + resDesc);
-                        response = new ScanPayResponse(PayResult.PAY_FAIL.getCode(), PayResult.PAY_FAIL.getDesc(), responseId);
+                        if (WxPayResult.USERPAYING.getValue().equalsIgnoreCase(resCode)) {
+                            response = new ScanPayResponse(PayResult.PAYING.getCode(), PayResult.PAYING.getDesc(), responseId);
+                            response.setOutTradeNo(payDetailsVO.getOutTradeNo());
+                        } else {
+                            response = new ScanPayResponse(PayResult.PAY_FAIL.getCode(), PayResult.PAY_FAIL.getDesc(), responseId);
+                        }
                     } else {
                         logger.info(logPrefix + "微信刷卡支付成功");
                         response = new ScanPayResponse(CommonResult.SUCCESS.getCode(), CommonResult.SUCCESS.getDesc(), responseId);

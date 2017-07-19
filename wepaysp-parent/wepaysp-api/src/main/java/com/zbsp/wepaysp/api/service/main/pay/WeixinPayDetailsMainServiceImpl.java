@@ -321,7 +321,7 @@ public class WeixinPayDetailsMainServiceImpl
                 // 更新查询结果
                 WeixinPayDetailsVO payResultVO = weixinPayDetailsService.doTransUpdateOrderQueryResult(queryResultVO);
                 
-                if (payResultVO != null && TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus()) {
+                if (payResultVO != null && TradeStatus.TRADE_SUCCESS.getValue() == payResultVO.getTradeStatus() && !PayType.WEIXIN_MICROPAY.getValue().equals(payResultVO.getPayType())) {
                     logger.info("订单查询结果为支付成功，向收银员/商户发送支付成功通知");
                     try {
 						wxAppidMessageService.sendPayResultNotice(MapUtil.convertBean(payResultVO));

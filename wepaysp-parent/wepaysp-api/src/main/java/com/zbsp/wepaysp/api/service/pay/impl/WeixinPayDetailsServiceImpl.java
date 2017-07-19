@@ -32,8 +32,10 @@ import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.StringHelper;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.Dealer;
@@ -211,7 +213,6 @@ public class WeixinPayDetailsServiceImpl
         		vo.setTotalFee(weixinPayDetails.getTotalFee());
         		//vo.setResultCode(weixinPayDetails.getResultCode());
         		vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
-        		
         		
         		resultList.add(vo);
         	}
@@ -489,6 +490,8 @@ public class WeixinPayDetailsServiceImpl
        	sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "新增微信支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo()+ ", 商户ID=" + dealer.getDealerId() + ", 商户姓名=" + dealer.getCompany() + "，消费金额：" + newPayOrder.getTotalFee() + ", 商品详情=" + newPayOrder.getBody() + "]", processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
         
         BeanCopierUtil.copyProperties(newPayOrder, weixinPayDetailsVO);
+        weixinPayDetailsVO.setTimeStart(DateUtil.getDate(new Date(), "yyyyMMddHHmmss"));
+        weixinPayDetailsVO.setTimeExpire(DateUtil.getDate(TimeUtil.plusSeconds(60 * 2), "yyyyMMddHHmmss"));
         return weixinPayDetailsVO;
     }
 
@@ -578,19 +581,22 @@ public class WeixinPayDetailsServiceImpl
                 }
             } else {
                 payDetails.setResultCode(ResultCode.FAIL.toString());
-                
                 String errCode = StringUtils.isNotBlank(payResultVO.getErrCode()) ? payResultVO.getErrCode() : WxPayResult.FAIL.getCode();// 错误码
                 String errCodeDes = payResultVO.getErrCodeDes();
-                
+
                 if (StringUtils.isBlank(errCodeDes)) {
                     if (Validator.contains(WxPayResult.class, errCode)) {
                         errCodeDes = Enum.valueOf(WxPayResult.class, errCode).getDesc();
                     }
                 }
-                payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
                 payDetails.setErrCode(errCode);
                 payDetails.setErrCodeDes(errCodeDes);
                 logDescTemp += "，支付结果：交易失败，错误码：" + errCode + "，错误描述：" + payDetails.getErrCodeDes();
+                if (WxPayResult.USERPAYING.getValue().equalsIgnoreCase(payResultVO.getErrCode())) {// 用户支付中
+                    payDetails.setTradeStatus(TradeStatus.TRADE_PAYING.getValue());
+                } else {
+                    payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
+                }
             }
         } else {// 通讯失败，只有刷卡支付会走此分支，因为通信失败时，统一下单- 微信结果通知不会含有系统订单
             payDetails.setReturnCode(returnCode);

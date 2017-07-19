@@ -8,8 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
@@ -69,6 +67,7 @@ public class AlipayRefundDetails
     private String modifier;
     private Date modifyTime;
     private String remark;
+    private Integer totalFee;
 
     public AlipayRefundDetails() {
     }
@@ -368,7 +367,6 @@ public class AlipayRefundDetails
         this.refundFee = refundFee;
     }
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "GMT_REFUND_PAY", nullable = false, length = 0)
     public Date getGmtRefundPay() {
         return this.gmtRefundPay;
@@ -396,7 +394,6 @@ public class AlipayRefundDetails
         this.buyerUserId = buyerUserId;
     }
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "TRANS_BEGIN_TIME", length = 0)
     public Date getTransBeginTime() {
         return this.transBeginTime;
@@ -406,7 +403,6 @@ public class AlipayRefundDetails
         this.transBeginTime = transBeginTime;
     }
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "TRANS_END_TIME", length = 0)
     public Date getTransEndTime() {
         return this.transEndTime;
@@ -434,7 +430,6 @@ public class AlipayRefundDetails
         this.creator = creator;
     }
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "CREATE_TIME", nullable = false, length = 0)
     public Date getCreateTime() {
         return this.createTime;
@@ -453,7 +448,6 @@ public class AlipayRefundDetails
         this.modifier = modifier;
     }
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "MODIFY_TIME", length = 0)
     public Date getModifyTime() {
         return this.modifyTime;
@@ -470,6 +464,15 @@ public class AlipayRefundDetails
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+    
+    @Column(name = "TOTAL_FEE")
+    public Integer getTotalFee() {
+        return this.totalFee;
+    }
+
+    public void setTotalFee(Integer totalFee) {
+        this.totalFee = totalFee;
     }
 
 }
