@@ -44,6 +44,8 @@ public class WeixinRefundDetails
     private String sign;
     private String outTradeNo;
     private String transactionId;
+    private String outRefundNo;
+	private String refundId;
     private Integer couponRefundType;
     private Integer totalFee;
     private Integer refundFee;
@@ -54,7 +56,6 @@ public class WeixinRefundDetails
     private String resultCode;
     private String errCode;
     private String errCodeDes;
-    private String refundId;
     private String refundChannel;
     private Integer cashFee;
     private Integer cashRefundFee;
@@ -76,6 +77,20 @@ public class WeixinRefundDetails
     private String remark;
 
     public WeixinRefundDetails() {
+    }
+    
+    public static enum CouponRefundType {
+        /** 1 撤销 */        revocation(1),
+        /** 2 退款 */        refund(2);
+        private int value;
+        
+        public int getValue() {
+            return value;
+        }
+        
+        private CouponRefundType(int value) {
+            this.value = value;
+        }
     }
     
     @Id
@@ -353,8 +368,17 @@ public class WeixinRefundDetails
     public void setErrCodeDes(String errCodeDes) {
         this.errCodeDes = errCodeDes;
     }
+    
+    @Column(name = "OUT_REFUND_NO", length = 64)
+    public String getOutRefundNo() {
+		return outRefundNo;
+	}
 
-    @Column(name = "REFUND_ID", length = 32)
+	public void setOutRefundNo(String outRefundNo) {
+		this.outRefundNo = outRefundNo;
+	}
+	
+    @Column(name = "REFUND_ID", length = 64)
     public String getRefundId() {
         return this.refundId;
     }
@@ -453,7 +477,7 @@ public class WeixinRefundDetails
         this.couponRefundFeeSingle = couponRefundFeeSingle;
     }
 
-    @Column(name = "TRANS_BEGIN_TIME", nullable = false, length = 0)
+    @Column(name = "TRANS_BEGIN_TIME", length = 0)
     public Date getTransBeginTime() {
         return this.transBeginTime;
     }

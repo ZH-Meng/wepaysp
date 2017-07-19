@@ -1,19 +1,11 @@
 package com.zbsp.wepaysp.api.listener;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.zip.GZIPInputStream;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.tencent.business.DownloadBillBusiness;
 import com.tencent.protocol.downloadbill_protocol.DownloadBillResData;
 import com.zbsp.wepaysp.api.service.pay.WeixinBillService;
-import com.zbsp.wepaysp.common.util.GZipUtils;
-import com.zbsp.wepaysp.common.util.StringHelper;
 
 /**
  * User: rizenguo
@@ -59,7 +51,7 @@ public class DefaultDownloadBillBusinessResultListener implements DownloadBillBu
 		response = response.replace("`", "");
 
 		String[] bills = response.split("\\n");
-
+        //下载对账单成功后保存明细、更新原始交易信息的退款字段并生成退款记录
 		weixinBillService.doTransSaveBill(bills);
 
 	}

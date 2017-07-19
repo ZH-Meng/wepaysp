@@ -117,7 +117,7 @@
 	</bean>
 	
 	<bean id="alipayAppService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppServiceImpl" parent="baseService">
-		<property name="sysLogService" ref="sysLogService" />
+		
 	</bean> 
 	
 	<bean id="weixinBillService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinBillServiceImpl" parent="baseService">

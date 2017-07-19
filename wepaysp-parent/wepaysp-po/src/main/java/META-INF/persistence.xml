@@ -27,5 +27,6 @@
 		<!-- report -->
 		<class>com.zbsp.wepaysp.po.report.RptDealerStatDay</class>
 		<class>com.zbsp.wepaysp.po.report.RptDealerStatMonth</class>
+		<class>com.zbsp.wepaysp.po.pay.WeixinBill</class>
 	</persistence-unit>
 </persistence>
