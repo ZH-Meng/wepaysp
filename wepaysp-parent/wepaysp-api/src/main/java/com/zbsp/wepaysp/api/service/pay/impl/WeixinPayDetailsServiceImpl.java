@@ -744,7 +744,7 @@ public class WeixinPayDetailsServiceImpl
         
         WeixinPayDetailsVO returnPayDetailVO = null;
         
-        if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) { // 非处理中，代表系统已收到微信支付结果通知并处理
+        if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue() && payDetails.getTradeStatus().intValue() != TradeStatus.TRADE_PAYING.getValue()) { // 非处理中，代表系统已收到微信支付结果通知并处理
         	throw new DataStateException("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
         	
         	/*if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
@@ -810,6 +810,9 @@ public class WeixinPayDetailsServiceImpl
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.PAYERROR.toString())) { 
             	payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
             	logger.warn("系统支付订单（ID=" +orderQueryResultVO.getOutTradeNo() + "）状态为交易失败");
+            } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.NOTPAY.toString()) || StringUtils.equalsIgnoreCase(tradeState, TradeState.NOPAY.toString())) { 
+            	payDetails.setTradeStatus(TradeStatus.TRADE_CLOSED.getValue());
+            	
             } else {
                 // 未支付，支付超时 用户支付中，对应交易处理中
             	//TODO 转入退款
