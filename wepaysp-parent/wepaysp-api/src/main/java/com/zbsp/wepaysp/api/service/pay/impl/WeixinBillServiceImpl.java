@@ -55,7 +55,7 @@ public class WeixinBillServiceImpl
         	weixinBill.setPayType(column[8]);
         	String resultCode = column[9];
         	weixinBill.setResultCode(column[9]);
-        	if(resultCode.equals("REFUND")){
+        	if(resultCode.equals("REFUND")||resultCode.equals("REVOKED")){
         		refundList.add(column);
         	}
         	weixinBill.setBankType(column[10]);
