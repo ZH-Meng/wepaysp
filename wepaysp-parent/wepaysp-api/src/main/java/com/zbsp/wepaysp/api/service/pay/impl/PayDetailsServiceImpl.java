@@ -214,7 +214,7 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         String dealerOid = MapUtils.getString(paramMap, "dealerOid");
         String storeOid = MapUtils.getString(paramMap, "storeOid");
         String dealerEmployeeOid = MapUtils.getString(paramMap, "dealerEmployeeOid");
-        Integer payType = MapUtils.getInteger(paramMap, "payType");
+        String payType = MapUtils.getString(paramMap, "payType");
         Integer tradeStatus = MapUtils.getInteger(paramMap, "tradeStatus");
         // 从视图ViewPayDetail中查询支付明细
         String listJpql = "select w.id.dealerEmployeeOid, w.id.payType, w.id.transactionId, w.id.outTradeNo, w.id.transBeginTime, w.id.transEndTime, w.id.tradeStatus, "
@@ -236,11 +236,11 @@ public class PayDetailsServiceImpl extends BaseService implements PayDetailsServ
         }
         if (payType != null) {
             sql.append(" and w.id.payType = :PAYTYPE");
-            sqlMap.put("PAYTYPE", payType.toString());
+            sqlMap.put("PAYTYPE", payType);
         }
         if (tradeStatus != null) {
             sql.append(" and w.id.tradeStatus = :TRADESTATUS");
-            sqlMap.put("TRADESTATUS", tradeStatus.toString());
+            sqlMap.put("TRADESTATUS", tradeStatus);
         }
         if (beginTime != null ) {
             sql.append(" and w.id.transBeginTime >=:BEGINTIME ");

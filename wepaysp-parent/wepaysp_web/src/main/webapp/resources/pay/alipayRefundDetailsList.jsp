@@ -185,13 +185,13 @@
 						  				<fmt:formatNumber value="${alipayRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 						  			<s:if test="#alipayRefundDetailsVo.tradeStatus == 0">
-					  				<s:set var="tradeStatusStr">交易中</s:set>
+					  				<s:set var="tradeStatusStr">退款中</s:set>
 						  			</s:if>
 						  			<s:elseif test="#alipayRefundDetailsVo.tradeStatus == 1">
-						  				<s:set var="tradeStatusStr">交易成功</s:set>
+						  				<s:set var="tradeStatusStr">退款成功</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#alipayRefundDetailsVo.tradeStatus == 2">
-						  				<s:set var="tradeStatusStr">交易失败</s:set>
+						  				<s:set var="tradeStatusStr">退款失败</s:set>
 						  			</s:elseif>
 									<s:else>
 										<s:set var="tradeStatusStr">未知</s:set>
