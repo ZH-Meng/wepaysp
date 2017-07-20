@@ -122,4 +122,6 @@
 	
 	<bean id="weixinBillService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinBillServiceImpl" parent="baseService">
 	</bean>
+	<bean id="reconciliationDetailsService" class="com.zbsp.wepaysp.api.service.reconciliation.impl.ReconciliationDetailsServiceImpl" parent="baseService">
+	</bean>
 </beans>
