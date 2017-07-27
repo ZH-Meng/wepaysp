@@ -218,7 +218,8 @@ public class PayNoticeBindWeixinServiceImpl
         }
         
         po.setIwoid(Generator.generateIwoid());
-        po.setState(PayNoticeBindWeixin.State.open.getValue());// 默认开启
+        // 商户默认关闭收款通知，收银员默认开启
+        po.setState(PayNoticeBindWeixin.Type.dealer.getValue().equals(bindType) ? PayNoticeBindWeixin.State.closed.getValue() : PayNoticeBindWeixin.State.open.getValue());
         po.setOpenid(userinfoResData.getOpenid());
         po.setNickname(userinfoResData.getNickname());
         po.setSex(StringUtils.isBlank(userinfoResData.getSex()) ? 0 : Integer.parseInt(userinfoResData.getSex()));
