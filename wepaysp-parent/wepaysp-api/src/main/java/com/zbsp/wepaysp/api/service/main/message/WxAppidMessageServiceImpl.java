@@ -2,8 +2,10 @@ package com.zbsp.wepaysp.api.service.main.message;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -58,11 +60,17 @@ public class WxAppidMessageServiceImpl implements WxAppidMessageService {
     	} else {
     		throw new RuntimeException("支付订单数据异常：storeOid不能为空");
     	}
+        int count = 0;
+        
     	queryMap.put("state", PayNoticeBindWeixin.State.open.getValue());
     	List<PayNoticeBindWeixinVO> toUserList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(queryMap);
-    	
+    	// 查找商户绑定
+    	PayNoticeBindWeixinVO dealerBind = payNoticeBindWeixinService.doJoinTransQueryDealerBind(dealerOid);
+        if (dealerBind != null)
+            toUserList.add(dealerBind);
+
+        Set<String> sentSet = new HashSet<>(); // 已发送微信用户集
     	if (toUserList != null && !toUserList.isEmpty()) {
-    		int count = 0;
     		logger.info("订单（ID=" + outTradeNo + "）需要向（" + toUserList.size() + "人）发送支付成功通知");
     		// 准备发送消息的参数（服务商配置信息）
     		String certLocalPath = null;
@@ -79,12 +87,13 @@ public class WxAppidMessageServiceImpl implements WxAppidMessageService {
     		}
     		
     		for(PayNoticeBindWeixinVO toUser : toUserList) {
-    			if (toUser != null && StringUtils.isNotBlank(toUser.getOpenid())) {
+                if (toUser != null && StringUtils.isNotBlank(toUser.getOpenid()) && !sentSet.contains(toUser.getOpenid())) {// 不重复发
     				String messageURL = MessageFormat.format(SysConfig.wxPayMessageLinkURL, toUser.getOpenid(), dealerOid, storeOid, dealerEmployeeOid);
 					SendTemplateMsgResData sendResult = WeixinUtil.sendPaySuccessNotice(payDetailsMap, toUser.getOpenid(), certLocalPath, certPassword, accessToken, messageURL);
 					if (SendTempMsgErr.SUCCESS.getValue().equals(sendResult.getErrcode())) {// 发送成功
 						logger.info("订单（ID=" + outTradeNo + "）向（" + toUser.getNickname() + "(openid=" + toUser.getOpenid() + ")）发送支付成功通知成功");
 						count ++;
+						sentSet.add(toUser.getOpenid());
 					} else {
 						logger.info("订单（ID=" + outTradeNo + "）向（" + toUser.getNickname() + "(openid=" + toUser.getOpenid() + ")）发送支付成功通知失败");
 					}
@@ -100,7 +109,7 @@ public class WxAppidMessageServiceImpl implements WxAppidMessageService {
     	    }
     	    logger.info(temp + "没有启用的支付通知绑定人"+"，订单（ID=" + outTradeNo + "）不需要发送支付成功通知");
     	}
-		return 0;
+		return count;
 	}
 
 	public void setSysConfigService(SysConfigService sysConfigService) {

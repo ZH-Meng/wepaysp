@@ -52,15 +52,16 @@ public class AppIdMoreController
             } else {
                 modelAndView = new ModelAndView("appid/appidMore");
                 modelAndView.addObject("openid", openid);
-                if (dealerUser != null) {
-                    //PayNoticeBindWeixin bindDealer = (PayNoticeBindWeixin) bindMap.get("bindDealer");
-                }
                 // 商户员工更多功能：选项：是否每日接收收款通知， 是否每日接收收款汇总通知
-                // 商户 更多功能，选项：是否每日接收收款汇总通知，可能既是商户又是员工
-                if (cashierUser != null) {
+                // 商户 更多功能，选项：是否每日接收收款汇总通知，暂不考虑可能既是商户又是员工
+                if (dealerUser != null) {
+                    PayNoticeBindWeixin bindDealer = (PayNoticeBindWeixin) bindMap.get("bindDealer");
+                    modelAndView.addObject("collectionNoticeDealerState", PayNoticeBindWeixin.State.open.getValue().equals(bindDealer.getState()) ? "on" : "off");
+                    modelAndView.addObject("bindCollnoticeOid", bindDealer.getIwoid());
+                } else if (cashierUser != null) {
                     PayNoticeBindWeixin bindCashier = (PayNoticeBindWeixin) bindMap.get("bindCashier");
                     modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindCashier.getState()) ? "on" : "off");
-                    modelAndView.addObject("bindCashierOid", bindCashier.getIwoid());
+                    modelAndView.addObject("bindCollnoticeOid", bindCashier.getIwoid());
                 }
             }
         }

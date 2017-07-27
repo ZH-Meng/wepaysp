@@ -160,7 +160,6 @@ public class PayNoticeBindWeixinServiceImpl
         List<?> bindList = null;
         
         PayNoticeBindWeixin po = new PayNoticeBindWeixin();
-        String logTemp = "";
         if (PayNoticeBindWeixin.Type.dealer.getValue().equals(bindType)) {// 微信绑定商户
             jpql.append(" and p.type=:TYPE");
             jpqlMap.put("TYPE", bindType);
@@ -180,8 +179,7 @@ public class PayNoticeBindWeixinServiceImpl
             if (d == null) {
                 throw new NotExistsException("微信绑定商户，收银员不存在，dealerEmployeeOid=" + toRelateOid);
             }
-            po.setBindDealer(d);;
-            logTemp = "，关联商户：" + toRelateOid;
+            po.setBindDealer(d);
         } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType) // 微信绑定绑定门店级支付码 
             || PayNoticeBindWeixin.Type.dealerEmployee.getValue().equals(bindType)) {// 微信绑定绑定收银员级支付码
             jpql.append(" and p.type in (:TYPE1,:TYPE2)");
@@ -208,7 +206,6 @@ public class PayNoticeBindWeixinServiceImpl
                     throw new NotExistsException("微信支付通知绑定，收银员不存在，dealerEmployeeOid=" + toRelateOid);
                 }
                 po.setPayDealerEmployee(de);
-                logTemp = "，关联收银员：" + toRelateOid;
             } else if (PayNoticeBindWeixin.Type.store.getValue().equals(bindType)) {
                 // 绑定门店
                 Store store = commonDAO.findObject(Store.class, toRelateOid);
@@ -216,7 +213,6 @@ public class PayNoticeBindWeixinServiceImpl
                     throw new NotExistsException("微信支付通知绑定，门店不存在，storeOid=" + toRelateOid);
                 }
                 po.setStore(store);
-                logTemp = "，关联门店：" + toRelateOid;
             }
         } else {
             throw new IllegalArgumentException("参数type只能是1、2、3");
@@ -231,11 +227,6 @@ public class PayNoticeBindWeixinServiceImpl
         po.setCreator(userinfoResData.getOpenid());
         // TODO 考虑增加字段 来维护昵称与微信尽量保持一致
         commonDAO.save(po, false);
-        
-        // 记录日志
-        Date logTime = new Date();
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), null, "创建支付通知绑定信息[绑定类别=" + po.getType() +"，openid=" + po.getOpenid() + ", 昵称=" + po.getNickname() + ", 性别=" + po.getSex() + ", 状态=" + po.getState() + logTemp+ "]", 
-            logTime, logTime, null, po.toString(), SysLog.State.success.getValue(), po.getIwoid(), null, SysLog.ActionType.create.getValue());
         
         PayNoticeBindWeixinVO vo = new PayNoticeBindWeixinVO();
         BeanCopierUtil.copyProperties(po, vo);
@@ -304,9 +295,22 @@ public class PayNoticeBindWeixinServiceImpl
         commonDAO.update(bindwx);
     }
     
+    @Override
+    public PayNoticeBindWeixinVO doJoinTransQueryDealerBind(String dealerOid) {
+        Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid不能为空！");
+        PayNoticeBindWeixinVO  bindVO = null;
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        jpqlMap.put("bindDealerOid", dealerOid);
+        PayNoticeBindWeixin dealerBind = commonDAO.findObject("from PayNoticeBindWeixin p where p.bindDealer.iwoid=:bindDealerOid", jpqlMap, false);
+        if (dealerBind != null) {
+            bindVO = new PayNoticeBindWeixinVO();
+            BeanCopierUtil.copyProperties(dealerBind, bindVO);
+        }
+        return bindVO;
+    }
+    
 	public void setSysLogService(SysLogService sysLogService) {
 		this.sysLogService = sysLogService;
 	}
-
 
 }
