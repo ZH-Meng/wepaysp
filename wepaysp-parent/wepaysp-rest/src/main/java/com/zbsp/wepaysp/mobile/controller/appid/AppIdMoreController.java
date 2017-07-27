@@ -56,7 +56,7 @@ public class AppIdMoreController
                 // 商户 更多功能，选项：是否每日接收收款汇总通知，暂不考虑可能既是商户又是员工
                 if (dealerUser != null) {
                     PayNoticeBindWeixin bindDealer = (PayNoticeBindWeixin) bindMap.get("bindDealer");
-                    modelAndView.addObject("collectionNoticeDealerState", PayNoticeBindWeixin.State.open.getValue().equals(bindDealer.getState()) ? "on" : "off");
+                    modelAndView.addObject("collectionNoticeState", PayNoticeBindWeixin.State.open.getValue().equals(bindDealer.getState()) ? "on" : "off");
                     modelAndView.addObject("bindCollnoticeOid", bindDealer.getIwoid());
                 } else if (cashierUser != null) {
                     PayNoticeBindWeixin bindCashier = (PayNoticeBindWeixin) bindMap.get("bindCashier");

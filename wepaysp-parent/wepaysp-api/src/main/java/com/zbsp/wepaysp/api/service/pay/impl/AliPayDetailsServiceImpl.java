@@ -843,6 +843,7 @@ public class AliPayDetailsServiceImpl
             Dealer dealer = payDetails.getDealer();
             payDetailVO.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
             payDetailVO.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+            payDetailVO.setDealerOid(dealer != null  ? dealer.getIwoid() : "");
             
             PartnerEmployee pe = payDetails.getPartnerEmployee();
             payDetailVO.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));

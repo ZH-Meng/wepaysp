@@ -22,6 +22,7 @@
 				<param name="namespace">/resources/partner</param>
 				<param name="method">goToCreateDealer</param>
 			</result>
+			<result name="dealerBindWxID">/resources/partner/dealerBindWxID.jsp</result>
 			<result name="getQrCodeImg" type="stream">
 				<param name="contentType">application/octet-stream</param>
 				<param name="contentDisposition">attachment;fileName="${qrCodeName}"</param>  

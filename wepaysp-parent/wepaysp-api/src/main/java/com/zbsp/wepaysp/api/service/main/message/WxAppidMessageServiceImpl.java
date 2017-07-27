@@ -66,7 +66,7 @@ public class WxAppidMessageServiceImpl implements WxAppidMessageService {
     	List<PayNoticeBindWeixinVO> toUserList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(queryMap);
     	// 查找商户绑定
     	PayNoticeBindWeixinVO dealerBind = payNoticeBindWeixinService.doJoinTransQueryDealerBind(dealerOid);
-        if (dealerBind != null)
+        if (dealerBind != null && PayNoticeBindWeixin.State.open.getValue() == dealerBind.getState())
             toUserList.add(dealerBind);
 
         Set<String> sentSet = new HashSet<>(); // 已发送微信用户集

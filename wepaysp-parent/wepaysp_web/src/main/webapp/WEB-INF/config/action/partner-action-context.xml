@@ -19,6 +19,7 @@
 		<property name="dealerService" ref="dealerService"></property>
 		<property name="partnerEmployeeService" ref="partnerEmployeeService"></property>
 		<property name="alipayAppAuthDetailsService" ref="alipayAppAuthDetailsService" />
+		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
 	<bean id="storeAction" class="com.zbsp.wepaysp.manage.web.action.partner.StoreAction" scope="prototype">
