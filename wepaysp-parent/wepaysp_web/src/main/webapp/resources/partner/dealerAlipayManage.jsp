@@ -17,7 +17,9 @@
 		<div class="bgposition">您现在的位置：代理商管理&gt;商户信息管理&gt;商户支付宝管理</div>
 		<div class="bgtj">
 			<ul class="tj_title">
-				<li>支付宝授权</li>
+				<li>商户：
+				<s:if test="%{dealerVO != null}">${dealerVO.company }</s:if>
+				支付宝授权</li>
 			</ul>
 			<s:form method="post">
 				<s:hidden id="dealerOid" name="dealerOid"/>

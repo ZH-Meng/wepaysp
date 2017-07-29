@@ -16,7 +16,7 @@ public class SysEnums {
         /** 3：微信-扫码支付 */                                 WEIXIN_NATIVE("3", "微信-扫码支付"),
         /** 4：微信-微信买单 */                                 WEIXIN_PAY("4", "微信-微信买单"),
         
-        /** 6：支付宝-当面付-条码支付 */                    ALI_FACE_BAR("6", "支付宝-条码支付"),
+        /** 6：支付宝-当面付-条码支付 */                    ALI_FACE_BAR("6", "支付宝-刷卡支付"),
         /** 7：支付宝-扫码付 */                                  ALI_SCAN("7", "支付宝-扫码支付"),
         /** 8：支付宝-手机网站支付 */                       ALI_H5("8", "支付宝-手机网站支付");
         
@@ -33,6 +33,19 @@ public class SysEnums {
         private PayType(String value, String desc) {
             this.value = value;
             this.desc = desc;
+        }
+    }
+    
+    /**退款方式*/
+    public static enum RefundType {
+        /**撤销：1*/        REVERSE(1),
+        /**退款：2*/        REFUND(2);
+        private int value;
+        public int getValue() {
+            return value;
+        }
+        private RefundType(int value) {
+            this.value = value;
         }
     }
     
@@ -62,7 +75,7 @@ public class SysEnums {
     }
     
     /**
-     * 交易状态
+     * 交易状态，支付、退款公用
      */
     public static enum TradeStatus {
         /** 0：交易中 */                                        
@@ -77,6 +90,8 @@ public class SysEnums {
         TRADE_CLOSED(4),
         /** 5：交易待关闭 */  
         TRADE_TO_BE_CLOSED(5),
+        /** 6：交易待支付（用户支付中） */        
+        TRADE_PAYING(6),
         
         /** 99 人工处理*/
         MANUAL_HANDLING(99);

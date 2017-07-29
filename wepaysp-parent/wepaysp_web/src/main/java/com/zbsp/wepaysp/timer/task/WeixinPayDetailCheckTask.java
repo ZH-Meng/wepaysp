@@ -20,6 +20,7 @@ import com.zbsp.wepaysp.api.service.main.pay.WeixinPayDetailsMainService;
 import com.zbsp.wepaysp.api.service.pay.WeixinPayDetailsService;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
+import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.util.StringHelper;
 import com.zbsp.wepaysp.common.util.TimeUtil;
@@ -47,9 +48,9 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
     @Override
     public void doJob() {
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[开始]"));
-        // 查出前intervalTime毫秒的交易处理中和待关闭的记录
+        // 查出前intervalTime毫秒的交易处理中和待关闭、用户支付中的记录
         List<WeixinPayDetails> tradingList = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsByState(
-            new int[] { TradeStatus.TRADEING.getValue(), TradeStatus.TRADE_TO_BE_CLOSED.getValue() }, intervalTime);
+            new int[] { TradeStatus.TRADEING.getValue(), TradeStatus.TRADE_TO_BE_CLOSED.getValue(), TradeStatus.TRADE_PAYING.getValue() }, intervalTime);
         
         // 开始时间限制时间
         Date minDate = new Date(new Date().getTime() - maxQueryIntervaltime);
@@ -89,7 +90,8 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
                     }
                 }
                 
-                if (closeFlag) {
+                // 刷卡支付不支持关闭订单，支持撤销但暂不调用，继续查询。
+                if (closeFlag && !PayType.WEIXIN_MICROPAY.getValue().equals(payDetail.getPayType())) {
                     // 调用关闭订单API
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 开始调用关闭订单API ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
                     try {

@@ -77,6 +77,11 @@
 								<span class="field_label">商户订单号</span>
 								<s:textfield name="aliPayDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
 							</div>
+							<div class="condition_field">
+								<span class="field_label">支付金额大于</span>
+								<input type="hidden" name="aliPayDetailsVO.totalAmount" id="totalAmountStr" value=""/>
+								<s:textfield id="totalAmount" maxlength="8" name="queryMinAmount" cssStyle="width:60px;"/>元
+							</div>
 						</div>
 					</li>
 					<li class="bg_button">
@@ -158,7 +163,8 @@
 						  				<s:property value="#aliPayDetailsVo.dealerEmployeeName" />
 						  			</td>						  			
 						  			<s:if test="#aliPayDetailsVo.payType == 6">
-						  				<s:set var="payTypeStr">当面付-条码支付</s:set>
+						  				<%--当面付-条码支付 --%>
+						  				<s:set var="payTypeStr">刷卡支付</s:set>
 						  			</s:if>
 						  			<s:elseif test="#aliPayDetailsVo.payType == 7">
 						  				<s:set var="payTypeStr">扫码支付</s:set>
@@ -248,8 +254,18 @@
 				return false;
 			}
 			if (beginTime.substring(0, 7) != endTime.substring(0, 7)) {
-				alert("不能跨月查询");
+				alert("不能跨月查询！");
 				return;
+			}
+			
+			var fee = $("#totalAmount").val();
+			if(!isBlank(fee)) {
+				if (!isMoney2Exp(fee)) {
+					alert("输入金额无效，请输入大于0的两位小数或整数！");
+					return;
+				} else {
+					$("#totalAmountStr").val(Math.round(fee*100));
+				}
 			}
 			invokeAction(method);
 		}
@@ -262,7 +278,8 @@
 			$("#storeId").val("");
 			$("#dealerEmployeeId").val("");
 			$("#tradeNo").val("");
-			$("#outTradeNo").val("");			
+			$("#outTradeNo").val("");
+			$("#totalFee").val("");
 			//$("#beginTime").val("");
 			//$("#endTime").val("");
 			//$("#queryForm")[0].reset();

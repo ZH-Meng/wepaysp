@@ -71,6 +71,10 @@ public interface WeixinRefundDetailsService {
      * @return 保存成功返回保存后的退款明细VO
      */
     public WeixinRefundDetailsVO doTransCreateRefundDetails(WeixinPayDetails weixinPayDetails, String creator, String operatorUserOid, String logFunctionOid);
+    
+    public WeixinRefundDetailsVO doTransCreateReverseDetails(WeixinPayDetails weixinPayDetails);
+
+    public void doTransUpdateReverseResult(WeixinRefundDetailsVO refundDetailsVO);
 
     
 }

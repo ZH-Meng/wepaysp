@@ -32,8 +32,10 @@ import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
+import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.StringHelper;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.partner.Dealer;
@@ -91,7 +93,8 @@ public class WeixinPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
-
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
+        
         //StringBuffer sql = new StringBuffer("select distinct(w) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p and w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         String jpqlSelect = "select distinct(w) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         StringBuffer conditionSB = new StringBuffer();
@@ -165,6 +168,10 @@ public class WeixinPayDetailsServiceImpl
             conditionSB.append(" and w.transactionId = :TRANSACTIONID");
             jpqlMap.put("TRANSACTIONID", transactionId);
         }
+        if (minAmout != null ) {
+            conditionSB.append(" and w.totalFee >:MINAMOUT ");
+            jpqlMap.put("MINAMOUT", minAmout);
+        }
 
         conditionSB.append(" order by w.transBeginTime desc");
         List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
@@ -206,7 +213,6 @@ public class WeixinPayDetailsServiceImpl
         		vo.setTotalFee(weixinPayDetails.getTotalFee());
         		//vo.setResultCode(weixinPayDetails.getResultCode());
         		vo.setTransBeginTime(weixinPayDetails.getTransBeginTime());
-        		
         		
         		resultList.add(vo);
         	}
@@ -252,7 +258,8 @@ public class WeixinPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String transactionId = MapUtils.getString(paramMap, "transactionId");// 微信单号
-
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额，大于且不等于
+        
         //StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w, Partner p, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partner=p, w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
         
@@ -327,7 +334,10 @@ public class WeixinPayDetailsServiceImpl
             sql.append(" and w.transactionId = :TRANSACTIONID");
             sqlMap.put("TRANSACTIONID", transactionId);
         }
-        
+        if (minAmout != null ) {
+        	sql.append(" and w.totalFee >:MINAMOUT ");
+        	sqlMap.put("MINAMOUT", minAmout);
+        }
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 
@@ -480,6 +490,8 @@ public class WeixinPayDetailsServiceImpl
        	sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "新增微信支付明细[系统内部订单ID=" + newPayOrder.getOutTradeNo()+ ", 商户ID=" + dealer.getDealerId() + ", 商户姓名=" + dealer.getCompany() + "，消费金额：" + newPayOrder.getTotalFee() + ", 商品详情=" + newPayOrder.getBody() + "]", processTime, processTime, null, newPayOrder.toString(), SysLog.State.success.getValue(), newPayOrder.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
         
         BeanCopierUtil.copyProperties(newPayOrder, weixinPayDetailsVO);
+        weixinPayDetailsVO.setTimeStart(DateUtil.getDate(new Date(), "yyyyMMddHHmmss"));
+        weixinPayDetailsVO.setTimeExpire(DateUtil.getDate(TimeUtil.plusSeconds(60 * 2), "yyyyMMddHHmmss"));
         return weixinPayDetailsVO;
     }
 
@@ -569,19 +581,22 @@ public class WeixinPayDetailsServiceImpl
                 }
             } else {
                 payDetails.setResultCode(ResultCode.FAIL.toString());
-                
                 String errCode = StringUtils.isNotBlank(payResultVO.getErrCode()) ? payResultVO.getErrCode() : WxPayResult.FAIL.getCode();// 错误码
                 String errCodeDes = payResultVO.getErrCodeDes();
-                
+
                 if (StringUtils.isBlank(errCodeDes)) {
                     if (Validator.contains(WxPayResult.class, errCode)) {
                         errCodeDes = Enum.valueOf(WxPayResult.class, errCode).getDesc();
                     }
                 }
-                payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
                 payDetails.setErrCode(errCode);
                 payDetails.setErrCodeDes(errCodeDes);
                 logDescTemp += "，支付结果：交易失败，错误码：" + errCode + "，错误描述：" + payDetails.getErrCodeDes();
+                if (WxPayResult.USERPAYING.getValue().equalsIgnoreCase(payResultVO.getErrCode())) {// 用户支付中
+                    payDetails.setTradeStatus(TradeStatus.TRADE_PAYING.getValue());
+                } else {
+                    payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
+                }
             }
         } else {// 通讯失败，只有刷卡支付会走此分支，因为通信失败时，统一下单- 微信结果通知不会含有系统订单
             payDetails.setReturnCode(returnCode);
@@ -729,7 +744,7 @@ public class WeixinPayDetailsServiceImpl
         
         WeixinPayDetailsVO returnPayDetailVO = null;
         
-        if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue()) { // 非处理中，代表系统已收到微信支付结果通知并处理
+        if (payDetails.getTradeStatus().intValue() != TradeStatus.TRADEING.getValue() && payDetails.getTradeStatus().intValue() != TradeStatus.TRADE_PAYING.getValue()) { // 非处理中，代表系统已收到微信支付结果通知并处理
         	throw new DataStateException("系统已收到微信支付结果通知并处理，无需更新订单查询结果");
         	
         	/*if (StringUtils.equalsIgnoreCase(TradeState.SUCCESS.toString(), orderQueryResultVO.getTradeState())) {
@@ -795,6 +810,9 @@ public class WeixinPayDetailsServiceImpl
             } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.PAYERROR.toString())) { 
             	payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
             	logger.warn("系统支付订单（ID=" +orderQueryResultVO.getOutTradeNo() + "）状态为交易失败");
+            } else if (StringUtils.equalsIgnoreCase(tradeState, TradeState.NOTPAY.toString()) || StringUtils.equalsIgnoreCase(tradeState, TradeState.NOPAY.toString())) { 
+            	payDetails.setTradeStatus(TradeStatus.TRADE_CLOSED.getValue());
+            	
             } else {
                 // 未支付，支付超时 用户支付中，对应交易处理中
             	//TODO 转入退款
@@ -1020,12 +1038,10 @@ public class WeixinPayDetailsServiceImpl
         StringBuffer logDescBuffer = new StringBuffer("修改微信支付明细[");
         
         payDetails.setTradeStatus(tradeStatus.getValue());
-        payDetails.setRemark(payDetails.getRemark() + remark);
-        
         logDescBuffer.append(", tradeStatus：");
         logDescBuffer.append(payDetails.getTradeStatus());
         if (StringUtils.isNotBlank(remark)) {
-            payDetails.setRemark(payDetails.getRemark() + remark);
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + remark);
             logDescBuffer.append(", remark：");
             logDescBuffer.append(remark);
         }

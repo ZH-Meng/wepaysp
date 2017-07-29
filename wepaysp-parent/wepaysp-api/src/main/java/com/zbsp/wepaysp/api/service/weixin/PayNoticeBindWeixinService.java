@@ -61,4 +61,7 @@ public interface PayNoticeBindWeixinService {
     public Map<String, Object> doJoinTransQueryBindInfo(String openid);
 
     public void doTransUpdateBindWeixinState(String bindOid, PayNoticeBindWeixin.State state);
+
+    public PayNoticeBindWeixinVO doJoinTransQueryDealerBind(String dealerOid);
+    
 }

@@ -2,9 +2,11 @@ package com.zbsp.wepaysp.api.service.alipay.impl;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.alipay.AlipayAppAuthDetailsService;
@@ -135,27 +137,60 @@ public class AlipayAppAuthDetailsServiceImpl
     }
 
     @Override
-    public AlipayAppAuthDetailsVO doJoinTranQueryAppAuthDetailByDealer(String dealerOid, String appId) {
+    public AlipayAppAuthDetailsVO doJoinTransQueryAppAuthDetailByDealer(String dealerOid, String appId) {
         // 检查参数
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid为空");
         Validator.checkArgument(StringUtils.isBlank(appId), "appId为空");
         
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
-        String jpql = "from AlipayAppAuthDetails a where a.dealer.iwoid=:DEALEROID and a.alipayApp.appId=:APPID and a.status=:STATUS";
+        String jpql = "from AlipayAppAuthDetails a where a.dealer.iwoid=:DEALEROID and a.appId=:APPID and a.status=:STATUS";
         jpqlMap.put("DEALEROID", dealerOid);
         jpqlMap.put("APPID", appId);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         AlipayAppAuthDetails appAuthDetails = commonDAO.findObject(jpql, jpqlMap, false);
         AlipayAppAuthDetailsVO appAuthDetailsVO = null;
         if (appAuthDetails != null) {
-        	appAuthDetailsVO = new AlipayAppAuthDetailsVO();
-        	BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
+            appAuthDetailsVO = new AlipayAppAuthDetailsVO();
+            BeanCopierUtil.copyProperties(appAuthDetails, appAuthDetailsVO);
         }
         return appAuthDetailsVO;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AlipayAppAuthDetails> doJoinTransQueryExpiredAppAuthDetails(String appid) {
+        Validator.checkArgument(StringUtils.isBlank(appid), "appid为空");
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayAppAuthDetails a left join fetch a.dealer where a.appId=:APPID and a.status=:STATUS and a.authEnd <= :NOWTIME";
+        jpqlMap.put("APPID", appid);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        jpqlMap.put("NOWTIME", DateUtils.addDays(new Date(), 2));// 当前时间后的两天（即提前两天失效）
+        return (List<AlipayAppAuthDetails>) commonDAO.findObjectList(jpql, jpqlMap, false);
+    }
+    
+    @Override
+    public void doTransUpdateAppAuthDetail(AlipayAppAuthDetails appAuthDetails) {
+        Validator.checkArgument(appAuthDetails == null, "appAuthDetails为空");
+        commonDAO.update(appAuthDetails);
     }
 
     public void setSysLogService(SysLogService sysLogService) {
         this.sysLogService = sysLogService;
     }
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid, String dealerId) {
+		 Validator.checkArgument(StringUtils.isBlank(appid), "appid为空");
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayAppAuthDetails a left join fetch a.dealer where a.appId=:APPID and a.status=:STATUS ";
+        if (StringUtils.isNotBlank(dealerId)) {
+            jpql += " and a.dealer.dealerId=:DEALERID";
+            jpqlMap.put("DEALERID", dealerId);
+        }
+        jpqlMap.put("APPID", appid);
+        jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
+        return (List<AlipayAppAuthDetails>) commonDAO.findObjectList(jpql, jpqlMap, false);
+	}
 
 }

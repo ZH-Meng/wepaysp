@@ -40,6 +40,7 @@ public class AliPayDetailsAction
     private int partnerVoListLevel;
     private String listType;
     private PayTotalVO totalVO;
+    private String queryMinAmount;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -126,6 +127,7 @@ public class AliPayDetailsAction
             paramMap.put("storeId", aliPayDetailsVO.getStoreId());
             paramMap.put("outTradeNo", aliPayDetailsVO.getOutTradeNo());
             paramMap.put("tradeNo", aliPayDetailsVO.getTradeNo());
+            paramMap.put("minAmout", aliPayDetailsVO.getTotalAmount());
             
             rowCount = aliPayDetailsService.doJoinTransQueryAliPayDetailsCount(paramMap);
             if (rowCount > 0) {
@@ -236,6 +238,14 @@ public class AliPayDetailsAction
 
     public PayTotalVO getTotalVO() {
         return totalVO;
+    }
+    
+    public String getQueryMinAmount() {
+        return queryMinAmount;
+    }
+
+    public void setQueryMinAmount(String queryMinAmount) {
+        this.queryMinAmount = queryMinAmount;
     }
 
 }

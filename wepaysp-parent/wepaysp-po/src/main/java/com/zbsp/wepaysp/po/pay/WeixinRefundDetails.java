@@ -44,9 +44,9 @@ public class WeixinRefundDetails
     private String sign;
     private String outTradeNo;
     private String transactionId;
+  	private String refundId;
+    private Integer refundType;
     private String outRefundNo;
-	private String refundId;
-    private Integer couponRefundType;
     private Integer totalFee;
     private Integer refundFee;
     private String refundFeeType;
@@ -78,21 +78,7 @@ public class WeixinRefundDetails
 
     public WeixinRefundDetails() {
     }
-    
-    public static enum CouponRefundType {
-        /** 1 撤销 */        revocation(1),
-        /** 2 退款 */        refund(2);
-        private int value;
-        
-        public int getValue() {
-            return value;
-        }
-        
-        private CouponRefundType(int value) {
-            this.value = value;
-        }
-    }
-    
+
     @Id
     @Column(name = "IWOID", unique = true, nullable = false, length = 32)
     public String getIwoid() {
@@ -102,16 +88,16 @@ public class WeixinRefundDetails
     public void setIwoid(String iwoid) {
         this.iwoid = iwoid;
     }
-    
+
     @Column(name = "WEIXIN_PAY_DETAILS_OID", length = 32)
     public String getWeixinPayDetailsOid() {
         return weixinPayDetailsOid;
     }
-    
+
     public void setWeixinPayDetailsOid(String weixinPayDetailsOid) {
         this.weixinPayDetailsOid = weixinPayDetailsOid;
     }
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DEALER_OID", nullable = false)
     public Dealer getDealer() {
@@ -279,15 +265,15 @@ public class WeixinRefundDetails
         this.transactionId = transactionId;
     }
 
-    @Column(name = "COUPON_REFUND_TYPE")
-    public Integer getCouponRefundType() {
-        return couponRefundType;
+    @Column(name = "REFUND_TYPE")
+    public Integer getRefundType() {
+        return refundType;
     }
-    
-    public void setCouponRefundType(Integer couponRefundType) {
-        this.couponRefundType = couponRefundType;
+
+    public void setRefundType(Integer refundType) {
+        this.refundType = refundType;
     }
-    
+
     @Column(name = "TOTAL_FEE")
     public Integer getTotalFee() {
         return this.totalFee;
@@ -485,7 +471,7 @@ public class WeixinRefundDetails
     public void setTransBeginTime(Date transBeginTime) {
         this.transBeginTime = transBeginTime;
     }
-    
+
     @Column(name = "TRANS_END_TIME", length = 0)
     public Date getTransEndTime() {
         return this.transEndTime;
@@ -494,16 +480,16 @@ public class WeixinRefundDetails
     public void setTransEndTime(Date transEndTime) {
         this.transEndTime = transEndTime;
     }
-    
+
     @Column(name = "END_TIME", length = 0)
     public Date getEndTime() {
         return endTime;
     }
-    
+
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
-    
+
     @Column(name = "trade_status")
     public Integer getTradeStatus() {
         return tradeStatus;
@@ -512,7 +498,7 @@ public class WeixinRefundDetails
     public void setTradeStatus(Integer tradeStatus) {
         this.tradeStatus = tradeStatus;
     }
-    
+
     @Column(name = "CREATOR", nullable = false, length = 32)
     public String getCreator() {
         return this.creator;
@@ -556,6 +542,15 @@ public class WeixinRefundDetails
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    @Column(name = "OUT_REFUND_NO", length =32)
+    public String getOutRefundNo() {
+        return outRefundNo;
+    }
+
+    public void setOutRefundNo(String outRefundNo) {
+        this.outRefundNo = outRefundNo;
     }
 
 }

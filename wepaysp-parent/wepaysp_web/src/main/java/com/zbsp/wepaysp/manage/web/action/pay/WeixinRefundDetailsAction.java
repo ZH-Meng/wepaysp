@@ -17,7 +17,7 @@ import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
 import com.zbsp.wepaysp.vo.partner.PartnerVO;
-import com.zbsp.wepaysp.vo.pay.PayTotalVO;
+import com.zbsp.wepaysp.vo.pay.RefundTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 /**
@@ -39,7 +39,7 @@ public class WeixinRefundDetailsAction
     private int userLevel;
     private int partnerVoListLevel;
     private String listType;
-    private PayTotalVO totalVO;
+    private RefundTotalVO totalVO;
     
     @SuppressWarnings("unchecked")
     @Override
@@ -130,13 +130,13 @@ public class WeixinRefundDetailsAction
                 Map<String, Object> resultMap = weixinRefundDetailsService.doJoinTransQueryWeixinRefundDetails(paramMap, start, size);
                 weixinRefundDetailsVoList = (List<WeixinRefundDetailsVO>) MapUtils.getObject(resultMap, "refundList");
                 // 合计
-                totalVO = (PayTotalVO) MapUtils.getObject(resultMap, "total");
+                totalVO = (RefundTotalVO) MapUtils.getObject(resultMap, "total");
             } else {
-                totalVO = new PayTotalVO();
+                totalVO = new RefundTotalVO();
             }
         } catch (Exception e) {
-            logger.error("微信交易明细查询列表错误：" + e.getMessage());
-            setAlertMessage("微信交易明细查询列表错误！");
+            logger.error("微信退款明细查询列表错误：" + e.getMessage());
+            setAlertMessage("微信退款明细查询列表错误！");
         }
         
         return "weixinRefundDetailsList";
@@ -232,7 +232,7 @@ public class WeixinRefundDetailsAction
         return listType;
     }
 
-    public PayTotalVO getTotalVO() {
+    public RefundTotalVO getTotalVO() {
         return totalVO;
     }
 

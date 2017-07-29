@@ -22,6 +22,7 @@ var digital8Pattern = /^[0-9]{8}$/;//8位数字或-
 var macPattern = /[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}:[A-Fa-f\d]{2}/; 
 var qqPattern = /^[1-9][0-9]{4,9}$/;
 var digital6Pattern = /^\d{6}$/;//6位数字
+var money2Pattern=/^((0{1}(\.((0{1}[1-9]{1})|([1-9]{1}\d?)))?)|([1-9]{1}\d*(\.\d{1,2})?))$/;// 金额，保留1到2位小数
 
 var piRegExp = new RegExp(positiveIntegerPattern);
 var piRegExp1 = new RegExp(positiveIntegerPattern1);
@@ -40,6 +41,7 @@ var digital8Exp = new RegExp(digital8Pattern);
 var macExp = new RegExp(macPattern);
 var qqExp = new RegExp(qqPattern);
 var digital6Exp = new RegExp(digital6Pattern);
+var money2Exp = new RegExp(money2Pattern);
 
 //MAC地址校验
 function isMac(str){
@@ -191,7 +193,13 @@ function isDigital6Exp(str){
 	}
 	return false;
 }
-
+/**金额：0，0.01，0.1，10，10.01，10.1，10.00*/
+function isMoney2Exp(str) {
+	if(money2Exp.test(str)){
+		return true;
+	}
+	return false;
+}
 
 var saveListBackgroundColor = null;
 

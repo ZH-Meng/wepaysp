@@ -24,13 +24,16 @@ import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.SysUserUtil;
 import com.zbsp.wepaysp.po.alipay.AlipayAppAuthDetails;
+import com.zbsp.wepaysp.po.weixin.PayNoticeBindWeixin;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.alipay.AlipayAppAuthDetailsService;
 import com.zbsp.wepaysp.api.service.partner.DealerService;
 import com.zbsp.wepaysp.api.service.partner.PartnerEmployeeService;
+import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.vo.alipay.AlipayAppAuthDetailsVO;
 import com.zbsp.wepaysp.vo.partner.DealerVO;
 import com.zbsp.wepaysp.vo.partner.PartnerEmployeeVO;
+import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 
 /**
  * 商户管理
@@ -57,6 +60,9 @@ public class DealerAction
     
     private AlipayAppAuthDetailsService alipayAppAuthDetailsService;
     private String authStatusDesc;// 已授权、未授权
+    private PayNoticeBindWeixinService payNoticeBindWeixinService;
+    private List<PayNoticeBindWeixinVO> payNoticeBindWeixinVoList;
+    private String payNoticeBindWeixinOid;
     
     @Override
     protected String query(int start, int size) {
@@ -444,6 +450,68 @@ public class DealerAction
     }
     
     /**
+     * 跳转微信支付通知绑定微信账户页面
+     * <pre>
+     * 		查询当前收银员绑定的微信用户信息列表；
+     * 		在结果页面加载二维码图片；
+     * </pre>
+     * @return
+     */
+    public String goToBindWxID() {
+        logger.info("跳转商户绑定微信账户页面");
+        try {
+        	ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        	if (!SysUserUtil.isDealer(manageUser)) {
+        		return "accessDenied";
+        	} else {
+        		if (StringUtils.isNotBlank(dealerOid)) {
+	                // 查询已绑定的信息
+	                Map<String, Object> paramMap = new HashMap<String, Object>();
+	
+	                paramMap.put("dealerOid", dealerOid);
+	                paramMap.put("type", PayNoticeBindWeixin.Type.dealer.getValue());
+	                payNoticeBindWeixinVoList = payNoticeBindWeixinService.doJoinTransQueryPayNoticeBindWeixinList(paramMap);
+	            } else {
+	                logger.warn("非法绑定微信，参数dealerOid为空！");
+	                setAlertMessage("绑定微信失败！");
+	        		return "accessDenied";
+	            }
+        	}
+        } catch (Exception e) {
+            logger.error("绑定微信错误：" + e.getMessage());
+            setAlertMessage("绑定微信错误！");
+        	return ERROR;
+        }
+        return "dealerBindWxID";
+    }
+    
+    /**删除微信绑定*/
+    public String deleteBindWxID() {
+    	logger.info("删除微信绑定开始");
+        try {
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        	if (!SysUserUtil.isDealer(manageUser)) {
+        		return "accessDenied";
+        	} else {
+                if (StringUtils.isNotBlank(payNoticeBindWeixinOid) && StringUtils.isNotBlank(dealerOid)) {
+                    // 删除绑定
+                    payNoticeBindWeixinService.doTransDeletePayNoticeBindWeixin(payNoticeBindWeixinOid);
+                    logger.info("删除微信绑定成功，跳转绑定页面");
+                    return goToBindWxID();
+                } else {
+                    logger.warn("非法删除微信绑定，参数payNoticeBindWeixinOid为空！");
+                    setAlertMessage("删除微信绑定信息失败！");
+                    return "accessDenied";
+                }
+        	}
+        } catch (Exception e) {
+            logger.error("删除微信绑定错误：" + e.getMessage());
+            setAlertMessage("删除微信绑定错误！");
+            return ERROR;
+        }
+    }
+    
+    /**
      * 加载绑定微信收款汇总通知二维码
      * @return
      */
@@ -540,12 +608,14 @@ public class DealerAction
                 SysConfig.appId4Face2FacePay, SysConfig.alipayAuthCallBackURL, urlParamMap);
     		 
     		 // 查看商户是否授权当面付应用
-    		 AlipayAppAuthDetailsVO authDetailsVO = alipayAppAuthDetailsService.doJoinTranQueryAppAuthDetailByDealer(dealerOid, SysConfig.appId4Face2FacePay);
+    		 AlipayAppAuthDetailsVO authDetailsVO = alipayAppAuthDetailsService.doJoinTransQueryAppAuthDetailByDealer(dealerOid, SysConfig.appId4Face2FacePay);
     		 if (authDetailsVO != null && AlipayAppAuthDetails.AppAuthStatus.VALID.toString().equals(authDetailsVO.getStatus())) {
     		     authStatusDesc = "已授权";
     		 } else {
     		     authStatusDesc = "未授权";
     		 }
+    		 // 商户信息
+    		 dealerVO = dealerService.doJoinTransQueryDealerByOid(dealerOid);
         } catch (Exception e) {
             logger.error("跳转商户管理支付宝页面错误：" + e.getMessage());
             setAlertMessage("跳转商户管理支付宝页面错误！");
@@ -655,5 +725,17 @@ public InputStream getAliapyAppAuthCodeImg() {
     public void setAlipayAppAuthDetailsService(AlipayAppAuthDetailsService alipayAppAuthDetailsService) {
         this.alipayAppAuthDetailsService = alipayAppAuthDetailsService;
     }
+
+	public List<PayNoticeBindWeixinVO> getPayNoticeBindWeixinVoList() {
+		return payNoticeBindWeixinVoList;
+	}
+
+	public void setPayNoticeBindWeixinService(PayNoticeBindWeixinService payNoticeBindWeixinService) {
+		this.payNoticeBindWeixinService = payNoticeBindWeixinService;
+	}
+
+	public void setPayNoticeBindWeixinOid(String payNoticeBindWeixinOid) {
+		this.payNoticeBindWeixinOid = payNoticeBindWeixinOid;
+	}
 	
 }

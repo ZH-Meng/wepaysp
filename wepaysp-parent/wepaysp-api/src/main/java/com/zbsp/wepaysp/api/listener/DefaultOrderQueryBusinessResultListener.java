@@ -75,7 +75,7 @@ public class DefaultOrderQueryBusinessResultListener implements OrderQueryBusine
      * 恭喜，订单查询成功
      */
     public void onOrderQuerySuccess(ScanPayQueryResData orderQueryResData) {
-        logger.info("微信订单查询成功");
+        logger.info("微信订单查询成功，trade_state={}, trade_state_desc={}", orderQueryResData.getTrade_state(), orderQueryResData.getTrade_state_desc());
         weixinPayDetailsMainService.handleOrderQueryResult("SUCCESS", WeixinPackConverter.orderQueryRes2WeixinPayDetailsVO(orderQueryResData));
         result = ON_ORDER_QUERY_SUCCESS;
     }

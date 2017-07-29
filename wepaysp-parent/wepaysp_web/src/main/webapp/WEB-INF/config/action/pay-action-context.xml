@@ -32,4 +32,9 @@
 		<property name="aliPayDetailsService" ref="aliPayDetailsService"></property>
 	</bean>
 	
+	<bean id="alipayRefundDetailsAction" class="com.zbsp.wepaysp.manage.web.action.pay.AlipayRefundDetailsAction" scope="prototype">
+		<property name="partnerService" ref="partnerService"></property>
+		<property name="alipayRefundDetailsService" ref="alipayRefundDetailsService"></property>
+	</bean>
+	
 </beans>

@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.pay.impl;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,6 +50,8 @@ import com.zbsp.wepaysp.vo.pay.PayTotalVO;
 public class AliPayDetailsServiceImpl
     extends BaseService
     implements AliPayDetailsService {
+    
+    private final static BigDecimal TIMES_100 = new BigDecimal(100);
     
     private SysLogService sysLogService;
     
@@ -524,12 +527,10 @@ public class AliPayDetailsServiceImpl
         StringBuffer logDescBuffer = new StringBuffer("修改支付宝明细[");
         
         payDetails.setTradeStatus(tradeStatus);
-        payDetails.setRemark(payDetails.getRemark() + remark);
-        
         logDescBuffer.append(", tradeStatus：");
         logDescBuffer.append(payDetails.getTradeStatus());
         if (StringUtils.isNotBlank(remark)) {
-            payDetails.setRemark(payDetails.getRemark() + remark);
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + remark);
             logDescBuffer.append(", remark：");
             logDescBuffer.append(remark);
         }
@@ -572,6 +573,7 @@ public class AliPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
         
         String jpqlSelect = "select distinct(w) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ";
         
@@ -645,6 +647,10 @@ public class AliPayDetailsServiceImpl
         if (StringUtils.isNotBlank(tradeNo)) {
             conditionSB.append(" and w.tradeNo = :TRADENO");
             jpqlMap.put("TRADENO", tradeNo);
+        }
+        if (minAmout != null ) {
+        	conditionSB.append(" and w.totalAmount >:MINAMOUT ");
+        	jpqlMap.put("MINAMOUT", minAmout);
         }
 
         conditionSB.append(" order by w.transBeginTime desc");
@@ -729,6 +735,7 @@ public class AliPayDetailsServiceImpl
         String payType = MapUtils.getString(paramMap, "payType");
         String outTradeNo = MapUtils.getString(paramMap, "outTradeNo");// 系统单号
         String tradeNo = MapUtils.getString(paramMap, "tradeNo");// 支付宝单号
+        Integer minAmout = MapUtils.getInteger(paramMap, "minAmout");// 查询最小金额
 
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from AliPayDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
         // 只查交易成功的
@@ -801,6 +808,10 @@ public class AliPayDetailsServiceImpl
             sql.append(" and w.tradeNo = :TRADENO");
             jpqlMap.put("TRADENO", tradeNo);
         }
+        if (minAmout != null ) {
+        	sql.append(" and w.totalAmount >:MINAMOUT ");
+        	jpqlMap.put("MINAMOUT", minAmout);
+        }
         
         return commonDAO.queryObjectCount(sql.toString(), jpqlMap, false);
     }
@@ -832,6 +843,7 @@ public class AliPayDetailsServiceImpl
             Dealer dealer = payDetails.getDealer();
             payDetailVO.setDealerName(dealer != null ? dealer.getCompany() : (de != null ? de.getDealer().getCompany() : "" ));
             payDetailVO.setDealerId(dealer != null ? dealer.getDealerId() : (de != null ? de.getDealer().getDealerId() : "" ));
+            payDetailVO.setDealerOid(dealer != null  ? dealer.getIwoid() : "");
             
             PartnerEmployee pe = payDetails.getPartnerEmployee();
             payDetailVO.setPartnerEmployeeName(pe != null ? pe.getEmployeeName() : (dealer != null ? dealer.getPartnerEmployee().getEmployeeName() : ""));
@@ -921,7 +933,7 @@ public class AliPayDetailsServiceImpl
             tradeStatus = TradeStatus.MANUAL_HANDLING.getValue();
             payDetails.setRemark((StringUtils.isBlank(payDetails.getRemark()) ? "查询支付宝交易响应成功，但" : (payDetails.getRemark() +",")) + "金额不一致");
         } else {
-            payDetails.setRemark(payDetails.getRemark() + queryPayResultVO.getRemark());
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + queryPayResultVO.getRemark());
         }
         //TODO 其他金额校验
         
@@ -1017,10 +1029,14 @@ public class AliPayDetailsServiceImpl
         payDetails.setBuyerUserId(notifyVO.getBuyer_id());
         payDetails.setBuyerLogonId(notifyVO.getBuyer_logon_id());
         payDetails.setSellerId(notifyVO.getSeller_id());
-        payDetails.setReceiptAmount(NumberUtils.toInt(notifyVO.getReceipt_amount()));
-        payDetails.setInvoiceAmount(NumberUtils.toInt(notifyVO.getInvoice_amount()));
-        payDetails.setBuyerPayAmount(NumberUtils.toInt(notifyVO.getBuyer_pay_amount()));
-        payDetails.setPointAmount(NumberUtils.toInt(notifyVO.getPoint_amount()));
+        payDetails.setReceiptAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getReceipt_amount())).multiply(TIMES_100).intValue());
+        payDetails.setInvoiceAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getInvoice_amount())).multiply(TIMES_100).intValue());
+        payDetails.setBuyerPayAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getBuyer_pay_amount())).multiply(TIMES_100).intValue());
+        payDetails.setPointAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getPoint_amount())).multiply(TIMES_100).intValue());
+
+        if (notifyVO.getGmt_payment() != null) {
+            payDetails.setGmtPayment(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_payment(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
+        }
         if (notifyVO.getGmt_refund() != null) {
             payDetails.setGmtRefund(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_refund(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));
         }
@@ -1037,7 +1053,7 @@ public class AliPayDetailsServiceImpl
             }
         }
         if (StringUtils.isNotBlank(remark)) {
-            payDetails.setRemark(payDetails.getRemark() + remark);
+            payDetails.setRemark(StringUtils.defaultString(payDetails.getRemark()) + remark);
         }
         commonDAO.update(payDetails);
     }
@@ -1059,5 +1075,32 @@ public class AliPayDetailsServiceImpl
         }
         commonDAO.update(payDetails);
 	}
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AliPayDetails> doJoinTransQueryAliPayDetailsByState(int[] stateArr, long intervalTime) {
+        Validator.checkArgument(null == stateArr || stateArr.length == 0, "查询状态不能为空");
+        String jpql = "from AliPayDetails w where w.transBeginTime <= :TRANSBEGINTIME";
+        Timestamp beginTime = new Timestamp(new Date().getTime() - intervalTime * 1000);
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        if (stateArr.length == 1) {
+            jpql += " and w.tradeStatus = :TRADESTATUS";
+            paramMap.put("TRADESTATUS", stateArr[0]);
+        } else if (stateArr.length > 1) {
+            jpql += " and w.tradeStatus in (";
+            for (int i = 0; i < stateArr.length; i++) {
+                if (i != stateArr.length - 1) {
+                    jpql += ":TRADESTATUS" + i + ",";
+                } else {
+                    jpql += ":TRADESTATUS" + i;
+                }
+                paramMap.put("TRADESTATUS" + i, stateArr[i]);
+            }
+            jpql += ")";
+        }
+        paramMap.put("TRANSBEGINTIME", beginTime);
+
+        return (List<AliPayDetails>) super.commonDAO.findObjectList(jpql, paramMap, false);
+    }
 
 }

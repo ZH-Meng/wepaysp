@@ -40,6 +40,7 @@ public class WeixinPayDetailsAction
     private int partnerVoListLevel;
     private String listType;
     private PayTotalVO totalVO;
+    private String queryMinAmount;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -126,6 +127,7 @@ public class WeixinPayDetailsAction
             paramMap.put("storeId", weixinPayDetailsVO.getStoreId());
             paramMap.put("outTradeNo", weixinPayDetailsVO.getOutTradeNo());
             paramMap.put("transactionId", weixinPayDetailsVO.getTransactionId());
+            paramMap.put("minAmout", weixinPayDetailsVO.getTotalFee());
             
             rowCount = weixinPayDetailsService.doJoinTransQueryWeixinPayDetailsCount(paramMap);
             if (rowCount > 0) {
@@ -236,6 +238,14 @@ public class WeixinPayDetailsAction
 
     public PayTotalVO getTotalVO() {
         return totalVO;
+    }
+    
+    public String getQueryMinAmount() {
+        return queryMinAmount;
+    }
+
+    public void setQueryMinAmount(String queryMinAmount) {
+        this.queryMinAmount = queryMinAmount;
     }
 
 }

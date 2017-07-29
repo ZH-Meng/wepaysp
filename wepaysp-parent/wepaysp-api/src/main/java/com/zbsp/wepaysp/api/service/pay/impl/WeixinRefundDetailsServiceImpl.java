@@ -17,22 +17,24 @@ import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
 import com.zbsp.wepaysp.po.pay.WeixinRefundDetails;
 import com.zbsp.wepaysp.api.service.BaseService;
-import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
 import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
+import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
+import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
+import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.vo.pay.PayTotalVO;
+import com.zbsp.wepaysp.vo.pay.RefundTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
 
 public class WeixinRefundDetailsServiceImpl
     extends BaseService
     implements WeixinRefundDetailsService {
-    
-    private SysLogService sysLogService;
 
     @SuppressWarnings("unchecked")
 	@Override
@@ -59,7 +61,8 @@ public class WeixinRefundDetailsServiceImpl
 
         // StringBuffer sql = new StringBuffer("select distinct(w) from WeixinRefundDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select distinct(w) from WeixinRefundDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
-        
+        // 只查交易成功的
+        sql.append(" and w.tradeStatus=1");
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
         if (StringUtils.isNotBlank(partner1Oid)) {
@@ -109,11 +112,11 @@ public class WeixinRefundDetailsServiceImpl
         }
         
         if (beginTime != null ) {
-            sql.append(" and w.transBeginTime >=:BEGINTIME ");
+            sql.append(" and w.transEndTime >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-            sql.append(" and w.transBeginTime <=:ENDTIME ");
+            sql.append(" and w.transEndTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
         if (StringUtils.isNotBlank(outTradeNo)) {
@@ -129,14 +132,14 @@ public class WeixinRefundDetailsServiceImpl
 
         List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
-        Long totalAmount = 0L;
-        Long totalMoney = 0L;
+        Long totalRefundAmount = 0L;
+        Long totalRefundMoney = 0L;
         // 总笔数为记录总数，总金额为交易成功的总金额
         if(weixinRefundDetailsList != null && !weixinRefundDetailsList.isEmpty()) {
         	for (WeixinRefundDetails weixinRefundDetails : weixinRefundDetailsList) {
-        	    totalAmount++;
+        	    totalRefundAmount++;
                 if (weixinRefundDetails.getTradeStatus().intValue() == TradeStatus.TRADE_SUCCESS.getValue()) {
-                    totalMoney += weixinRefundDetails.getTotalFee();
+                    totalRefundMoney += weixinRefundDetails.getRefundFee();
                 }
                 
         		WeixinRefundDetailsVO vo = new WeixinRefundDetailsVO();
@@ -167,15 +170,16 @@ public class WeixinRefundDetailsServiceImpl
         		
         		vo.setTotalFee(weixinRefundDetails.getTotalFee());
         		vo.setRefundFee(weixinRefundDetails.getRefundFee());
-        		vo.setResultCode(weixinRefundDetails.getResultCode());
-        		vo.setTransBeginTime(weixinRefundDetails.getTransBeginTime());
+        		vo.setTradeStatus(weixinRefundDetails.getTradeStatus());
+        		//vo.setResultCode(weixinRefundDetails.getResultCode());
+        		vo.setTransEndTime(weixinRefundDetails.getTransEndTime());
         		resultList.add(vo);
         	}
         }
         
-        PayTotalVO totalVO = new PayTotalVO();
-        totalVO.setTotalAmount(totalAmount);
-        totalVO.setTotalMoney(totalMoney);
+        RefundTotalVO totalVO = new RefundTotalVO();
+        totalVO.setTotalRefundAmount(totalRefundAmount);
+        totalVO.setTotalRefundMoney(totalRefundMoney);
         resultMap.put("refundList", resultList);
         resultMap.put("total", totalVO);
         return resultMap;
@@ -203,7 +207,8 @@ public class WeixinRefundDetailsServiceImpl
 
         // StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinRefundDetails w, PartnerEmployee pe, Dealer d, Store s, DealerEmployee de where w.partnerEmployee=pe and w.dealer=d and w.store=s and w.dealerEmployee=de");
         StringBuffer sql = new StringBuffer("select count(distinct w.iwoid) from WeixinRefundDetails w LEFT JOIN w.partner LEFT JOIN w.partnerEmployee LEFT JOIN w.dealer LEFT JOIN w.store LEFT JOIN w.dealerEmployee where 1=1 ");
-
+        // 只查交易成功的
+        sql.append(" and w.tradeStatus=1");
         
         Map<String, Object> sqlMap = new HashMap<String, Object>();
 
@@ -254,11 +259,11 @@ public class WeixinRefundDetailsServiceImpl
         }
         
         if (beginTime != null ) {
-            sql.append(" and w.transBeginTime >=:BEGINTIME ");
+            sql.append(" and w.transEndTime >=:BEGINTIME ");
             sqlMap.put("BEGINTIME", beginTime);
         }
         if (endTime != null ) {
-            sql.append(" and w.transBeginTime <=:ENDTIME ");
+            sql.append(" and w.transEndTime <=:ENDTIME ");
             sqlMap.put("ENDTIME", endTime);
         }
         if (StringUtils.isNotBlank(outTradeNo)) {
@@ -281,13 +286,13 @@ public class WeixinRefundDetailsServiceImpl
 
         WeixinRefundDetails refundDetail = new WeixinRefundDetails();
         Map<String, Object> sqlMap = new HashMap<String, Object>();
-        // 获取 服务商员工ID下一个序列值
-        String sql = "select nextval('" + SysSequenceCode.PAY_ORDER + "') as sequence_value";
+        // 获取 商户退款ID下一个序列值
+        String sql = "select nextval('" + SysSequenceCode.REFUND_ORDER + "') as sequence_value";
         Object seqObj = commonDAO.findObject(sql, sqlMap, true);
         if (seqObj == null) {
-            throw new IllegalArgumentException("支付订单Id对应序列记录不存在");
+            throw new IllegalArgumentException("退款订单Id对应序列记录不存在");
         }
-        refundDetail.setOutTradeNo(Generator.generateSequenceYYYYMMddNum((Integer) seqObj, SysSequenceMultiple.PAY_ORDER));// 商户订单号
+        refundDetail.setOutRefundNo(Generator.generateSequenceYYYYMMddNum((Integer) seqObj, SysSequenceMultiple.REFUND_ORDER));// 商户退款订单号
 
         /*--------系统服务商、业务员、商户、门店、收银员-------*/
         refundDetail.setWeixinPayDetailsOid(weixinPayDetails.getIwoid());
@@ -305,15 +310,97 @@ public class WeixinRefundDetailsServiceImpl
 
         refundDetail.setIwoid(Generator.generateIwoid());
         refundDetail.setAppid(weixinPayDetails.getAppid());
+        refundDetail.setSubAppid(weixinPayDetails.getSubAppid());
         refundDetail.setMchId(weixinPayDetails.getMchId());
         refundDetail.setSubMchId(weixinPayDetails.getSubMchId());
-
+        refundDetail.setOutTradeNo(weixinPayDetails.getOutTradeNo());
+        refundDetail.setTransactionId(weixinPayDetails.getTransactionId());
         refundDetail.setDeviceInfo(weixinPayDetails.getDeviceInfo());
-		return null;
+        refundDetail.setRefundType(SysEnums.RefundType.REFUND.getValue());
+        refundDetail.setTotalFee(weixinPayDetails.getTotalFee());// 订单金额
+        refundDetail.setRefundFee(weixinPayDetails.getTotalFee());// 申请退款金额 FIXME
+        commonDAO.save(refundDetail, true);
+        WeixinRefundDetailsVO refundVO = new WeixinRefundDetailsVO(); 
+        BeanCopierUtil.copyProperties(refundDetail, refundVO);
+		return refundVO;
 	}
 
-	public void setSysLogService(SysLogService sysLogService) {
-	    this.sysLogService = sysLogService;
-	}
+    @Override
+    public WeixinRefundDetailsVO doTransCreateReverseDetails(WeixinPayDetails weixinPayDetails) {
+        Validator.checkArgument(weixinPayDetails == null, "weixinPayDetails不能为空");
+        Validator.checkArgument(StringUtils.isBlank(weixinPayDetails.getIwoid()), "weixinPayDetails.iwoid不能为空");
+        WeixinRefundDetails refundDetail = new WeixinRefundDetails();
+        /*--------系统服务商、业务员、商户、门店、收银员-------*/
+        refundDetail.setWeixinPayDetailsOid(weixinPayDetails.getIwoid());
+        refundDetail.setPartner1Oid(weixinPayDetails.getPartner1Oid());
+        refundDetail.setPartner2Oid(weixinPayDetails.getPartner2Oid());
+        refundDetail.setPartner3Oid(weixinPayDetails.getPartner3Oid());
+        refundDetail.setPartnerLevel(weixinPayDetails.getPartnerLevel());
+        refundDetail.setPartner(weixinPayDetails.getPartner());
+        refundDetail.setDealer(weixinPayDetails.getDealer());
+        refundDetail.setStore(weixinPayDetails.getStore());
+        refundDetail.setDealerEmployee(weixinPayDetails.getDealerEmployee());
+        refundDetail.setTradeStatus(TradeStatus.TRADEING.getValue());
+        refundDetail.setTransBeginTime(new Date());
+        refundDetail.setCreator("api");
+
+        refundDetail.setIwoid(Generator.generateIwoid());
+        refundDetail.setAppid(weixinPayDetails.getAppid());
+        refundDetail.setSubAppid(weixinPayDetails.getSubAppid());
+        refundDetail.setMchId(weixinPayDetails.getMchId());
+        refundDetail.setSubMchId(weixinPayDetails.getSubMchId());
+        refundDetail.setOutTradeNo(weixinPayDetails.getOutTradeNo());
+        refundDetail.setTransactionId(weixinPayDetails.getTransactionId());
+        refundDetail.setDeviceInfo(weixinPayDetails.getDeviceInfo());
+        refundDetail.setRefundType(SysEnums.RefundType.REVERSE.getValue());
+        refundDetail.setTotalFee(weixinPayDetails.getTotalFee());// 订单金额
+        refundDetail.setRefundFee(weixinPayDetails.getTotalFee());// 申请退款金额 
+        commonDAO.save(refundDetail, true);
+        WeixinRefundDetailsVO refundVO = new WeixinRefundDetailsVO(); 
+        BeanCopierUtil.copyProperties(refundDetail, refundVO);
+        return refundVO;
+    }
+
+    @Override
+    public void doTransUpdateReverseResult(WeixinRefundDetailsVO refundDetailsVO) {
+        Validator.checkArgument(refundDetailsVO == null, "refundDetailsVO不能为空");
+        Validator.checkArgument(StringUtils.isBlank(refundDetailsVO.getOutTradeNo()), "refundDetailsVO.outTradeNo不能为空");
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from WeixinRefundDetails w where w.outTradeNo=:OUTTRADENO and w.tradeStatus=:TRADESTATUS ";
+        jpqlMap.put("OUTTRADENO", refundDetailsVO.getOutTradeNo());
+        jpqlMap.put("TRADESTATUS", TradeStatus.TRADEING.getValue());
+
+        WeixinRefundDetails refundDetails = commonDAO.findObject(jpql, jpqlMap, false);
+        if (StringUtils.equalsIgnoreCase(ReturnCode.SUCCESS.toString(), refundDetailsVO.getReturnCode())) {// 通信成功
+            Validator.checkArgument(StringUtils.isBlank(refundDetailsVO.getMchId()), "微信商户号不能为空");
+            Validator.checkArgument(StringUtils.isBlank(refundDetailsVO.getResultCode()), "微信撤销结果码不能为空");
+            refundDetails.setReturnCode(refundDetailsVO.getResultCode());
+            refundDetails.setReturnMsg(refundDetailsVO.getReturnMsg());
+            refundDetails.setResultCode(refundDetailsVO.getResultCode());
+            if (StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), refundDetailsVO.getResultCode())) {// 撤销成功
+                refundDetails.setTradeStatus(TradeStatus.TRADE_SUCCESS.getValue());
+                
+                // 更新原支付明细
+                jpql =  "from WeixinPayDetails w where w.outTradeNo=:OUTTRADENO";
+                jpqlMap.clear();
+                jpqlMap.put("OUTTRADENO", refundDetailsVO.getOutTradeNo());
+                WeixinPayDetails payDetails = commonDAO.findObject(jpql, jpqlMap, false);
+                if (payDetails == null) {
+                    throw new NotExistsException("系统支付订单不存在！");
+                }
+                payDetails.setRefundFee(payDetails.getTotalFee());
+                //payDetails.setTradeStatus(TradeStatus.TRADE_REVERSED.getValue());// 原交易状态不变
+                commonDAO.update(payDetails);
+            } else {
+                refundDetails.setErrCode(refundDetailsVO.getErrCode());
+                refundDetails.setErrCodeDes(refundDetailsVO.getErrCodeDes());
+                refundDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
+            }
+            refundDetails.setTransEndTime(new Date());
+            refundDetails.setEndTime(new Date());
+        }// 通信失败不更新结果
+        
+        commonDAO.update(refundDetails);
+    }
     
 }

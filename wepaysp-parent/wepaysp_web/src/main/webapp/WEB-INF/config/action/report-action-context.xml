@@ -18,7 +18,6 @@
 	
 	<bean id="rptDealerStatDayAction" class="com.zbsp.wepaysp.manage.web.action.report.RptDealerStatDayAction" scope="prototype">
 		<property name="rptDealerStatService" ref="rptDealerStatService"></property>
-		<property name="storeService" ref="storeService"></property>
 	</bean>
 	
 </beans>

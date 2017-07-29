@@ -99,10 +99,10 @@
 				</ul>
 			</div>
 			<div class="bgtj_total">
-				<span style="margin-left:20px;">总笔数：${totalVO.totalAmount }，退款总金额：				
-					<s:if test="totalVO.totalMoney == 0">0元</s:if>	
+				<span style="margin-left:20px;">总笔数：${totalVO.totalRefundAmount }，退款总金额：				
+					<s:if test="totalVO.totalRefundMoney == 0">0元</s:if>	
 					<s:else>
-						<fmt:formatNumber value="${totalVO.totalMoney / 100}" pattern="###,###,###,##0.00"/>元
+						<fmt:formatNumber value="${totalVO.totalRefundMoney / 100}" pattern="###,###,###,##0.00"/>元
 					</s:else>
 				</span>
 			</div>
@@ -126,7 +126,7 @@
 	                                <th>门店名称</th>
 	                                <th>收银员ID</th>
 	                                <th>收银员姓名</th>
-	                                <th>退款人</th>
+	                                <!-- <th>退款人</th> -->
 	                                <th>订单金额</th>
 	                                <th>退款金额</th>
 	                                <th>状态</th>
@@ -175,35 +175,38 @@
 						  			<td title="<s:property value="#weixinRefundDetailsVo.dealerEmployeeName" />">
 						  				<s:property value="#weixinRefundDetailsVo.dealerEmployeeName" />
 						  			</td>
-						  			<td title="<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />">
+<%-- 						  			<td title="<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />">
 						  				<s:property value="#weixinRefundDetailsVo.refundEmployeeName" />
-						  			</td>
+						  			</td> --%>
 						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>">
 						  				<fmt:formatNumber value="${weixinRefundDetailsVo.totalFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
 						  			<td class="bgright" title="<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>">
 						  				<fmt:formatNumber value="${weixinRefundDetailsVo.refundFee/100}" pattern="###,###,###,##0.00"/>
 						  			</td>
-						  			<s:if test="#weixinRefundDetailsVo.resultCode == 'SUCCESS'">
-						  				<s:set var="resultCodeStr">交易成功</s:set>
+						  			<s:if test="#weixinRefundDetailsVo.tradeStatus == 0">
+					  				<s:set var="tradeStatusStr">退款中</s:set>
 						  			</s:if>
-						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == 'FAIL'">
-						  				<s:set var="resultCodeStr">交易失败</s:set>
+						  			<s:elseif test="#weixinRefundDetailsVo.tradeStatus == 1">
+						  				<s:set var="tradeStatusStr">退款成功</s:set>
 						  			</s:elseif>
-						  			<s:elseif test="#weixinRefundDetailsVo.resultCode == NULL || #weixinRefundDetailsVo.resultCode == '' ">
-						  				<s:set var="resultCodeStr">处理中</s:set>
-									</s:elseif>
-						  			<td title="<s:property value="resultCodeStr" />">
-						  				<s:property value="#resultCodeStr" />
+						  			<s:elseif test="#weixinRefundDetailsVo.tradeStatus == 2">
+						  				<s:set var="tradeStatusStr">退款失败</s:set>
+						  			</s:elseif>
+									<s:else>
+										<s:set var="tradeStatusStr">未知</s:set>
+									</s:else>
+						  			<td title="<s:property value="tradeStatusStr" />">
+						  				<s:property value="#tradeStatusStr" />
 						  			</td>
-						  			<td title="<s:date name="#weixinRefundDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>">
-						  				<s:date name="#weixinRefundDetailsVo.transBeginTime" format="yyyy-MM-dd HH:mm:ss"/>
+						  			<td title="<s:date name="#weixinRefundDetailsVo.transEndTime" format="yyyy-MM-dd HH:mm:ss"/>">
+						  				<s:date name="#weixinRefundDetailsVo.transEndTime" format="yyyy-MM-dd HH:mm:ss"/>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="<s:property value='userLevel<3?17:13'/>">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="<s:property value='userLevel<3?16:12'/>">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>

@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.pay;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.LockModeType;
@@ -136,5 +137,13 @@ public interface AliPayDetailsService {
 
     /**更新扫码预下单结果*/
 	public void doTransUpdateScanPrecreateResult(String outTradeNo, String code ,String msg, String subCode, String subMsg);
+	
+    /**
+     * 根据交易状态和交易开始时间在当前时间-间隔时间之前的记录
+     * @param state 交易状态
+     * @param intervalTime 间隔时间，毫秒数
+     * @return
+     */
+    public List<AliPayDetails> doJoinTransQueryAliPayDetailsByState(int[] stateArr, long intervalTime);
 
 }

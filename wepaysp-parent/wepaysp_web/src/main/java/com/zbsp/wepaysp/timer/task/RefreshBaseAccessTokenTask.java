@@ -49,7 +49,7 @@ public class RefreshBaseAccessTokenTask
         	}
         	if (REFRESHF_RUN) {
         		// 刷新
-        		new WeixinUtil().refreshBaseAccessToken(partner1Oid);
+        		WeixinUtil.refreshBaseAccessToken(partner1Oid);
         		
         		REFRESHF_RUN = false;
         	}

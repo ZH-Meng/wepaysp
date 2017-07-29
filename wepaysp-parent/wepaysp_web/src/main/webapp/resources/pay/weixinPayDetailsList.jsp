@@ -83,6 +83,11 @@
 								<span class="field_label">商户订单号</span>
 								<s:textfield name="weixinPayDetailsVO.outTradeNo" id="outTradeNo" maxlength="18"/>
 							</div>
+							<div class="condition_field">
+								<span class="field_label">支付金额大于</span>
+								<input type="hidden" name="weixinPayDetailsVO.totalFee" id="totalFeeStr" value=""/>
+								<s:textfield id="totalFee" maxlength="8"  name="queryMinAmount" cssStyle="width:60px;"/>元
+							</div>
 						</div>
 					</li>
 					<li class="bg_button">
@@ -167,7 +172,8 @@
 						  				<s:set var="payTypeStr">刷卡支付</s:set>
 						  			</s:if>
 						  			<s:elseif test="#weixinPayDetailsVo.payType == 2">
-						  				<s:set var="payTypeStr">公众号支付</s:set>
+						  				<%--公众号 --%>
+						  				<s:set var="payTypeStr">扫码支付</s:set>
 						  			</s:elseif>
 						  			<s:elseif test="#weixinPayDetailsVo.payType == 3">
 						  				<s:set var="payTypeStr">扫码支付</s:set>
@@ -253,8 +259,17 @@
 				return false;
 			}
 			if (beginTime.substring(0, 7) != endTime.substring(0, 7)) {
-				alert("不能跨月查询");
+				alert("不能跨月查询！");
 				return;
+			}
+			var fee = $("#totalFee").val();
+			if(!isBlank(fee)) {
+				if (!isMoney2Exp(fee)) {
+					alert("输入金额无效，请输入大于0的两位小数或整数！");
+					return;
+				} else {
+					$("#totalFeeStr").val(Math.round(fee*100));
+				}
 			}
 			invokeAction(method);
 		}
@@ -267,7 +282,8 @@
 			$("#storeId").val("");
 			$("#dealerEmployeeId").val("");
 			$("#transactionId").val("");
-			$("#outTradeNo").val("");			
+			$("#outTradeNo").val("");
+			$("#totalFee").val("");
 			//$("#beginTime").val("");
 			//$("#endTime").val("");
 			//$("#queryForm")[0].reset();

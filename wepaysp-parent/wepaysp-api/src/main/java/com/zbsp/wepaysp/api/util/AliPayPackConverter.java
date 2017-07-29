@@ -237,8 +237,10 @@ public class AliPayPackConverter {
             ExtendParams extendParams = new ExtendParams();
             // 设置返佣帐号，支付宝分配的系统商编号(通过setSysServiceProviderId方法)
             extendParams.setSysServiceProviderId(payDetailsVO.getIsvPartnerId());
-            // 扫码支付2小时有效
+            // 扫码支付二维码2小时有效，扫码后订单需要设置
             
+            // 手机网站支付超时 设定 30分钟
+            String timeoutExpress = SysEnvKey.EXPIRE_TIME_ALI_PAY_30M;
             // 创建条码支付请求builder，设置请求参数
             builder.setAppAuthToken(payDetailsVO.getAppAuthToken())
                 .setOutTradeNo(payDetailsVO.getOutTradeNo())
@@ -249,7 +251,8 @@ public class AliPayPackConverter {
                 .setUndiscountableAmount(null)
                 .setStoreId(payDetailsVO.getStoreId())            
                 .setExtendParams(extendParams)
-                .setGoodsDetailList(null);
+                .setGoodsDetailList(null)
+                .setTimeoutExpress(timeoutExpress);
         } catch (Exception e) {
             throw new ConvertPackException(e.getMessage());
         }

@@ -20,8 +20,9 @@
 	<div class="rightbg">
 		<div class="bgposition">您现在的位置：商户信息管理&gt;商户信息维护</div>
 	    <div class="bgtj">
-	    	<form action="<%=request.getContextPath()%>/resources/partner/dealermanage!updateDealerBase.action" method="post" id="dealerForm">
+	    	<s:form method="post">
 	    		<s:hidden id="iwoid" name="dealerVO.iwoid"/>
+	    		<s:hidden id="dealerOid" name="dealerOid"/>
 	            <ul class="bg_tjtab">
 	                <li class="bg_tjall">
 	                	<table>
@@ -47,32 +48,15 @@
 	                </li>
 	                <li class="bg_button">
 	                    <a href="javascript:void(0);" onclick="updateDealerBase();return false;">保存</a>
-	                    <a href="javascript:void(0);" id="bind-wx-btn">绑定微信</a>
+	                    <a href="javascript:void(0);" onclick="toBindWxID('<s:property value="dealerVO.iwoid" />');return false;">绑定微信</a>
 	                </li>
 	            </ul>
-	        </form>
-	        <div id="bind-wx" style="display: none;">
-		        <div class="qrCode_wrapper">
-					<div class="qrCode_block">
-						<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadAppidQRCode.action?dealerOid=${dealerVO.iwoid}" alt="公众号二维码" width="200" height="200"/>
-						<span class="qrCode_title">公众号二维码</span>
-					</div>
-					<div class="qrCode_block">
-						<img src="<%=request.getContextPath()%>/resources/partner/dealermanage!loadBindQRCode.action?dealerOid=${dealerVO.iwoid}" alt="绑定二维码" width="200" height="200"/>
-						<span class="qrCode_title">商户二维码</span>
-					</div>
-					<div class="qrCode_remark_block">
-						说明：
-						<p>1、商户在关注公众号后，通过微信扫描“绑定商户二维码”绑定商户</p>
-						<p>2、绑定成功后，可在微信查看收款列表和收款汇总信息</p>
-					</div>
-				</div>
-			</div>
-	        <s:form method="post">
-				<div style="display: none;">
-					<s:include value="/resources/include/page.jsp"/>
-				</div>
-			</s:form>
+	            <ul>
+	            	<li class="t-center">
+	                	<s:include value="/resources/include/noPage.jsp"></s:include>
+	                </li>
+	            </ul>
+	        </s:form>
 	    </div>
 	</div>
 	<script type="text/javascript">
@@ -114,15 +98,13 @@
 			if (!window.confirm("确认修改？")) {
 				return false;
 			}
-			$("#dealerForm").submit();
+			invokeAction('updateDealerBase');
 		}
 		
-
-		$("#bind-wx-btn").toggle(function() {
-			$("#bind-wx").show();
-		}, function() {
-			$("#bind-wx").hide();
-		});
+		function toBindWxID(iwoid){
+			$("#dealerOid").val(iwoid);
+			invokeAction('goToBindWxID');
+		}
 	</script>	
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 </body>
