@@ -12,8 +12,10 @@
          
     <task:annotation-driven />
     <task:scheduled-tasks>   
-        <task:scheduled ref="weixinPayDetailCheckTask" method="process" cron="0 0/1 * * * ?"/>
+         
+        <task:scheduled ref="weixinDownloadBillTask" method="process" cron="0 0/1 * * * ?"/>
         <!-- <task:scheduled ref="refreshBaseAccessTokenTask" method="process" cron="0 0/1 * * * ?"/> -->
+        <task:scheduled ref="reconciliationTask" method="process" cron="0 0/18 * * * ?"/>
     </task:scheduled-tasks> 
     <context:component-scan base-package="com.zbsp.wepaysp.timer.task" />
 </beans>

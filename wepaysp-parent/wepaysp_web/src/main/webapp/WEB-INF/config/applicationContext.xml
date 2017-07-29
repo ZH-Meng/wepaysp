@@ -90,5 +90,5 @@
   	<bean id="springContextUtil" class="com.zbsp.wepaysp.manage.web.util.SpringContextUtil" />
   	
 	<import resource="service-context.xml" />
-	<!-- <import resource="spring-task-context.xml" /> -->
+	<import resource="spring-task-context.xml" /> <!-- -->
 </beans>

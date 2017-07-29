@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
+    http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
+	version="2.0">
+	<!-- 商户结算统计 -->
+	<named-native-query name="reconciliation"
+		result-set-mapping="reconciliationMapping">
+		<query>
+		<![CDATA[
+
+			select a.TRANS_BEGIN_TIME as TRADE_TIME,a.OUT_TRADE_NO,a.TRANSACTION_ID,a.TOTAL_FEE,a.TRADE_STATUS,a.RESULT_CODE,b.TOTAL_FEE as BILL_TOTAL_FEE,b.RESULT_CODE as BILL_RESULT_CODE,1 as RECONCILIATION_RESULT , 1 as PAY_PLATFORM
+			from weixin_pay_details_t a , weixin_bill_t b
+			where a.out_trade_no = b.out_trade_no 
+			and a.TRANS_BEGIN_TIME between :startTime and  :endTime 
+			and  a.total_fee = b.total_fee
+			and a.trade_status <> 1 
+			and b.result_code = 'SUCCESS'
+			union all
+			select b.TRADE_TIME, a.OUT_TRADE_NO,a.TRANSACTION_ID,a.TOTAL_FEE,a.TRADE_STATUS,a.RESULT_CODE,b.SETTLEMENT_REFUND_FEE as BILL_TOTAL_FEE,b.RESULT_CODE as BILL_RESULT_CODE, 1 AS RECONCILIATION_RESULT, 1 as PAY_PLATFORM
+			from weixin_refund_details_t a , weixin_bill_t b
+			where a.out_trade_no = b.out_trade_no 
+			and b.TRADE_TIME between :startTime and  :endTime 
+			and a.REFUND_FEE = b.SETTLEMENT_REFUND_FEE
+			and b.result_code = 'REFUND'
+			and a.trade_status <> 1 
+			
+			union all 
+
+			select b.TRADE_TIME,b.OUT_TRADE_NO,b.TRANSACTION_ID,0 as TOTAL_FEE,0 as TRADE_STATUS,'' as RESULT_CODE,b.TOTAL_FEE as BILL_TOTAL_FEE,b.RESULT_CODE  as BILL_RESULT_CODE, 2 AS RECONCILIATION_RESULT, 1 as PAY_PLATFORM
+			from weixin_bill_t b
+			where b.TRADE_TIME between :startTime and  :endTime 
+			and b.result_code = 'SUCCESS'
+			and not exists (select 1 from weixin_pay_details_t a where a.out_trade_no = b.out_trade_no and a.total_fee = b.total_fee and trade_status = 1  )
+			union all
+			select b.TRADE_TIME, b.OUT_TRADE_NO,b.TRANSACTION_ID,0 as TOTAL_FEE,0 as TRADE_STATUS,'' as RESULT_CODE,b.SETTLEMENT_REFUND_FEE as BILL_TOTAL_FEE,b.RESULT_CODE  as BILL_RESULT_CODE, 2 AS RECONCILIATION_RESULT, 1 as PAY_PLATFORM
+			from weixin_bill_t b
+			where b.TRADE_TIME between :startTime and  :endTime 
+			and b.result_code = 'REFUND'
+			and not exists (select 1 from weixin_refund_details_t a where a.out_trade_no = b.out_trade_no and a.REFUND_FEE = b.SETTLEMENT_REFUND_FEE and trade_status = 1  )
+			
+			union all 
+
+			select a.TRANS_BEGIN_TIME as TRADE_TIME,a.OUT_TRADE_NO,a.TRANSACTION_ID,a.TOTAL_FEE,a.TRADE_STATUS,a.RESULT_CODE,0 as BILL_TOTAL_FEE,0 as BILL_RESULT_CODE , 3 AS RECONCILIATION_RESULT, 1 as PAY_PLATFORM
+			from weixin_pay_details_t a
+			where a.TRANS_BEGIN_TIME between :startTime and  :endTime 
+			and a.trade_status = 1 
+			and not exists (select 1 from weixin_bill_t b where a.out_trade_no = b.out_trade_no and a.total_fee = b.total_fee  and b.result_code = 'SUCCESS' )
+			union all
+			select a.TRANS_BEGIN_TIME as TRADE_TIME,a.OUT_TRADE_NO,a.TRANSACTION_ID,a.REFUND_FEE as TOTAL_FEE,a.TRADE_STATUS,a.RESULT_CODE,0 as BILL_TOTAL_FEE,0 as BILL_RESULT_CODE , 3 AS RECONCILIATION_RESULT, 1 as PAY_PLATFORM
+			from weixin_refund_details_t a
+			where a.TRANS_BEGIN_TIME between :startTime and  :endTime 
+			and a.trade_status = 1 
+			and not exists (select 1 from weixin_bill_t b where a.out_trade_no = b.out_trade_no and a.REFUND_FEE = b.SETTLEMENT_REFUND_FEE  and b.result_code = 'REFUND' )
+			 
+		]]></query>
+	</named-native-query>
+ 
+	
+	<sql-result-set-mapping name="reconciliationMapping">
+		<column-result name="TRADE_TIME" />
+		<column-result name="OUT_TRADE_NO" />
+		<column-result name="TRANSACTION_ID" />
+		<column-result name="TOTAL_FEE" />
+		<column-result name="TRADE_STATUS" />
+		<column-result name="RESULT_CODE" />
+		<column-result name="BILL_TOTAL_FEE" />
+		<column-result name="BILL_RESULT_CODE" />
+		<column-result name="RECONCILIATION_RESULT" />
+		<column-result name="PAY_PLATFORM" />
+	</sql-result-set-mapping>
+</entity-mappings>
