@@ -8,6 +8,7 @@ import java.util.Map;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.WeixinBillService;
 import com.zbsp.wepaysp.common.constant.SysEnums;
+import com.zbsp.wepaysp.common.constant.SysEnums.RefundType;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.po.pay.WeixinBill;
@@ -106,7 +107,7 @@ public class WeixinBillServiceImpl
             refundDetail.setTransactionId(weixinPayDetail.getTransactionId());
             refundDetail.setOutRefundNo(refundColumn[15]);
             refundDetail.setRefundId(refundColumn[14]);
-            refundDetail.setCouponRefundType(WeixinRefundDetails.CouponRefundType.refund.getValue());
+            refundDetail.setRefundType(RefundType.REFUND.getValue());
             refundDetail.setTotalFee(weixinPayDetail.getTotalFee());
             Integer refundFee = ((new BigDecimal(refundColumn[16])).multiply(new BigDecimal("100"))).intValue();
             refundDetail.setRefundFee(refundFee);
