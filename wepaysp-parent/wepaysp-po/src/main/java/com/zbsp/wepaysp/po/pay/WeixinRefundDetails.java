@@ -544,13 +544,4 @@ public class WeixinRefundDetails
         this.remark = remark;
     }
 
-    @Column(name = "OUT_REFUND_NO", length =32)
-    public String getOutRefundNo() {
-        return outRefundNo;
-    }
-
-    public void setOutRefundNo(String outRefundNo) {
-        this.outRefundNo = outRefundNo;
-    }
-
 }
