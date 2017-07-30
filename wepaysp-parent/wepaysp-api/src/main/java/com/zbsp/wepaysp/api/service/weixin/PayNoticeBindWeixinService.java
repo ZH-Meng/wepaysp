@@ -60,8 +60,19 @@ public interface PayNoticeBindWeixinService {
      */
     public Map<String, Object> doJoinTransQueryBindInfo(String openid);
 
+    /**
+     * 通过绑定信息oid更新绑定状态
+     * @param bindOid
+     * @param state
+     */
     public void doTransUpdateBindWeixinState(String bindOid, PayNoticeBindWeixin.State state);
 
-    public PayNoticeBindWeixinVO doJoinTransQueryDealerBind(String dealerOid);
+    /**
+     * 查找商户绑定微信
+     * @param dealerOid
+     * @param state 指定状态查询，缺省查找所有绑定
+     * @return
+     */
+    public List<PayNoticeBindWeixinVO> doJoinTransQueryDealerBind(String dealerOid, String state);
     
 }
