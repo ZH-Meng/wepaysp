@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="edu" namespace="/resources/edu" extends="wepaysp-manage-default">
+		<!-- 缴费总账单管理 -->
+		<action name="totalbillmanage" class="aipayEduBillAction">
+			<result name="totalBillList">/resources/edu/partnerEmployeeList.jsp</result>
+			<result name="getBillTemplate" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${billTemplateName}"</param>  
+				<param name="inputName">billTemplate</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+		<!-- 缴费账单明细 -->
+		<action name="billdetail" class="aipayEduTotalBillAction">
+			<result name="billList">/resources/edu/billList.jsp</result>
+			<result name="getBillData" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="contentDisposition">attachment;fileName="${billDataName}"</param>  
+				<param name="inputName">billData</param>
+				<param name="bufferSize">1024</param>
+			</result>
+		</action>
+	</package>
+</struts>

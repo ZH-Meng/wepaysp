@@ -17,6 +17,7 @@ import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
+import com.zbsp.wepaysp.po.partner.School;
 import com.zbsp.wepaysp.po.partner.Store;
 
 @Entity
@@ -45,6 +46,7 @@ public class SysUser implements Serializable {
     private DealerEmployee dealerEmployee;
     private Partner partner;
     private PartnerEmployee partnerEmployee;
+    private School school;
     private String creator;
     private Date createTime;
     private String modifier;
@@ -334,8 +336,18 @@ public class SysUser implements Serializable {
     public void setPartnerEmployee(PartnerEmployee partnerEmployee) {
         this.partnerEmployee = partnerEmployee;
     }
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SCHOOL_OID")
+    public School getSchool() {
+		return school;
+	}
 
-    @Column(name = "creator", nullable = false, length = 32)
+	public void setSchool(School school) {
+		this.school = school;
+	}
+
+	@Column(name = "creator", nullable = false, length = 32)
     public String getCreator() {
         return this.creator;
     }

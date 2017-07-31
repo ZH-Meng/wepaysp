@@ -18,6 +18,7 @@ import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
 import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
+import com.zbsp.wepaysp.po.partner.School;
 
 
 /**
@@ -45,7 +46,9 @@ public class ManageUser extends User {
     
     private PartnerEmployee dataPartnerEmployee;
     
-    private DealerEmployee dataDealerEmployee;    
+    private DealerEmployee dataDealerEmployee;   
+    
+    private School dataSchool;   
     
     private String lastLoginIp;
     
@@ -54,7 +57,7 @@ public class ManageUser extends User {
     private String roleIndex;
 
     public ManageUser(String iwoid, String userId, String username, String password, String loginToken, Integer userLevel,Integer dataPermissionType, Partner dataPartner,
-    		Dealer dataDealer, PartnerEmployee dataPartnerEmployee, DealerEmployee dataDealerEmployee, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
+    		Dealer dataDealer, PartnerEmployee dataPartnerEmployee, DealerEmployee dataDealerEmployee, School dataSchool, String lastLoginIp, Date lastLoginTime, String roleIndex, boolean enabled, boolean accountNonExpired,
             boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.iwoid = iwoid;
@@ -66,6 +69,7 @@ public class ManageUser extends User {
         this.dataDealer = dataDealer;
         this.dataPartnerEmployee = dataPartnerEmployee;
         this.dataDealerEmployee = dataDealerEmployee;
+        this.dataSchool = dataSchool;
         this.lastLoginIp = lastLoginIp;
         this.lastLoginTime = lastLoginTime;
         this.roleIndex = roleIndex;
@@ -125,6 +129,14 @@ public class ManageUser extends User {
 
 	public void setDataDealerEmployee(DealerEmployee dataDealerEmployee) {
 		this.dataDealerEmployee = dataDealerEmployee;
+	}
+	
+	public School getDataSchool() {
+		return dataSchool;
+	}
+
+	public void setDataSchool(School dataSchool) {
+		this.dataSchool = dataSchool;
 	}
 
 	public String getLastLoginIp() {
