@@ -56,8 +56,8 @@ public class SysUser implements Serializable {
         /** 业务员 */                                           salesman(2),
         /** 商户老板 */                                      dealer(3),
         /** 店长 */                                           shopManager(4),
-        /** 收银员 */                                       cashier(5);
-        
+        /** 收银员 */                                       cashier(5),
+        /** 学校 */                                        school(6);
         private int value;
 
         public int getValue() {
