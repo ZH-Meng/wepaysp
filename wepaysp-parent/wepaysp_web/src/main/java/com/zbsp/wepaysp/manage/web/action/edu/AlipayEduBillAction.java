@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.zbsp.wepaysp.api.service.pay.AlipayEduBillService;
+import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;

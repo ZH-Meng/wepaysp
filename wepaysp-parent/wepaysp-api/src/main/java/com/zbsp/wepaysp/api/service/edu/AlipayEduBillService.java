@@ -1,4 +1,4 @@
-package com.zbsp.wepaysp.api.service.pay;
+package com.zbsp.wepaysp.api.service.edu;
 
 import java.util.Map;
 

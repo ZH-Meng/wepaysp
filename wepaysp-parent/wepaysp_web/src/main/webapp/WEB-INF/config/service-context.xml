@@ -138,5 +138,10 @@
 	
 	<bean id="alipayRefundDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.AlipayRefundDetailsServiceImpl" parent="baseService">
 	</bean>
+	
+	<bean id="alipayEduTotalBillService" class="com.zbsp.wepaysp.api.service.edu.impl.AlipayEduTotalBillServiceImpl" parent="baseService">
+	</bean>
+	<bean id="alipayEduBillService" class="com.zbsp.wepaysp.api.service.edu.impl.AlipayEduBillServiceImpl" parent="baseService">
+	</bean>
 
 </beans>

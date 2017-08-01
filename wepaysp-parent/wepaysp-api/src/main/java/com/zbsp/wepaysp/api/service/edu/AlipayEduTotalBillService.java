@@ -1,6 +1,10 @@
-package com.zbsp.wepaysp.api.service.pay;
+package com.zbsp.wepaysp.api.service.edu;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import com.zbsp.wepaysp.vo.edu.AlipayEduTotalBillVO;
 
 /**
  * 教育缴费总账单服务 
@@ -21,12 +25,9 @@ public interface AlipayEduTotalBillService {
      * @param paramMap 查询参数
      * @param startIndex 记录起始位置
      * @param maxResult 返回记录最大数
-     * @return Map
-     * <pre>
-     *   billList：交易List<AlipayEduTotalBillVO>
-     *   <pre>
+     * @return List<AlipayEduTotalBillVO>
      */
-    public Map<String, Object> doJoinTransQueryAlipayEduTotalBill(Map<String, Object> paramMap, int startIndex, int maxResult);
+    public List<AlipayEduTotalBillVO> doJoinTransQueryAlipayEduTotalBill(Map<String, Object> paramMap, int startIndex, int maxResult);
     
     /**
      * 统计符合条件的总数.
@@ -42,5 +43,7 @@ public interface AlipayEduTotalBillService {
      * @return 符合条件的信息总数
      */
     public int doJoinTransQueryAlipayEduTotalBillCount(Map<String, Object> paramMap);
+
+    public Map<String, Object> doTransSaveTotalBill(String billName, String endTime, String excelPath, List<ArrayList<String>> dataList);
     
 }
