@@ -35,6 +35,12 @@
 			<artifactId>struts2-spring-plugin</artifactId>
 			<version>${struts.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-json-plugin</artifactId>
+			<version>${struts.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -68,17 +74,6 @@
 			<version>1.2</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>3.8</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.8</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>com.zbsp</groupId>
 			<artifactId>wepaysp-api</artifactId>

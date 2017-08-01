@@ -15,7 +15,6 @@
 		<property name="alipayEduTotalBillService" ref="alipayEduTotalBillService" />
 		<property name="billTemplateAbsolutePath"  value="${billTemplateAbsolutePath}"/>
 		<property name="billFileRootDir"  value="${billFileRootDir}"/>
-		<property name="fixedExcelHeaders"  value="${fixedExcelHeaders}"/>
 	</bean>
 	
 	<bean id="aipayEduBillAction" class="com.zbsp.wepaysp.manage.web.action.edu.AlipayEduBillAction" scope="prototype">

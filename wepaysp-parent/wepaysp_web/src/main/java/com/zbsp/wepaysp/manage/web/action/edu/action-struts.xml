@@ -13,6 +13,9 @@
 				<param name="inputName">billTemplate</param>
 				<param name="bufferSize">1024</param>
 			</result>
+			<result name="uploadResult" type="json">
+				<param name="root">dataMap</param>
+			</result>
 		</action>
 		<!-- 缴费账单明细 -->
 		<action name="billdetail" class="aipayEduBillAction">

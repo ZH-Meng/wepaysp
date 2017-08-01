@@ -8,7 +8,7 @@
 	<constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
 	<constant name="struts.multipart.maxSize" value="50000000"/>
 	
-	<package name="global-default" extends="struts-default">
+	<package name="global-default" extends="json-default,struts-default">
 		<global-results>
 			<result name="login">/index.jsp</result>
 			<result name="error">/resources/include/error.jsp</result>

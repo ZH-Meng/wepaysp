@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +24,6 @@ import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.manage.web.util.PoiExcel2k3Helper;
 import com.zbsp.wepaysp.manage.web.util.PoiExcel2k7Helper;
 import com.zbsp.wepaysp.manage.web.util.PoiExcelHelper;
-import com.zbsp.wepaysp.po.edu.AlipayEduTotalBill;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.vo.edu.AlipayEduTotalBillVO;
 
@@ -32,14 +32,12 @@ public class AlipayEduTotalBillAction
     extends PageAction {
 
     private static final long serialVersionUID = -8734218055007641937L;
+    private static final String LOG_PREFIX  ="教育缴费总账单 - [{}] - [{}]";
     /** 账单文件存放根目录 */
     private String billFileRootDir;
     /** 账单模板文件绝对路径 */
     private String billTemplateAbsolutePath;
     private String billTemplateName;
-    /** 账单文件excel固定列头 */
-    private String fixedExcelHeaders;
-    private String[] fixedExcelHeaderArr;
 
     private String beginTime;
     private String endTime;
@@ -51,9 +49,10 @@ public class AlipayEduTotalBillAction
     private File billFile;
     private String billFileFileName;
     private String billFileContentType;
+    private Map<String, Object> dataMap;
 
     public void init() {
-        if (StringUtils.isBlank(billFileRootDir) || StringUtils.isBlank(billTemplateAbsolutePath) || StringUtils.isBlank(fixedExcelHeaders)) {
+        if (StringUtils.isBlank(billFileRootDir) || StringUtils.isBlank(billTemplateAbsolutePath)) {
             throw new RuntimeException("缺少参数");
         }
         File template = new File(billTemplateAbsolutePath);
@@ -63,7 +62,6 @@ public class AlipayEduTotalBillAction
         if (!billDir.exists()) {
             billDir.mkdirs();
         }
-        fixedExcelHeaderArr = fixedExcelHeaders.split(",");
     }
 
     @Override
@@ -109,42 +107,54 @@ public class AlipayEduTotalBillAction
 
     /** 上传缴费账单（待定时发送） */
     public String uploadBill() {
+    	logger.info(LOG_PREFIX, "上传", "开始");
+		logger.info("收费名称：{}, 文件名：{}", billName, billFileFileName);
         ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        dataMap = new HashMap<>();
+        String code = "success";
+        String msg = "缴费账单上传成功！";
         if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
             // 检查文件类型
             PoiExcelHelper excelHelper = null;
-            String excelPrefix = "";
+            String excelSuffix = "";
             if ("application/vnd.ms-excel".equalsIgnoreCase(billFileContentType)) {
-                excelPrefix = ".xls";
+            	excelSuffix = ".xls";
                 excelHelper = new PoiExcel2k3Helper();
             } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equalsIgnoreCase(billFileContentType)) {
-                excelPrefix = ".xlsx";
+            	excelSuffix = ".xlsx";
                 excelHelper = new PoiExcel2k7Helper();
             } else {
-                // TODO
-                return ERROR;
+                code = "fileTypeInvalid";
+                msg = "账单文件类型无效，只支持后缀未.xls或.xlsx的excel！";
+				logger.warn(LOG_PREFIX + "原因：{}", "上传", "失败", "fileTypeInvalid");
             }
 
-            String billFileSaveDir = billFileRootDir.concat(File.separator).concat(manageUser.getDataSchool().getSchoolNo());// 保存路径
-            String billFileSaveName = DateUtil.getDate(new Date(), "yyyyMMddHHmmssSSS").concat(excelPrefix); // 保存名称
-            File billExcelFile = new File(billFileSaveDir, billFileSaveName);
-            try {
-                FileUtils.copyFile(billFile, billExcelFile);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (excelHelper != null) {
+            	String billFileSaveDir = billFileRootDir.concat(File.separator).concat(manageUser.getDataSchool().getSchoolNo());// 保存路径
+            	String billFileSaveName = DateUtil.getDate(new Date(), "yyyyMMddHHmmssSSS").concat(excelSuffix); // 保存名称
+            	File billExcelFile = new File(billFileSaveDir, billFileSaveName);
+            	try {
+            		FileUtils.copyFile(billFile, billExcelFile);
+            	} catch (IOException e) {
+            		code = "fileUploadFail";
+            		msg = "缴费账单上传失败！";
+					logger.error(LOG_PREFIX + "\n{}", "上传", "失败", e.getMessage(), e);
+            	}
+            	// 读取并封装EXCEL数据
+            	List<ArrayList<String>> dataList = excelHelper.readExcel(billExcelFile, 0, "1-", 1);
+            	
+            	Map<String, Object> resultMap =alipayEduTotalBillService.doTransSaveTotalBill(billName, endTime, billExcelFile.getAbsolutePath(), dataList);
+            	code = MapUtils.getString(resultMap, "code");
+            	msg = MapUtils.getString(resultMap, "msg");
             }
-            // 读取并封装EXCEL数据
-            List<ArrayList<String>> dataList = excelHelper.readExcel(billExcelFile, 0, "1-", 1);
-            
-            alipayEduTotalBillService.doTransSaveTotalBill(billName, endTime, billExcelFile.getAbsolutePath(), dataList);
-
-            // 上传成功返回列表
-            return list();
         } else {
-            logger.warn("当前用户无权查看缴费账单！");
-            setAlertMessage("当前用户无权查看缴费账单！");
-            return "accessDenied";
+        	code = "accessDenied";
+        	msg = "当前用户无权上传缴费账单！";
+        	logger.warn(LOG_PREFIX + "原因：{}", "上传", "失败", "accessDenied");
         }
+        dataMap.put("code", code);
+        dataMap.put("msg", msg);
+        return "uploadResult";
     }
 
     public void setBillFileRootDir(String billFileRootDir) {
@@ -195,10 +205,6 @@ public class AlipayEduTotalBillAction
         this.billFileContentType = billFileContentType;
     }
 
-    public void setFixedExcelHeaders(String fixedExcelHeaders) {
-        this.fixedExcelHeaders = fixedExcelHeaders;
-    }
-
     public void setBillTemplateAbsolutePath(String billTemplateAbsolutePath) {
         this.billTemplateAbsolutePath = billTemplateAbsolutePath;
     }
@@ -206,5 +212,9 @@ public class AlipayEduTotalBillAction
     public String getBillTemplateName() {
         return billTemplateName;
     }
+
+	public Map<String, Object> getDataMap() {
+		return dataMap;
+	}
 
 }
