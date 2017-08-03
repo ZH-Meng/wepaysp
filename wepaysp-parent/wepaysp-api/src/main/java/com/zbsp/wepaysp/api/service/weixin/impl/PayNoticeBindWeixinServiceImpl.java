@@ -296,17 +296,27 @@ public class PayNoticeBindWeixinServiceImpl
     }
     
     @Override
-    public PayNoticeBindWeixinVO doJoinTransQueryDealerBind(String dealerOid) {
+    public List<PayNoticeBindWeixinVO> doJoinTransQueryDealerBind(String dealerOid, String state) {
         Validator.checkArgument(StringUtils.isBlank(dealerOid), "dealerOid不能为空！");
-        PayNoticeBindWeixinVO  bindVO = null;
+        List<PayNoticeBindWeixinVO>  bindVOList = null;
+        String jpql = "from PayNoticeBindWeixin p where p.bindDealer.iwoid=:bindDealerOid";
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         jpqlMap.put("bindDealerOid", dealerOid);
-        PayNoticeBindWeixin dealerBind = commonDAO.findObject("from PayNoticeBindWeixin p where p.bindDealer.iwoid=:bindDealerOid", jpqlMap, false);
-        if (dealerBind != null) {
-            bindVO = new PayNoticeBindWeixinVO();
-            BeanCopierUtil.copyProperties(dealerBind, bindVO);
+        if (StringUtils.isNotBlank(state)) {
+        	jpqlMap.put("STATE", state);
+        	jpql += " and p.state=:STATE";
         }
-        return bindVO;
+        @SuppressWarnings("unchecked")
+		List<PayNoticeBindWeixin> dealerBindList = (List<PayNoticeBindWeixin>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        if (dealerBindList != null && !dealerBindList.isEmpty()) {
+        	bindVOList = new ArrayList<PayNoticeBindWeixinVO>();
+        	for (PayNoticeBindWeixin dealerBind : dealerBindList) {
+        		PayNoticeBindWeixinVO bindVO = new PayNoticeBindWeixinVO();
+        		BeanCopierUtil.copyProperties(dealerBind, bindVO);
+        		bindVOList.add(bindVO);
+			}
+        }
+        return bindVOList;
     }
     
 	public void setSysLogService(SysLogService sysLogService) {

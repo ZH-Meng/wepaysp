@@ -53,7 +53,54 @@
 			where a.TRANS_BEGIN_TIME between :startTime and  :endTime 
 			and a.trade_status = 1 
 			and not exists (select 1 from weixin_bill_t b where a.out_trade_no = b.out_trade_no and a.REFUND_FEE = b.SETTLEMENT_REFUND_FEE  and b.result_code = 'REFUND' )
-			 
+			
+			union all
+			
+			select a.TRANS_BEGIN_TIME as TRADE_TIME,a.OUT_TRADE_NO,a.TRADE_NO AS TRANSACTION_ID,a.total_amount AS TOTAL_FEE,a.TRADE_STATUS,a.CODE AS RESULT_CODE,b.total_amount as BILL_TOTAL_FEE,'SUCCESS' as BILL_RESULT_CODE,1 as RECONCILIATION_RESULT , 2 as PAY_PLATFORM
+				from ali_pay_details_t a , alipay_bill_details_t b
+				where a.out_trade_no = b.out_trade_no 
+				and a.TRANS_BEGIN_TIME between :startTime and  :endTime
+				and  a.total_amount = b.total_amount
+				and a.trade_status <> 1 
+				and b.bill_type = '1'
+			union all
+				select b.gmt_close AS TRADE_TIME, a.OUT_TRADE_NO,a.TRADE_NO AS TRANSACTION_ID,a.refund_amount AS TOTAL_FEE,a.TRADE_STATUS,a.CODE AS RESULT_CODE,b.total_amount as BILL_TOTAL_FEE,'REFUND' as BILL_RESULT_CODE, 1 AS RECONCILIATION_RESULT, 2 as PAY_PLATFORM
+				from alipay_refund_details_t a, alipay_bill_details_t b
+				where a.out_trade_no = b.out_trade_no 
+				and a.trans_end_time between :startTime and  :endTime
+				and a.refund_amount = b.total_amount
+				and b.bill_type = '2'
+				and a.trade_status <> 1 
+						
+			union all 
+			
+				select b.gmt_create AS TRADE_TIME,b.OUT_TRADE_NO,b.TRADE_NO AS TRANSACTION_ID,0 as TOTAL_FEE,0 as TRADE_STATUS,'' as RESULT_CODE,b.total_amount AS BILL_TOTAL_FEE,'SUCCESS' as BILL_RESULT_CODE, 2 AS RECONCILIATION_RESULT, 2 as PAY_PLATFORM
+				from alipay_bill_details_t b
+				where b.gmt_create between :startTime and  :endTime
+				and b.bill_type = '1'
+				and b.SOURCE_ID = '1'
+				and not exists (select 1 from ali_pay_details_t a where a.out_trade_no = b.out_trade_no and a.total_amount = b.total_amount and trade_status = 1  )
+			union all
+				select b.gmt_close AS TRADE_TIME, b.OUT_TRADE_NO,b.TRADE_NO AS TRANSACTION_ID,0 as TOTAL_FEE,0 as TRADE_STATUS,'' as RESULT_CODE,b.total_amount as BILL_TOTAL_FEE,'REFUND' as BILL_RESULT_CODE, 2 AS RECONCILIATION_RESULT, 2 as PAY_PLATFORM
+				from alipay_bill_details_t b
+				where b.gmt_close between :startTime and  :endTime
+				and b.bill_type = '2'
+				and b.SOURCE_ID = '1'
+				and not exists (select 1 from alipay_refund_details_t a where a.out_trade_no = b.out_trade_no and a.refund_amount = b.total_amount and trade_status = 1  )
+			
+			union all 
+			
+				select a.TRANS_BEGIN_TIME as TRADE_TIME,a.OUT_TRADE_NO,a.TRADE_NO AS TRANSACTION_ID,a.total_amount AS TOTAL_FEE,a.TRADE_STATUS,a.CODE AS RESULT_CODE,0 as BILL_TOTAL_FEE,0 as BILL_RESULT_CODE , 3 AS RECONCILIATION_RESULT, 2 as PAY_PLATFORM
+				from ali_pay_details_t a
+				where a.TRANS_BEGIN_TIME between :startTime and  :endTime
+				and a.trade_status = 1 
+				and not exists (select 1 from alipay_bill_details_t b where a.out_trade_no = b.out_trade_no and a.total_amount = b.total_amount  and b.bill_type = '1' )
+			union all
+				select a.trans_end_time as TRADE_TIME,a.OUT_TRADE_NO,a.TRADE_NO AS TRANSACTION_ID,a.refund_amount as TOTAL_FEE,a.TRADE_STATUS,a.CODE AS RESULT_CODE,0 as BILL_TOTAL_FEE,0 as BILL_RESULT_CODE , 3 AS RECONCILIATION_RESULT, 2 as PAY_PLATFORM
+				from alipay_refund_details_t a
+				where a.trans_end_time between :startTime and  :endTime
+				and a.trade_status = 1 
+				and not exists (select 1 from alipay_bill_details_t b where a.out_trade_no = b.out_trade_no and a.refund_amount = b.total_amount  and b.bill_type = '2' ) 
 		]]></query>
 	</named-native-query>
  
