@@ -1,7 +1,6 @@
 package com.zbsp.wepaysp.api.service.weixin.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.tencent.protocol.appid.sns_userinfo_protocol.GetUserinfoResData;
 import com.zbsp.wepaysp.api.service.BaseService;
-import com.zbsp.wepaysp.api.service.manage.SysLogService;
 import com.zbsp.wepaysp.api.service.weixin.PayNoticeBindWeixinService;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.BindNoUniqueException;
@@ -19,7 +17,6 @@ import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.po.manage.SysLog;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.po.partner.Dealer;
 import com.zbsp.wepaysp.po.partner.DealerEmployee;
@@ -31,8 +28,6 @@ import com.zbsp.wepaysp.vo.weixin.PayNoticeBindWeixinVO;
 public class PayNoticeBindWeixinServiceImpl
     extends BaseService
     implements PayNoticeBindWeixinService {
-
-    private SysLogService sysLogService;
 
     @Override
     public List<PayNoticeBindWeixinVO> doJoinTransQueryPayNoticeBindWeixinList(Map<String, Object> paramMap) {
@@ -120,8 +115,6 @@ public class PayNoticeBindWeixinServiceImpl
                 logger.error("微信支付通知绑定信息不存在，oid=" + vo.getIwoid());
                 continue;
             }
-            String oldWxStr = wx.toString();
-            Date processBeginTime = new Date();
             if (StringUtils.isNotBlank(vo.getBindDealerEmployeeOid())) {
             	DealerEmployee bindDealerEmployee = new DealerEmployee();
             	bindDealerEmployee.setIwoid(vo.getBindDealerEmployeeOid());
@@ -132,7 +125,6 @@ public class PayNoticeBindWeixinServiceImpl
             wx.setState(vo.getState());
             wx.setModifier(modifier);
             commonDAO.update(wx);
-            sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "微信支付通知绑定信息[绑定收银员姓名oid：" + vo.getBindDealerEmployeeOid() + "，状态：" + vo.getState() + "]", processBeginTime, processBeginTime, oldWxStr, wx.toString(), SysLog.State.success.getValue(), wx.getIwoid(), logFunctionOid, SysLog.ActionType.modify.getValue());
             count++;
         }
         
@@ -318,9 +310,5 @@ public class PayNoticeBindWeixinServiceImpl
         }
         return bindVOList;
     }
-    
-	public void setSysLogService(SysLogService sysLogService) {
-		this.sysLogService = sysLogService;
-	}
 
 }
