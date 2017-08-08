@@ -84,6 +84,11 @@ public class SysConfig {
      */
     public static String appId4Face2FacePay;
     
+    /***
+     * 支付宝教育缴费功能能的蚂蚁平台应用ID，需要在 alipay_app_t 表中存在
+     */
+    public static String appId4Edu;
+    
     /**支付宝授权回调系统地址*/
     public static String alipayAuthCallBackURL;
     

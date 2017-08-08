@@ -75,10 +75,9 @@
 	                                <th>缴费账单名称</th>
 	                                
 	                                <%--动态列  chargeItem--%>
-	                                <th>明细费</th>
-	                                <th>明细费</th>
-	                                <th>明细费</th>
-	                                <th>明细费</th>
+	                                <s:iterator value="alipayEduTotalBillVO.chargeItemHeaders" var="thName">
+	                                	<th><s:property value="#thName" /></th>
+	                                </s:iterator>
 	                                
 	                                <th>合计</th>
 	                                <th>账单状态</th>
@@ -108,7 +107,9 @@
 						  			</td>
 						  			<%-- 动态明细金额 --%>
 						  			<s:iterator value="chargeItemMap">
-						  				<td><s:property value="value"/></td>
+						  				<td title="<s:number name="value/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />">
+						  					<s:number name="value/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />
+						  				</td>
 						  			</s:iterator>
 						  			
 						  			<td title="<s:number name="#vo.amount/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />">

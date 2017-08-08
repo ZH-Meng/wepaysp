@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.alipay.api.response.AlipayTradePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.zbsp.alipay.trade.model.ExtendParams;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingSendRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePrecreateRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
@@ -15,6 +16,7 @@ import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
+import com.zbsp.wepaysp.vo.edu.AlipayEduBillVO;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 /**
@@ -258,4 +260,14 @@ public class AliPayPackConverter {
         }
         return builder;
     }
+
+	public static AlipayEcoEduKtBillingSendRequestBuilder alipayEduBillVO2AlipayEcoEduKtBillingSendRequestBuilder(AlipayEduBillVO alipayEduBillVO) {
+		AlipayEcoEduKtBillingSendRequestBuilder builder = new AlipayEcoEduKtBillingSendRequestBuilder();
+        try {
+        	//TODO
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return builder;
+	}
 }

@@ -440,6 +440,7 @@ public class AliPayUtil {
             "json", "utf-8", Configs.getAlipayPublicKey(), Configs.getSignType());
     }
 
+    /**初始化支付宝当面付配置*/
     public static void init(Map<String, Object> app) {
         String openApiDomain = SysConfig.onlineFlag ? SysEnvKey.ANT_OPEN_API_DOMAIN : SysEnvKey.ANT_OPEN_API_DOMAIN_DEV;
         String appid = MapUtils.getString(app, SysEnvKey.ALIPAY_APP_ID);

@@ -105,6 +105,8 @@ public class AlipayEduTotalBillServiceImpl
         AlipayEduTotalBill totalBill = commonDAO.findObject(AlipayEduTotalBill.class, totalBillOid);
         if (totalBill != null) {
             BeanCopierUtil.copyProperties(totalBill, totalBillVO);
+            String[] headers = totalBill.getChargeItemHeaders().split(",");
+            totalBillVO.setChargeItemHeaders(headers);
         }
         return totalBillVO;
     }
@@ -148,7 +150,7 @@ public class AlipayEduTotalBillServiceImpl
             totalBill.setPartnerOid(school.getPartner() == null ? null : school.getPartner().getIwoid());
             totalBill.setPartnerLevel(school.getPartnerLevel());
             totalBill.setOrderStatus(OrderStatus.INIT.name());// 账单新建
-            totalBill.setSendTime(new Date());// FIXME 定时任务发送
+            //totalBill.setSendTime(new Date());// 定时任务发送
             totalBill.setBillName(billName);
             totalBill.setCloseTime(DateUtil.getDate(endTime, "yyyy-MM-dd"));// 账单过期（关闭）时间
             totalBill.setExcelPath(excelPath);
@@ -189,6 +191,8 @@ public class AlipayEduTotalBillServiceImpl
             chanageItemExist = true;
 
         int columnIndex = 0;
+        
+        String chargeItemHeaders = "";
         for (String header : headers) {
             if (columnIndex < fixHeaderCount) {
                 if (!fixedExcelHeaderArr[columnIndex].equalsIgnoreCase(headers.get(columnIndex))) {
@@ -203,9 +207,14 @@ public class AlipayEduTotalBillServiceImpl
                     msg = "缴费账单文件第+ (columnIndex+1) +列列头不为空！";
                     return;
                 }
+                if (columnIndex < headers.size() -2)
+					chargeItemHeaders += header + ",";
+				else if (columnIndex == headers.size() - 2)
+					chargeItemHeaders += header;
             }
             columnIndex++;
         }
+        totalBill.setChargeItemHeaders(chargeItemHeaders);
 
         if (!fixedExcelHeaderArr[fixedExcelHeaderArr.length - 1].equalsIgnoreCase(headers.get(headers.size() - 1))) {
             code = "fileColumnHeaderError";
@@ -264,7 +273,7 @@ public class AlipayEduTotalBillServiceImpl
                         return;
                     }
                     BigDecimal money = new BigDecimal(row.get(index));
-                    changeIemMap.put(headers.get(index), money);
+                    changeIemMap.put(headers.get(index), money.multiply(SysEnvKey.TIMES_100));
                     totalAmountTemp = totalAmountTemp.add(money);
                 }
                 bill.setChargeItem(JSONUtil.toJSONString(changeIemMap, false));

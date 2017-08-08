@@ -14,6 +14,7 @@ public class AlipayEduTotalBillVO {
 	private Integer receiptCount;
 	private Integer receiptMoney;
 	private String excelPath;
+	private String[] chargeItemHeaders;
 
 	public String getIwoid() {
 		return iwoid;
@@ -101,6 +102,14 @@ public class AlipayEduTotalBillVO {
 
 	public void setExcelPath(String excelPath) {
 		this.excelPath = excelPath;
+	}
+
+	public String[] getChargeItemHeaders() {
+		return chargeItemHeaders;
+	}
+
+	public void setChargeItemHeaders(String[] chargeItemHeaders) {
+		this.chargeItemHeaders = chargeItemHeaders;
 	}
 
 }

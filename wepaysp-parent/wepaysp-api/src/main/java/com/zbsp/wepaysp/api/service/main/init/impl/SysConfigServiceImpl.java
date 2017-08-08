@@ -12,6 +12,7 @@ import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.alipay.AlipayAppService;
 import com.zbsp.wepaysp.api.service.main.init.SysConfigService;
 import com.zbsp.wepaysp.api.service.partner.PartnerService;
+import com.zbsp.wepaysp.api.util.AliPayEduUtil;
 import com.zbsp.wepaysp.api.util.AliPayUtil;
 import com.zbsp.wepaysp.api.util.WeixinUtil;
 import com.zbsp.wepaysp.common.constant.SysEnums.ServerType;
@@ -35,6 +36,7 @@ public class SysConfigServiceImpl
     private String serverType;
     
     private String appId4Face2FacePay;
+    private String appId4Edu;
     private String alipayAuthCallBackURL;
     private String alipayWapPayURL;
     private String alipayWapPayReturnURL;
@@ -91,18 +93,32 @@ public class SysConfigServiceImpl
         }
         
         // 检查appId4Face2FacePay是否存在
-        Map<String, Object> app = SysConfig.alipayAppMap.get(appId4Face2FacePay);
-        if (app == null) {
+        Map<String, Object> payApp = SysConfig.alipayAppMap.get(appId4Face2FacePay);
+        if (payApp == null) {
             throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
         }
         
-        if (onlineFlag && AlipayApp.AppType.SANDBOXIE.toString().equals(app.get(SysEnvKey.ALIPAY_APP_TYPE))) {
+        if (onlineFlag && AlipayApp.AppType.SANDBOXIE.toString().equals(payApp.get(SysEnvKey.ALIPAY_APP_TYPE))) {
             throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，上线不能使用沙箱应用");
         }
         
-        // 支付宝支付的配置 FIXME 改为从数据库中读取
-        AliPayUtil.init(app);
+        if (StringUtils.isBlank(appId4Edu)) {
+            throw new SystemInitException("初始化系统配置信息失败，参数缺失：appId4Edu");
+        } else {
+            logger.info("初始化系统配置信息：appId4Edu=" + appId4Edu);
+            SysConfig.appId4Edu = appId4Edu;
+        }
         
+        // 检查appId4Face2FacePay是否存在
+        Map<String, Object> eduApp = SysConfig.alipayAppMap.get(appId4Face2FacePay);
+        if (eduApp == null) {
+            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
+        }
+        
+        // 支付宝支付的配置
+        AliPayUtil.init(payApp);
+        // 支付宝教育缴费的配置
+        AliPayEduUtil.init(eduApp);
     }
     
     /** 
@@ -443,5 +459,9 @@ public class SysConfigServiceImpl
     public void setAlipayAppService(AlipayAppService alipayAppService) {
         this.alipayAppService = alipayAppService;
     }
+
+	public void setAppId4Edu(String appId4Edu) {
+		this.appId4Edu = appId4Edu;
+	}
 
 }
