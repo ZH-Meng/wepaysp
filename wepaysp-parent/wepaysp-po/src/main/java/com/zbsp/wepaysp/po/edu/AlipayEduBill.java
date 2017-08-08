@@ -146,7 +146,7 @@ public class AlipayEduBill
         this.appAuthToken = appAuthToken;
     }
 
-    @Column(name = "SEND_TIME", nullable = false, length = 0)
+    @Column(name = "SEND_TIME", length = 0)
     public Date getSendTime() {
         return this.sendTime;
     }

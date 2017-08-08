@@ -35,6 +35,12 @@ public class AlipayEduTotalBill
     private String modifier;
     private Date modifyTime;
     private String remark;
+    
+    /**账单状态*/
+    public enum OrderStatus {
+        INIT, // 新建
+        SEND_SUCCESS;// 发送成功            
+    }
 
     public AlipayEduTotalBill() {
     }

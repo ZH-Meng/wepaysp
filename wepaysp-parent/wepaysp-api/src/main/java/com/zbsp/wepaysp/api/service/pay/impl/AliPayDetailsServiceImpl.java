@@ -49,8 +49,6 @@ public class AliPayDetailsServiceImpl
     extends BaseService
     implements AliPayDetailsService {
     
-    private final static BigDecimal TIMES_100 = new BigDecimal(100);
-    
     /** 通过状态判断交易是否结束*/
     private boolean tradeIsEnd(int tradeStatus) {
         if (TradeStatus.TRADE_CLOSED.getValue() == tradeStatus 
@@ -906,10 +904,10 @@ public class AliPayDetailsServiceImpl
         payDetails.setBuyerUserId(notifyVO.getBuyer_id());
         payDetails.setBuyerLogonId(notifyVO.getBuyer_logon_id());
         payDetails.setSellerId(notifyVO.getSeller_id());
-        payDetails.setReceiptAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getReceipt_amount())).multiply(TIMES_100).intValue());
-        payDetails.setInvoiceAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getInvoice_amount())).multiply(TIMES_100).intValue());
-        payDetails.setBuyerPayAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getBuyer_pay_amount())).multiply(TIMES_100).intValue());
-        payDetails.setPointAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getPoint_amount())).multiply(TIMES_100).intValue());
+        payDetails.setReceiptAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getReceipt_amount())).multiply(SysEnvKey.TIMES_100).intValue());
+        payDetails.setInvoiceAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getInvoice_amount())).multiply(SysEnvKey.TIMES_100).intValue());
+        payDetails.setBuyerPayAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getBuyer_pay_amount())).multiply(SysEnvKey.TIMES_100).intValue());
+        payDetails.setPointAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getPoint_amount())).multiply(SysEnvKey.TIMES_100).intValue());
 
         if (notifyVO.getGmt_payment() != null) {
             payDetails.setGmtPayment(DateUtil.getTimestamp(DateUtil.getDate(notifyVO.getGmt_payment(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON)));

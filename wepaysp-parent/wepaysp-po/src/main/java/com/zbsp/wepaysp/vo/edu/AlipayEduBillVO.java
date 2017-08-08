@@ -1,5 +1,7 @@
 package com.zbsp.wepaysp.vo.edu;
 
+import java.util.LinkedHashMap;
+
 public class AlipayEduBillVO {
 	private String outTradeNo;
 	private String childName;
@@ -10,6 +12,7 @@ public class AlipayEduBillVO {
 	private String chargeBillTitle;
 	private String chargeItem;
 	private Integer amount;
+	private LinkedHashMap<String, Object> chargeItemMap;
 
 	public String getOutTradeNo() {
 		return outTradeNo;
@@ -82,5 +85,13 @@ public class AlipayEduBillVO {
 	public void setAmount(Integer amount) {
 		this.amount = amount;
 	}
+    
+    public LinkedHashMap<String, Object> getChargeItemMap() {
+        return chargeItemMap;
+    }
+    
+    public void setChargeItemMap(LinkedHashMap<String, Object> chargeItemMap) {
+        this.chargeItemMap = chargeItemMap;
+    }
 
 }

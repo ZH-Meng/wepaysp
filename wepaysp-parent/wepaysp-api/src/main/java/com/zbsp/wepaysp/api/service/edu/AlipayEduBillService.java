@@ -2,6 +2,10 @@ package com.zbsp.wepaysp.api.service.edu;
 
 import java.util.Map;
 
+import com.zbsp.wepaysp.po.edu.AlipayEduBill;
+
+import java.util.List;
+
 /**
  * 教育缴费账单明细服务 
  * @author mengzh
@@ -40,5 +44,8 @@ public interface AlipayEduBillService {
      * @return 符合条件的信息总数
      */
     public int doJoinTransQueryAlipayEduBillCount(Map<String, Object> paramMap);
+    
+    /**批量保存账单明细*/
+    public void doTransBatchSaveAlipayEduBills(List<AlipayEduBill> billList);
     
 }

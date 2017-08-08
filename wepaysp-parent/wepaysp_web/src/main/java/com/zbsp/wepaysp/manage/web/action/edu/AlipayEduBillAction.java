@@ -9,6 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
+import com.zbsp.wepaysp.api.service.edu.AlipayEduTotalBillService;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
@@ -26,6 +27,7 @@ public class AlipayEduBillAction extends PageAction {
 	private AlipayEduTotalBillVO alipayEduTotalBillVO;
 	private List<AlipayEduBillVO> alipayEduBillVOList;
 	private AlipayEduBillService alipayEduBillService;
+	private AlipayEduTotalBillService alipayEduTotalBillService;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -46,10 +48,11 @@ public class AlipayEduBillAction extends PageAction {
 			setAlertMessage("当前用户无权查看缴费账单明细！");
 			return "accessDenied";
 		}
+		alipayEduTotalBillVO = alipayEduTotalBillService.doJoinTransQueryAlipayEduTotalBillByOid(totalBillOid);
 		rowCount = alipayEduBillService.doJoinTransQueryAlipayEduBillCount(paramMap);
 		if (rowCount > 0) {
-			Map<String, Object> resultMap = alipayEduBillService.doJoinTransQueryAlipayEduBill(paramMap, start, size);
-			alipayEduBillVOList = (List<AlipayEduBillVO>) MapUtils.getObject(resultMap, "alipayEduBillVOList");
+			Map<String, Object> resultMap = alipayEduBillService.doJoinTransQueryAlipayEduBill(paramMap, 0, -1);
+			alipayEduBillVOList = (List<AlipayEduBillVO>) MapUtils.getObject(resultMap, "billList");
 		}
 		return "billList";
 	}
@@ -100,13 +103,21 @@ public class AlipayEduBillAction extends PageAction {
 	public List<AlipayEduBillVO> getAlipayEduBillVOList() {
 		return alipayEduBillVOList;
 	}
+	
+    public String getChildName() {
+        return childName;
+    }
 
-	public void setChildName(String childName) {
+    public void setChildName(String childName) {
 		this.childName = childName;
 	}
 
 	public void setAlipayEduBillService(AlipayEduBillService alipayEduBillService) {
 		this.alipayEduBillService = alipayEduBillService;
 	}
+    
+    public void setAlipayEduTotalBillService(AlipayEduTotalBillService alipayEduTotalBillService) {
+        this.alipayEduTotalBillService = alipayEduTotalBillService;
+    }
 
 }
