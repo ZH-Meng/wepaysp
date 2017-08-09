@@ -28,6 +28,7 @@
 		<property name="alipayWapPayURL" value="${alipayWapPayURL}" />
 		<property name="alipayWapPayNotifyURL" value="${alipayWapPayNotifyURL}" />
 		<property name="alipayWapPayReturnURL" value="${alipayWapPayReturnURL}" />
+		<property name="alipayEduNotifyURL" value="${alipayEduNotifyURL}" />
 		<property name="alipayReportFlag" value="${alipayReportFlag}" />
 		<property name="serverType" value="${serverType}" />
 		<property name="onlineFlag" value="${onlineFlag}" />

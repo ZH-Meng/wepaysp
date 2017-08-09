@@ -106,5 +106,8 @@ public class SysConfig {
     
     /**上线开关，为true时为线上模式，false为开发/测试模式*/
     public static boolean onlineFlag;
+    
+    /**支付宝教育缴费异步通知地址*/
+    public static String alipayEduNotifyURL;
 
 }

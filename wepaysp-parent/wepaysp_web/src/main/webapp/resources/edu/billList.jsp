@@ -106,9 +106,9 @@
 						  				<s:property value="#vo.chargeBillTitle" />
 						  			</td>
 						  			<%-- 动态明细金额 --%>
-						  			<s:iterator value="chargeItemMap">
-						  				<td title="<s:number name="value/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />">
-						  					<s:number name="value/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />
+						  			<s:iterator value="chargeItems" var="item">
+						  				<td title="<s:number name="item.itemPrice" type="currency" groupingUsed="true" maximumFractionDigits="2" />">
+						  					<s:number name="item.itemPrice" type="currency" groupingUsed="true" maximumFractionDigits="2" />
 						  				</td>
 						  			</s:iterator>
 						  			

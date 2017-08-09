@@ -10,12 +10,16 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayEcoEduKtBillingSendRequest;
+import com.alipay.api.request.AlipayEcoEduKtSchoolinfoModifyRequest;
 import com.alipay.api.response.AlipayEcoEduKtBillingSendResponse;
+import com.alipay.api.response.AlipayEcoEduKtSchoolinfoModifyResponse;
 import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingSendRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtSchoolinfoModifyRequestBuilder;
 import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.util.Validator;
-import com.zbsp.wepaysp.vo.edu.AlipayEduBillVO;
+import com.zbsp.wepaysp.po.edu.AlipayEduBill;
+import com.zbsp.wepaysp.po.partner.School;
 
 public class AliPayEduUtil {
 
@@ -25,13 +29,30 @@ public class AliPayEduUtil {
     public static AlipayClient eduClient;
     
     /**
+     * 学校信息录入
+     * @throws AlipayApiException 
+     */
+    public static AlipayEcoEduKtSchoolinfoModifyResponse schoolInfoModify(School school) throws AlipayApiException {
+        Validator.checkArgument(school == null, "school 为空");
+        
+        AlipayEcoEduKtSchoolinfoModifyRequestBuilder builder = AliPayPackConverter.school2AlipayEcoEduKtSchoolinfoModifyRequestBuilder(school);
+        
+        AlipayEcoEduKtSchoolinfoModifyRequest request = new AlipayEcoEduKtSchoolinfoModifyRequest();
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AlipayEcoEduKtSchoolinfoModifyRequest bizContent:" + request.getBizContent());
+        
+        return eduClient.execute(request);
+    }
+    
+    /**
      * 发送账单
      * @throws AlipayApiException 
      */
-    public static AlipayEcoEduKtBillingSendResponse billSend(AlipayEduBillVO alipayEduBillVO) throws AlipayApiException {
-        Validator.checkArgument(alipayEduBillVO == null, "alipayEduBillVO为空");
+    public static AlipayEcoEduKtBillingSendResponse billSend(AlipayEduBill alipayEduBill) throws AlipayApiException {
+        Validator.checkArgument(alipayEduBill == null, "alipayEduBill为空");
         
-        AlipayEcoEduKtBillingSendRequestBuilder builder = AliPayPackConverter.alipayEduBillVO2AlipayEcoEduKtBillingSendRequestBuilder(alipayEduBillVO);
+        AlipayEcoEduKtBillingSendRequestBuilder builder = AliPayPackConverter.alipayEduBill2AlipayEcoEduKtBillingSendRequestBuilder(alipayEduBill);
         
         AlipayEcoEduKtBillingSendRequest request = new AlipayEcoEduKtBillingSendRequest();
         // 设置业务参数
@@ -43,7 +64,7 @@ public class AliPayEduUtil {
     
     /**初始化教育缴费配置*/
     public static void init(Map<String, Object> app) {
-		String openApiDomain = SysConfig.onlineFlag ? SysEnvKey.ANT_OPEN_API_DOMAIN : SysEnvKey.ANT_OPEN_API_DOMAIN_DEV;
+		String openApiDomain = SysEnvKey.ANT_OPEN_API_DOMAIN ;
 		String appid = MapUtils.getString(app, SysEnvKey.ALIPAY_APP_ID);
 		String alipayPublicKey = MapUtils.getString(app, SysEnvKey.ALIPAY_PUBLIC_KEY);
 		String signType = MapUtils.getString(app, SysEnvKey.ALIPAY_APP_SIGN_TYPE);

@@ -3,6 +3,7 @@ package com.zbsp.wepaysp.api.service.edu;
 import java.util.Map;
 
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
+import com.zbsp.wepaysp.po.edu.AlipayEduBill.OrderStatus;
 
 import java.util.List;
 
@@ -47,5 +48,11 @@ public interface AlipayEduBillService {
     
     /**批量保存账单明细*/
     public void doTransBatchSaveAlipayEduBills(List<AlipayEduBill> billList);
+
+    /** 根据状态查找账单明细*/
+    public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(OrderStatus status);
+
+    /** 更新账单明细*/
+    public void doTransUpdateAlipayEduBill(AlipayEduBill bill);
     
 }

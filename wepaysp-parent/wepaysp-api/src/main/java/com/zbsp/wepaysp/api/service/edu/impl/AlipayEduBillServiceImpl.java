@@ -2,19 +2,20 @@ package com.zbsp.wepaysp.api.service.edu.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.zbsp.alipay.trade.model.ChargeItems;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
+import com.zbsp.wepaysp.po.edu.AlipayEduBill.OrderStatus;
 import com.zbsp.wepaysp.vo.edu.AlipayEduBillVO;
 
 
@@ -36,9 +37,8 @@ public class AlipayEduBillServiceImpl
                 AlipayEduBillVO billVO = new AlipayEduBillVO();
                 BeanCopierUtil.copyProperties(bill, billVO);
                 
-                @SuppressWarnings("unchecked")
-                LinkedHashMap<String, Object> chargeItemMap = JSONUtil.parseObject(bill.getChargeItem(), LinkedHashMap.class);
-                billVO.setChargeItemMap(chargeItemMap);
+                List<ChargeItems> chargeItems = JSONUtil.parseArray(bill.getChargeItem(), ChargeItems.class);
+                billVO.setChargeItems(chargeItems);
                 resultList.add(billVO);
             }
         }
@@ -89,6 +89,24 @@ public class AlipayEduBillServiceImpl
     public void doTransBatchSaveAlipayEduBills(List<AlipayEduBill> billList) {
         Validator.checkArgument(billList == null, "billList 不能为空");
         commonDAO.saveList(billList, 100);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(OrderStatus status) {
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayEduBill a where 1=1";
+        if (status != null) {
+            jpql += " and a.orderStatus=:STATUS";
+            jpqlMap.put("STATUS", status.name());
+        }
+        return (List<AlipayEduBill>) commonDAO.findObjectList(jpql, jpqlMap, false);
+    }
+
+    @Override
+    public void doTransUpdateAlipayEduBill(AlipayEduBill bill) {
+        Validator.checkArgument(bill == null, "bill 不能为空");
+        commonDAO.update(bill);
     }
 
 }

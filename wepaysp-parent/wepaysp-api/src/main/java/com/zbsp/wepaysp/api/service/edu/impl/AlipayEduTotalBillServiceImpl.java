@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,9 +11,14 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.zbsp.alipay.trade.model.ChargeItems;
+import com.zbsp.alipay.trade.utils.Utils;
 import com.zbsp.wepaysp.api.service.BaseService;
+import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduTotalBillService;
+import com.zbsp.wepaysp.common.config.SysSequenceCode;
+import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
@@ -228,6 +232,8 @@ public class AlipayEduTotalBillServiceImpl
         int totalCount = dataList.size();
         int totalMoney = 0;
         int rowIndex = 1;
+        
+        Map<String, Object> sqlMap = new HashMap<String, Object>();
         for (ArrayList<String> row : dataList) {
             if (row.size() != headers.size()) {
                 code = "fileRowDataError";
@@ -246,7 +252,15 @@ public class AlipayEduTotalBillServiceImpl
 
             bill.setIwoid(Generator.generateIwoid());
             bill.setAlipayEduTotalBillOid(totalBill.getIwoid());
-            bill.setSchoolNo(totalBill.getSchoolNo());
+
+            // 获取 支付订单ID下一个序列值
+            String sql = "select nextval('" + SysSequenceCode.PAY_ORDER + "') as sequence_value";
+            Object seqObj = commonDAO.findObject(sql, sqlMap, true);
+            if (seqObj == null) {
+                throw new IllegalArgumentException("支付订单Id对应序列记录不存在");
+            }
+            bill.setOutTradeNo(Generator.generateSequenceYYYYMMddNum((Integer)seqObj, SysSequenceMultiple.PAY_ORDER));
+            
             bill.setPartner1Oid(totalBill.getPartner1Oid());
             bill.setPartner2Oid(totalBill.getPartner2Oid());
             bill.setPartner3Oid(totalBill.getPartner3Oid());
@@ -255,17 +269,19 @@ public class AlipayEduTotalBillServiceImpl
             bill.setPartnerLevel(school.getPartnerLevel());
             bill.setOrderStatus(OrderStatus.INIT.name());
             bill.setLineNum(rowIndex);
-            bill.setGmtEnd(DateUtil.getDate(totalBill.getCloseTime(), "yyyy-MM-dd HH:mm:ss"));
+            bill.setGmtEnd(Utils.toDate(totalBill.getCloseTime()));
             bill.setEndEnable(totalBill.getCloseTime() == null ? "N" : "Y");            
             bill.setAmount(totalAmount.multiply(SysEnvKey.TIMES_100).intValue());
             bill.setSchoolPid(school.getSchoolPid());
+            bill.setSchoolNo(school.getSchoolNo());
             bill.setIsvPartnerId(school.getIsvPid());
-            //bill.setAppId();
-            //bill.setAppAuthToken();
+            bill.setAppId(SysConfig.appId4Edu);
+            // bill.setAppAuthToken();
             
             if (chanageItemExist) {
                 BigDecimal totalAmountTemp = new BigDecimal(0);
-                Map<String, Object> changeIemMap = new LinkedHashMap<>(); // 确保各项明细有序与列头一致对应
+                List<ChargeItems> chargeItems = new ArrayList<>();
+                
                 for (int index = fixHeaderCount; index < row.size() - 1; index++) {
                     if (!NumberUtils.isCreatable(row.get(index).trim())) {
                         code = "fileRowDataError";
@@ -273,10 +289,12 @@ public class AlipayEduTotalBillServiceImpl
                         return;
                     }
                     BigDecimal money = new BigDecimal(row.get(index));
-                    changeIemMap.put(headers.get(index), money.multiply(SysEnvKey.TIMES_100));
                     totalAmountTemp = totalAmountTemp.add(money);
+                    
+                    ChargeItems item = new ChargeItems(headers.get(index), money.toString());// 明细项金额为元，string类型保存，便于发送账单时直接反序列化
+                    chargeItems.add(item);
                 }
-                bill.setChargeItem(JSONUtil.toJSONString(changeIemMap, false));
+                bill.setChargeItem(JSONUtil.toJSONString(chargeItems, false));
 
                 // 验证合计
                 if (!NumberUtils.isCreatable(row.get(row.size() - 1))) {
@@ -292,7 +310,7 @@ public class AlipayEduTotalBillServiceImpl
                 }
             }
             billList.add(bill);
-            totalMoney += totalAmount.multiply(SysEnvKey.TIMES_100).intValue();
+            totalMoney += totalAmount.multiply(SysEnvKey.TIMES_100).intValue();// 合计金额：单位为分
             rowIndex++;
         }
         totalBill.setTotalCount(totalCount);
