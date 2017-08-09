@@ -25,6 +25,7 @@ import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxEnums.GrantType;
+import com.zbsp.wepaysp.common.constant.WxEnums.SendTempMsgErr;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.StringHelper;
@@ -42,6 +43,8 @@ public final class WeixinUtil {
     private static final Logger logger = LogManager.getLogger(WeixinUtil.class);
     
     private final static int refreshLimitErrorCount = 3;
+    
+    private final static int sendPaySuccessNoticeRetryCount = 5;
 	
     /**FIXME 可以在数据库中灵活配置需要通知的业务和模版ID的对应关系，以及模版ID的启用停用*/
     private static String TEMPLATE_ID_PAY_SUCCESS = "nJWFUU8wDvd7elT4znZivLLHmMYl_ajID6cd4OujHa0";
@@ -111,7 +114,23 @@ public final class WeixinUtil {
         // 调用模版消息发送接口
         String jsonResult = WXPay.requestSendTemplateMsgService(templateMsg, accessToken, certLocalPath, certPassword);
         // 返回消息发送结果（不能确定是否下发至微信用户，需要查看事件推送结果）
-        return JSONUtil.parseObject(jsonResult, SendTemplateMsgResData.class);
+        
+        SendTemplateMsgResData sendResult = null;
+        String errorcode = "";
+        int count = 1;
+        while (!SendTempMsgErr.SUCCESS.getValue().equals(errorcode)) {
+            if (count == sendPaySuccessNoticeRetryCount) {
+                logger.error("发送支付成功消息达到最大重试次数{}，仍然发送失败！！！订单号：{}", sendPaySuccessNoticeRetryCount, outTradeNo);
+                break;
+            } else {
+                if (count > 1)
+                    logger.warn("发送支付成功消息一次未成功，开始第{}次，订单号：{}", count, outTradeNo);
+            }
+            sendResult = JSONUtil.parseObject(jsonResult, SendTemplateMsgResData.class);
+            errorcode = sendResult == null ? "" : sendResult.getErrcode();
+            count++;
+        }
+        return sendResult;
     }
     
     /**

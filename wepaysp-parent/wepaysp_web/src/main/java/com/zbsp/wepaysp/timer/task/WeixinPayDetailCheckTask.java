@@ -132,6 +132,8 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
                     }
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 调用查询订单API结束 ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
                 }
+                
+                closeFlag = false;
             }
             
             logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 调用查询订单API成功次数：" + querySuccTimes + ", 失败次数：" + queryErrTimes + " ]",

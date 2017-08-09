@@ -1,86 +1,98 @@
 package com.zbsp.wepaysp.vo.edu;
 
+import java.util.List;
+
 public class AlipayEduBillVO {
-	private String outTradeNo;
-	private String childName;
-	private String userMobile;
-	private String userName;
-	private String classIn;
-	private String orderStatus;
-	private String chargeBillTitle;
-	private String chargeItem;
-	private Integer amount;
 
-	public String getOutTradeNo() {
-		return outTradeNo;
-	}
+    private String outTradeNo;
+    private String childName;
+    private String userMobile;
+    private String userName;
+    private String classIn;
+    private String orderStatus;
+    private String chargeBillTitle;
+    private String chargeItem;
+    private Integer amount;
+    private List chargeItems;// CharegeItems的List
 
-	public void setOutTradeNo(String outTradeNo) {
-		this.outTradeNo = outTradeNo;
-	}
+    public String getOutTradeNo() {
+        return outTradeNo;
+    }
 
-	public String getChildName() {
-		return childName;
-	}
+    public void setOutTradeNo(String outTradeNo) {
+        this.outTradeNo = outTradeNo;
+    }
 
-	public void setChildName(String childName) {
-		this.childName = childName;
-	}
+    public String getChildName() {
+        return childName;
+    }
 
-	public String getUserMobile() {
-		return userMobile;
-	}
+    public void setChildName(String childName) {
+        this.childName = childName;
+    }
 
-	public void setUserMobile(String userMobile) {
-		this.userMobile = userMobile;
-	}
+    public String getUserMobile() {
+        return userMobile;
+    }
 
-	public String getUserName() {
-		return userName;
-	}
+    public void setUserMobile(String userMobile) {
+        this.userMobile = userMobile;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    public String getUserName() {
+        return userName;
+    }
 
-	public String getClassIn() {
-		return classIn;
-	}
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
-	public void setClassIn(String classIn) {
-		this.classIn = classIn;
-	}
+    public String getClassIn() {
+        return classIn;
+    }
 
-	public String getOrderStatus() {
-		return orderStatus;
-	}
+    public void setClassIn(String classIn) {
+        this.classIn = classIn;
+    }
 
-	public void setOrderStatus(String orderStatus) {
-		this.orderStatus = orderStatus;
-	}
+    public String getOrderStatus() {
+        return orderStatus;
+    }
 
-	public String getChargeBillTitle() {
-		return chargeBillTitle;
-	}
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
+    }
 
-	public void setChargeBillTitle(String chargeBillTitle) {
-		this.chargeBillTitle = chargeBillTitle;
-	}
+    public String getChargeBillTitle() {
+        return chargeBillTitle;
+    }
 
-	public String getChargeItem() {
-		return chargeItem;
-	}
+    public void setChargeBillTitle(String chargeBillTitle) {
+        this.chargeBillTitle = chargeBillTitle;
+    }
 
-	public void setChargeItem(String chargeItem) {
-		this.chargeItem = chargeItem;
-	}
+    public String getChargeItem() {
+        return chargeItem;
+    }
 
-	public Integer getAmount() {
-		return amount;
-	}
+    public void setChargeItem(String chargeItem) {
+        this.chargeItem = chargeItem;
+    }
 
-	public void setAmount(Integer amount) {
-		this.amount = amount;
-	}
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public List getChargeItems() {
+        return chargeItems;
+    }
+
+    public void setChargeItems(List chargeItems) {
+        this.chargeItems = chargeItems;
+    }
 
 }

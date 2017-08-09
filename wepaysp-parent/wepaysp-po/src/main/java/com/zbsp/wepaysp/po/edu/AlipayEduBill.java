@@ -52,6 +52,17 @@ public class AlipayEduBill
     private Date modifyTime;
     private String remark;
 
+    /** 账单状态 */
+    public enum OrderStatus {
+        INIT, // 新建
+        NOT_PAY, // 待缴费 （订单发送后状态）
+        PAYING, // 支付中
+        PAY_SUCCESS, // 支付成功，处理中 （收到支付成功的异步通知后状态）
+        BILLING_SUCCESS, // 缴费成功 （同步教育接口状态成功后）
+        TIMEOUT_CLOSED, // 逾期关闭账单
+        ISV_CLOSED// 账单关闭 （同步教育接口订单主动关闭成功后状态）
+    }
+    
     public AlipayEduBill() {
     }
 
@@ -146,7 +157,7 @@ public class AlipayEduBill
         this.appAuthToken = appAuthToken;
     }
 
-    @Column(name = "SEND_TIME", nullable = false, length = 0)
+    @Column(name = "SEND_TIME", length = 0)
     public Date getSendTime() {
         return this.sendTime;
     }
