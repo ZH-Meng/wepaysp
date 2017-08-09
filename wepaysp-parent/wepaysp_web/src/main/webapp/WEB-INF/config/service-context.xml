@@ -18,14 +18,17 @@
 		<property name="payClientCheckURL" value="${payClientCheckURL}" />
 		<property name="wxPayCallBackURL" value="${wxPayCallBackURL}" />
 		<property name="wxPayNotifyURL" value="${wxPayNotifyURL}" />
+		<property name="wxPayMessageLinkURL" value="${wxPayMessageLinkURL}" />
 		<property name="bindCallBackURL" value="${bindCallBackURL}" />
 		<property name="qRCodeRootPath" value="${qRCodeRootPath}" />
 		<property name="appidQrCodePath" value="${appidQrCodePath}" />
 		<property name="appId4Face2FacePay" value="${appId4Face2FacePay}" />
+		<property name="appId4Edu" value="${appId4Edu}" />
 		<property name="alipayAuthCallBackURL" value="${alipayAuthCallBackURL}" />
 		<property name="alipayWapPayURL" value="${alipayWapPayURL}" />
 		<property name="alipayWapPayNotifyURL" value="${alipayWapPayNotifyURL}" />
 		<property name="alipayWapPayReturnURL" value="${alipayWapPayReturnURL}" />
+		<property name="alipayEduNotifyURL" value="${alipayEduNotifyURL}" />
 		<property name="alipayReportFlag" value="${alipayReportFlag}" />
 		<property name="serverType" value="${serverType}" />
 		<property name="onlineFlag" value="${onlineFlag}" />
@@ -68,7 +71,6 @@
 	</bean>
 	
 	<bean id="weixinPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.WeixinPayDetailsServiceImpl" parent="baseService">
-		<property name="sysLogService" ref="sysLogService" />
 		<property name="sysConfigService" ref="sysConfigService" />
 	</bean>
     
@@ -94,7 +96,6 @@
 	</bean>
 	
 	<bean id="payNoticeBindWeixinService" class="com.zbsp.wepaysp.api.service.weixin.impl.PayNoticeBindWeixinServiceImpl" parent="baseService">
-		<property name="sysLogService" ref="sysLogService" />
 	</bean>	
 	
 	<bean id="appManageService" class="com.zbsp.wepaysp.api.service.app.impl.AppManageServiceImpl" parent="baseService">
@@ -106,7 +107,6 @@
 	</bean>
 
 	<bean id="aliPayDetailsService" class="com.zbsp.wepaysp.api.service.pay.impl.AliPayDetailsServiceImpl" parent="baseService">
-		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	
 	<bean id="aliPayDetailsMainService" class="com.zbsp.wepaysp.api.service.main.pay.AliPayDetailsMainServiceImpl" parent="baseService">
@@ -115,7 +115,6 @@
 	</bean>
 	
 	<bean id="alipayAppAuthDetailsService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppAuthDetailsServiceImpl" parent="baseService">
-		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	
 	<bean id="alipayAppService" class="com.zbsp.wepaysp.api.service.alipay.impl.AlipayAppServiceImpl" parent="baseService">
@@ -140,6 +139,7 @@
 	</bean>
 	
 	<bean id="alipayEduTotalBillService" class="com.zbsp.wepaysp.api.service.edu.impl.AlipayEduTotalBillServiceImpl" parent="baseService" init-method="init">
+		<property name="alipayEduBillService" ref="alipayEduBillService" />
 		<property name="fixedExcelHeaders"  value="${fixedExcelHeaders}"/>
 	</bean>
 	<bean id="alipayEduBillService" class="com.zbsp.wepaysp.api.service.edu.impl.AlipayEduBillServiceImpl" parent="baseService">

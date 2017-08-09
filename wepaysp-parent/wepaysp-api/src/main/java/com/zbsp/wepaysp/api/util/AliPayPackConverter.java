@@ -2,19 +2,30 @@ package com.zbsp.wepaysp.api.util;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.alipay.api.response.AlipayTradePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.zbsp.alipay.trade.model.ChargeItems;
 import com.zbsp.alipay.trade.model.ExtendParams;
+import com.zbsp.alipay.trade.model.UserDetails;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingSendRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtSchoolinfoModifyRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePrecreateRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradeWapPayRequestBuilder;
+import com.zbsp.alipay.trade.utils.Utils;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
+import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.po.edu.AlipayEduBill;
+import com.zbsp.wepaysp.po.partner.School;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
 
 /**
@@ -258,4 +269,41 @@ public class AliPayPackConverter {
         }
         return builder;
     }
+
+    public static AlipayEcoEduKtSchoolinfoModifyRequestBuilder school2AlipayEcoEduKtSchoolinfoModifyRequestBuilder(School school) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**缴费账单发送请求包转换*/
+	public static AlipayEcoEduKtBillingSendRequestBuilder alipayEduBill2AlipayEcoEduKtBillingSendRequestBuilder(AlipayEduBill alipayEduBill) {
+		AlipayEcoEduKtBillingSendRequestBuilder builder = new AlipayEcoEduKtBillingSendRequestBuilder();
+        try {
+            UserDetails user = new UserDetails(alipayEduBill.getUserMobile(), alipayEduBill.getUserName(), alipayEduBill.getUserRelation(), alipayEduBill.getUserChangeMobile());
+            
+            List<UserDetails> users = new ArrayList<>();
+            users.add(user);
+            
+        	builder.setUsers(users)
+        	    .setSchoolPid(alipayEduBill.getSchoolPid())
+        	    .setSchoolNo(alipayEduBill.getSchoolNo())
+        	    .setChildName(alipayEduBill.getChildName())
+        	    .setGrade(alipayEduBill.getGrade())
+        	    .setClassIn(alipayEduBill.getClassIn())
+        	    .setStudentCode(alipayEduBill.getStudentCode())
+                .setStudentIdentify(alipayEduBill.getStudentIdentify())
+                .setStatus(alipayEduBill.getStatus())
+                .setOutTradeNo(alipayEduBill.getOutTradeNo())
+                .setChargeBillTitle(alipayEduBill.getChargeBillTitle())
+                .setChargeItem(JSONUtil.parseArray(alipayEduBill.getChargeItem(), ChargeItems.class))
+                .setAmount(Utils.toAmount(alipayEduBill.getAmount()))
+                .setGmtEnd(StringUtils.isBlank(alipayEduBill.getGmtEnd()) ? Utils.toDate(new Date()) :alipayEduBill.getGmtEnd()) // 必填项，所以为空时endEnable为N，设置当前时间，所以不会生效
+                .setEndEnable(alipayEduBill.getEndEnable())
+                .setPartnerId(alipayEduBill.getIsvPartnerId());
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return builder;
+	}
+
 }

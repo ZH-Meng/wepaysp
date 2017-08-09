@@ -57,5 +57,19 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
-  </dependencies>
+    
+    <dependency>
+      <groupId>com.alipay.api</groupId>
+      <artifactId>alipay-sdk</artifactId>
+      <version>java20170411150054</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/alipay-sdk-java20170411150054.jar</systemPath>
+   </dependency>
+   
+    <dependency>
+	    <groupId>acom.alipay</groupId>
+	    <artifactId>alipay-edu</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+    </dependency>
+ </dependencies>
 </project>

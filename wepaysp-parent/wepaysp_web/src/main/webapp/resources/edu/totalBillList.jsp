@@ -27,7 +27,7 @@
 											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})"/>
 										至	
 										<input type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
-											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})"/>
+											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d+1}'})"/>
 									</td>
 									<th>账单名称</th>
 									<td><s:textfield name="billName" id="billName" maxlength="20"/></td>
@@ -68,8 +68,8 @@
 						  				<s:property value="#vo.billName" />
 						  			</td>
 						  			<td title="操作">
-					  					<a href="<%=request.getContextPath()%>/resources/edu/totalbillmanage!billDetail.action?totalBillOid=<s:property value="#vo.iwoid" />" >查看</a>
-					  					<a href="javascript:void(0);" onclick="alipayManage('<s:property value="#dealerVo.iwoid" />')">下载账单</a>
+					  					<a href="<%=request.getContextPath()%>/resources/edu/billdetail!list.action?totalBillOid=<s:property value="#vo.iwoid" />" >查看</a>
+					  					<a href="<%=request.getContextPath()%>/resources/edu/billdetail!downloadBill.action?totalBillOid=<s:property value="#vo.iwoid" />" >下载账单</a>
 						  			</td>
 						  		</tr>
 						  		</s:iterator>
@@ -93,7 +93,7 @@
 		     <form action="<%=request.getContextPath()%>/resources/edu/totalbillmanage!uploadBill.action"  enctype="multipart/form-data" method="post">
 	            <label for="billFile">缴费账单Excel：</label><input type="file" name="billFile" />
 	            <label for="endTime">账单截止日期：</label><input type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
-											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-%d'})"/>
+											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',minDate:'%y-%M-%d'})"/>
 	            <label for="收费名称"></label><input type="text" name="billName"/>
 	            <input type="submit" value="发送" />
 	            <input type="button" value="关闭" />

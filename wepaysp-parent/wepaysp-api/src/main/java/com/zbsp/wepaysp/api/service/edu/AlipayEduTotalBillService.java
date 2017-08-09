@@ -44,6 +44,18 @@ public interface AlipayEduTotalBillService {
      */
     public int doJoinTransQueryAlipayEduTotalBillCount(Map<String, Object> paramMap);
 
-    public Map<String, Object> doTransSaveTotalBill(String billName, String endTime, String excelPath, List<ArrayList<String>> dataList);
+    /**
+     * 保存缴费账单及明细（检查合法后方可保存）
+     * 
+     * @param schoolNo 学校唯一编码，必填
+     * @param billName 缴费账单名称，必填
+     * @param endTime 过期时间，非必填
+     * @param excelPath excel账单文件存储路径，必填
+     * @param dataList excel内容数据，必填
+     * @return
+     */
+    public Map<String, Object> doTransSaveTotalBill(String schoolNo, String billName, String endTime, String excelPath, List<ArrayList<String>> dataList);
+
+    public AlipayEduTotalBillVO doJoinTransQueryAlipayEduTotalBillByOid(String totalBillOid);
     
 }
