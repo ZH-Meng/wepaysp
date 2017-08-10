@@ -38,6 +38,7 @@ public class AlipayEduBill
     private String studentIdentify;
     private String status;
     private String outTradeNo;
+    private String k12OrderNo;
     private String chargeBillTitle;
     private String chargeItem;
     private Integer amount;
@@ -407,6 +408,15 @@ public class AlipayEduBill
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+    
+    @Column(name = "K12_ORDER_NO", length = 12)
+    public String getK12OrderNo() {
+        return k12OrderNo;
+    }
+    
+    public void setK12OrderNo(String k12OrderNo) {
+        this.k12OrderNo = k12OrderNo;
     }
 
 }

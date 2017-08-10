@@ -244,7 +244,7 @@ public class AlipayEcoEduKtBillingSendRequestBuilder
         private String chargeBillTitle;
 
         /** 可选，缴费详情：输入json格式字符串。Json定义：key填写缴费项名称，value填写缴费项金额，金额保留2位小数。至少输入一个 */
-        @SerializedName("chargeItem")
+        @SerializedName("charge_item")
         private List<ChargeItems> chargeItem;
 
         /** 必填，总金额,保留两位小数。总金额= charge_item各子项的金额总和 */
