@@ -490,7 +490,7 @@ public class AliPayDetailsMainServiceImpl
                             aliPayDetailsService.doTransUpdateNotifyResult(notifyVO, null, updateRemark + "交易已被处理，只更新通知信息(不含状态)；");
                         } else {// 当前交易处理中
                             if (TradeState4AliPay.TRADE_CLOSED.toString().equals(tradeStatusNotify)) {
-                                if (payDetailsVO.getRefundFee() == null || payDetailsVO.getRefundFee() > 0) {// 交易关闭
+                                if (payDetailsVO.getRefundFee() == null || payDetailsVO.getRefundFee() == 0) {// 交易关闭
                                     logger.info(logPrefix + "异步通知交易已取消，准备更新交易状态为关闭");
                                     aliPayDetailsService.doTransUpdateNotifyResult(notifyVO, TradeStatus.TRADE_CLOSED, updateRemark + "通知交易已取消，更新交易状态为关闭；");
                                 } else {// 交易已全额退款，理论首次通知走此分支

@@ -52,7 +52,7 @@ public class AliPayEduBillSendTask extends TimerBasicTask {
                         logger.warn(LOG_PREFIX + "发送成功");
                         bill.setStudentNo(response.getStudentNo());
                         bill.setOrderStatus(OrderStatus.NOT_PAY.name());
-                        //TODO
+                        bill.setK12OrderNo(response.getOrderNo());
                         alipayEduBillService.doTransUpdateAlipayEduBill(bill);
                     }
                     Thread.sleep(1000);

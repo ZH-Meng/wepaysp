@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill.OrderStatus;
+import com.zbsp.wepaysp.po.edu.AlipayEduNotify;
 
 import java.util.List;
 
@@ -54,5 +55,8 @@ public interface AlipayEduBillService {
 
     /** 更新账单明细*/
     public void doTransUpdateAlipayEduBill(AlipayEduBill bill);
+
+    /** 根据通知更新账单状态*/
+    public AlipayEduBill doTransUpdateBillByAlipayEduNotify(AlipayEduNotify eduNotify);
     
 }

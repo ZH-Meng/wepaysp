@@ -13,6 +13,8 @@ import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.zbsp.alipay.trade.model.ChargeItems;
 import com.zbsp.alipay.trade.model.ExtendParams;
 import com.zbsp.alipay.trade.model.UserDetails;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingModifyRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingSendRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtSchoolinfoModifyRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayTradePayRequestBuilder;
@@ -305,5 +307,29 @@ public class AliPayPackConverter {
         }
         return builder;
 	}
+
+	/**同步账单状态*/
+    public static AlipayEcoEduKtBillingModifyRequestBuilder alipayEduBill2AlipayEcoEduKtBillingModifyRequestBuilder(AlipayEduBill alipayEduBill) {
+        AlipayEcoEduKtBillingModifyRequestBuilder builder = new AlipayEcoEduKtBillingModifyRequestBuilder();
+        try {
+            builder.setOutTradeNo(alipayEduBill.getK12OrderNo());
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return builder;
+    }
+    
+    /**同步账单状态，1：缴费成功，2关闭账单，3退费，4同步网商状态返回的状态*/
+    public static AlipayEcoEduKtBillingQueryRequestBuilder alipayEduBill2AlipayEcoEduKtBillingQueryRequestBuilder(AlipayEduBill alipayEduBill) {
+        AlipayEcoEduKtBillingQueryRequestBuilder builder = new AlipayEcoEduKtBillingQueryRequestBuilder();
+        try {
+            builder.setOutTradeNo(alipayEduBill.getK12OrderNo())
+               .setIsvPid(alipayEduBill.getIsvPartnerId())
+               .setSchoolPid(alipayEduBill.getSchoolPid());
+        } catch (Exception e) {
+            throw new ConvertPackException(e.getMessage());
+        }
+        return builder;
+    }
 
 }

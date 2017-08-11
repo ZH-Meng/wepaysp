@@ -1,7 +1,5 @@
 package com.zbsp.wepaysp.manage.web.action.edu;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduTotalBillService;
 import com.zbsp.wepaysp.api.service.main.edu.AlipayEduBillMainService;
-import com.zbsp.wepaysp.common.constant.AliPayEnums;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
@@ -160,6 +157,10 @@ public class AlipayEduBillAction extends PageAction {
     
     public void setAlipayEduTotalBillService(AlipayEduTotalBillService alipayEduTotalBillService) {
         this.alipayEduTotalBillService = alipayEduTotalBillService;
+    }
+    
+    public void setAlipayEduBillMainService(AlipayEduBillMainService alipayEduBillMainService) {
+        this.alipayEduBillMainService = alipayEduBillMainService;
     }
 
 }

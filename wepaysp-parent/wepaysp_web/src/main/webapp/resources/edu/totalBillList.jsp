@@ -7,6 +7,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>缴费账单管理</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
+	<link href="<%=request.getContextPath()%>/layui/css/layui.css" rel="stylesheet" />
 </head>
 <body class="bgbj">
 	<div class="rightbg">
@@ -95,8 +96,6 @@
 	            <label for="endTime">账单截止日期：</label><input type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
 											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',minDate:'%y-%M-%d'})"/>
 	            <label for="收费名称"></label><input type="text" name="billName"/>
-	            <input type="submit" value="发送" />
-	            <input type="button" value="关闭" />
 	        </form>
     	</div>
 	</div>
@@ -104,18 +103,53 @@
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
+	<script src="<%=request.getContextPath()%>/layui/layui.js" charset="utf-8"></script>
 	
 	<script type="text/javascript">
-		$("#sendBIll-btn").toggle(function() {
+		/* $("#sendBIll-btn").toggle(function() {
 			$("#uploadBillDialog").show();
 		}, function() {
 			$("#uploadBillDialog").hide();
-		});
+		}); */
+		
 		function showUploadBillDialog() {
 			$("#dealerOid").val(iwoid);
 			invokeAction('goToAlipayManage');
 		}
+		
+		layui.use('layer', function(){
+			  var layer = layui.layer;
+		});
+		
+		
+		$('#sendBIll-btn').on('click', function(){
+		  var type ='auto', text = $(this).text();
+			  
+			layer.open({
+		        type: 1
+		        ,offset: type //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+		        ,id: 'LAY_demo'+type //防止重复弹出
+		        ,content: $("#uploadBillDialog")
+		        ,btn: ['取消','确认']
+		        ,btnAlign: 'c' //按钮居中
+	        	,yes: function(index, layero){
+	        	    //按钮【按钮一】的回调
+	        	    return false;
+	        	  }
+	        	  ,btn2: function(index, layero){
+	        	    //按钮【按钮二】的回调
+	        	    
+	        	    //return false 开启该代码可禁止点击该按钮关闭
+	        		  return false;
+	        	  }
+		        ,shade: 0.1
+		        ,yes: function(){
+		          layer.closeAll();
+		        }
+		      });
+		  });
 	</script>
+	
 	
 </body>
 </html>
