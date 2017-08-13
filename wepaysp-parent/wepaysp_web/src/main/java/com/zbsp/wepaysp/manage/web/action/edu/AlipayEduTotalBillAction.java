@@ -50,6 +50,8 @@ public class AlipayEduTotalBillAction
     private String billFileFileName;
     private String billFileContentType;
     private Map<String, Object> dataMap;
+    private String saveName;
+    
 
     public void init() {
         if (StringUtils.isBlank(billFileRootDir) || StringUtils.isBlank(billTemplateAbsolutePath)) {
@@ -106,7 +108,7 @@ public class AlipayEduTotalBillAction
     }
 
     /** 上传缴费账单（待定时发送） */
-    public String uploadBill() {
+    public String uploadExcel() {
         logger.info(LOG_PREFIX, "上传", "开始");
         logger.info("收费名称：{}, 文件名：{}", billName, billFileFileName);
         String code = "success";
@@ -120,21 +122,18 @@ public class AlipayEduTotalBillAction
                     msg = "请选择缴费账单文件并上传！";
                 } else {
                     // 检查文件类型
-                    PoiExcelHelper excelHelper = null;
                     String excelSuffix = "";
                     if ("application/vnd.ms-excel".equalsIgnoreCase(billFileContentType)) {
                         excelSuffix = ".xls";
-                        excelHelper = new PoiExcel2k3Helper();
                     } else if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equalsIgnoreCase(billFileContentType)) {
                         excelSuffix = ".xlsx";
-                        excelHelper = new PoiExcel2k7Helper();
                     } else {
                         code = "fileTypeInvalid";
                         msg = "账单文件类型无效，只支持后缀未.xls或.xlsx的excel！";
                         logger.warn(LOG_PREFIX + "原因：{}", "上传", "失败", "fileTypeInvalid");
                     }
 
-                    if (excelHelper != null) {
+                    if (StringUtils.isNotBlank(excelSuffix)) {
                         // 保存上传的excel账单文件
                         String billFileSaveDir = billFileRootDir.concat(File.separator).concat(manageUser.getDataSchool().getSchoolNo());// 保存路径
                         String billFileSaveName = DateUtil.getDate(new Date(), "yyyyMMddHHmmssSSS").concat(excelSuffix); // 保存名称
@@ -146,15 +145,9 @@ public class AlipayEduTotalBillAction
                             msg = "缴费账单上传失败！";
                             logger.error(LOG_PREFIX + "\n{}", "上传", "失败", e.getMessage(), e);
                         }
-                        // 读取并封装EXCEL数据
-                        List<ArrayList<String>> dataList = excelHelper.readExcel(billExcelFile, 0, "1-", 1);
 
-                        // 保存账单
-                        Map<String, Object> resultMap = alipayEduTotalBillService.doTransSaveTotalBill(manageUser.getDataSchool().getSchoolNo(), billName, endTime, billExcelFile.getAbsolutePath(),
-                            dataList);
-                        code = MapUtils.getString(resultMap, "code");
-                        msg = MapUtils.getString(resultMap, "msg");
-                        logger.warn(LOG_PREFIX + "- code : {}, msg : {}", "上传", "结果", code, msg);
+                        dataMap.put("displayName", billFileFileName);
+                        dataMap.put("saveName", billFileSaveName);
                     }
                 }
             } else {
@@ -171,6 +164,44 @@ public class AlipayEduTotalBillAction
         dataMap.put("code", code);
         dataMap.put("msg", msg);
         return "uploadResult";
+    }
+    
+    public String newBill() {
+		String code = "fail";
+		String msg = "缴费账单上传失败！";
+		dataMap = new HashMap<>();
+
+		PoiExcelHelper excelHelper = null;
+		ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
+			if (StringUtils.isBlank(saveName)) {
+			} else if (saveName.endsWith(".xls")) {
+				excelHelper = new PoiExcel2k3Helper();
+			} else if (saveName.endsWith(".xlsx")) {
+				excelHelper = new PoiExcel2k7Helper();				
+			} else {
+			}
+			if (excelHelper != null) {
+				String billFileSaveDir = billFileRootDir.concat(File.separator).concat(manageUser.getDataSchool().getSchoolNo());// 保存路径
+				File billExcelFile = new File(billFileSaveDir, saveName);
+				// 读取并封装EXCEL数据
+				List<ArrayList<String>> dataList = excelHelper.readExcel(billExcelFile, 0, "1-", 1);
+				
+				// 保存账单
+				Map<String, Object> resultMap = alipayEduTotalBillService.doTransSaveTotalBill(manageUser.getDataSchool().getSchoolNo(), billName, endTime, billExcelFile.getAbsolutePath(), dataList);
+				code = MapUtils.getString(resultMap, "code");
+				msg = MapUtils.getString(resultMap, "msg");
+				logger.info(LOG_PREFIX + "- code : {}, msg : {}", "上传", "结果", code, msg);
+			}
+		} else {
+			code = "accessDenied";
+			msg = "当前用户无权上传缴费账单！";
+			logger.warn(LOG_PREFIX + "原因：{}", "上传", "失败", "accessDenied");
+		}
+		// 返回上传结果json串
+		dataMap.put("code", code);
+		dataMap.put("msg", msg);
+		return "uploadResult";
     }
 
     public void setBillFileRootDir(String billFileRootDir) {
@@ -231,6 +262,14 @@ public class AlipayEduTotalBillAction
 
 	public Map<String, Object> getDataMap() {
 		return dataMap;
+	}
+
+	public String getSaveName() {
+		return saveName;
+	}
+
+	public void setSaveName(String saveName) {
+		this.saveName = saveName;
 	}
 
 }
