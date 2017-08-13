@@ -4,6 +4,12 @@
         "http://struts.apache.org/dtds/struts-2.3.dtd">
 <struts>
 	<package name="partner" namespace="/resources/partner" extends="wepaysp-manage-default">
+	    <!-- 学校管理 -->
+		<action name="schoolmanage" class="schoolAction">
+			<result name="schoolList">/resources/partner/schoolList.jsp</result>
+			<result name="createSchool">/resources/partner/createSchool.jsp</result>
+			<result name="updateSchool">/resources/partner/updateSchool.jsp</result>	
+		</action>
 		<!-- 代理商管理 -->
 		<action name="partnermanage" class="partnerAction">
 			<result name="partnerList">/resources/partner/partnerList.jsp</result>

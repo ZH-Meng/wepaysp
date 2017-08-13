@@ -49,13 +49,20 @@ public class WeixinDownloadBillTask extends TimerBasicTask {
     public void doJob() {
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[开始]"));
         
-        String initDate = billDate;
-        if (StringUtils.isBlank(initDate)) {
-            initDate = new DateTime().minusDays(1).toString("yyyyMMdd");
-        }
-        
+        String initDate = billDate; 
         //获取顶级渠道商，分渠道商下载对账单
         List<Partner> topPartnerList = partnerService.doJoinTransQueryTopPartner(null, null);
+        
+        
+        for(int i=96; i>1 ;i--){
+        	initDate = new DateTime().minusDays(i).toString("yyyyMMdd");
+        
+        
+//        if (StringUtils.isBlank(initDate)) {
+//            initDate = new DateTime().minusDays(1).toString("yyyyMMdd");
+//        }
+        
+
         
         for(Partner partner:topPartnerList){
             // 从内存中获取服务商配置信息
@@ -94,7 +101,7 @@ public class WeixinDownloadBillTask extends TimerBasicTask {
     		}
         }
         
-
+        }
        
         
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[结束]"));

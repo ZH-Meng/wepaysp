@@ -38,4 +38,10 @@
 		<property name="payNoticeBindWeixinService" ref="payNoticeBindWeixinService" />
 	</bean>
 	
+	<bean id="schoolAction" class="com.zbsp.wepaysp.manage.web.action.partner.SchoolAction" scope="prototype">
+		<property name="schoolService" ref="schoolService"></property>
+		<property name="partnerEmployeeService" ref="partnerEmployeeService"></property>
+		<property name="alipayEduRegionService" ref="alipayEduRegionService" />		
+	</bean>	
+	
 </beans>
