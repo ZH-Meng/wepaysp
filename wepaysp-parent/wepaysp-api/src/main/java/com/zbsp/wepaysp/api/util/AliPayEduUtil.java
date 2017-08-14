@@ -9,13 +9,18 @@ import org.apache.logging.log4j.Logger;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayEcoEduKtBillingModifyRequest;
+import com.alipay.api.request.AlipayEcoEduKtBillingQueryRequest;
 import com.alipay.api.request.AlipayEcoEduKtBillingSendRequest;
 import com.alipay.api.request.AlipayEcoEduKtSchoolinfoModifyRequest;
+import com.alipay.api.response.AlipayEcoEduKtBillingModifyResponse;
+import com.alipay.api.response.AlipayEcoEduKtBillingQueryResponse;
 import com.alipay.api.response.AlipayEcoEduKtBillingSendResponse;
 import com.alipay.api.response.AlipayEcoEduKtSchoolinfoModifyResponse;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingModifyRequestBuilder;
+import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingQueryRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtBillingSendRequestBuilder;
 import com.zbsp.alipay.trade.model.builder.AlipayEcoEduKtSchoolinfoModifyRequestBuilder;
-import com.zbsp.wepaysp.api.service.SysConfig;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
@@ -58,6 +63,41 @@ public class AliPayEduUtil {
         // 设置业务参数
         request.setBizContent(builder.toJsonString());
         logger.info("AlipayEcoEduKtBillingSendRequest bizContent:" + request.getBizContent());
+        
+        return eduClient.execute(request);
+    }
+    
+    /**
+     * 同步账单状态，1：缴费成功，2关闭账单，3退费，4同步网商状态返回的状态
+     * @throws AlipayApiException 
+     */
+    public static AlipayEcoEduKtBillingModifyResponse billModify(AlipayEduBill alipayEduBill, int status) throws AlipayApiException {
+        Validator.checkArgument(alipayEduBill == null, "alipayEduBill为空");
+        
+        AlipayEcoEduKtBillingModifyRequestBuilder builder = AliPayPackConverter.alipayEduBill2AlipayEcoEduKtBillingModifyRequestBuilder(alipayEduBill);
+        builder.setStatus(String.valueOf(status));
+        
+        AlipayEcoEduKtBillingModifyRequest request = new AlipayEcoEduKtBillingModifyRequest();
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AlipayEcoEduKtBillingModifyRequest bizContent:" + request.getBizContent());
+        
+        return eduClient.execute(request);
+    }
+    
+    /**
+     * 账单查询
+     * @throws AlipayApiException 
+     */
+    public static AlipayEcoEduKtBillingQueryResponse billQuery(AlipayEduBill alipayEduBill) throws AlipayApiException {
+        Validator.checkArgument(alipayEduBill == null, "alipayEduBill为空");
+        
+        AlipayEcoEduKtBillingQueryRequestBuilder builder = AliPayPackConverter.alipayEduBill2AlipayEcoEduKtBillingQueryRequestBuilder(alipayEduBill);
+        
+        AlipayEcoEduKtBillingQueryRequest request = new AlipayEcoEduKtBillingQueryRequest();
+        // 设置业务参数
+        request.setBizContent(builder.toJsonString());
+        logger.info("AlipayEcoEduKtBillingQueryRequest bizContent:" + request.getBizContent());
         
         return eduClient.execute(request);
     }

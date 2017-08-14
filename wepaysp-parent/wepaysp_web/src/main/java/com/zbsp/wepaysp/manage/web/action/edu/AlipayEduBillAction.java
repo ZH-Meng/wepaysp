@@ -5,11 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.collections.MapUtils;
+import org.apache.struts2.ServletActionContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduTotalBillService;
+import com.zbsp.wepaysp.api.service.main.edu.AlipayEduBillMainService;
+import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
 import com.zbsp.wepaysp.po.manage.SysUser;
@@ -28,6 +34,7 @@ public class AlipayEduBillAction extends PageAction {
 	private List<AlipayEduBillVO> alipayEduBillVOList;
 	private AlipayEduBillService alipayEduBillService;
 	private AlipayEduTotalBillService alipayEduTotalBillService;
+	private AlipayEduBillMainService alipayEduBillMainService;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -71,6 +78,38 @@ public class AlipayEduBillAction extends PageAction {
 	public InputStream getBillData() {
 		return null;
 	}
+	
+    /**
+     * 账单异步通知
+     */
+    public void asynNotify() {
+        String logPrefix = "处理支付宝教育缴费账单异步通知请求 - ";
+        logger.info(logPrefix + "开始");
+        // 校验签名
+        HttpServletRequest request = ServletActionContext.getRequest();
+        HttpServletResponse response = ServletActionContext.getResponse();
+
+        // 获取所有请求参数
+        @SuppressWarnings("unchecked")
+        Map<String, String[]> parameterMap = request.getParameterMap();
+
+        Map<String, String> paramMap = new HashMap<String, String>();
+        for (Map.Entry<String, String[]> parameter : parameterMap.entrySet()) {
+            paramMap.put(parameter.getKey(), parameter.getValue()[0]);
+        }
+        logger.info(logPrefix + "异步通知请求参数：{}", JSONUtil.toJSONString(paramMap, true));
+
+        String result;
+        try {
+            Map<String, Object> resultMap = alipayEduBillMainService.handleAlipayPayEduBillNotify(paramMap);
+            result = MapUtils.getString(resultMap, "result");
+            response.getWriter().write(result); // 返回非 success 也无意义，支付宝有重发机制
+            logger.info(logPrefix + "处理结果为({})", result);
+        } catch (Exception e) {
+            logger.error(logPrefix + "异常 : {}", e.getMessage(), e);
+        }
+        logger.info(logPrefix + "结束");
+    }
 	
 	public String getUserName() {
 		return userName;
@@ -118,6 +157,10 @@ public class AlipayEduBillAction extends PageAction {
     
     public void setAlipayEduTotalBillService(AlipayEduTotalBillService alipayEduTotalBillService) {
         this.alipayEduTotalBillService = alipayEduTotalBillService;
+    }
+    
+    public void setAlipayEduBillMainService(AlipayEduBillMainService alipayEduBillMainService) {
+        this.alipayEduBillMainService = alipayEduBillMainService;
     }
 
 }

@@ -144,9 +144,19 @@
 	</bean>
 	<bean id="alipayEduBillService" class="com.zbsp.wepaysp.api.service.edu.impl.AlipayEduBillServiceImpl" parent="baseService">
 	</bean>
+
 	<bean id="schoolService" class="com.zbsp.wepaysp.api.service.partner.impl.SchoolServiceImpl" parent="baseService">
 		<property name="sysLogService" ref="sysLogService" />
 	</bean>
 	<bean id="alipayEduRegionService" class="com.zbsp.wepaysp.api.service.dic.zone.impl.AlipayEduRegionServiceImpl" parent="baseService">
 	</bean>
+	
+	<bean id="alipayEduNotifyService" class="com.zbsp.wepaysp.api.service.edu.impl.AlipayEduNotifyServiceImpl" parent="baseService">
+	</bean>
+	
+	<bean id="alipayEduBillMainService" class="com.zbsp.wepaysp.api.service.main.edu.AlipayEduBillMainServiceImpl" >
+		<property name="alipayEduBillService" ref="alipayEduBillService" />
+		<property name="alipayEduNotifyService" ref="alipayEduNotifyService" />
+	</bean>
+
 </beans>

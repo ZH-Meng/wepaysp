@@ -158,15 +158,17 @@ public class AlipayEduTotalBillServiceImpl
             totalBill.setBillName(billName);
             totalBill.setCloseTime(DateUtil.getDate(endTime, "yyyy-MM-dd"));// 账单过期（关闭）时间
             totalBill.setExcelPath(excelPath);
+            totalBill.setReceiptCount(0);
+            totalBill.setReceiptMoney(0);
             
-            checkExcelData(dataList, code, msg, school, totalBill, billList);// 检查数据合法及完整性
+            // 检查数据合法及完整性，并设置应缴费人数和金额
+            checkExcelData(dataList, code, msg, school, totalBill, billList);
             
-            if ("success".equals(code)) {
-                // 检查通过，保存总账单、批量保存账单明细
-                
-                // TODO 建议增加列个数字段，便于控制详情展示列数
+            if ("success".equals(code)) { // 检查通过
+                // 保存总账单
                 commonDAO.save(totalBill, false);
                 
+                // 批量保存账单明细
                 alipayEduBillService.doTransBatchSaveAlipayEduBills(billList);
             }
         }
@@ -218,6 +220,8 @@ public class AlipayEduTotalBillServiceImpl
             }
             columnIndex++;
         }
+        
+        // 设置明细项列头，页面动态展示td需要
         totalBill.setChargeItemHeaders(chargeItemHeaders);
 
         if (!fixedExcelHeaderArr[fixedExcelHeaderArr.length - 1].equalsIgnoreCase(headers.get(headers.size() - 1))) {
@@ -244,12 +248,17 @@ public class AlipayEduTotalBillServiceImpl
             
             AlipayEduBill bill = new AlipayEduBill();
             // FIXME 固定字段暂硬编码
-            // TODO 明细完整性校验
-            bill.setClassIn(row.get(0).trim());
-            bill.setChildName(row.get(1).trim());
-            bill.setUserMobile(row.get(2).trim());
-            bill.setChargeBillTitle(row.get(3).trim());
+            bill.setClassIn(StringUtils.trimToEmpty(row.get(0)));
+            bill.setChildName(StringUtils.trimToEmpty(row.get(1)));
+            bill.setUserMobile(StringUtils.trimToEmpty(row.get(2)));
+            bill.setChargeBillTitle(StringUtils.isBlank(StringUtils.trimToEmpty(row.get(3))) ? totalBill.getBillName() : StringUtils.trimToEmpty(row.get(3)));
 
+            if (StringUtils.isBlank(bill.getClassIn()) || StringUtils.isBlank(bill.getChildName()) || StringUtils.isBlank(bill.getUserMobile())) {
+                code = "fileRowDataInvalid";
+                msg = "缴费账单文件明细行单元格不能为空！";
+                return;
+            }
+            
             bill.setIwoid(Generator.generateIwoid());
             bill.setAlipayEduTotalBillOid(totalBill.getIwoid());
 

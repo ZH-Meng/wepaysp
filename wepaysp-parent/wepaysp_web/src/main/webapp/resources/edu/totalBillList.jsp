@@ -7,6 +7,20 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>缴费账单管理</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
+	<link href="<%=request.getContextPath()%>/layui/css/layui.css" rel="stylesheet" />
+	<style>
+		.layui-form-label{width: 100px;}
+		.layui-input-block{margin-left: 130px;}
+		.layui-form-item{margin-bottom: 5px;}
+		.layui-input-block input.Wdate{
+			width: 185px;
+		    height: 22px;
+		    line-height: 22px;
+		    font-size: 12px;
+		    border: 1px solid #c7c7c7;
+		    background: #fff;
+		}
+	</style>
 </head>
 <body class="bgbj">
 	<div class="rightbg">
@@ -88,33 +102,117 @@
 	            </ul>
 	    	</div>
 	    </s:form>
-	    <!-- TODO 改为弹出层 -->
+	    
     	<div id="uploadBillDialog" style="display: none;">
-		     <form action="<%=request.getContextPath()%>/resources/edu/totalbillmanage!uploadBill.action"  enctype="multipart/form-data" method="post">
-	            <label for="billFile">缴费账单Excel：</label><input type="file" name="billFile" />
-	            <label for="endTime">账单截止日期：</label><input type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
+		     <form id="new-bill-form" class="layui-form" style="padding: 5px 10px 0px 0px;">
+			    <input type="hidden" name="saveName" id="excel-save-name"/>
+		     	<div class="layui-form-item">
+		     		<label class="layui-form-label" for="billFile">缴费账单Excel：<span class="tj_bt">*</span></label>
+				    <div class="layui-input-block">
+				       <input type="file" name="billFile" lay-type="file" class="layui-upload-file" class="layui-input"/>
+				       <span id="excel-display-name"></span>
+				    </div>
+			    </div>
+			    <div class="layui-form-item">
+				    <label class="layui-form-label" for="endTime">账单截止日期：</label>
+				    <div class="layui-input-block">
+				      <input type="text" name="endTime" id="endTime" class="Wdate layui-input" readonly="readonly" value="<s:property value="endTime"/>"
 											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',minDate:'%y-%M-%d'})"/>
-	            <label for="收费名称"></label><input type="text" name="billName"/>
-	            <input type="submit" value="发送" />
-	            <input type="button" value="关闭" />
+				    </div>
+			    </div>
+			    <div class="layui-form-item">
+				    <label class="layui-form-label" for="billFile">收费名称：<span class="tj_bt">*</span></label>
+				    <div class="layui-input-block">
+				      <input id="bill-name" type="text" name="billName" lay-verify="title" autocomplete="off" placeholder="" class="layui-input"/>
+				    </div>
+				</div>
 	        </form>
     	</div>
 	</div>
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/js/check.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/tools/datePicker/WdatePicker.js"></script>
+	<script src="<%=request.getContextPath()%>/layui/layui.js" charset="utf-8"></script>
 	
 	<script type="text/javascript">
-		$("#sendBIll-btn").toggle(function() {
-			$("#uploadBillDialog").show();
-		}, function() {
-			$("#uploadBillDialog").hide();
+		var layer;
+		layui.use(['layer', 'upload'],
+		function() {
+		    layer = layui.layer;
+	
+		    layui.upload({
+		        url: '<%=request.getContextPath()%>/resources/edu/totalbillmanage!uploadExcel.action',
+		        before: function(input) {
+		            $("#excel-save-name").val("");
+		            $("#excel-display-name").text("");
+		        },
+		        success: function(res) {
+		            if (res.code == 'success') {
+		                $("#excel-save-name").val(res.saveName);
+		                $("#excel-display-name").text(res.displayName);
+		            } else {
+		                alert(res.msg);
+		            }
+		        }
+		    });
 		});
-		function showUploadBillDialog() {
-			$("#dealerOid").val(iwoid);
-			invokeAction('goToAlipayManage');
-		}
+	
+		var uploading = false;
+	
+		$('#sendBIll-btn').on('click',
+		function() {
+		    var type = 'auto';
+	
+		    layer.open({
+		        type: 1,
+		        offset: type //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+		        ,
+		        id: 'LAY_demo' + type //防止重复弹出
+		        ,
+		        area: ['400px', '300px'],
+		        title: '账单信息',
+		        content: $("#uploadBillDialog"),
+		        btn: ['取消', '确认'],
+		        btnAlign: 'c' //按钮居中
+		        ,
+		        yes: function(index, layero) {
+		            layer.closeAll();
+		        },
+		        btn2: function(index, layero) {
+		            if (uploading) return;
+		            uploading = true;
+		            if (isBlank($("#excel-save-name").val())) {
+		                layer.alert("缴费账单excel还未上传！");
+		            } else if (isBlank($("#bill-name").val())) {
+		                layer.alert("收费名称不能为空！");
+		                $("#bill-name").focus();
+		            } else {
+		                $.ajax({
+		                    url: '<%=request.getContextPath()%>/resources/edu/totalbillmanage!newBill.action',
+		                    data: $("#new-bill-form").serialize(),
+		                    type: "POST",
+		                    async: false,
+		                    success: function(data) {
+		                        if (data.msg != undefined) alert(data.msg);
+		                        else alert("上传失败！");
+		                        if (data.code == 'success') {
+		                            layer.closeAll();
+		                            invokeAction('list');
+		                        }
+		                    },
+		                    error: function() {
+		                        alert("上传失败！");
+		                    }
+		                });
+		            }
+		            uploading = false;
+		            return false; // 开启该代码可禁止点击该按钮关闭
+		        },
+		        shade: 0.1
+		    });
+		});
 	</script>
 	
 </body>

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib uri="http://java.sun.com/jstl/fmt_rt" prefix="fmt"%>
 <%@ taglib prefix="manage" uri="/permission-tags" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -30,9 +31,9 @@
 									<th>缴费人数：</th>
 									<td>${alipayEduTotalBillVO.totalCount }</td>
 									<th>账单总计金额:</th>
-									<td><s:number name="alipayEduTotalBillVO.totalMoney/100" type="currency" groupingUsed="true" maximumFractionDigits="2" /></td>
+									<td><fmt:formatNumber value="${alipayEduTotalBillVO.totalMoney/100}" pattern="###,###,###,##0.00"/> 元</td>
 									<th>缴费成功金额：</th>
-									<td><s:number name="alipayEduTotalBillVO.receiptMoney/100" type="currency" groupingUsed="true" maximumFractionDigits="2" /></td>
+									<td><fmt:formatNumber value="${alipayEduTotalBillVO.receiptMoney/100}" pattern="###,###,###,##0.00"/> 元</td>
 								</tr>
 							</tbody>
 						</table>
@@ -67,7 +68,7 @@
 	                    <table class="bg_odd">
 	                        <thead>
 	                            <tr>
-	                                <th style="width: 100px;">序号</th>
+	                                <th style="width: 40px;">序号</th>
 	                                <th>缴费单号</th>
 	                                <th>年级/班级</th>
 	                                <th>学生姓名</th>
@@ -107,13 +108,13 @@
 						  			</td>
 						  			<%-- 动态明细金额 --%>
 						  			<s:iterator value="chargeItems" var="item">
-						  				<td title="<s:number name="item.itemPrice" type="currency" groupingUsed="true" maximumFractionDigits="2" />">
-						  					<s:number name="item.itemPrice" type="currency" groupingUsed="true" maximumFractionDigits="2" />
+						  				<td title="<s:property value="#item.itemPrice" />元">
+						  					<fmt:formatNumber value="${item.itemPrice}" pattern="###,###,###,##0.00"/> 元
 						  				</td>
 						  			</s:iterator>
 						  			
-						  			<td title="<s:number name="#vo.amount/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />">
-						  				<s:number name="#vo.amount/100" type="currency" groupingUsed="true" maximumFractionDigits="2" />
+						  			<td title="<fmt:formatNumber value="${vo.amount/100}" pattern="###,###,###,##0.00"/> 元">
+						  				<fmt:formatNumber value="${vo.amount/100}" pattern="###,###,###,##0.00"/> 元
 						  			</td>
 						  			
 						  			<s:if test="#vo.orderStatus == 'INIT'">

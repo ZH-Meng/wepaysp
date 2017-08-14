@@ -22,6 +22,7 @@ public class Utils {
     }
 
     public static String toDate(Date date) {
+    	if (date == null) return null;
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
     }
 

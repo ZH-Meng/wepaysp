@@ -20,6 +20,7 @@
 	<bean id="aipayEduBillAction" class="com.zbsp.wepaysp.manage.web.action.edu.AlipayEduBillAction" scope="prototype">
 		<property name="alipayEduBillService" ref="alipayEduBillService" />
 		<property name="alipayEduTotalBillService" ref="alipayEduTotalBillService" />
+		<property name="alipayEduBillMainService" ref="alipayEduBillMainService" />
 	</bean>
 	
 </beans>

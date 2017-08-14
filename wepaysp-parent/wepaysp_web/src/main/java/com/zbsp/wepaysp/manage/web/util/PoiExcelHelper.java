@@ -2,6 +2,7 @@ package com.zbsp.wepaysp.manage.web.util;
 
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;  
 import java.util.HashMap;
@@ -247,34 +248,39 @@ public abstract class PoiExcelHelper {
         } catch (NumberFormatException ex) {  
             return value;  
         }  */
-    	if (cell == null) {  
-            return "";  
-        }  
-    	String value="";
-    	switch (cell.getCellType()) {   //根据cell中的类型来输出数据   
-    			   case Cell.CELL_TYPE_NUMERIC:  
-    			        if (HSSFDateUtil.isCellDateFormatted(cell)) {//  如果是date类型则 ，获取该cell的date值    
-    			        	 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
-    	        	 value =sdf.format(HSSFDateUtil.getJavaDate(cell.getNumericCellValue())) ;   
-    	        		} else { // 纯数字    
-    	        	 value = String.valueOf((long)cell.getNumericCellValue());   
-    				    }  
-    			       break;  
-    			   case Cell.CELL_TYPE_STRING:  
-    				  value=cell.getStringCellValue();  
-    			       break;  
-    			   case Cell.CELL_TYPE_BOOLEAN:  
-    				  value=String.valueOf(cell.getBooleanCellValue());  
-    			       break;  
-    			   case Cell.CELL_TYPE_FORMULA:  
-    				  value=cell.getCellFormula();  
-    			       break;  
-    			   default:  
-    			      value = "";
-    			   break;  
-    			   }  
-    	return value;	
-    	
+        if (cell == null) {
+            return "";
+        }
+        String value = "";
+        BigDecimal number = null;
+        switch (cell.getCellType()) { // 根据cell中的类型来输出数据
+            case Cell.CELL_TYPE_NUMERIC:
+                if (HSSFDateUtil.isCellDateFormatted(cell)) {// 如果是date类型则 ，获取该cell的date值
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    value = sdf.format(HSSFDateUtil.getJavaDate(cell.getNumericCellValue()));
+                } else { // 纯数字
+                    number = new BigDecimal(cell.getNumericCellValue());
+                    if (number.scale() == 0) {
+                        value = String.valueOf(number);
+                    } else {
+                        value = String.valueOf(number.setScale(2, BigDecimal.ROUND_HALF_UP));// 保留两位小数
+                    }
+                }
+                break;
+            case Cell.CELL_TYPE_STRING:
+                value = cell.getStringCellValue();
+                break;
+            case Cell.CELL_TYPE_BOOLEAN:
+                value = String.valueOf(cell.getBooleanCellValue());
+                break;
+            case Cell.CELL_TYPE_FORMULA:
+                value = cell.getCellFormula();
+                break;
+            default:
+                value = "";
+                break;
+        }
+        return value;
     }  
   
     /** 
