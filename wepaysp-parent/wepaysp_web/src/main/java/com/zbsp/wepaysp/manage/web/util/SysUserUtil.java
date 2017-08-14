@@ -112,5 +112,24 @@ public class SysUserUtil {
         }
         return true;
     }
+    
+    /**
+     * 是否是学校
+     * 
+     * @return
+     */
+    public static boolean isSchool(ManageUser manageUser) {
+        int level = 0;
+        if (manageUser.getUserLevel() == null) {
+            return false;
+        } else {
+            level = manageUser.getUserLevel();
+            if (level != SysUser.UserLevel.school.getValue() || manageUser.getDataSchool() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
 
 }

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alipay.api.response.AlipayTradePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.google.gson.annotations.SerializedName;
 import com.zbsp.alipay.trade.model.ChargeItems;
 import com.zbsp.alipay.trade.model.ExtendParams;
 import com.zbsp.alipay.trade.model.UserDetails;
@@ -272,10 +273,30 @@ public class AliPayPackConverter {
         return builder;
     }
 
-    public static AlipayEcoEduKtSchoolinfoModifyRequestBuilder school2AlipayEcoEduKtSchoolinfoModifyRequestBuilder(School school) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    /**
+     * @param school
+     * @return
+     */
+	public static AlipayEcoEduKtSchoolinfoModifyRequestBuilder school2AlipayEcoEduKtSchoolinfoModifyRequestBuilder(
+			School school) {
+
+		AlipayEcoEduKtSchoolinfoModifyRequestBuilder builder = new AlipayEcoEduKtSchoolinfoModifyRequestBuilder();
+		try {
+			builder.setSchoolName(school.getShcoolName()).setSchoolIcon(school.getSchoolIcon())
+					.setSchoolIconType(school.getSchoolIconType()).setSchoolStdcode(school.getSchoolStdcode())
+					.setSchoolType(school.getSchoolType()).setProvinceCode(school.getProvinceCode())
+					.setProvinceName(school.getProvinceName()).setCityCode(school.getCityCode())
+					.setCityName(school.getCityName()).setDistrictCode(school.getDistrictCode())
+					.setDistrictName(school.getDistrictName()).setIsvName(school.getIsvName())
+					.setIsvNotifyUrl(school.getIsvNotifyUrl()).setIsvPid(school.getIsvPid())
+					.setSchoolPid(school.getSchoolPid()).setIsvPhone(school.getIsvPhone())
+					.setBankcardNo(school.getBankcardNo()).setBankUid(school.getBankUid())
+					.setBankNotifyrl(school.getBankNotifyUrl());
+		} catch (Exception e) {
+			throw new ConvertPackException(e.getMessage());
+		}
+		return builder;
+	}
 
     /**缴费账单发送请求包转换*/
 	public static AlipayEcoEduKtBillingSendRequestBuilder alipayEduBill2AlipayEcoEduKtBillingSendRequestBuilder(AlipayEduBill alipayEduBill) {
