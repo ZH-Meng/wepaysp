@@ -3,7 +3,7 @@
  "http://struts.apache.org/dtds/struts-2.1.dtd">
 <struts>
 	<constant name="struts.enable.DynamicMethodInvocation" value="true" />   
-	<constant name="struts.devMode" value="false" />
+	<constant name="struts.devMode" value="true" />
 	<constant name="struts.ui.theme" value="simple" />
 	<constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
 	<constant name="struts.multipart.maxSize" value="50000000"/>
@@ -11,7 +11,9 @@
 	<package name="global-default" extends="json-default,struts-default">
 		<global-results>
 			<result name="login">/index.jsp</result>
+			<!-- 
 			<result name="error">/resources/include/error.jsp</result>
+			 -->
 			<result name="accessDenied">/resources/include/accessDenied.jsp</result>
 			<result name="accessDeniedH5">/resources/include/accessDeniedH5.jsp</result>
 		</global-results>

@@ -130,7 +130,7 @@
 						  		</s:iterator>
 			  				</s:if>
 					  		<s:else>
-					  			<tr><td colspan="10">无符合条件的查询结果！</td></tr>
+					  			<tr><td colspan="11">无符合条件的查询结果！</td></tr>
 					  		</s:else>
 	                    	</tbody>
 	               		</table>

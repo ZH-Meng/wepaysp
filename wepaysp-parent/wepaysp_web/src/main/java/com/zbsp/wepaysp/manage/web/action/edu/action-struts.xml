@@ -3,6 +3,11 @@
         "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
         "http://struts.apache.org/dtds/struts-2.3.dtd">
 <struts>
+	<package name="bill" namespace="/bill" extends="global-default">
+		<action name="asynNotify" class="aipayEduBillAction" method="asynNotify">
+		</action>
+	</package>
+	
 	<package name="edu" namespace="/resources/edu" extends="wepaysp-manage-default">
 		<!-- 缴费总账单管理 -->
 		<action name="totalbillmanage" class="aipayEduTotalBillAction">

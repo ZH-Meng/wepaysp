@@ -264,7 +264,7 @@ public class SchoolServiceImpl
         newUser.setBuildType(SysUser.BuildType.create.getValue());
         newUser.setLastLoginTime(null);
         newUser.setDataPermisionType(SysUser.DataPermisionType.none.getValue());
-        newUser.setUserLevel(SysUser.UserLevel.dealer.getValue());
+        newUser.setUserLevel(SysUser.UserLevel.school.getValue());
         newUser.setSchool(school);
         newUser.setCreator(creator);
         commonDAO.save(newUser, false);
@@ -300,7 +300,7 @@ public class SchoolServiceImpl
         Date processTime = new Date();
 
         // 增加商户日志
-        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建商户[商户ID=" + school.getSchoolNo() + ", 商户名称=" + school.getShcoolName() + ", 联系人=" + school.getTechSupportPhone() + "]", processTime, processTime, null, school.toString(), SysLog.State.success.getValue(), partner.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
+        sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建学校[学校No=" + school.getSchoolNo() + ", 学校名称=" + school.getShcoolName() + ", 联系人=" + school.getTechSupportPhone() + "]", processTime, processTime, null, school.toString(), SysLog.State.success.getValue(), partner.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
         // 添加用户日志logFunctionOid 存 商户添加按钮oid
         sysLogService.doTransSaveSysLog(SysLog.LogType.userOperate.getValue(), operatorUserOid, "创建用户[用户ID=" + newUser.getUserId() + ", 用户名称=" + newUser.getUserName() + "]", processTime, processTime, null, newUser.toString(), SysLog.State.success.getValue(), newUser.getIwoid(), logFunctionOid, SysLog.ActionType.create.getValue());
 

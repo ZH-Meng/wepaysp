@@ -61,7 +61,13 @@
 					</li>
 				</ul>
 			</div>
-			<s:set var="changeItemCount" value="4" />
+			
+			<s:if test="alipayEduTotalBillVO.chargeItemHeaders != null">
+				<s:set var="changeItemCount" value="alipayEduTotalBillVO.chargeItemHeaders.length" />				
+			</s:if>
+			<s:else>
+				<s:set var="changeItemCount" value="0" />
+			</s:else>
 	    	<div class="bgtable">
 	            <ul class="bg_all">
 	                <li class="bg_table bg_table1">

@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "store_t", catalog = "wepay_sp")
+@Table(name = "store_t")
 public class Store
     implements java.io.Serializable {
 

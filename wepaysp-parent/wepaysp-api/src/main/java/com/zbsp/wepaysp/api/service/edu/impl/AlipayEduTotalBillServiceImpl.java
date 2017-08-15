@@ -48,6 +48,7 @@ public class AlipayEduTotalBillServiceImpl
             throw new RuntimeException("缺少参数：fixedExcelHeaders");
         }
         fixedExcelHeaderArr = fixedExcelHeaders.split(",");
+        logger.info("支付宝教育缴费账单excel模板列头：{}", fixedExcelHeaders);
     }
 	
     @SuppressWarnings("unchecked")
@@ -118,31 +119,33 @@ public class AlipayEduTotalBillServiceImpl
     @Override
     public Map<String, Object> doTransSaveTotalBill(String schoolNo, String billName, String endTime, String excelPath,List<ArrayList<String>> dataList) {
     	Validator.checkArgument(StringUtils.isBlank(billName), "billName为空");
-    	Validator.checkArgument(StringUtils.isBlank(excelPath), "excelPath为空");
-    	Map<String, Object> resultMap = new HashMap<>();
-    	String code = "success";
-    	String msg = "缴费账单上传成功！";
+        Validator.checkArgument(StringUtils.isBlank(excelPath), "excelPath为空");
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("code", "success");
+        resultMap.put("msg", "缴费账单上传成功！");
 
+        Map<String, Object> jpqlMap = new HashMap<>();
         // 根据账单名称查重
-        resultMap.put("SCHOOLNO", schoolNo);
-        resultMap.put("BILLNAME", billName);
-        AlipayEduTotalBill existBill = commonDAO.findObject("from AlipayEduTotalBill a where a.schoolNo=:SCHOOLNO and a.billName=:BILLNAME", resultMap, false);
-        resultMap.clear();
-    	
+        jpqlMap.put("SCHOOLNO", schoolNo);
+        jpqlMap.put("BILLNAME", billName);
+        AlipayEduTotalBill existBill = commonDAO.findObject("from AlipayEduTotalBill a where a.schoolNo=:SCHOOLNO and a.billName=:BILLNAME", jpqlMap, false);
+        jpqlMap.clear();
+
         if (existBill != null) {
-            code = "billExisted";
-            msg = "缴费账单（" + billName + ")已存在！";
+            resultMap.put("code", "billExisted");
+            resultMap.put("msg", "缴费账单（" + billName + ")已存在！");
+            logger.warn("billExisted：缴费账单（" + billName + ")已存在！");
         } else {
             // 查找学校
-            resultMap.put("SCHOOLNO", schoolNo);
-            School school = commonDAO.findObject("from School s where s.schoolNo=:SCHOOLNO", resultMap, false);
-            resultMap.clear();
+            jpqlMap.put("SCHOOLNO", schoolNo);
+            School school = commonDAO.findObject("from School s where s.schoolNo=:SCHOOLNO", jpqlMap, false);
+            jpqlMap.clear();
             if (school == null) {
                 throw new NotExistsException("学校不存在，schoolNo=" + schoolNo);
             }
-            
+
             // dataList 示例：[[年级/班级, 学生姓名, 家长手机号, 缴费账单名称, 保教费, 代办费, 校车非, 伙食费, 合计], [五年级3班, 张三, , 2017年秋季费用, 200, 300, 200, 300, 1000]]
-            
+
             List<AlipayEduBill> billList = new ArrayList<>();// 待封装明细集合
             AlipayEduTotalBill totalBill = new AlipayEduTotalBill();
             totalBill.setIwoid(Generator.generateIwoid());
@@ -154,42 +157,42 @@ public class AlipayEduTotalBillServiceImpl
             totalBill.setPartnerOid(school.getPartner() == null ? null : school.getPartner().getIwoid());
             totalBill.setPartnerLevel(school.getPartnerLevel());
             totalBill.setOrderStatus(OrderStatus.INIT.name());// 账单新建
-            //totalBill.setSendTime(new Date());// 定时任务发送
+            // totalBill.setSendTime(new Date());// 定时任务发送
             totalBill.setBillName(billName);
             totalBill.setCloseTime(DateUtil.getDate(endTime, "yyyy-MM-dd"));// 账单过期（关闭）时间
             totalBill.setExcelPath(excelPath);
             totalBill.setReceiptCount(0);
             totalBill.setReceiptMoney(0);
-            
+
             // 检查数据合法及完整性，并设置应缴费人数和金额
-            checkExcelData(dataList, code, msg, school, totalBill, billList);
-            
-            if ("success".equals(code)) { // 检查通过
+            checkExcelData(resultMap, dataList, school, totalBill, billList);
+            if ("success".equals(MapUtils.getString(resultMap, "code"))) { // 检查通过
+                logger.info("检查通过，开始保存缴费账单和账单明细");
                 // 保存总账单
                 commonDAO.save(totalBill, false);
-                
+
                 // 批量保存账单明细
                 alipayEduBillService.doTransBatchSaveAlipayEduBills(billList);
             }
         }
-    	
-    	resultMap.put("code", code);
-    	resultMap.put("msg", msg);
         return resultMap;
     }
     
     /**检查表头及明细行数据合法性并封装账单明细集合*/
-    private void checkExcelData(List<ArrayList<String>> dataList, String code, String msg, School school, AlipayEduTotalBill totalBill, List<AlipayEduBill> billList) {
+    private void checkExcelData(Map<String, Object> resultMap, List<ArrayList<String>> dataList, School school, AlipayEduTotalBill totalBill, List<AlipayEduBill> billList) {
+        logger.info("检查excel明细行数据 - 开始");
         if (dataList == null || dataList.size() <= 1) {
-            code = "fileContentInvalid";
-            msg = "缴费账单文件至少包含列头和一行数据！";
+            logger.warn("fileContentInvalid：缴费账单文件至少包含列头和一行数据！");
+            resultMap.put("code", "fileContentInvalid");
+            resultMap.put("msg", "缴费账单文件至少包含列头和一行数据！");
             return;
         }
         // 检查表头
         ArrayList<String> headers = dataList.get(0);
         if (headers.size() < fixedExcelHeaderArr.length) {
-            code = "fileColumnHeaderError";
-            msg = "缴费账单文件列头个数不能小于" + fixedExcelHeaderArr.length + "！";
+            logger.warn("fileColumnHeaderError：缴费账单文件列头个数缺少！");
+            resultMap.put("code", "fileColumnHeaderError");
+            resultMap.put("msg", "缴费账单文件列头个数不能小于" + fixedExcelHeaderArr.length + "！");
             return;
         }
         boolean chanageItemExist = false;
@@ -197,36 +200,39 @@ public class AlipayEduTotalBillServiceImpl
             chanageItemExist = true;
 
         int columnIndex = 0;
-        
+
         String chargeItemHeaders = "";
         for (String header : headers) {
             if (columnIndex < fixHeaderCount) {
                 if (!fixedExcelHeaderArr[columnIndex].equalsIgnoreCase(headers.get(columnIndex))) {
-                    code = "fileColumnHeaderError";
-                    msg = "缴费账单文件第+ (columnIndex+1) +列名称错误，应该是：" + fixedExcelHeaderArr[columnIndex] + "！";
+                    logger.warn("缴费账单文件第"+ (columnIndex+1) +"列名称{}错误，应该是：" + fixedExcelHeaderArr[columnIndex] + "！", headers.get(columnIndex));
+                    resultMap.put("code", "fileColumnHeaderError");
+                    resultMap.put("msg", "缴费账单文件第"+ (columnIndex+1) +"列名称错误，应该是：" + fixedExcelHeaderArr[columnIndex] + "！");
                     return;
                 }
             } else {
                 // 非固定字段，校验列头不能为空
                 if (StringUtils.isBlank(header)) {
-                    code = "fileColumnHeaderError";
-                    msg = "缴费账单文件第+ (columnIndex+1) +列列头不为空！";
+                    logger.warn("fileColumnHeaderError：缴费账单文件列头为空！");
+                    resultMap.put("code", "fileColumnHeaderError");
+                    resultMap.put("msg", "缴费账单文件第" + (columnIndex + 1) + "列列头不为空！");
                     return;
                 }
-                if (columnIndex < headers.size() -2)
-					chargeItemHeaders += header + ",";
-				else if (columnIndex == headers.size() - 2)
-					chargeItemHeaders += header;
+                if (columnIndex < headers.size() - 2)
+                    chargeItemHeaders += header + ",";
+                else if (columnIndex == headers.size() - 2)
+                    chargeItemHeaders += header;
             }
             columnIndex++;
         }
-        
+
         // 设置明细项列头，页面动态展示td需要
         totalBill.setChargeItemHeaders(chargeItemHeaders);
 
         if (!fixedExcelHeaderArr[fixedExcelHeaderArr.length - 1].equalsIgnoreCase(headers.get(headers.size() - 1))) {
-            code = "fileColumnHeaderError";
-            msg = "缴费账单文件最后一列名称错误，应该是：合计！";
+            logger.warn("fileColumnHeaderError：缴费账单文件最后一列不是合计！");
+            resultMap.put("code", "fileColumnHeaderError");
+            resultMap.put("msg", "缴费账单文件最后一列名称错误，应该是：合计！");
             return;
         }
 
@@ -236,16 +242,17 @@ public class AlipayEduTotalBillServiceImpl
         int totalCount = dataList.size();
         int totalMoney = 0;
         int rowIndex = 1;
-        
+
         Map<String, Object> sqlMap = new HashMap<String, Object>();
         for (ArrayList<String> row : dataList) {
             if (row.size() != headers.size()) {
-                code = "fileRowDataError";
-                msg = "缴费账单文件明细行列个数与列头列个数不一致！";
+                logger.warn("fileRowDataError：缴费账单文件明细行列个数与列头列个数不一致！");
+                resultMap.put("code", "fileRowDataError");
+                resultMap.put("msg", "缴费账单文件明细行列个数与列头列个数不一致！");
                 return;
             }
             BigDecimal totalAmount = new BigDecimal(row.get(row.size() - 1));
-            
+
             AlipayEduBill bill = new AlipayEduBill();
             // FIXME 固定字段暂硬编码
             bill.setClassIn(StringUtils.trimToEmpty(row.get(0)));
@@ -254,11 +261,12 @@ public class AlipayEduTotalBillServiceImpl
             bill.setChargeBillTitle(StringUtils.isBlank(StringUtils.trimToEmpty(row.get(3))) ? totalBill.getBillName() : StringUtils.trimToEmpty(row.get(3)));
 
             if (StringUtils.isBlank(bill.getClassIn()) || StringUtils.isBlank(bill.getChildName()) || StringUtils.isBlank(bill.getUserMobile())) {
-                code = "fileRowDataInvalid";
-                msg = "缴费账单文件明细行单元格不能为空！";
+                logger.warn("fileRowDataInvalid：缴费账单文件明细行单元格有空！");
+                resultMap.put("code", "fileRowDataInvalid");
+                resultMap.put("msg", "缴费账单文件明细行单元格不能为空！");
                 return;
             }
-            
+
             bill.setIwoid(Generator.generateIwoid());
             bill.setAlipayEduTotalBillOid(totalBill.getIwoid());
 
@@ -268,8 +276,8 @@ public class AlipayEduTotalBillServiceImpl
             if (seqObj == null) {
                 throw new IllegalArgumentException("支付订单Id对应序列记录不存在");
             }
-            bill.setOutTradeNo(Generator.generateSequenceYYYYMMddNum((Integer)seqObj, SysSequenceMultiple.PAY_ORDER));
-            
+            bill.setOutTradeNo(Generator.generateSequenceYYYYMMddNum((Integer) seqObj, SysSequenceMultiple.PAY_ORDER));
+
             bill.setPartner1Oid(totalBill.getPartner1Oid());
             bill.setPartner2Oid(totalBill.getPartner2Oid());
             bill.setPartner3Oid(totalBill.getPartner3Oid());
@@ -279,27 +287,28 @@ public class AlipayEduTotalBillServiceImpl
             bill.setOrderStatus(OrderStatus.INIT.name());
             bill.setLineNum(rowIndex);
             bill.setGmtEnd(Utils.toDate(totalBill.getCloseTime()));
-            bill.setEndEnable(totalBill.getCloseTime() == null ? "N" : "Y");            
+            bill.setEndEnable(totalBill.getCloseTime() == null ? "N" : "Y");
             bill.setAmount(totalAmount.multiply(SysEnvKey.TIMES_100).intValue());
             bill.setSchoolPid(school.getSchoolPid());
             bill.setSchoolNo(school.getSchoolNo());
             bill.setIsvPartnerId(school.getIsvPid());
             bill.setAppId(SysConfig.appId4Edu);
             // bill.setAppAuthToken();
-            
+
             if (chanageItemExist) {
                 BigDecimal totalAmountTemp = new BigDecimal(0);
                 List<ChargeItems> chargeItems = new ArrayList<>();
-                
+
                 for (int index = fixHeaderCount; index < row.size() - 1; index++) {
                     if (!NumberUtils.isCreatable(row.get(index).trim())) {
-                        code = "fileRowDataError";
-                        msg = "缴费账单文件明细行第" + (rowIndex) + "行" + headers.get(index) + "不是数字！";
+                        logger.warn("fileRowDataError：缴费账单文件明细行单元格有不是数字！");
+                        resultMap.put("code", "fileRowDataError");
+                        resultMap.put("msg", "缴费账单文件明细行第" + (rowIndex) + "行" + headers.get(index) + "不是数字！");
                         return;
                     }
                     BigDecimal money = new BigDecimal(row.get(index));
                     totalAmountTemp = totalAmountTemp.add(money);
-                    
+
                     ChargeItems item = new ChargeItems(headers.get(index), money.toString());// 明细项金额为元，string类型保存，便于发送账单时直接反序列化
                     chargeItems.add(item);
                 }
@@ -307,14 +316,16 @@ public class AlipayEduTotalBillServiceImpl
 
                 // 验证合计
                 if (!NumberUtils.isCreatable(row.get(row.size() - 1))) {
-                    code = "fileRowDataError";
-                    msg = "缴费账单文件明细行第" + (rowIndex) + "行" + headers.get(headers.size() - 1) + "不是数字！";
+                    logger.warn("fileRowDataError：缴费账单文件明细行单元格合计有不是数字！");
+                    resultMap.put("code", "fileRowDataError");
+                    resultMap.put("msg", "缴费账单文件明细行第" + (rowIndex) + "行" + headers.get(headers.size() - 1) + "不是数字！");
                     return;
                 }
 
                 if (totalAmount.compareTo(totalAmountTemp) != 0) {
-                    code = "fileRowDataError";
-                    msg = "缴费账单文件明细行第" + (rowIndex) + "行各项费用总和与合计项不等！";
+                    logger.warn("fileRowDataError：缴费账单文件明细行各项费用和合计不等！");
+                    resultMap.put("code", "fileRowDataError");
+                    resultMap.put("msg", "缴费账单文件明细行第" + (rowIndex) + "行各项费用总和与合计项不等！");
                     return;
                 }
             }
@@ -324,6 +335,7 @@ public class AlipayEduTotalBillServiceImpl
         }
         totalBill.setTotalCount(totalCount);
         totalBill.setTotalMoney(totalMoney);
+        logger.info("检查excel明细行数据 - 通过");
     }
 	
     public void setAlipayEduBillService(AlipayEduBillService alipayEduBillService) {

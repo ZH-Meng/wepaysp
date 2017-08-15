@@ -69,23 +69,26 @@ public class AlipayEduTotalBillAction
     @Override
     protected String query(int start, int size) {
         // 检查参数
-
-        // 根据当前用户的类型进行不同颗粒的查询
-        Map<String, Object> paramMap = new HashMap<String, Object>();
-        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
-            paramMap.put("schoolNo", manageUser.getDataSchool().getSchoolNo());
-            paramMap.put("billName", billName);
-            paramMap.put("beginTime", DateUtil.getDate(beginTime, "yyyy-MM-dd"));
-            paramMap.put("endTime", DateUtil.getDate(endTime, "yyyy-MM-dd"));
-        } else {
-            logger.warn("当前用户无权查看缴费账单！");
-            setAlertMessage("当前用户无权查看缴费账单！");
-            return "accessDenied";
-        }
-        rowCount = alipayEduTotalBillService.doJoinTransQueryAlipayEduTotalBillCount(paramMap);
-        if (rowCount > 0) {
-            alipayEduTotalBillVOList = alipayEduTotalBillService.doJoinTransQueryAlipayEduTotalBill(paramMap, start, size);
+        try {
+            // 根据当前用户的类型进行不同颗粒的查询
+            Map<String, Object> paramMap = new HashMap<String, Object>();
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
+                paramMap.put("schoolNo", manageUser.getDataSchool().getSchoolNo());
+                paramMap.put("billName", billName);
+                paramMap.put("beginTime", DateUtil.getDate(beginTime, "yyyy-MM-dd"));
+                paramMap.put("endTime", DateUtil.getDate(endTime, "yyyy-MM-dd"));
+            } else {
+                logger.warn("当前用户无权查看缴费账单！");
+                setAlertMessage("当前用户无权查看缴费账单！");
+                return "accessDenied";
+            }
+            rowCount = alipayEduTotalBillService.doJoinTransQueryAlipayEduTotalBillCount(paramMap);
+            if (rowCount > 0) {
+                alipayEduTotalBillVOList = alipayEduTotalBillService.doJoinTransQueryAlipayEduTotalBill(paramMap, start, size);
+            }
+        } catch (Exception e) {
+            logger.error("查看缴费账单错误：{}", e.getMessage(), e);
         }
         return "totalBillList";
     }
@@ -110,7 +113,7 @@ public class AlipayEduTotalBillAction
     /** 上传缴费账单（待定时发送） */
     public String uploadExcel() {
         logger.info(LOG_PREFIX, "上传", "开始");
-        logger.info("收费名称：{}, 文件名：{}", billName, billFileFileName);
+        logger.info("账单上传文件名：{}", billFileFileName);
         String code = "success";
         String msg = "缴费账单上传成功！";
         dataMap = new HashMap<>();
@@ -170,34 +173,41 @@ public class AlipayEduTotalBillAction
 		String code = "fail";
 		String msg = "缴费账单上传失败！";
 		dataMap = new HashMap<>();
+        logger.info("收费名称：{}, 账单文件保存名：{}", billName, saveName);
+        try {
+            PoiExcelHelper excelHelper = null;
+            ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
+                if (StringUtils.isBlank(saveName)) {
+                } else if (saveName.endsWith(".xls")) {
+                    excelHelper = new PoiExcel2k3Helper();
+                } else if (saveName.endsWith(".xlsx")) {
+                    excelHelper = new PoiExcel2k7Helper();
+                } else {
+                }
+                if (excelHelper != null) {
+                    String billFileSaveDir = billFileRootDir.concat(File.separator).concat(manageUser.getDataSchool().getSchoolNo());// 保存路径
+                    File billExcelFile = new File(billFileSaveDir, saveName);
+                    // 读取并封装EXCEL数据
+                    List<ArrayList<String>> dataList = excelHelper.readExcel(billExcelFile, 0, "1-", 1);
 
-		PoiExcelHelper excelHelper = null;
-		ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
-			if (StringUtils.isBlank(saveName)) {
-			} else if (saveName.endsWith(".xls")) {
-				excelHelper = new PoiExcel2k3Helper();
-			} else if (saveName.endsWith(".xlsx")) {
-				excelHelper = new PoiExcel2k7Helper();				
-			} else {
-			}
-			if (excelHelper != null) {
-				String billFileSaveDir = billFileRootDir.concat(File.separator).concat(manageUser.getDataSchool().getSchoolNo());// 保存路径
-				File billExcelFile = new File(billFileSaveDir, saveName);
-				// 读取并封装EXCEL数据
-				List<ArrayList<String>> dataList = excelHelper.readExcel(billExcelFile, 0, "1-", 1);
-				
-				// 保存账单
-				Map<String, Object> resultMap = alipayEduTotalBillService.doTransSaveTotalBill(manageUser.getDataSchool().getSchoolNo(), billName, endTime, billExcelFile.getAbsolutePath(), dataList);
-				code = MapUtils.getString(resultMap, "code");
-				msg = MapUtils.getString(resultMap, "msg");
-				logger.info(LOG_PREFIX + "- code : {}, msg : {}", "上传", "结果", code, msg);
-			}
-		} else {
-			code = "accessDenied";
-			msg = "当前用户无权上传缴费账单！";
-			logger.warn(LOG_PREFIX + "原因：{}", "上传", "失败", "accessDenied");
-		}
+                    // 保存账单
+                    Map<String, Object> resultMap = alipayEduTotalBillService.doTransSaveTotalBill(manageUser.getDataSchool().getSchoolNo(), billName, endTime, billExcelFile.getAbsolutePath(),
+                        dataList);
+                    code = MapUtils.getString(resultMap, "code");
+                    msg = MapUtils.getString(resultMap, "msg");
+                    logger.info(LOG_PREFIX + "- code : {}, msg : {}", "newBill", "结果", code, msg);
+                }
+            } else {
+                code = "accessDenied";
+                msg = "当前用户无权上传缴费账单！";
+                logger.warn(LOG_PREFIX + "原因：{}", "newBill", "失败", "accessDenied");
+            }
+        } catch (Exception e) {
+            logger.error(LOG_PREFIX + "原因：{}", "newBill", "失败", e.getMessage(), e);
+            code = "error";
+            msg = "上传缴费账单失败！";
+        }
 		// 返回上传结果json串
 		dataMap.put("code", code);
 		dataMap.put("msg", msg);

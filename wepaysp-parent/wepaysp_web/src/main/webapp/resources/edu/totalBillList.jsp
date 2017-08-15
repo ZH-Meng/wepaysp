@@ -153,7 +153,7 @@
 		                $("#excel-save-name").val(res.saveName);
 		                $("#excel-display-name").text(res.displayName);
 		            } else {
-		                alert(res.msg);
+		            	layer.alert(res.msg);
 		            }
 		        }
 		    });
@@ -195,9 +195,12 @@
 		                    type: "POST",
 		                    async: false,
 		                    success: function(data) {
-		                        if (data.msg != undefined) alert(data.msg);
-		                        else alert("上传失败！");
+		                        if (data.msg != undefined) {
+		                        	if (data.code != 'success') layer.alert(data.msg);
+		                        }  else 
+		                        	alert("上传失败！");
 		                        if (data.code == 'success') {
+		                        	alert("上传成功！");
 		                            layer.closeAll();
 		                            invokeAction('list');
 		                        }

@@ -50,7 +50,7 @@ public class AlipayEduBillMainServiceImpl
         try {
             String signType = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Edu), SysEnvKey.ALIPAY_APP_SIGN_TYPE);
             String alipayPublicKey = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Edu), SysEnvKey.ALIPAY_PUBLIC_KEY);
-            if (!AlipaySignature.rsaCheckV1(paramMap, alipayPublicKey, "utf-8", signType)) {
+            if (!AlipaySignature.rsaCheckV1(paramMap, alipayPublicKey, MapUtils.getString(paramMap, "charset"), "")) {
                 logger.error(logPrefix + "验签 - 签名错误");
             } else {
                 logger.info(logPrefix + "验签 - 签名正确");
@@ -131,6 +131,19 @@ public class AlipayEduBillMainServiceImpl
 
     public void setAlipayEduNotifyService(AlipayEduNotifyService alipayEduNotifyService) {
         this.alipayEduNotifyService = alipayEduNotifyService;
+    }
+    
+    public static void main(String[] args) {
+        
+        try {
+            boolean b = AlipaySignature.rsaCheckContent("app_id=2016112803443590&auth_app_id=2017053107391618&buyer_id=2088202477752996&buyer_logon_id=men***@163.com&buyer_pay_amount=0.04&charset=GBK&fund_bill_list=[{\"amount\":\"0.04\",\"fundChannel\":\"ALIPAYACCOUNT\"}]&gmt_create=2017-08-15 15:14:40&gmt_payment=2017-08-15 15:14:41&invoice_amount=0.04&notify_id=db0f6f2fad963e0c9c5780d2f7141b1nn2&notify_time=2017-08-15 15:14:41&notify_type=trade_status_sync&out_trade_no=59929e85c71c884ff01e8fa1&passback_params=b3JkZXJObz01OTkyOWU4NWM3MWM4ODRmZjAxZThmYTE=&point_amount=0.00&receipt_amount=0.04&seller_email=775907359@qq.com&seller_id=2088521354078238&subject=2017���＾����5&total_amount=0.04&trade_no=2017081521001004990219233031&trade_status=TRADE_SUCCESS&version=1.0,s",
+                "Uk+6SmV5GHjf5fz7/t0SddkuSpmGqCBLY+O4e7vQJGGyxZvzKS1F1CY8XlCmC6991zR/mpsr6TN3DViliLHC15Jvy9yaofmXD9hTsrLxrzYqPpCwY/LUhnkKZ66XztIDtO/TTVQm7ks1PLMb2UvlY69EPhTUFo7J0qKVZTmEM4=", 
+                "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgub5iPOR+EJfZ85xAQZvE8cRrDTNRnZNzoNK6jSpZnSql4Dl+Sb/wPQMSsOP/IvIm1qqpK1NQinLmrNKqJBT6a2rfLNqzZLLQIcMf2l/zIJWE7tR9OWEcDApe5f7UXZJx0GaK/wKJheBlo/+5bM7P+aGylE+/f9dL5FVyFeN/eX9f1yr/J6rvCNRq1vCWcZ/Sq6moGioqYckx2swHHeuarwh3QcUzKTt62zaFDlAyKJUV5co5BSMCbeJzCrFyAMr9kpuzkvlUL4cJ4l+UUiHYIkTgtZLGyOGwS9oUL7PU09sKl2dBS+a3nx+KJ05Yejl7Fn5q/wKfqBLU9YKn1comwIDAQAB", "UTF-8");
+            System.out.println(b);
+        } catch (AlipayApiException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
 }

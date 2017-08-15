@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "alipay_edu_region_t", catalog = "wepay_sp")
+@Table(name = "alipay_edu_region_t")
 public class AlipayEduRegion
     implements java.io.Serializable {
 
