@@ -66,7 +66,7 @@
 
 	<filter-mapping>
 		<filter-name>webFilter</filter-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>*.action</url-pattern>
 	</filter-mapping>
 
      <filter-mapping>

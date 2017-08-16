@@ -95,28 +95,25 @@ public class AlipayEduBillMainServiceImpl
             // 记录通知
             AlipayEduNotify eduNotify = alipayEduNotifyService.doTransSaveEduNotify(notifyVO);
             
+            // 异步通知信息都是K12的，不必校验app_id
             // 检查重要参数app_id、totalAmount、seller_id
-            if (!StringUtils.equals(notifyVO.getApp_id(), eduNotify.getAlipayEduBill().getAppId())) {
-                logger.warn("检查通知内容 - 失败 - app_id不一致，通知app_id={}, 账单明细app_id={}", notifyVO.getApp_id(), eduNotify.getAlipayEduBill().getAppId());
-            } else {
-                result  = AsynNotifyHandleResult.SUCCESS.toString();
-                // TODO 通过线程池任务来异步处理，账单同步超时处理
+            result  = AsynNotifyHandleResult.SUCCESS.toString();
+            // TODO 通过线程池任务来异步处理，账单同步超时处理
+            
+            // 根据通知处理账单
+            AlipayEduBill bill = alipayEduBillService.doTransUpdateBillByAlipayEduNotify(eduNotify);
+            
+            if (OrderStatus.PAY_SUCCESS.name().equalsIgnoreCase(bill.getOrderStatus())) {
+                // 同步缴费成功进行销帐
+                AlipayEcoEduKtBillingModifyResponse response = AliPayEduUtil.billModify(bill, 1);
                 
-                // 根据通知处理账单
-                AlipayEduBill bill = alipayEduBillService.doTransUpdateBillByAlipayEduNotify(eduNotify);
-                
-                if (OrderStatus.PAY_SUCCESS.name().equalsIgnoreCase(bill.getOrderStatus())) {
-                    // 同步缴费成功进行销帐
-                    AlipayEcoEduKtBillingModifyResponse response = AliPayEduUtil.billModify(bill, 1);
-                    
-                    logger.info("调用同步账单状态（缴费成功）接口，k12OrderNo：{}, 响应：{}", bill.getK12OrderNo(), JSONUtil.toJSONString(response, true));
-                    if (response == null || !Constants.SUCCESS.equals(response.getCode())) {// 交易或者结束
-                        logger.error(StringHelper.combinedString("同步账单状态（缴费成功）失败", AlarmLogPrefix.invokeAliPayAPIErr.getValue()));
-                    } else {
-                        // 同步成功
-                        bill.setOrderStatus(OrderStatus.BILLING_SUCCESS.name());
-                        alipayEduBillService.doTransUpdateAlipayEduBill(bill);
-                    }
+                logger.info("调用同步账单状态（缴费成功）接口，k12OrderNo：{}, 响应：{}", bill.getK12OrderNo(), JSONUtil.toJSONString(response, true));
+                if (response == null || !Constants.SUCCESS.equals(response.getCode())) {// 交易或者结束
+                    logger.error(StringHelper.combinedString("同步账单状态（缴费成功）失败", AlarmLogPrefix.invokeAliPayAPIErr.getValue()));
+                } else {
+                    // 同步成功
+                    bill.setOrderStatus(OrderStatus.BILLING_SUCCESS.name());
+                    alipayEduBillService.doTransUpdateAlipayEduBill(bill);
                 }
             }
         } catch (Exception e) {

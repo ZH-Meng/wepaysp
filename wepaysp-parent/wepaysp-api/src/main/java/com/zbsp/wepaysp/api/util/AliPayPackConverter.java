@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.alipay.api.response.AlipayTradePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
-import com.google.gson.annotations.SerializedName;
 import com.zbsp.alipay.trade.model.ChargeItems;
 import com.zbsp.alipay.trade.model.ExtendParams;
 import com.zbsp.alipay.trade.model.UserDetails;
@@ -27,6 +26,7 @@ import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.ConvertPackException;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
 import com.zbsp.wepaysp.po.partner.School;
 import com.zbsp.wepaysp.vo.pay.AliPayDetailsVO;
@@ -320,7 +320,8 @@ public class AliPayPackConverter {
                 .setChargeBillTitle(alipayEduBill.getChargeBillTitle())
                 .setChargeItem(JSONUtil.parseArray(alipayEduBill.getChargeItem(), ChargeItems.class))
                 .setAmount(Utils.toAmount(alipayEduBill.getAmount()))
-                .setGmtEnd(StringUtils.isBlank(alipayEduBill.getGmtEnd()) ? Utils.toDate(new Date()) :alipayEduBill.getGmtEnd()) // 必填项，所以为空时endEnable为N，设置当前时间，所以不会生效
+                // 必填项，所以为空时endEnable为N，设置时间也不会生效，但是设置当前时间又会有误差。所以设置当前时间加一天保证发送成功时间又不起作用
+                .setGmtEnd(StringUtils.isBlank(alipayEduBill.getGmtEnd()) ? Utils.toDate(TimeUtil.plusSeconds(new Date(), 3600 * 24)) :alipayEduBill.getGmtEnd()) 
                 .setEndEnable(alipayEduBill.getEndEnable())
                 .setPartnerId(alipayEduBill.getIsvPartnerId());
         } catch (Exception e) {

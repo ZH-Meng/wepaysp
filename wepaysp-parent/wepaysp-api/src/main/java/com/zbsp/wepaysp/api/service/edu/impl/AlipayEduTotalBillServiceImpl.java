@@ -58,6 +58,7 @@ public class AlipayEduTotalBillServiceImpl
         StringBuilder jpqlBuilder = new StringBuilder("from AlipayEduTotalBill a where 1=1");
         Map<String, Object> jpqlMap = assembleQueryCondition(jpqlBuilder, paramMap);
 
+        jpqlBuilder.append(" order by a.createTime desc");
         List<AlipayEduTotalBill> totalBillList = (List<AlipayEduTotalBill>) commonDAO.findObjectList(jpqlBuilder.toString(), jpqlMap, false, startIndex, maxResult);
         if (totalBillList != null && !totalBillList.isEmpty()) {
             for (AlipayEduTotalBill totalBill : totalBillList) {

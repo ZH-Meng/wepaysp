@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.MapUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.struts2.ServletActionContext;
 
 import com.zbsp.wepaysp.api.service.main.edu.AlipayEduBillMainService;
 import com.zbsp.wepaysp.common.util.JSONUtil;
@@ -42,34 +41,24 @@ public class AlipayEduBillAsynNotifyServlet
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
         throws ServletException, IOException {
-        super.doPost(req, resp);
+        doPost(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
-        super.doPost(req, resp);
+        super.doPost(request, response);
 
         String logPrefix = "处理支付宝教育缴费账单异步通知请求 - ";
         logger.info(logPrefix + "开始");
         try {
-            // 校验签名
-            HttpServletRequest request = ServletActionContext.getRequest();
-            HttpServletResponse response = ServletActionContext.getResponse();
-
             // 获取所有请求参数
             @SuppressWarnings("unchecked")
             Map<String, String[]> parameterMap = request.getParameterMap();
 
             Map<String, String> paramMap = new HashMap<String, String>();
             for (Map.Entry<String, String[]> parameter : parameterMap.entrySet()) {
-                System.out.println(JSONUtil.toJSONString(parameter, true));
-                String value = "";
-                for (String v : parameter.getValue()) {
-                    value += v;
-                }
-                paramMap.put(parameter.getKey(), value);
-                // paramMap.put(parameter.getKey(), parameter.getValue()[0]);
+                paramMap.put(parameter.getKey(), parameter.getValue()[0]);
             }
             logger.info(logPrefix + "异步通知请求参数：{}", JSONUtil.toJSONString(paramMap, true));
 

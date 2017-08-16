@@ -75,9 +75,14 @@
 						  			<td>
 						  				<s:property value="pageRows*(currPage-1) + #rowStatus.index + 1" />
 						  			</td>
-						  			<td title="<s:date name="#vo.sendTime" format="yyyy-MM-dd HH:mm:ss" />">
-						  				<s:date name="#vo.sendTime" format="yyyy-MM-dd HH:mm:ss" />
-						  			</td>
+						  			<s:if test="#vo.sendTime == null">
+										<td></td>	
+						  			</s:if>
+						  			<s:else>
+							  			<td title="<s:date name="#vo.sendTime" format="yyyy-MM-dd HH:mm:ss" />">
+							  				<s:date name="#vo.sendTime" format="yyyy-MM-dd HH:mm:ss" />
+							  			</td>
+						  			</s:else>
 						  			<td title="<s:property value="#vo.billName" />">
 						  				<s:property value="#vo.billName" />
 						  			</td>

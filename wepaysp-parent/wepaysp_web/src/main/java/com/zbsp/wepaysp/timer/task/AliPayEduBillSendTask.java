@@ -9,6 +9,7 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.response.AlipayEcoEduKtBillingSendResponse;
 import com.zbsp.alipay.trade.config.Constants;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
+import com.zbsp.wepaysp.api.service.edu.AlipayEduTotalBillService;
 import com.zbsp.wepaysp.api.util.AliPayEduUtil;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.util.JSONUtil;
@@ -29,6 +30,8 @@ public class AliPayEduBillSendTask extends TimerBasicTask {
     
     private static String LOG_PREFIX = "[定时任务] - [支付宝教育缴费账单发送] - ";
     
+    @Autowired
+    private AlipayEduTotalBillService alipayEduTotalBillService;// TODO 发送完毕更新账单的发送时间
     @Autowired
     private AlipayEduBillService alipayEduBillService;
 
