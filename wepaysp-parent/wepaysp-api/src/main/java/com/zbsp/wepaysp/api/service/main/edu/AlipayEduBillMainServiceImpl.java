@@ -51,9 +51,11 @@ public class AlipayEduBillMainServiceImpl
         boolean flag = false;
         String result  = AsynNotifyHandleResult.FAILURE.toString();
         try {
-            String signType = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Edu), SysEnvKey.ALIPAY_APP_SIGN_TYPE);
-            String alipayPublicKey = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Edu), SysEnvKey.ALIPAY_PUBLIC_KEY);
-            if (!AlipaySignature.rsaCheckV1(paramMap, alipayPublicKey, MapUtils.getString(paramMap, "charset"), "")) {
+            //String signType = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Edu), SysEnvKey.ALIPAY_APP_SIGN_TYPE);
+            //String alipayPublicKey = MapUtils.getString(SysConfig.alipayAppMap.get(SysConfig.appId4Edu), SysEnvKey.ALIPAY_PUBLIC_KEY);
+            
+            String alipayPublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDI6d306Q8fIfCOaTXyiUeJHkrIvYISRcc73s3vF1ZT7XN8RNPwJxo8pWaJMmvyTn9N4HQ632qJBVHf8sxHi/fEsraprwCtzvzQETrNRwVxLO5jVmRGi60j8Ue1efIlzPXV9je9mkjzOmdssymZkh2QhUrCmZYI/FCEa3/cNMW0QIDAQAB";
+            if (!AlipaySignature.rsaCheckV1(paramMap, alipayPublicKey, MapUtils.getString(paramMap, "charset"), "RSA")) {
                 logger.error(logPrefix + "验签 - 签名错误");
             } else {
                 logger.info(logPrefix + "验签 - 签名正确");
@@ -137,14 +139,17 @@ public class AlipayEduBillMainServiceImpl
     }
     
     public static void main(String[] args) {
-        String sign = "eUk+6SmV5GHjf5fz7/t0SddkuSpmGqCBLY+O4e7vQJGGyxZvzKS1F1CY8XlCmC6991zR/mpsr6TN3DViliLHC15Jvy9yaofmXD9hTsrLxrzYqPpCwY/LUhnkKZ66XztIDtO/TTVQm7ks1PLMb2UvlY69EPhTUFo7J0qKVZTmEM4=";
+        String sign = "Uk+6SmV5GHjf5fz7/t0SddkuSpmGqCBLY+O4e7vQJGGyxZvzKS1F1CY8XlCmC6991zR/mpsr6TN3DViliLHC15Jvy9yaofmXD9hTsrLxrzYqPpCwY/LUhnkKZ66XztIDtO/TTVQm7ks1PLMb2UvlY69EPhTUFo7J0qKVZTmEM4=";
+        String alipayPublicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDI6d306Q8fIfCOaTXyiUeJHkrIvYISRcc73s3vF1ZT7XN8RNPwJxo8pWaJMmvyTn9N4HQ632qJBVHf8sxHi/fEsraprwCtzvzQETrNRwVxLO5jVmRGi60j8Ue1efIlzPXV9je9mkjzOmdssymZkh2QhUrCmZYI/FCEa3/cNMW0QIDAQAB";
         try {
         	System.out.println(Base64.decodeBase64(sign.getBytes()).length);
             boolean b = AlipaySignature.rsaCheckContent("app_id=2016112803443590&auth_app_id=2017053107391618&buyer_id=2088202477752996&buyer_logon_id=men***@163.com&buyer_pay_amount=0.04&charset=GBK&fund_bill_list=[{\"amount\":\"0.04\",\"fundChannel\":\"ALIPAYACCOUNT\"}]&gmt_create=2017-08-15 15:14:40&gmt_payment=2017-08-15 15:14:41&invoice_amount=0.04&notify_id=db0f6f2fad963e0c9c5780d2f7141b1nn2&notify_time=2017-08-15 15:14:41&notify_type=trade_status_sync&out_trade_no=59929e85c71c884ff01e8fa1&passback_params=b3JkZXJObz01OTkyOWU4NWM3MWM4ODRmZjAxZThmYTE=&point_amount=0.00&receipt_amount=0.04&seller_email=775907359@qq.com&seller_id=2088521354078238&subject=2017���＾����5&total_amount=0.04&trade_no=2017081521001004990219233031&trade_status=TRADE_SUCCESS&version=1.0",
                 //"eUk+6SmV5GHjf5fz7/t0SddkuSpmGqCBLY+O4e7vQJGGyxZvzKS1F1CY8XlCmC6991zR/mpsr6TN3DViliLHC15Jvy9yaofmXD9hTsrLxrzYqPpCwY/LUhnkKZ66XztIDtO/TTVQm7ks1PLMb2UvlY69EPhTUFo7J0qKVZTmEM4=",
                 //"VXXGSaee11FbOl8V89nUCuCLz2UCxEPJyo3khbM7uL3aKk1xG9H8481LY/DgFiWjEonGOvjQ1uz5MGIIrQVG6Xkopx66PoCAj1cmZQ63mwcXl9bNb/YYRgwuaGv+wI0rgv4idw8OOsrA9XffaEQXMRtSJmC9B6Trm4r41JSlIOLIM7QVqtIYO2FZOU9dBrcX8mQXXh1O/rZwa0Y+Mm8xCBQfuZRm6GgwVZDMR650fyeU5q+aUbl0Zol55C+WVd3NR08iFCofd/nrktUo5EGgfK6tbTyRthEMcPdAKmeC/MFuY5Nh0djo1rynOvjaA/wSH9BseoeyPnUx3Qel5m7XAA==",
             		sign,
-                "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCuk5ohQonX2RaUKkpgECJ6/FHBs4j7mhPR1jIc0PPKy+ypNTn54bqKUs36f01iAS6elgJi15kFnmimG/I10ezoe7YIkTUdOeh1+B/IlZVX637wwr8PyUYRn9Jcbq6KGTBoK7EakDtMcTrqkSZ1NN1tLaxUDF4bMnll9273/njeXQIDAQAB", "GBK");
+                //"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCuk5ohQonX2RaUKkpgECJ6/FHBs4j7mhPR1jIc0PPKy+ypNTn54bqKUs36f01iAS6elgJi15kFnmimG/I10ezoe7YIkTUdOeh1+B/IlZVX637wwr8PyUYRn9Jcbq6KGTBoK7EakDtMcTrqkSZ1NN1tLaxUDF4bMnll9273/njeXQIDAQAB",
+            		alipayPublicKey,
+            		"utf-8");
             System.out.println(b);
         } catch (AlipayApiException e) {
             // TODO Auto-generated catch block

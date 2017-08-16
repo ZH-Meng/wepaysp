@@ -49,7 +49,7 @@ public class AliPayEduBillSendTask extends TimerBasicTask {
                     if (response == null || !Constants.SUCCESS.equals(response.getCode())) {// 交易或者结束
                         logger.warn(LOG_PREFIX + "发送失败");
                     } else {
-                        logger.warn(LOG_PREFIX + "发送成功");
+                        logger.info(LOG_PREFIX + "发送成功");
                         bill.setStudentNo(response.getStudentNo());
                         bill.setOrderStatus(OrderStatus.NOT_PAY.name());
                         bill.setK12OrderNo(response.getOrderNo());

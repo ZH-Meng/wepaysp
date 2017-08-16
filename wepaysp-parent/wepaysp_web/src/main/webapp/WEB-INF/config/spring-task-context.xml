@@ -18,6 +18,7 @@
         <task:scheduled ref="weixinDownloadBillTask" method="process" cron="0 0 10 * * ?"/>
         <task:scheduled ref="aiPayBillDownloadTask" method="process" cron="0 5 10 * * ?"/>
         <task:scheduled ref="reconciliationTask" method="process" cron="0 0/18 * * * ?"/>
+         <task:scheduled ref="aliPayEduBillSendTask" method="process" cron="0/1 * * * * ?"/>
          -->
     	<task:scheduled ref="refreshAppAuthTokenTask" method="process" cron="0 0 0 * * ?"/>
     </task:scheduled-tasks> 

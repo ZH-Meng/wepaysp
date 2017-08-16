@@ -40,6 +40,7 @@ public class AlipayEduNotifyServiceImpl
                 orderNo = orderNoStr.split("=")[1];
             }
         }
+        logger.info("账单K12OrderNo:" + orderNo);
         
         String appId = notifyVO.getApp_id();
         String totalAmountStr = notifyVO.getTotal_amount();
@@ -50,6 +51,7 @@ public class AlipayEduNotifyServiceImpl
         Validator.checkArgument(StringUtils.isBlank(notifyVO.getTrade_status()), "trade_status为空");
         
         Map<String, Object>jpqlMap = new HashMap<String, Object>();
+        jpqlMap.put("ORDERNO", orderNo);
         AlipayEduBill bill = commonDAO.findObject("from AlipayEduBill a where a.k12OrderNo=:ORDERNO", jpqlMap, false);
         if (bill == null) {
             throw new NotExistsException("缴费账单明细不存在，k12OrderNo=" + orderNo);

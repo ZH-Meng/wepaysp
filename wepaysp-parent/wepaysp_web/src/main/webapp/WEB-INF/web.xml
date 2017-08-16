@@ -14,6 +14,19 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	
+	 <filter>
+         <filter-name>GBKEncodingFilter</filter-name>
+         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+         <init-param>
+             <param-name>encoding</param-name>
+             <param-value>GBK</param-value>
+        </init-param>
+         <init-param>
+             <param-name>forceEncoding</param-name>
+             <param-value>true</param-value>
+        </init-param>
+     </filter>
+	
 	<filter>
 		<filter-name>loginFilter</filter-name>
 		<filter-class>com.zbsp.wepaysp.manage.web.security.LoginFilter</filter-class>
@@ -55,7 +68,22 @@
 		<filter-name>webFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
+
+     <filter-mapping>
+         <filter-name>GBKEncodingFilter</filter-name>
+         <url-pattern>/bill/asynNotify</url-pattern>
+     </filter-mapping>
+     
+	<servlet>
+		<servlet-name>billAsynNotify</servlet-name>
+		<servlet-class>com.zbsp.wepaysp.manage.web.action.edu.AlipayEduBillAsynNotifyServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>billAsynNotify</servlet-name>
+		<url-pattern>/bill/asynNotify</url-pattern>
+	</servlet-mapping>
+  
 	<session-config>
 		<session-timeout>300</session-timeout>
 	</session-config>
