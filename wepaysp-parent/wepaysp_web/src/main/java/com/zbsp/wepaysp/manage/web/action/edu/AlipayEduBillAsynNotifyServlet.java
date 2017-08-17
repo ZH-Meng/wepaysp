@@ -47,7 +47,6 @@ public class AlipayEduBillAsynNotifyServlet
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
-        super.doPost(request, response);
 
         String logPrefix = "处理支付宝教育缴费账单异步通知请求 - ";
         logger.info(logPrefix + "开始");
@@ -64,7 +63,7 @@ public class AlipayEduBillAsynNotifyServlet
 
             Map<String, Object> resultMap = alipayEduBillMainService.handleAlipayPayEduBillNotify(paramMap);
             String result = MapUtils.getString(resultMap, "result");
-            response.getWriter().write(result); // 返回非 success 也无意义，支付宝有重发机制
+            response.getWriter().write(result.toLowerCase()); // 返回非 success 也无意义，支付宝有重发机制
             logger.info(logPrefix + "处理结果为({})", result);
         } catch (Exception e) {
             logger.error(logPrefix + "异常 : {}", e.getMessage(), e);

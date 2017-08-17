@@ -1,6 +1,8 @@
 package com.zbsp.wepaysp.timer.task;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,7 @@ public class AliPayEduBillSendTask extends TimerBasicTask {
     private static String LOG_PREFIX = "[定时任务] - [支付宝教育缴费账单发送] - ";
     
     @Autowired
-    private AlipayEduTotalBillService alipayEduTotalBillService;// TODO 发送完毕更新账单的发送时间
+    private AlipayEduTotalBillService alipayEduTotalBillService;
     @Autowired
     private AlipayEduBillService alipayEduBillService;
 
@@ -44,6 +46,7 @@ public class AliPayEduBillSendTask extends TimerBasicTask {
         
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 需要发送的账单明细数量：" + ((billList != null && !billList.isEmpty()) ? billList.size() : 0) +  " ]"));
         AlipayEcoEduKtBillingSendResponse response = null;
+        Set<String> totalBillOids = new HashSet<String>(); 
         if (billList != null && !billList.isEmpty()) {
             for (AlipayEduBill bill : billList) {
                 try {
@@ -64,7 +67,10 @@ public class AliPayEduBillSendTask extends TimerBasicTask {
                 } catch (Exception e) {
                     logger.error(StringHelper.combinedString(LOG_PREFIX, "异常:\n{}"), e.getMessage(), e);
                 }
+                totalBillOids.add(bill.getAlipayEduTotalBillOid());
             }
+            // 更新账单为已发送
+            alipayEduTotalBillService.doTransTotalBillSent(totalBillOids, null);
         }
         
         logger.info(StringHelper.combinedString(LOG_PREFIX, "[结束]"));

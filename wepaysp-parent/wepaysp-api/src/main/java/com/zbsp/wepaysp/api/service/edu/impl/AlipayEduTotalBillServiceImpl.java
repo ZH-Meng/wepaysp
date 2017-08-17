@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -337,6 +338,20 @@ public class AlipayEduTotalBillServiceImpl
         totalBill.setTotalCount(totalCount);
         totalBill.setTotalMoney(totalMoney);
         logger.info("检查excel明细行数据 - 通过");
+    }
+
+    @Override
+    public void doTransTotalBillSent(Set<String> totalBillOids, Date time) {
+        List<AlipayEduTotalBill> totalBills = new ArrayList<>();
+        
+        for (String totaBillOid : totalBillOids) {
+            AlipayEduTotalBill totalBill = commonDAO.findObject(AlipayEduTotalBill.class, totaBillOid);
+            totalBill.setSendTime(time == null ? new Date() : time);
+            totalBill.setOrderStatus(OrderStatus.SEND_SUCCESS.name());
+            totalBills.add(totalBill);
+            logger.info("更新缴费账单（{}）为发送成功，发送时间：{}", totalBill.getBillName(), DateUtil.getDate(totalBill.getSendTime(), "yyyy-MM-dd HH:mm:ss"));
+        }
+        commonDAO.updateList(totalBills);
     }
 	
     public void setAlipayEduBillService(AlipayEduBillService alipayEduBillService) {
