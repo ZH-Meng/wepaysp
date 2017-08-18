@@ -63,7 +63,7 @@ public class AliPayEduBillSendTask
                 List<AlipayEduBill> billList = alipayEduBillService.doJoinTransQueryAlipayEduBillByStatus(totalBill.getIwoid(), OrderStatus.INIT);
                 logger.info(StringHelper.combinedString(LOG_PREFIX, "[ {}需要发送的账单明细数量：{}]"), totalBill.getBillName(), (billList != null && !billList.isEmpty()) ? billList.size() : 0);
 
-                // ④ 调用缴费账单发送接口，暂只发送一次
+                // ④ 遍历并调用缴费账单发送接口，暂只发送一次
                 if (billList != null && !billList.isEmpty()) {
                     for (AlipayEduBill bill : billList) {
                         try {
@@ -77,6 +77,7 @@ public class AliPayEduBillSendTask
                                 bill.setStudentNo(response.getStudentNo());
                                 bill.setOrderStatus(OrderStatus.NOT_PAY.name());
                                 bill.setK12OrderNo(response.getOrderNo());
+                                // ⑤ 更新账单明细状态为已发送 待支付
                                 alipayEduBillService.doTransUpdateAlipayEduBill(bill);
                             }
 
@@ -92,19 +93,18 @@ public class AliPayEduBillSendTask
                     }
                 }
 
-                // ⑤ 若totalBill账单的明细全部发送成功，设置发送时间和状态（发送成功）
+                // ⑥ 若totalBill账单的明细全部发送成功，设置发送时间和状态（发送成功）
                 if (totalBillSucess) {
                     totalBill.setSendTime(new Date());
                     totalBill.setOrderStatus(com.zbsp.wepaysp.po.edu.AlipayEduTotalBill.OrderStatus.SEND_SUCCESS.name());
                     sendSuceessList.add(totalBill);
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "账单（{}）发送成功"), totalBill.getBillName());
-                }
-
-                totalBillSucess = true;
+				} else
+					totalBillSucess = true;
             }
             
             if (!sendSuceessList.isEmpty()) {
-                // ⑥ 批量更新发送成功的账单集合
+                //  批量更新发送成功的账单集合
                 alipayEduTotalBillService.doTransUpdateTotalBillList(sendSuceessList);
             }
         } catch (Exception e) {

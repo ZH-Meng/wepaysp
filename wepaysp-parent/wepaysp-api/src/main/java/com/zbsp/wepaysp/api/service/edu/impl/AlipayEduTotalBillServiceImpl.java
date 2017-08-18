@@ -113,8 +113,9 @@ public class AlipayEduTotalBillServiceImpl
         AlipayEduTotalBill totalBill = commonDAO.findObject(AlipayEduTotalBill.class, totalBillOid);
         if (totalBill != null) {
             BeanCopierUtil.copyProperties(totalBill, totalBillVO);
-            String[] headers = totalBill.getChargeItemHeaders().split(",");
-            totalBillVO.setChargeItemHeaders(headers);
+            if (StringUtils.isNotBlank(totalBill.getChargeItemHeaders())) {
+            	totalBillVO.setChargeItemHeaders(totalBill.getChargeItemHeaders().split(","));
+            }
         }
         return totalBillVO;
     }

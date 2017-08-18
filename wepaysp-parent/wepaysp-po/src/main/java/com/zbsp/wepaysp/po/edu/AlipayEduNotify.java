@@ -333,6 +333,7 @@ public class AlipayEduNotify
         this.remark = remark;
     }
     
+    @Column(name = "notify_id", length = 128)
     public String getNotifyId() {
         return notifyId;
     }

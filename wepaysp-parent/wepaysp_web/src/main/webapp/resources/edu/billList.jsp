@@ -72,7 +72,7 @@
 			</div>
 			
 			<s:if test="alipayEduTotalBillVO.chargeItemHeaders != null">
-				<s:set var="changeItemCount" value="alipayEduTotalBillVO.chargeItemHeaders.length" />				
+				<s:set var="changeItemCount" value="alipayEduTotalBillVO.chargeItemHeaders.length" />
 			</s:if>
 			<s:else>
 				<s:set var="changeItemCount" value="0" />
@@ -91,9 +91,11 @@
 	                                <th>缴费账单名称</th>
 	                                
 	                                <%--动态列  chargeItem--%>
-	                                <s:iterator value="alipayEduTotalBillVO.chargeItemHeaders" var="thName">
-	                                	<th><s:property value="#thName" /></th>
-	                                </s:iterator>
+	                                <s:if test="#changeItemCount > 0">
+		                                <s:iterator value="alipayEduTotalBillVO.chargeItemHeaders" var="thName">
+		                                	<th><s:property value="#thName" /></th>
+		                                </s:iterator>
+	                                </s:if>
 	                                
 	                                <th>合计</th>
 	                                <th>账单状态</th>
