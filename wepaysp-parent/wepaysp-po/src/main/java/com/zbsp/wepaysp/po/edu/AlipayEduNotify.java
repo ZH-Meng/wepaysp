@@ -47,6 +47,7 @@ public class AlipayEduNotify
     private String modifier;
     private Date modifyTime;
     private String remark;
+    private String notifyId;
 
     public AlipayEduNotify() {
     }
@@ -330,6 +331,14 @@ public class AlipayEduNotify
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+    
+    public String getNotifyId() {
+        return notifyId;
+    }
+    
+    public void setNotifyId(String notifyId) {
+        this.notifyId = notifyId;
     }
 
 }

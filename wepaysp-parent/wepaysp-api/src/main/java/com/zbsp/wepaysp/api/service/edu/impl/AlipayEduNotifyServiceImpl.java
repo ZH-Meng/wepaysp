@@ -13,6 +13,7 @@ import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduNotifyService;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
+import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
@@ -29,6 +30,14 @@ public class AlipayEduNotifyServiceImpl
     @Override
     public AlipayEduNotify doTransSaveEduNotify(AlipayWapPayNotifyVO notifyVO) {
         Validator.checkArgument(notifyVO == null, "notifyVO 不能为空");
+        
+        // 检查通知是否存在
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        jpqlMap.put("NOTIFYID", notifyVO.getNotify_id());
+        AlipayEduNotify existNotify = commonDAO.findObject("from AlipayEduNotify a where a.notifyId=:NOTIFYID", jpqlMap, false);
+        if (existNotify != null) {
+            throw new AlreadyExistsException("缴费账单明细支付异步通知已存在，notifyId=" + notifyVO.getNotify_id());
+        }
         
         // 回调链接里面的out_trade_no , 在不出现关闭交易帐单的情况下，就是发账单返回的order_no;
         // 交易关闭的账单，发账单时返回的orderNo参数，会通过passback_params这个参数带回，此参数通过base64（utf-8）编码，使用时需要反编码。反编译出来的样式orderNo=58acf6f8fc4fee266c866d44
@@ -50,14 +59,13 @@ public class AlipayEduNotifyServiceImpl
         Validator.checkArgument(!NumberUtils.isCreatable(totalAmountStr) || !Pattern.matches(SysEnvKey.REGEX_￥_POSITIVE_FLOAT_2BIT, totalAmountStr), "totalAmount(" + totalAmountStr + ")格式不正确");
         Validator.checkArgument(StringUtils.isBlank(notifyVO.getTrade_status()), "trade_status为空");
         
-        Map<String, Object>jpqlMap = new HashMap<String, Object>();
+        jpqlMap.clear();
         jpqlMap.put("ORDERNO", orderNo);
         AlipayEduBill bill = commonDAO.findObject("from AlipayEduBill a where a.k12OrderNo=:ORDERNO", jpqlMap, false);
         if (bill == null) {
             throw new NotExistsException("缴费账单明细不存在，k12OrderNo=" + orderNo);
         }
         
-        // 
         AlipayEduNotify notify = new AlipayEduNotify();
         notify.setIwoid(Generator.generateIwoid());
         notify.setAlipayEduBill(bill);
@@ -69,8 +77,7 @@ public class AlipayEduNotifyServiceImpl
         notify.setTradeStatus(notifyVO.getTrade_status());
         notify.setTradeNo(notifyVO.getTrade_no());
         
-        // TODO 检查通知是否存在
-        //notify.setNotifyId(notifyVO.getNotify_id());
+        notify.setNotifyId(notifyVO.getNotify_id());
         notify.setNotifyType(notifyVO.getNotify_type());
         notify.setNotifyTime(DateUtil.getDate(notifyVO.getNotify_time(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
         notify.setSellerId(notifyVO.getSeller_id());

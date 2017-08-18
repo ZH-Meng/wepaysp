@@ -268,8 +268,9 @@ public class ExcelUtil {
         Workbook workbook = null;
         InputStream inputStream = null;
         try {
+            System.out.println(tempFilePath);
             inputStream = new FileInputStream(tempFilePath);
-            
+            System.out.println(inputStream);
             if(tempFilePath.endsWith(".xlsx")){
                 workbook = new XSSFWorkbook(inputStream);
             }else if(tempFilePath.endsWith(".xls")){

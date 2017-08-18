@@ -43,7 +43,7 @@
 										<input type="text" name="endTime" id="endTime" class="Wdate" readonly="readonly" value="<s:property value="endTime"/>"
 											onfocus="WdatePicker({isShowClear:false,lang:'zh-cn',dateFmt:'yyyy-MM-dd',maxDate:'%y-%M-{%d+1}'})"/>
 									</td>
-									<th>账单名称</th>
+									<th>收费备注</th>
 									<td><s:textfield name="billName" id="billName" maxlength="20"/></td>
 								</tr>
 							</tbody>
@@ -64,7 +64,7 @@
 	                            <tr>
 	                                <th style="width: 100px;">序号</th>
 	                                <th>账单发送时间</th>
-	                                <th>账单名称</th>
+	                                <th>收费备注</th>
 	                                <th class="twenty">操作</th>
 	                            </tr>
 	                        </thead>
@@ -126,7 +126,7 @@
 				    </div>
 			    </div>
 			    <div class="layui-form-item">
-				    <label class="layui-form-label" for="billFile">收费名称：<span class="tj_bt">*</span></label>
+				    <label class="layui-form-label" for="billFile">收费备注：<span class="tj_bt">*</span></label>
 				    <div class="layui-input-block">
 				      <input id="bill-name" type="text" name="billName" lay-verify="title" autocomplete="off" placeholder="" class="layui-input"/>
 				    </div>
@@ -177,21 +177,18 @@
 		        id: 'LAY_demo' + type //防止重复弹出
 		        ,
 		        area: ['400px', '300px'],
-		        title: '账单信息',
+		        title: '发送缴费账单',
 		        content: $("#uploadBillDialog"),
-		        btn: ['取消', '确认'],
+		        btn: ['发送', '关闭'],
 		        btnAlign: 'c' //按钮居中
 		        ,
 		        yes: function(index, layero) {
-		            layer.closeAll();
-		        },
-		        btn2: function(index, layero) {
-		            if (uploading) return;
+		        	if (uploading) return;
 		            uploading = true;
 		            if (isBlank($("#excel-save-name").val())) {
 		                layer.alert("缴费账单excel还未上传！");
 		            } else if (isBlank($("#bill-name").val())) {
-		                layer.alert("收费名称不能为空！");
+		                layer.alert("收费备注不能为空！");
 		                $("#bill-name").focus();
 		            } else {
 		                $.ajax({
@@ -217,6 +214,9 @@
 		            }
 		            uploading = false;
 		            return false; // 开启该代码可禁止点击该按钮关闭
+		        },
+		        btn2: function(index, layero) {
+		        	 layer.closeAll();
 		        },
 		        shade: 0.1
 		    });

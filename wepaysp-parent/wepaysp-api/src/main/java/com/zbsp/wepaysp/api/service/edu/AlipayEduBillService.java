@@ -5,6 +5,7 @@ import java.util.Map;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill.OrderStatus;
 import com.zbsp.wepaysp.po.edu.AlipayEduNotify;
+import com.zbsp.wepaysp.vo.edu.AlipayEduBillVO;
 
 import java.util.List;
 
@@ -26,12 +27,9 @@ public interface AlipayEduBillService {
      * @param paramMap 查询参数
      * @param startIndex 记录起始位置
      * @param maxResult 返回记录最大数
-     * @return Map
-     * <pre>
-     *   billList：交易List<AlipayEduBillVO>
-     *   <pre>
+     * @return 交易List<AlipayEduBillVO>
      */
-    public Map<String, Object> doJoinTransQueryAlipayEduBill(Map<String, Object> paramMap, int startIndex, int maxResult);
+    public List<AlipayEduBillVO> doJoinTransQueryAlipayEduBill(Map<String, Object> paramMap, int startIndex, int maxResult);
     
     /**
      * 统计符合条件的总数.
@@ -50,8 +48,8 @@ public interface AlipayEduBillService {
     /**批量保存账单明细*/
     public void doTransBatchSaveAlipayEduBills(List<AlipayEduBill> billList);
 
-    /** 根据状态查找账单明细*/
-    public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(OrderStatus status);
+    /** 根据状态查找账单明细 */
+    public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(String totalBillOid, OrderStatus status);
 
     /** 更新账单明细*/
     public void doTransUpdateAlipayEduBill(AlipayEduBill bill);

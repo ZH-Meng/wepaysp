@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.zbsp.wepaysp.po.edu.AlipayEduTotalBill;
+import com.zbsp.wepaysp.po.edu.AlipayEduTotalBill.OrderStatus;
 import com.zbsp.wepaysp.vo.edu.AlipayEduTotalBillVO;
 
 /**
@@ -66,5 +68,14 @@ public interface AlipayEduTotalBillService {
      * @param time
      */
     public void doTransTotalBillSent(Set<String> totalBillOids, Date time);
+    
+    /**
+     * 查询有效分钟内待发送的缴费账单
+     * @param validMins
+     * @return
+     */
+    public List<AlipayEduTotalBill> doJoinTransQueryTotalBillOfWaitingSend(Integer validMins);
+
+    public void doTransUpdateTotalBillList(List<AlipayEduTotalBill> sendSuceessList);
     
 }

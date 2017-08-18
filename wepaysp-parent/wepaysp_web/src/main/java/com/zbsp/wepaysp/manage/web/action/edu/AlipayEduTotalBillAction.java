@@ -95,7 +95,7 @@ public class AlipayEduTotalBillAction
 
     /** 查询总账单列表 */
     public String list() {
-        initPageData(PageAction.defaultLargePageSize);
+        initPageData(PageAction.defaultSmallPageSize);
         return goCurrent();
     }
 
@@ -106,7 +106,8 @@ public class AlipayEduTotalBillAction
 
     public InputStream getBillTemplate()
         throws FileNotFoundException, UnsupportedEncodingException {
-        billTemplateName = new String("缴费账单模版.xls".getBytes("GBK"), "ISO8859-1");
+        //billTemplateName = new String("缴费账单模版.xls".getBytes("GBK"), "ISO8859-1");
+        billTemplateName = new String("ChargeTemplate.xls");
         return new FileInputStream(new File(billTemplateAbsolutePath));
     }
 

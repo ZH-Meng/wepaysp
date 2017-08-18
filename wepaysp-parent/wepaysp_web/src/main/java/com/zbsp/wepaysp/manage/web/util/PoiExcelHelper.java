@@ -274,7 +274,12 @@ public abstract class PoiExcelHelper {
                 value = String.valueOf(cell.getBooleanCellValue());
                 break;
             case Cell.CELL_TYPE_FORMULA:
-                value = cell.getCellFormula();
+                //value = cell.getCellFormula();
+                try {
+                    value = String.valueOf(cell.getStringCellValue());
+                } catch (IllegalStateException e) {
+                    value = String.valueOf(cell.getNumericCellValue());
+                }
                 break;
             default:
                 value = "";

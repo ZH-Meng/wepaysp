@@ -23,9 +23,18 @@
 									<th>收费名称：</th>
 									<td>${alipayEduTotalBillVO.billName }</td>
 									<th>账单发送时间：</th>
-									<td><s:date name="alipayEduTotalBillVO.sendTime"  format="yyyy-MM-dd HH:mm:ss"/></td>
+									<td>
+										<s:if test="alipayEduTotalBillVO.sendTime != null">
+											<s:date name="alipayEduTotalBillVO.sendTime"  format="yyyy-MM-dd HH:mm:ss"/>
+										</s:if>
+									</td>
 									<th>账单到期时间：</th>
-									<td><s:date name="alipayEduTotalBillVO.closeTime"  format="yyyy-MM-dd HH:mm:ss"/></td>
+									<td>
+										<s:if test="alipayEduTotalBillVO.closeTime != null">
+											<s:date name="alipayEduTotalBillVO.closeTime"  format="yyyy-MM-dd"/>
+										</s:if>
+										<s:else>无</s:else>
+									</td>
 								</tr>	
 								<tr>
 									<th>缴费人数：</th>
@@ -47,8 +56,8 @@
 								<tr>
 									<th>学生姓名</th>
 									<td><s:textfield name="childName" id="childName" maxlength="20" /></td>
-									<th>学生家长</th>
-									<td><s:textfield name="userName" id="userName" maxlength="20" /></td>
+									<th>家长手机号</th>
+									<td><s:textfield name="userMobile" id="userMobile" maxlength="20" /></td>
 									<th>状态</th>
 									<td><s:select list="#{'': '','INIT':'待发送','NOT_PAY':'待缴费','PAYING':'支付中','PAY_SUCCESS':' 支付成功，处理中','BILLING_SUCCESS':'缴费成功','TIMEOUT_CLOSED':'逾期关闭账单','ISV_CLOSED':'账单关闭' }" name="orderStatus" id="orderStatus"></s:select></td>
 								</tr>

@@ -1,6 +1,8 @@
 package com.zbsp.wepaysp.manage.web.action.edu;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import com.zbsp.wepaysp.api.service.main.edu.AlipayEduBillMainService;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.manage.web.action.PageAction;
 import com.zbsp.wepaysp.manage.web.security.ManageUser;
+import com.zbsp.wepaysp.manage.web.util.ExcelUtil;
 import com.zbsp.wepaysp.po.manage.SysUser;
 import com.zbsp.wepaysp.vo.edu.AlipayEduBillVO;
 import com.zbsp.wepaysp.vo.edu.AlipayEduTotalBillVO;
@@ -27,7 +30,7 @@ public class AlipayEduBillAction extends PageAction {
 
 	private static final long serialVersionUID = -8734218055007641937L;
 	private String childName;// 学生姓名
-	private String userName;// 家长姓名
+	private String userMobile;// 家长手机号
 	private String orderStatus;
 	private String totalBillOid;
 	private AlipayEduTotalBillVO alipayEduTotalBillVO;
@@ -36,7 +39,8 @@ public class AlipayEduBillAction extends PageAction {
 	private AlipayEduTotalBillService alipayEduTotalBillService;
 	private AlipayEduBillMainService alipayEduBillMainService;
 
-	@SuppressWarnings("unchecked")
+	private String billDataName;
+	
 	@Override
 	protected String query(int start, int size) {
 		// 检查参数
@@ -48,7 +52,7 @@ public class AlipayEduBillAction extends PageAction {
 	        if (manageUser.getUserLevel() == SysUser.UserLevel.school.getValue()) {// 学校账户
 	            paramMap.put("schoolNo", manageUser.getDataSchool().getSchoolNo());
 	            paramMap.put("childName", childName);
-	            paramMap.put("userName", userName);
+	            paramMap.put("userMobile", userMobile);
 	            paramMap.put("orderStatus", orderStatus);
 	            paramMap.put("totalBillOid", totalBillOid);
 	        } else {
@@ -59,8 +63,7 @@ public class AlipayEduBillAction extends PageAction {
 	        alipayEduTotalBillVO = alipayEduTotalBillService.doJoinTransQueryAlipayEduTotalBillByOid(totalBillOid);
 	        rowCount = alipayEduBillService.doJoinTransQueryAlipayEduBillCount(paramMap);
 	        if (rowCount > 0) {
-	            Map<String, Object> resultMap = alipayEduBillService.doJoinTransQueryAlipayEduBill(paramMap, 0, -1);
-	            alipayEduBillVOList = (List<AlipayEduBillVO>) MapUtils.getObject(resultMap, "billList");
+	            alipayEduBillVOList = alipayEduBillService.doJoinTransQueryAlipayEduBill(paramMap, 0, -1);
 	        }
         } catch (Exception e) {
             logger.error("查看缴费账单明细错误：{}", e.getMessage(), e);
@@ -79,9 +82,26 @@ public class AlipayEduBillAction extends PageAction {
 		return "getBillData";
 	}
 	
-	public InputStream getBillData() {
-		return null;
-	}
+    public InputStream getBillData() {
+        String path = AlipayEduBillAction.class.getResource("eduBillList.xlsx").getPath();
+
+        // 导出条件：无
+        // 导出结果
+        List<List<?>> exportList = new ArrayList<List<?>>();
+
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("totalBillOid", totalBillOid);
+        List<AlipayEduBillVO> billList = alipayEduBillService.doJoinTransQueryAlipayEduBill(paramMap, 0, -1);
+        exportList.add(billList);
+
+        String fileName = "缴费账单明细".concat(totalBillOid).concat(".xlsx");
+        try {
+            billDataName = new String(fileName.getBytes("GBK"), "ISO8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return new ExcelUtil().writeData(exportList, path, null, true);
+    }
 	
     /**
      * 账单异步通知
@@ -100,13 +120,7 @@ public class AlipayEduBillAction extends PageAction {
 
             Map<String, String> paramMap = new HashMap<String, String>();
             for (Map.Entry<String, String[]> parameter : parameterMap.entrySet()) {
-                System.out.println(JSONUtil.toJSONString(parameter, true));
-                String value = "";
-                for (String v : parameter.getValue()) {
-                    value += v;
-                }
-                paramMap.put(parameter.getKey(), value);
-                //paramMap.put(parameter.getKey(), parameter.getValue()[0]);
+                paramMap.put(parameter.getKey(), parameter.getValue()[0]);
             }
             logger.info(logPrefix + "异步通知请求参数：{}", JSONUtil.toJSONString(paramMap, true));
 
@@ -120,15 +134,15 @@ public class AlipayEduBillAction extends PageAction {
         logger.info(logPrefix + "结束");
     }
 	
-	public String getUserName() {
-		return userName;
-	}
+    public String getUserMobile() {
+        return userMobile;
+    }
+    
+    public void setUserMobile(String userMobile) {
+        this.userMobile = userMobile;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getOrderStatus() {
+    public String getOrderStatus() {
 		return orderStatus;
 	}
 
@@ -171,5 +185,9 @@ public class AlipayEduBillAction extends PageAction {
     public void setAlipayEduBillMainService(AlipayEduBillMainService alipayEduBillMainService) {
         this.alipayEduBillMainService = alipayEduBillMainService;
     }
-
+    
+    public String getBillDataName() {
+        return billDataName;
+    }
+    
 }

@@ -1,5 +1,6 @@
 package com.zbsp.wepaysp.api.service.edu.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +13,11 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.zbsp.alipay.trade.model.ChargeItems;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
+import com.zbsp.wepaysp.common.util.EnumUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
@@ -29,8 +32,7 @@ public class AlipayEduBillServiceImpl
     implements AlipayEduBillService {
 
     @Override
-    public Map<String, Object> doJoinTransQueryAlipayEduBill(Map<String, Object> paramMap, int startIndex, int maxResult) {
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+    public List<AlipayEduBillVO> doJoinTransQueryAlipayEduBill(Map<String, Object> paramMap, int startIndex, int maxResult) {
         List<AlipayEduBillVO> resultList = new ArrayList<AlipayEduBillVO>();
         StringBuilder jpqlBuilder = new StringBuilder("from AlipayEduBill a where 1=1");
         Map<String, Object> jpqlMap = assembleQueryCondition(jpqlBuilder, paramMap);
@@ -42,13 +44,24 @@ public class AlipayEduBillServiceImpl
                 AlipayEduBillVO billVO = new AlipayEduBillVO();
                 BeanCopierUtil.copyProperties(bill, billVO);
                 
-                List<ChargeItems> chargeItems = JSONUtil.parseArray(bill.getChargeItem(), ChargeItems.class);
-                billVO.setChargeItems(chargeItems);
+                // 组装账单费用项
+                if (StringUtils.isNotBlank(bill.getChargeItem())) {
+                    List<ChargeItems> chargeItems = JSONUtil.parseArray(bill.getChargeItem(), ChargeItems.class);
+                    billVO.setChargeItems(chargeItems);
+                }
+                // 转换金额单位为元
+                billVO.setAmountYuan(new BigDecimal(bill.getAmount()).divide(SysEnvKey.BIG_100));
+                // 转换账单状态描述
+                OrderStatus status = EnumUtil.getEnumByGetValueMethod(OrderStatus.class, bill.getOrderStatus());
+                if (status != null)
+                    billVO.setOrderStatusStr(status.getDesc());
+                else
+                    billVO.setOrderStatusStr("未知");
+                
                 resultList.add(billVO);
             }
         }
-        resultMap.put("billList", resultList);
-        return resultMap;
+        return resultList;
     }
 
     @Override
@@ -62,7 +75,7 @@ public class AlipayEduBillServiceImpl
     private Map<String, Object> assembleQueryCondition(StringBuilder jpqlBuilder, Map<String, Object> paramMap) {
         String schoolNo = MapUtils.getString(paramMap, "schoolNo");
         String childName = MapUtils.getString(paramMap, "childName");
-        String userName = MapUtils.getString(paramMap, "userName");
+        String userMobile = MapUtils.getString(paramMap, "userMobile");
         String orderStatus = MapUtils.getString(paramMap, "orderStatus");
         String totalBillOid = MapUtils.getString(paramMap, "totalBillOid");// 总账单Oid
 
@@ -79,9 +92,9 @@ public class AlipayEduBillServiceImpl
             jpqlBuilder.append(" and a.childName like :CHILDNAME");
             jpqlMap.put("CHILDNAME", "%" + childName + "%");
         }
-        if (StringUtils.isNotBlank(userName)) {
-            jpqlBuilder.append(" and a.userName like :USERNAME");
-            jpqlMap.put("USERNAME", "%" + userName + "%");
+        if (StringUtils.isNotBlank(userMobile)) {
+            jpqlBuilder.append(" and a.userMobile like :USERMOBILE");
+            jpqlMap.put("USERMOBILE", "%" + userMobile + "%");
         }
         if (StringUtils.isNotBlank(orderStatus)) {
             jpqlBuilder.append(" and a.orderStatus=:ORDERSTATUS");
@@ -98,9 +111,13 @@ public class AlipayEduBillServiceImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(OrderStatus status) {
+    public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(String totalBillOid, OrderStatus status) {
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         String jpql = "from AlipayEduBill a where 1=1";
+        if (StringUtils.isBlank(totalBillOid)) {
+            jpql += " and a.alipayEduTotalBillOid=:TOTALBILLOID";
+            jpqlMap.put("TOTALBILLOID", totalBillOid);
+        }
         if (status != null) {
             jpql += " and a.orderStatus=:STATUS";
             jpqlMap.put("STATUS", status.name());
@@ -139,10 +156,15 @@ public class AlipayEduBillServiceImpl
             bill.setOrderStatus(OrderStatus.PAYING.name());
         } else if (TradeState4AliPay.TRADE_SUCCESS.name().equalsIgnoreCase(tradeStatus)) {
             bill.setOrderStatus(OrderStatus.PAY_SUCCESS.name());
+            bill.setBuyerLogonId(eduNotify.getBuyerLogonId());
+            bill.setGmtPayment(eduNotify.getGmtPayment());
+            bill.setTradeNo(eduNotify.getTradeNo());
+            
             // 更新账单已缴费总金额和已缴费人数
             AlipayEduTotalBill totalBill = commonDAO.findObject(AlipayEduTotalBill.class, bill.getAlipayEduTotalBillOid());
             totalBill.setReceiptCount(totalBill.getReceiptCount() + 1);
             totalBill.setReceiptMoney(totalBill.getReceiptMoney() + bill.getAmount());
+            commonDAO.update(totalBill);
         } else if (TradeState4AliPay.TRADE_CLOSED.name().equalsIgnoreCase(tradeStatus) || TradeState4AliPay.TRADE_FINISHED.name().equalsIgnoreCase(tradeStatus)) {
             // TODO 交易关闭（未支付或全额退款）、
             logger.warn("教育缴费异步通知，支付状态：{}，未处理", tradeStatus);
@@ -150,6 +172,12 @@ public class AlipayEduBillServiceImpl
         
         commonDAO.update(bill);
         return bill;
+    }
+    
+    public static void main(String[] args) {
+        AlipayEduBillVO vo = new AlipayEduBillVO();
+        vo.setAmountYuan(new BigDecimal(4).divide(SysEnvKey.BIG_100));
+        System.out.println(vo.getAmountYuan());
     }
 
 }

@@ -10,6 +10,7 @@ package com.zbsp.wepaysp.manage.web.util;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -264,6 +265,7 @@ public class ExcelHandle {
             cellIn = rowIn.createCell(cell);
         }
         if(cellStyle != null) {  
+            cellStyle.setWrapText(false);// 不换行
             cellIn.setCellStyle(cellStyle);
         }
         
@@ -275,6 +277,8 @@ public class ExcelHandle {
             } else {
                 if(value instanceof Integer || value instanceof Double || value instanceof Float || value instanceof Long){
                     cellIn.setCellValue(Double.parseDouble(value.toString())); 
+                } else if(value instanceof Date){
+                    cellIn.setCellValue(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(value));
                 }else{
                     cellIn.setCellValue(new XSSFRichTextString(value.toString()));
                 }

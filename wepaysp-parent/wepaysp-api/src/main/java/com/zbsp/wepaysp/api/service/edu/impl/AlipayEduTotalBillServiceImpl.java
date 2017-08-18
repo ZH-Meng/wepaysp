@@ -26,6 +26,7 @@ import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.DateUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.JSONUtil;
+import com.zbsp.wepaysp.common.util.TimeUtil;
 import com.zbsp.wepaysp.common.util.Validator;
 import com.zbsp.wepaysp.po.edu.AlipayEduBill;
 import com.zbsp.wepaysp.po.edu.AlipayEduTotalBill;
@@ -352,6 +353,27 @@ public class AlipayEduTotalBillServiceImpl
             logger.info("更新缴费账单（{}）为发送成功，发送时间：{}", totalBill.getBillName(), DateUtil.getDate(totalBill.getSendTime(), "yyyy-MM-dd HH:mm:ss"));
         }
         commonDAO.updateList(totalBills);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AlipayEduTotalBill> doJoinTransQueryTotalBillOfWaitingSend(Integer validMins) {
+        Map<String, Object> jpqlMap = new HashMap<String, Object>();
+        String jpql = "from AlipayEduTotalBill a where 1=1 and a.orderStatus=:STATUS ";
+        jpqlMap.put("STATUS", OrderStatus.INIT.name());
+
+        if (validMins != null) {
+            Date minCreateTime = TimeUtil.plusSeconds(new Date(), validMins * -60);
+            jpql += " and a.createTime>=:MINCREATETIME";
+            jpqlMap.put("MINCREATETIME", minCreateTime);
+        }
+        return (List<AlipayEduTotalBill>) commonDAO.findObjectList(jpql, jpqlMap, false);
+    }
+
+    @Override
+    public void doTransUpdateTotalBillList(List<AlipayEduTotalBill> sendSuceessList) {
+        Validator.checkArgument(sendSuceessList == null || sendSuceessList.isEmpty(), "sendSuceessList不能为空");
+        commonDAO.updateList(sendSuceessList);
     }
 	
     public void setAlipayEduBillService(AlipayEduBillService alipayEduBillService) {

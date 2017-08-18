@@ -52,16 +52,35 @@ public class AlipayEduBill
     private String modifier;
     private Date modifyTime;
     private String remark;
+    private Date gmtPayment;
+    private String buyerLogonId;
+    private String tradeNo;
 
     /** 账单状态 */
     public enum OrderStatus {
-        INIT, // 新建
-        NOT_PAY, // 待缴费 （订单发送后状态）
-        PAYING, // 支付中
-        PAY_SUCCESS, // 支付成功，处理中 （收到支付成功的异步通知后状态）
-        BILLING_SUCCESS, // 缴费成功 （同步教育接口状态成功后）
-        TIMEOUT_CLOSED, // 逾期关闭账单
-        ISV_CLOSED// 账单关闭 （同步教育接口订单主动关闭成功后状态）
+        INIT("INIT", "待发送"), // 新建
+        NOT_PAY("NOT_PAY", "待缴费"), // 待缴费 （订单发送后状态）
+        PAYING("PAYING", "支付中"), // 支付中
+        PAY_SUCCESS("PAY_SUCCESS", "支付成功，处理中"), // 支付成功，处理中 （收到支付成功的异步通知后状态）
+        BILLING_SUCCESS("BILLING_SUCCESS", "缴费成功"), // 缴费成功 （同步教育接口状态成功后）
+        TIMEOUT_CLOSED("TIMEOUT_CLOSED", "逾期关闭账单"), // 逾期关闭账单
+        ISV_CLOSED("TIMEOUT_CLOSED", "账单关闭");// 账单关闭 （同步教育接口订单主动关闭成功后状态）
+        
+        private String value;
+        private String desc;
+        
+        public String getValue() {
+            return value;
+        }
+        public String getDesc() {
+            return desc;
+        }
+        
+        private  OrderStatus(String value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+        
     }
     
     public AlipayEduBill() {
@@ -417,6 +436,33 @@ public class AlipayEduBill
     
     public void setK12OrderNo(String k12OrderNo) {
         this.k12OrderNo = k12OrderNo;
+    }
+
+    @Column(name = "GMT_PAYMENT", length = 0)
+    public Date getGmtPayment() {
+        return this.gmtPayment;
+    }
+
+    public void setGmtPayment(Date gmtPayment) {
+        this.gmtPayment = gmtPayment;
+    }
+    
+    @Column(name = "BUYER_LOGON_ID", length = 100)
+    public String getBuyerLogonId() {
+        return this.buyerLogonId;
+    }
+
+    public void setBuyerLogonId(String buyerLogonId) {
+        this.buyerLogonId = buyerLogonId;
+    }
+    
+    @Column(name = "TRADE_NO", length = 64)
+    public String getTradeNo() {
+        return this.tradeNo;
+    }
+
+    public void setTradeNo(String tradeNo) {
+        this.tradeNo = tradeNo;
     }
 
 }
