@@ -16,6 +16,7 @@ import com.zbsp.wepaysp.api.service.edu.AlipayEduBillService;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.AliPayEnums.TradeState4AliPay;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
+import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.EnumUtil;
 import com.zbsp.wepaysp.common.util.JSONUtil;
@@ -174,10 +175,14 @@ public class AlipayEduBillServiceImpl
         return bill;
     }
     
-    public static void main(String[] args) {
-        AlipayEduBillVO vo = new AlipayEduBillVO();
-        vo.setAmountYuan(new BigDecimal(4).divide(SysEnvKey.BIG_100));
-        System.out.println(vo.getAmountYuan());
-    }
+	@Override
+	public AlipayEduBill doJoinTransQueryBillByOid(String billOid) {
+		Validator.checkArgument(StringUtils.isBlank(billOid), "billOid不能为空");
+		AlipayEduBill bill = commonDAO.findObject(AlipayEduBill.class, billOid);
+		if (bill == null) {
+			throw new NotExistsException("明细不存在Oi=" + billOid);
+		}
+		return bill;
+	}
 
 }

@@ -1,11 +1,14 @@
 package com.zbsp.wepaysp.api.service.main.edu;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -123,6 +126,35 @@ public class AlipayEduBillMainServiceImpl
         resultMap.put("result", result);
         return resultMap;
     }
+
+	@Override
+	public Map<String, Object> closeEduBill(String totalBillOid, String billOid) {
+		Validator.checkArgument(StringUtils.isBlank(totalBillOid) && StringUtils.isBlank(billOid), "totalBillOid与billOid不能都为空");
+		List<AlipayEduBill> toCloseBillList = new ArrayList<>();
+		if (StringUtils.isNotBlank(totalBillOid)) {
+			toCloseBillList = alipayEduBillService.doJoinTransQueryAlipayEduBillByStatus(totalBillOid, OrderStatus.NOT_PAY);
+		} else {
+			toCloseBillList.add(alipayEduBillService.doJoinTransQueryBillByOid(billOid));
+		}
+		
+		AlipayEcoEduKtBillingModifyResponse closeResponse = null;
+		for (AlipayEduBill bill : toCloseBillList) {
+			try {
+				closeResponse = AliPayEduUtil.billModify(bill, 2);
+				logger.info("outTradeNo:{}, 账单关闭结果:{}", bill.getOutTradeNo(), JSONUtil.toJSONString(closeResponse, true));
+                if (closeResponse == null || !Constants.SUCCESS.equals(closeResponse.getCode())) {// 交易或者结束
+                    logger.warn("outTradeNo:{},账单关闭失败！", bill.getOutTradeNo());
+                } else {
+                    bill.setOrderStatus(OrderStatus.ISV_CLOSED.name());
+                }
+			} catch (AlipayApiException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		// TODO 更新
+		return null;
+	}
     
     public void setAlipayEduBillService(AlipayEduBillService alipayEduBillService) {
         this.alipayEduBillService = alipayEduBillService;

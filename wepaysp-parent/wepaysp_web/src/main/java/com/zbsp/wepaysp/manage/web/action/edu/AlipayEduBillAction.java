@@ -133,6 +133,14 @@ public class AlipayEduBillAction extends PageAction {
         }
         logger.info(logPrefix + "结束");
     }
+    
+    public String close() {
+    	return "jsonResult";
+    }
+    
+    public String closeAll() {
+    	return "jsonResult";
+    }
 	
     public String getUserMobile() {
         return userMobile;

@@ -56,5 +56,7 @@ public interface AlipayEduBillService {
 
     /** 根据通知更新账单状态*/
     public AlipayEduBill doTransUpdateBillByAlipayEduNotify(AlipayEduNotify eduNotify);
+
+	public AlipayEduBill doJoinTransQueryBillByOid(String billOid);
     
 }
