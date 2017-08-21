@@ -128,33 +128,53 @@ public class AlipayEduBillMainServiceImpl
     }
 
 	@Override
-	public Map<String, Object> closeEduBill(String totalBillOid, String billOid) {
-		Validator.checkArgument(StringUtils.isBlank(totalBillOid) && StringUtils.isBlank(billOid), "totalBillOid与billOid不能都为空");
-		List<AlipayEduBill> toCloseBillList = new ArrayList<>();
-		if (StringUtils.isNotBlank(totalBillOid)) {
-			toCloseBillList = alipayEduBillService.doJoinTransQueryAlipayEduBillByStatus(totalBillOid, OrderStatus.NOT_PAY);
-		} else {
-			toCloseBillList.add(alipayEduBillService.doJoinTransQueryBillByOid(billOid));
-		}
-		
-		AlipayEcoEduKtBillingModifyResponse closeResponse = null;
-		for (AlipayEduBill bill : toCloseBillList) {
-			try {
-				closeResponse = AliPayEduUtil.billModify(bill, 2);
-				logger.info("outTradeNo:{}, 账单关闭结果:{}", bill.getOutTradeNo(), JSONUtil.toJSONString(closeResponse, true));
+    public Map<String, Object> closeEduBill(String totalBillOid, String billOid) {
+        Validator.checkArgument(StringUtils.isBlank(totalBillOid) && StringUtils.isBlank(billOid), "totalBillOid与billOid不能都为空");
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("code", "success");
+        resultMap.put("msg", "操作成功");
+        
+        List<AlipayEduBill> toCloseBillList = new ArrayList<>();
+        if (StringUtils.isNotBlank(totalBillOid)) {
+            toCloseBillList = alipayEduBillService.doJoinTransQueryAlipayEduBillByStatus(totalBillOid, OrderStatus.NOT_PAY);// FIXME 待发送的账单是否需要关闭
+        } else {
+            toCloseBillList.add(alipayEduBillService.doJoinTransQueryBillByOid(billOid));
+        }
+
+        int failCount = 0;
+        List<AlipayEduBill> closeSuccessBillList = new ArrayList<>();
+        AlipayEcoEduKtBillingModifyResponse closeResponse = null;
+        for (AlipayEduBill bill : toCloseBillList) {
+            try {
+                closeResponse = AliPayEduUtil.billModify(bill, 2);
+                logger.info("outTradeNo:{}, 账单关闭结果:{}", bill.getOutTradeNo(), JSONUtil.toJSONString(closeResponse, true));
                 if (closeResponse == null || !Constants.SUCCESS.equals(closeResponse.getCode())) {// 交易或者结束
                     logger.warn("outTradeNo:{},账单关闭失败！", bill.getOutTradeNo());
+                    failCount++;
                 } else {
                     bill.setOrderStatus(OrderStatus.ISV_CLOSED.name());
+                    closeSuccessBillList.add(bill);
                 }
-			} catch (AlipayApiException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		// TODO 更新
-		return null;
-	}
+            } catch (AlipayApiException e) {
+                logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeAliPayAPIErr.getValue(), e.getMessage()));
+            }
+        }
+
+        if (failCount > 0) {
+            if (closeSuccessBillList.size() == 0) {
+                resultMap.put("code", "fail");
+                resultMap.put("msg", "操作失败");
+            } else {
+                resultMap.put("code", "notAllSuccess");
+                resultMap.put("msg", failCount + "个账单关闭失败");
+            }
+        }
+
+        // 批量更新（状态关闭）
+        if (closeSuccessBillList.size() > 0)
+            alipayEduBillService.doTransUpdateBillList(closeSuccessBillList);
+        return resultMap;
+    }
     
     public void setAlipayEduBillService(AlipayEduBillService alipayEduBillService) {
         this.alipayEduBillService = alipayEduBillService;

@@ -66,6 +66,7 @@
 					</li>
 					<li class="bg_button">
 						<a href="javascript:void(0);" onclick="invokeAction('list');">查询</a>
+						<a href="javascript:void(0);" id="close-allBill">全部关闭</a>
 						<a href="javascript:void(0);" onclick="history.back();">返回</a>
 					</li>
 				</ul>
@@ -99,6 +100,7 @@
 	                                
 	                                <th>合计</th>
 	                                <th>账单状态</th>
+	                                <th>操作</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -159,6 +161,11 @@
 						  			<td title="<s:property value="orderStatus" />">
 						  				<s:property value="#orderStatus" />
 						  			</td>
+						  			<td title="操作">
+						  				<s:if test="#vo.orderStatus == 'NOT_PAY'">
+						  					<a href="javascript:void(0);" onclick="closeBill('<s:property value="#vo.iwoid" />', this);">关闭</a>
+						  				</s:if>
+						  			</td>
 						  		</tr>
 						  		</s:iterator>
 			  				</s:if>
@@ -180,5 +187,87 @@
 	<s:property value="#request.messageBean.alertMessage" escape="false" />
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery.js"></script>
 	<script type="text/javascript" src="<%=request.getContextPath()%>/js/common.js"></script>
+	<script src="<%=request.getContextPath()%>/layui/layui.js" charset="utf-8"></script>
+	
+	<script type="text/javascript">
+		var layer;
+		layui.use(['layer'],
+		function() {
+		    layer = layui.layer;
+		});
+	
+		function closeBill(oid, obj) {
+		    layer.confirm('<div style="color:#F76A00;">该操作将关闭该笔账单，账单关闭后用户在支付宝教育缴费中将查询不到该账单，请仔细确认是否关闭？</div>', {
+		        icon: 3,
+		        title: '提示'
+		    }, function(index) {
+		    	$.ajax({
+                    url: '<%=request.getContextPath()%>/resources/edu/billdetail!close.action',
+                    data: {'billOid': oid},
+                    type: 'POST',
+                    //async: false,
+                    success: function(data) {
+                        if (data.msg != undefined) {
+                        	if (data.code != 'success') layer.msg(data.msg, {offset:'t', icon: 2});
+                        }  else 
+                        	layer.msg('操作失败！', {offset:'t', icon: 2, time:500});
+                        if (data.code == 'success') {
+                        	layer.msg(data.msg, {offset:'t', icon: 1, time:500}, function() {
+                        		$(obj).remove();
+                        		//invokeAction('list');
+                        	});
+                        }
+                    },
+                    error: function() {
+                    	layer.msg('操作失败！', {offset:'t', icon: 2, time:500});
+                    }
+                });
+		    });
+		}
+		
+		$('#close-allBill').on('click',
+		function() {
+		    var type = 'auto';
+		    
+		    layer.open({
+		        type: 1,
+		        offset: type,
+		        id: 'LAY_demo' + type,
+		        icon: 1,
+		        area: ['400px', '200px'],
+		        title: '关闭全部账单',
+		        content: '<div style="padding: 15px;"><div style="color:#F76A00;">该操作将关闭其中所有待缴费的账单，若其中有账单已经被用户支付，则无法关闭，账单关闭后用户在支付宝教育缴费中将查询不到关闭的账单，请仔细确认是否关闭？</div></div>',
+		        btn: ['确认', '取消'],
+		        btnAlign: 'c',
+		        yes: function(index, layero) {
+		        	$.ajax({
+	                    url: '<%=request.getContextPath()%>/resources/edu/billdetail!closeAll.action',
+	                    data: {'totalBillOid': "${totalBillOid}"},
+	                    type: 'POST',
+	                    //async: false,
+	                    success: function(data) {
+	                        if (data.msg != undefined) {
+	                        	if (data.code != 'success') layer.msg(data.msg, {offset:'t', icon: 2});
+	                        }  else 
+	                        	layer.msg('操作失败！', {offset:'t', icon: 2, time:500});
+	                        if (data.code == 'success') {
+	                        	layer.msg(data.msg, {offset:'t', icon: 1, time:500}, function() {
+	                        		invokeAction('list');
+	                        	});
+	                        }
+	                    },
+	                    error: function() {
+	                    	layer.msg('操作失败！', {offset:'t', icon: 2, time:500});
+	                    }
+	                });
+		        	layer.close(index);
+		        },
+		        btn2: function(index, layero) {
+		        	layer.close(index);
+		        },
+		        shade: 0.1
+		    });
+		});
+	</script>
 </body>
 </html>

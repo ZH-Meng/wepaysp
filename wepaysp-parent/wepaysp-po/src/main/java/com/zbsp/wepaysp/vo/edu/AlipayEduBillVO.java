@@ -6,6 +6,7 @@ import java.util.List;
 
 public class AlipayEduBillVO {
 
+    private String iwoid;
     private String outTradeNo;
     private String childName;
     private String userMobile;
@@ -140,6 +141,14 @@ public class AlipayEduBillVO {
 
     public void setAmountYuan(BigDecimal amountYuan) {
         this.amountYuan = amountYuan;
+    }
+
+    public String getIwoid() {
+        return iwoid;
+    }
+    
+    public void setIwoid(String iwoid) {
+        this.iwoid = iwoid;
     }
 
 }

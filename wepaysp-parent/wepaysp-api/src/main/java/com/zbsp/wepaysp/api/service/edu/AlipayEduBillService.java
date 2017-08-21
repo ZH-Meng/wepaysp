@@ -58,5 +58,7 @@ public interface AlipayEduBillService {
     public AlipayEduBill doTransUpdateBillByAlipayEduNotify(AlipayEduNotify eduNotify);
 
 	public AlipayEduBill doJoinTransQueryBillByOid(String billOid);
+
+    public void doTransUpdateBillList(List<AlipayEduBill> closeSuccessBillList);
     
 }

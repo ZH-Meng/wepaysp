@@ -115,7 +115,7 @@ public class AlipayEduBillServiceImpl
     public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(String totalBillOid, OrderStatus status) {
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
         String jpql = "from AlipayEduBill a where 1=1";
-        if (StringUtils.isBlank(totalBillOid)) {
+        if (StringUtils.isNotBlank(totalBillOid)) {
             jpql += " and a.alipayEduTotalBillOid=:TOTALBILLOID";
             jpqlMap.put("TOTALBILLOID", totalBillOid);
         }
@@ -184,5 +184,11 @@ public class AlipayEduBillServiceImpl
 		}
 		return bill;
 	}
+
+    @Override
+    public void doTransUpdateBillList(List<AlipayEduBill> billList) {
+        Validator.checkArgument(billList == null || billList.isEmpty(), "billList不能为空");
+        commonDAO.updateList(billList);
+    }
 
 }

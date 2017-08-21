@@ -33,6 +33,7 @@ public class AlipayEduBillAction extends PageAction {
 	private String userMobile;// 家长手机号
 	private String orderStatus;
 	private String totalBillOid;
+	private String billOid;
 	private AlipayEduTotalBillVO alipayEduTotalBillVO;
 	private List<AlipayEduBillVO> alipayEduBillVOList;
 	private AlipayEduBillService alipayEduBillService;
@@ -40,7 +41,8 @@ public class AlipayEduBillAction extends PageAction {
 	private AlipayEduBillMainService alipayEduBillMainService;
 
 	private String billDataName;
-	
+    private Map<String, Object> dataMap;
+    
 	@Override
 	protected String query(int start, int size) {
 		// 检查参数
@@ -83,6 +85,7 @@ public class AlipayEduBillAction extends PageAction {
 	}
 	
     public InputStream getBillData() {
+        logger.info("下载账单明细-开始");
         String path = AlipayEduBillAction.class.getResource("eduBillList.xlsx").getPath();
 
         // 导出条件：无
@@ -94,12 +97,13 @@ public class AlipayEduBillAction extends PageAction {
         List<AlipayEduBillVO> billList = alipayEduBillService.doJoinTransQueryAlipayEduBill(paramMap, 0, -1);
         exportList.add(billList);
 
-        String fileName = "缴费账单明细".concat(totalBillOid).concat(".xlsx");
+        String fileName = "缴费账单明细-".concat(totalBillOid).concat(".xlsx");
         try {
             billDataName = new String(fileName.getBytes("GBK"), "ISO8859-1");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+        logger.info("下载账单明细-结束");
         return new ExcelUtil().writeData(exportList, path, null, true);
     }
 	
@@ -135,11 +139,31 @@ public class AlipayEduBillAction extends PageAction {
     }
     
     public String close() {
+        logger.info("关闭账单-开始");
+        try {
+            dataMap = alipayEduBillMainService.closeEduBill(null, billOid);
+        } catch (Exception e) {
+            logger.error("关闭账单-错误: {}", e.getMessage(), e);
+            dataMap = new HashMap<>();
+            dataMap.put("code", "error");
+            dataMap.put("msg", "操作失败");
+        }
+        logger.info("关闭账单-结束");
     	return "jsonResult";
     }
     
     public String closeAll() {
-    	return "jsonResult";
+        logger.info("关闭全部账单-开始");
+        try {
+            dataMap = alipayEduBillMainService.closeEduBill(totalBillOid, null);
+        } catch (Exception e) {
+            logger.error("关闭全部账单-错误: {}", e.getMessage(), e);
+            dataMap = new HashMap<>();
+            dataMap.put("code", "error");
+            dataMap.put("msg", "操作失败");
+        }
+        logger.info("关闭全部账单-结束");
+        return "jsonResult";
     }
 	
     public String getUserMobile() {
@@ -196,6 +220,14 @@ public class AlipayEduBillAction extends PageAction {
     
     public String getBillDataName() {
         return billDataName;
+    }
+    
+    public void setBillOid(String billOid) {
+        this.billOid = billOid;
+    }
+    
+    public Map<String, Object> getDataMap() {
+        return dataMap;
     }
     
 }
