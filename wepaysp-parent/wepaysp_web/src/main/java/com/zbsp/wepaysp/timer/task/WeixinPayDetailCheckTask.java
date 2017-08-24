@@ -85,32 +85,42 @@ public class WeixinPayDetailCheckTask extends TimerBasicTask {
                 if (payDetail.getTradeStatus() != null && payDetail.getTradeStatus() == TradeStatus.TRADE_TO_BE_CLOSED.getValue()) {
                     closeFlag = true;
                 } else {
-                    if (TimeUtil.timeBefore(payDetail.getTransBeginTime(), minDate)) {// 交易时间是否在1小时之前
-                        closeFlag = true;
+                    if (PayType.WEIXIN_MICROPAY.getValue().equals(payDetail.getPayType())) {
+                        // 刷卡支付设置了过期时间 2分钟
+                        if (TimeUtil.timeAfter(new Date(), TimeUtil.plusSeconds(payDetail.getTransBeginTime(), SysEnvKey.WX_MICROPAY_EXPIRE_SECS))) 
+                            closeFlag = true; 
+                    } else {
+                        if (TimeUtil.timeBefore(payDetail.getTransBeginTime(), minDate)) // 交易时间是否在1小时之前
+                            closeFlag = true;
                     }
                 }
                 
-                // 刷卡支付不支持关闭订单，支持撤销但暂不调用，继续查询。
-                if (closeFlag && !PayType.WEIXIN_MICROPAY.getValue().equals(payDetail.getPayType())) {
-                    // 调用关闭订单API
-                    logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 开始调用关闭订单API ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
-                    try {
-                        DefaultCloseOrderBusinessResultListener closeOrderListener= new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService);
-                        WXPay.doCloseOrderBusiness(
-                            new CloseOrderReqData(payDetail.getOutTradeNo(), keyPartner, payDetail.getAppid(), payDetail.getMchId(), payDetail.getSubMchId()), 
-                            closeOrderListener, certLocalPath, certPassword, keyPartner);
-                        if (!DefaultCloseOrderBusinessResultListener.ON_CLOSE_ORDER_FAIL.equals(closeOrderListener.getResult()) && 
-                            !DefaultCloseOrderBusinessResultListener.ON_CLOSE_ORDER_SUCCESS.equals(closeOrderListener.getResult())) {
+                if (closeFlag) {
+                    if (PayType.WEIXIN_MICROPAY.getValue().equals(payDetail.getPayType())) {
+                        // 刷卡支付不支持关闭订单，刷卡支付设置了过期时间，直接关闭系统订单。
+                        weixinPayDetailsService.doTransUpdatePayDetailState(payDetail.getOutTradeNo(), TradeStatus.TRADE_CLOSED, "自主关闭-支付超时");
+                        logger.info(LOG_PREFIX + "刷卡支付在用户输入密码超过过期时间后自主关闭，outTradeNo={}", payDetail.getOutTradeNo());
+                    } else if (PayType.WEIXIN_JSAPI.getValue().equals(payDetail.getPayType())) {
+                        // 调用关闭订单API
+                        logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 开始调用关闭订单API ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
+                        try {
+                            DefaultCloseOrderBusinessResultListener closeOrderListener= new DefaultCloseOrderBusinessResultListener(weixinPayDetailsService);
+                            WXPay.doCloseOrderBusiness(
+                                new CloseOrderReqData(payDetail.getOutTradeNo(), keyPartner, payDetail.getAppid(), payDetail.getMchId(), payDetail.getSubMchId()), 
+                                closeOrderListener, certLocalPath, certPassword, keyPartner);
+                            if (!DefaultCloseOrderBusinessResultListener.ON_CLOSE_ORDER_FAIL.equals(closeOrderListener.getResult()) && 
+                                !DefaultCloseOrderBusinessResultListener.ON_CLOSE_ORDER_SUCCESS.equals(closeOrderListener.getResult())) {
+                                closeErrTimes++;
+                                return;
+                            }
+                            closeSuccTimes++;
+                        } catch (Exception e) {
+                            logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
+                                "系统支付订单(ID=" + payDetail.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()), e);
                             closeErrTimes++;
-                            return;
                         }
-                        closeSuccTimes++;
-                    } catch (Exception e) {
-                        logger.error(StringHelper.combinedString(AlarmLogPrefix.invokeWxPayAPIErr.getValue(), 
-                            "系统支付订单(ID=" + payDetail.getOutTradeNo() + "）关闭错误", "，异常信息：" + e.getMessage()), e);
-                        closeErrTimes++;
+                        logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 调用关闭订单API结束 ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
                     }
-                    logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 调用关闭订单API结束 ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
                 } else {// 查询订单
                     logger.info(StringHelper.combinedString(LOG_PREFIX, "[ 开始调用查询订单API ]", " - [系统支付订单ID=" + payDetail.getOutTradeNo() +" ]"));
                     // 调用查询订单API

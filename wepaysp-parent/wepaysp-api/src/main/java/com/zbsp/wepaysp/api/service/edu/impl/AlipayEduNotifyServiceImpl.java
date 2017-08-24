@@ -82,12 +82,12 @@ public class AlipayEduNotifyServiceImpl
         notify.setNotifyTime(DateUtil.getDate(notifyVO.getNotify_time(), SysEnvKey.TIME_PATTERN_YMD_HYPHEN_HMS_COLON));
         notify.setSellerId(notifyVO.getSeller_id());
         notify.setSellerEmail(notifyVO.getSeller_email());
-        notify.setReceiptAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getReceipt_amount())).multiply(SysEnvKey.TIMES_100).intValue());
-        notify.setInvoiceAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getInvoice_amount())).multiply(SysEnvKey.TIMES_100).intValue());
-        notify.setBuyerPayAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getBuyer_pay_amount())).multiply(SysEnvKey.TIMES_100).intValue());
-        notify.setPointAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getPoint_amount())).multiply(SysEnvKey.TIMES_100).intValue());
-        notify.setTotalAmoun(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getTotal_amount())).multiply(SysEnvKey.TIMES_100).intValue());
-        notify.setRefundFee(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getRefund_fee())).multiply(SysEnvKey.TIMES_100).intValue());
+        notify.setReceiptAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getReceipt_amount())).multiply(SysEnvKey.BIG_100).intValue());
+        notify.setInvoiceAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getInvoice_amount())).multiply(SysEnvKey.BIG_100).intValue());
+        notify.setBuyerPayAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getBuyer_pay_amount())).multiply(SysEnvKey.BIG_100).intValue());
+        notify.setPointAmount(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getPoint_amount())).multiply(SysEnvKey.BIG_100).intValue());
+        notify.setTotalAmoun(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getTotal_amount())).multiply(SysEnvKey.BIG_100).intValue());
+        notify.setRefundFee(BigDecimal.valueOf(NumberUtils.toDouble(notifyVO.getRefund_fee())).multiply(SysEnvKey.BIG_100).intValue());
         notify.setOutBizNo(notifyVO.getOut_biz_no());
         notify.setFundBillList(notifyVO.getFund_bill_list());
         notify.setVoucherDetailList(notifyVO.getVoucher_detail_list());

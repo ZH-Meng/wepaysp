@@ -26,6 +26,7 @@ import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
 import com.zbsp.wepaysp.common.constant.WxEnums.TradeState;
 import com.zbsp.wepaysp.common.constant.WxEnums.TradeType;
 import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
+import com.zbsp.wepaysp.common.constant.SysEnums;
 import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
@@ -484,7 +485,7 @@ public class WeixinPayDetailsServiceImpl
         
         BeanCopierUtil.copyProperties(newPayOrder, weixinPayDetailsVO);
         weixinPayDetailsVO.setTimeStart(DateUtil.getDate(new Date(), "yyyyMMddHHmmss"));
-        weixinPayDetailsVO.setTimeExpire(DateUtil.getDate(TimeUtil.plusSeconds(60 * 2), "yyyyMMddHHmmss"));
+        weixinPayDetailsVO.setTimeExpire(DateUtil.getDate(TimeUtil.plusSeconds(SysEnvKey.WX_MICROPAY_EXPIRE_SECS), "yyyyMMddHHmmss"));
         return weixinPayDetailsVO;
     }
 
@@ -648,6 +649,12 @@ public class WeixinPayDetailsServiceImpl
             // 指定业务结果为系统错误
             payDetails.setErrCode(WxPayResult.ERROR.getCode());
             payDetails.setErrCodeDes(WxPayResult.ERROR.getCode());
+        }
+        
+        // 下单失败，直接更新交易结束，FIXME 如果要重复利用out_trade_no时注意
+        if (!(StringUtils.equalsIgnoreCase(ReturnCode.SUCCESS.toString(), returnCode) && StringUtils.equalsIgnoreCase(ResultCode.SUCCESS.toString(), resultCode))) {
+            payDetails.setTradeStatus(TradeStatus.TRADE_FAIL.getValue());
+            payDetails.setTransEndTime(new Date());
         }
         
         commonDAO.update(payDetails);

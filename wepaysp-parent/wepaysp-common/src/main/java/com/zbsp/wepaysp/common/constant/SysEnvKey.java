@@ -83,7 +83,7 @@ public class SysEnvKey {
     /**正则，金额，整数*/
     public static final String REGEX_￥_INTEGER="^\\d+$";
     
-    /**倍数，100，适合单位分转元*/    
-    public final static BigDecimal TIMES_100 = new BigDecimal(100);
+    /**微信刷卡支付过期秒数 120*/    
+    public final static int WX_MICROPAY_EXPIRE_SECS = 120;
     
 }

@@ -292,7 +292,7 @@ public class AlipayEduTotalBillServiceImpl
             bill.setLineNum(rowIndex);
             bill.setGmtEnd(Utils.toDate(totalBill.getCloseTime()));
             bill.setEndEnable(totalBill.getCloseTime() == null ? "N" : "Y");
-            bill.setAmount(totalAmount.multiply(SysEnvKey.TIMES_100).intValue());
+            bill.setAmount(totalAmount.multiply(SysEnvKey.BIG_100).intValue());
             bill.setSchoolPid(school.getSchoolPid());
             bill.setSchoolNo(school.getSchoolNo());
             bill.setIsvPartnerId(school.getIsvPid());
@@ -334,7 +334,7 @@ public class AlipayEduTotalBillServiceImpl
                 }
             }
             billList.add(bill);
-            totalMoney += totalAmount.multiply(SysEnvKey.TIMES_100).intValue();// 合计金额：单位为分
+            totalMoney += totalAmount.multiply(SysEnvKey.BIG_100).intValue();// 合计金额：单位为分
             rowIndex++;
         }
         totalBill.setTotalCount(totalCount);
