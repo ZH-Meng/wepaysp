@@ -97,11 +97,11 @@ public class AlipayEduTotalBillServiceImpl
         }
         if (beginTime != null) {
             jpqlBuilder.append(" and a.sendTime>=:BEGINTIME");
-            jpqlMap.put("BEGINTIME", beginTime);
+            jpqlMap.put("BEGINTIME", TimeUtil.getDayStart(beginTime));
         }
         if (endTime != null) {
-            jpqlBuilder.append(" and a.sendTime<:ENDTIME");
-            jpqlMap.put("ENDTIME", endTime);
+            jpqlBuilder.append(" and a.sendTime<=:ENDTIME");
+            jpqlMap.put("ENDTIME", TimeUtil.getDayEnd(endTime));
         }
         return jpqlMap;
     }

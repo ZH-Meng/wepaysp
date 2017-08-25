@@ -64,7 +64,7 @@ public class AlipayEduBill
         PAY_SUCCESS("PAY_SUCCESS", "支付成功，处理中"), // 支付成功，处理中 （收到支付成功的异步通知后状态）
         BILLING_SUCCESS("BILLING_SUCCESS", "缴费成功"), // 缴费成功 （同步教育接口状态成功后）
         TIMEOUT_CLOSED("TIMEOUT_CLOSED", "逾期关闭账单"), // 逾期关闭账单
-        ISV_CLOSED("TIMEOUT_CLOSED", "账单关闭");// 账单关闭 （同步教育接口订单主动关闭成功后状态）
+        ISV_CLOSED("ISV_CLOSED", "账单关闭");// 账单关闭 （同步教育接口订单主动关闭成功后状态）
         
         private String value;
         private String desc;
