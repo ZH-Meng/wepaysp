@@ -33,7 +33,6 @@ public class SysPermissionServiceImpl extends BaseService implements SysPermissi
 
     private SysLogService sysLogService;
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysRole> doJoinTransQueryFunctionRoleList(Map<String, Object> paramMap) {
         String functionUrl = MapUtils.getString(paramMap, "functionUrl");
@@ -53,10 +52,9 @@ public class SysPermissionServiceImpl extends BaseService implements SysPermissi
             queryMap.put("ROLESTATE", roleState);
         }
 
-        return (List<SysRole>) commonDAO.findObjectList(sql, queryMap, false);
+        return commonDAO.findObjectList(sql, queryMap, false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysFunction> doJoinTransQueryRoleFunctionList(Map<String, Object> paramMap) {
         String roleOid = MapUtils.getString(paramMap, "roleOid");
@@ -97,7 +95,6 @@ public class SysPermissionServiceImpl extends BaseService implements SysPermissi
         return sysFunctions;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysFunction> doJoinTransQueryUserFunctionList(Map<String, Object> paramMap) {
         String userOid = MapUtils.getString(paramMap, "userOid");

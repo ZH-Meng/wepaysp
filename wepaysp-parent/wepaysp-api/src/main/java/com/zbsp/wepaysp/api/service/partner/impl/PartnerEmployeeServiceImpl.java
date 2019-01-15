@@ -36,7 +36,6 @@ public class PartnerEmployeeServiceImpl
 
     private SysLogService sysLogService;
     
-    @SuppressWarnings("unchecked")
 	@Override
     public PartnerEmployeeVO doJoinTransQueryPartnerEmployeeByOid(String partnerEmployeeOid) {
     	Validator.checkArgument(StringUtils.isBlank(partnerEmployeeOid), "代理商员工Oid不能为空！");
@@ -48,7 +47,7 @@ public class PartnerEmployeeServiceImpl
             String sqlStr = "from SysUser s where s.partnerEmployee.iwoid = :IWOID";
             Map<String, Object> sqlMap = new HashMap<String, Object>();
             sqlMap.put("IWOID", partnerEmployee.getIwoid());
-            List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+            List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
             if (userList != null && !userList.isEmpty()) {
             	partnerEmployeeVO.setLoginId(userList.get(0).getUserId());
             }
@@ -56,7 +55,6 @@ public class PartnerEmployeeServiceImpl
         return partnerEmployeeVO;
     }
 
-    @SuppressWarnings("unchecked")
 	@Override
     public List<PartnerEmployeeVO> doJoinTransQueryPartnerEmployeeList(Map<String, Object> paramMap, int startIndex, int maxResult) {
     	List<PartnerEmployeeVO> resultList = new ArrayList<PartnerEmployeeVO>();
@@ -89,7 +87,7 @@ public class PartnerEmployeeServiceImpl
         sql.append(" and pe.partner.iwoid = :PARTNEROID");
         sqlMap.put("PARTNEROID", partnerOid);
         sql.append(" order by pe.partnerEmployeeId desc");
-        List<PartnerEmployee> partnerEmployeeList = (List<PartnerEmployee>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<PartnerEmployee> partnerEmployeeList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (partnerEmployeeList != null && !partnerEmployeeList.isEmpty()) {
             for (PartnerEmployee partnerEmployee : partnerEmployeeList) {
@@ -99,7 +97,7 @@ public class PartnerEmployeeServiceImpl
                 String sqlStr = "from SysUser s where s.partnerEmployee.iwoid = :IWOID";
                 sqlMap.clear();
                 sqlMap.put("IWOID", partnerEmployee.getIwoid());
-                List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
                 if (userList != null && !userList.isEmpty()) {
                     vo.setLoginId(userList.get(0).getUserId());
                 }

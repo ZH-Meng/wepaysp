@@ -16,7 +16,6 @@ public class AlipayAppServiceImpl
     extends BaseService
     implements AlipayAppService {
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<AlipayApp> doJoinTransQueryAppByPartnerOid(String partnerOid) {
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "partnerOid为空");
@@ -25,7 +24,7 @@ public class AlipayAppServiceImpl
         String jpql = "from AlipayApp a where a.partner.iwoid = :PARTNEROID";
         jpqlMap.put("PARTNEROID", partnerOid);
         
-        return (List<AlipayApp>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        return commonDAO.findObjectList(jpql, jpqlMap, false);
     }
 
 }

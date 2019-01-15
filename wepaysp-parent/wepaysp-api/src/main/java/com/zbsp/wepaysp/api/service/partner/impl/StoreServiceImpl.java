@@ -59,7 +59,6 @@ public class StoreServiceImpl
         return storeVO;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<StoreVO> doJoinTransQueryStoreList(Map<String, Object> paramMap, int startIndex, int maxResult) {
         List<StoreVO> resultList = new ArrayList<StoreVO>();
@@ -87,7 +86,7 @@ public class StoreServiceImpl
         sqlMap.put("DEALEROID", dealerOid);
 
         sql.append(" order by s.storeId desc");
-        List<Store> storeList = (List<Store>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<Store> storeList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (storeList != null && !storeList.isEmpty()) {
             for (Store store : storeList) {

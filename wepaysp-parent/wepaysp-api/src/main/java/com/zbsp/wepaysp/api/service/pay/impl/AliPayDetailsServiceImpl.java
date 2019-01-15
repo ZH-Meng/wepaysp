@@ -397,7 +397,7 @@ public class AliPayDetailsServiceImpl
             if (store == null) {
                 logger.warn("门店不存在，storeOid=" + payDetailsVO.getStoreOid());
             }
-            dealer = dealer == null ? store.getDealer() : dealer;
+            dealer = dealer != null ? dealer : (store != null ? store.getDealer() : null);
         }
 
         if (dealer == null && StringUtils.isNotBlank(payDetailsVO.getDealerOid())) {
@@ -473,7 +473,6 @@ public class AliPayDetailsServiceImpl
         commonDAO.update(payDetails);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> doJoinTransQueryAliPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -577,7 +576,7 @@ public class AliPayDetailsServiceImpl
         }
 
         conditionSB.append(" order by w.transBeginTime desc");
-        List<AliPayDetails> aliPayDetailsList = (List<AliPayDetails>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
+        List<AliPayDetails> aliPayDetailsList = commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
   
         // 总笔数为记录总数，总金额为交易成功的总金额
         if(aliPayDetailsList != null && !aliPayDetailsList.isEmpty()) {
@@ -951,7 +950,6 @@ public class AliPayDetailsServiceImpl
         commonDAO.update(payDetails);
 	}
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<AliPayDetails> doJoinTransQueryAliPayDetailsByState(int[] stateArr, long intervalTime) {
         Validator.checkArgument(null == stateArr || stateArr.length == 0, "查询状态不能为空");
@@ -975,7 +973,7 @@ public class AliPayDetailsServiceImpl
         }
         paramMap.put("TRANSBEGINTIME", beginTime);
 
-        return (List<AliPayDetails>) super.commonDAO.findObjectList(jpql, paramMap, false);
+        return commonDAO.findObjectList(jpql, paramMap, false);
     }
 
 }

@@ -9,13 +9,6 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.zbsp.wepaysp.po.partner.Dealer;
-import com.zbsp.wepaysp.po.partner.DealerEmployee;
-import com.zbsp.wepaysp.po.partner.Partner;
-import com.zbsp.wepaysp.po.partner.PartnerEmployee;
-import com.zbsp.wepaysp.po.partner.Store;
-import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.po.pay.WeixinRefundDetails;
 import com.zbsp.wepaysp.api.service.BaseService;
 import com.zbsp.wepaysp.api.service.pay.WeixinRefundDetailsService;
 import com.zbsp.wepaysp.common.config.SysSequenceCode;
@@ -28,6 +21,13 @@ import com.zbsp.wepaysp.common.exception.NotExistsException;
 import com.zbsp.wepaysp.common.util.BeanCopierUtil;
 import com.zbsp.wepaysp.common.util.Generator;
 import com.zbsp.wepaysp.common.util.Validator;
+import com.zbsp.wepaysp.po.partner.Dealer;
+import com.zbsp.wepaysp.po.partner.DealerEmployee;
+import com.zbsp.wepaysp.po.partner.Partner;
+import com.zbsp.wepaysp.po.partner.PartnerEmployee;
+import com.zbsp.wepaysp.po.partner.Store;
+import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
+import com.zbsp.wepaysp.po.pay.WeixinRefundDetails;
 import com.zbsp.wepaysp.vo.pay.RefundTotalVO;
 import com.zbsp.wepaysp.vo.pay.WeixinRefundDetailsVO;
 
@@ -36,7 +36,6 @@ public class WeixinRefundDetailsServiceImpl
     extends BaseService
     implements WeixinRefundDetailsService {
 
-    @SuppressWarnings("unchecked")
 	@Override
     public Map<String, Object> doJoinTransQueryWeixinRefundDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -130,7 +129,7 @@ public class WeixinRefundDetailsServiceImpl
         
         sql.append(" order by w.transBeginTime desc");
 
-        List<WeixinRefundDetails> weixinRefundDetailsList = (List<WeixinRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<WeixinRefundDetails> weixinRefundDetailsList =commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
         Long totalRefundAmount = 0L;
         Long totalRefundMoney = 0L;

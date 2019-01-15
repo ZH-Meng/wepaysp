@@ -42,7 +42,6 @@ public class SchoolServiceImpl
     private SysLogService sysLogService;
    
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SchoolVO> doJoinTransQuerySchoolList(Map<String, Object> paramMap, int startIndex, int maxResult) {
         List<SchoolVO> resultList = new ArrayList<SchoolVO>();
@@ -80,7 +79,7 @@ public class SchoolServiceImpl
         }
 
         sql.append(" order by d.createTime desc");
-        List<School> schoolList = (List<School>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<School> schoolList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (schoolList != null && !schoolList.isEmpty()) {
             for (School school : schoolList) {
@@ -90,7 +89,7 @@ public class SchoolServiceImpl
                 String sqlStr = "from SysUser s where s.school.iwoid = :IWOID";
                 sqlMap.clear();
                 sqlMap.put("IWOID", school.getIwoid());
-                List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
                 if (userList != null && !userList.isEmpty()) {
                     vo.setLoginId(userList.get(0).getUserId());// 商户登陆名
                 }

@@ -20,14 +20,13 @@ import com.zbsp.wepaysp.common.config.SysSequenceMultiple;
 import com.zbsp.wepaysp.common.constant.SysEnums.AlarmLogPrefix;
 import com.zbsp.wepaysp.common.constant.SysEnums.PayType;
 import com.zbsp.wepaysp.common.constant.SysEnums.TradeStatus;
+import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.constant.WxEnums.OrderClosedErr;
 import com.zbsp.wepaysp.common.constant.WxEnums.ResultCode;
 import com.zbsp.wepaysp.common.constant.WxEnums.ReturnCode;
 import com.zbsp.wepaysp.common.constant.WxEnums.TradeState;
 import com.zbsp.wepaysp.common.constant.WxEnums.TradeType;
 import com.zbsp.wepaysp.common.constant.WxEnums.WxPayResult;
-import com.zbsp.wepaysp.common.constant.SysEnums;
-import com.zbsp.wepaysp.common.constant.SysEnvKey;
 import com.zbsp.wepaysp.common.exception.DataStateException;
 import com.zbsp.wepaysp.common.exception.InvalidValueException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
@@ -43,8 +42,8 @@ import com.zbsp.wepaysp.po.partner.Partner;
 import com.zbsp.wepaysp.po.partner.PartnerEmployee;
 import com.zbsp.wepaysp.po.partner.Store;
 import com.zbsp.wepaysp.po.pay.WeixinPayDetails;
-import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 import com.zbsp.wepaysp.vo.pay.PayTotalVO;
+import com.zbsp.wepaysp.vo.pay.WeixinPayDetailsVO;
 
 public class WeixinPayDetailsServiceImpl
     extends BaseService
@@ -68,7 +67,6 @@ public class WeixinPayDetailsServiceImpl
         }
     }
     
-    @SuppressWarnings("unchecked")
 	@Override
     public Map<String, Object> doJoinTransQueryWeixinPayDetails(Map<String, Object> paramMap, int startIndex, int maxResult) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -172,7 +170,7 @@ public class WeixinPayDetailsServiceImpl
         }
 
         conditionSB.append(" order by w.transBeginTime desc");
-        List<WeixinPayDetails> weixinPayDetailsList = (List<WeixinPayDetails>) commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
+        List<WeixinPayDetails> weixinPayDetailsList = commonDAO.findObjectList(jpqlSelect + conditionSB.toString(), jpqlMap, false, startIndex, maxResult);
   
         // 总笔数为记录总数，总金额为交易成功的总金额
         if(weixinPayDetailsList != null && !weixinPayDetailsList.isEmpty()) {
@@ -880,7 +878,6 @@ public class WeixinPayDetailsServiceImpl
         }
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public List<WeixinPayDetails> doJoinTransQueryWeixinPayDetailsByState(int[] stateArr, long intervalTime) {
         Validator.checkArgument(null == stateArr || stateArr.length == 0, "查询状态不能为空");
@@ -904,7 +901,7 @@ public class WeixinPayDetailsServiceImpl
         }
         paramMap.put("TRANSBEGINTIME", beginTime);
 
-        return (List<WeixinPayDetails>) super.commonDAO.findObjectList(jpql, paramMap, false);
+        return commonDAO.findObjectList(jpql, paramMap, false);
     }
     
     @Override

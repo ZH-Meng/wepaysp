@@ -46,7 +46,6 @@ public class DealerEmployeeServiceImpl
     private SysLogService sysLogService;
     private SysConfigService sysConfigService;
     
-    @SuppressWarnings("unchecked")
 	@Override
     public DealerEmployeeVO doJoinTransQueryDealerEmployeeByOid(String dealerEmployeeOid) {
     	Validator.checkArgument(StringUtils.isBlank(dealerEmployeeOid), "商户员工Oid不能为空！");
@@ -59,7 +58,7 @@ public class DealerEmployeeServiceImpl
             String sqlStr = "from SysUser s where s.dealerEmployee.iwoid = :IWOID";
             Map<String, Object> sqlMap = new HashMap<String, Object>();
             sqlMap.put("IWOID", dealerEmployee.getIwoid());
-            List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+            List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
             if (userList != null && !userList.isEmpty()) {
             	dealerEmployeeVO.setLoginId(userList.get(0).getUserId());
             }
@@ -67,7 +66,6 @@ public class DealerEmployeeServiceImpl
         return dealerEmployeeVO;
     }
 
-    @SuppressWarnings("unchecked")
 	@Override
     public List<DealerEmployeeVO> doJoinTransQueryDealerEmployeeList(Map<String, Object> paramMap, int startIndex, int maxResult) {
     	List<DealerEmployeeVO> resultList = new ArrayList<DealerEmployeeVO>();
@@ -112,7 +110,7 @@ public class DealerEmployeeServiceImpl
         }
         
         sql.append(" order by de.dealerEmployeeId desc");
-        List<DealerEmployee> dealerEmployeeList = (List<DealerEmployee>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<DealerEmployee> dealerEmployeeList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (dealerEmployeeList != null && !dealerEmployeeList.isEmpty()) {
             for (DealerEmployee dealerEmployee : dealerEmployeeList) {
@@ -123,7 +121,7 @@ public class DealerEmployeeServiceImpl
                 String sqlStr = "from SysUser s where s.dealerEmployee.iwoid = :IWOID";
                 sqlMap.clear();
                 sqlMap.put("IWOID", dealerEmployee.getIwoid());
-                List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
                 if (userList != null && !userList.isEmpty()) {
                     vo.setLoginId(userList.get(0).getUserId());
                 }

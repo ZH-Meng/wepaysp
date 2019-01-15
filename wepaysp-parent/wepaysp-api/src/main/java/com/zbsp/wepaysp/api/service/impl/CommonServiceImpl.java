@@ -1,4 +1,12 @@
-package com.zbsp.wepaysp.api.service;
+/*
+ * CommonServiceImpl.java
+ * 创建者：Liuht
+ * 创建日期：2017年7月14日
+ *
+ * 版权所有(C) 2015-2018。英泰伟业科技(北京)有限公司。
+ * 保留所有权利。
+ */
+package com.zbsp.wepaysp.api.service.impl;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,14 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.zbsp.wepaysp.api.dao.CommonORMDAO;
+import com.zbsp.wepaysp.api.service.CommonService;
 
 /**
- * BaseService
- * 
- * @author 杨帆
- * @modifier Liuht
+ * @author Liuht
  */
-public class BaseService {
+public class CommonServiceImpl
+    implements CommonService {
 
     // 公共DAO对象
     @Autowired
@@ -162,4 +169,5 @@ public class BaseService {
             return;
         }
     }
+
 }

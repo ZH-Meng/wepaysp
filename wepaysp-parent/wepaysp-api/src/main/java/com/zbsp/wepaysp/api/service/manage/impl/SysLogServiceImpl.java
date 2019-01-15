@@ -75,7 +75,6 @@ public class SysLogServiceImpl extends BaseService implements SysLogService {
         return sysLog;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysLogVo> doJoinTransQuerySysLogList(Map<String, Object> paramMap, int startIndex, int maxResult) {
         String userId = MapUtils.getString(paramMap, "userId");
@@ -134,7 +133,7 @@ public class SysLogServiceImpl extends BaseService implements SysLogService {
         sql.append(" order by l.processTimeBegin desc, l.sysUser.userId");
 
         List<SysLogVo> resultList = new ArrayList<SysLogVo>();
-        List<SysLog> sysLogList = (List<SysLog>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<SysLog> sysLogList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (sysLogList != null && !sysLogList.isEmpty()) {
             Set<String> userOidSet = new HashSet<String>();
@@ -256,7 +255,6 @@ public class SysLogServiceImpl extends BaseService implements SysLogService {
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysLogVo> doTransExportSysLogList(Map<String, Object> paramMap, String operationUserOid, String funOid) {
         String userId = MapUtils.getString(paramMap, "userId");
@@ -367,7 +365,7 @@ public class SysLogServiceImpl extends BaseService implements SysLogService {
         sql.append(" order by l.processTimeBegin desc, l.sysUser.userId");
 
         List<SysLogVo> resultList = new ArrayList<SysLogVo>();
-        List<SysLog> sysLogList = (List<SysLog>) commonDAO.findObjectList(sql.toString(), sqlMap, false);
+        List<SysLog> sysLogList = commonDAO.findObjectList(sql.toString(), sqlMap, false);
 
         if (sysLogList != null && !sysLogList.isEmpty()) {
             Set<String> userOidSet = new HashSet<String>();

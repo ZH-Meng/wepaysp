@@ -132,7 +132,6 @@ public class AlipayAppAuthDetailsServiceImpl
         return appAuthDetailsVO;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<AlipayAppAuthDetails> doJoinTransQueryExpiredAppAuthDetails(String appid) {
         Validator.checkArgument(StringUtils.isBlank(appid), "appid为空");
@@ -141,7 +140,7 @@ public class AlipayAppAuthDetailsServiceImpl
         jpqlMap.put("APPID", appid);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
         jpqlMap.put("NOWTIME", DateUtils.addDays(new Date(), 2));// 当前时间后的两天（即提前两天失效）
-        return (List<AlipayAppAuthDetails>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        return commonDAO.findObjectList(jpql, jpqlMap, false);
     }
     
     @Override
@@ -150,7 +149,6 @@ public class AlipayAppAuthDetailsServiceImpl
         commonDAO.update(appAuthDetails);
     }
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<AlipayAppAuthDetails> doJoinTransQueryValidAppAuthDetails(String appid, String dealerId) {
 		 Validator.checkArgument(StringUtils.isBlank(appid), "appid为空");
@@ -162,7 +160,7 @@ public class AlipayAppAuthDetailsServiceImpl
         }
         jpqlMap.put("APPID", appid);
         jpqlMap.put("STATUS", AlipayAppAuthDetails.AppAuthStatus.VALID.toString());
-        return (List<AlipayAppAuthDetails>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        return commonDAO.findObjectList(jpql, jpqlMap, false);
 	}
 
 }
