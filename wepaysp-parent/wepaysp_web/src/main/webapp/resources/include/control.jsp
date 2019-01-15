@@ -50,7 +50,7 @@
     		$("#menuOpen").click(function(){
     			$("#menuOpen").hide();
     			$("#menuClose").show();
-    			parent.contentFrame.cols = "292,22,*";
+    			parent.contentFrame.cols = "250,22,*";
     		});
 		</script>
 	</body>

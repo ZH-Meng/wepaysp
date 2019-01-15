@@ -27,7 +27,7 @@
 					<li>
 						<div class="query_condition">
 							<s:if test="userLevel  > 0 && userLevel  <= 4">
-								<s:set name="resetFlag" value="true"/>
+								<s:set var="resetFlag" value="true"/>
 								<s:if test="userLevel  == 1">
 									<s:if test="partnerVoListLevel == 2">
 										<div class="condition_field">

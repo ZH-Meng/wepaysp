@@ -41,6 +41,7 @@ public class WeixinPayDetailsAction
     private String listType;
     private PayTotalVO totalVO;
     private String queryMinAmount;
+    private String nowDateStr;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -168,6 +169,32 @@ public class WeixinPayDetailsAction
         return goCurrent();
     }
     
+    /**
+     * 商户导出数据
+     * 
+     * @return
+     */
+    public String exportFile() {
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        logger.info("导出微信支付交易明细-商户（{}）", manageUser.getUserId() + "-" + manageUser.getUsername());
+        query(0, -1);
+        nowDateStr = DateUtil.getDate(new Date(), "yyyyMMdd");
+        return "weixinPayDetailsExcel";
+    }
+    
+    /**
+     * 代理商导出数据
+     * 
+     * @return
+     */
+    public String exportFile4Dealer() {
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        logger.info("导出微信支付交易明细-代理商（{}）", manageUser.getUserId() + "-" + manageUser.getUsername());
+        query(0, -1);
+        nowDateStr = DateUtil.getDate(new Date(), "yyyyMMdd");
+        return "weixinPayDetailsExcel";
+    }
+    
     private void initDefaultDatesArgs() {
         if (StringUtils.isBlank(beginTime) || StringUtils.isBlank(endTime)) {
             // 默认查询时间为今天
@@ -246,6 +273,10 @@ public class WeixinPayDetailsAction
 
     public void setQueryMinAmount(String queryMinAmount) {
         this.queryMinAmount = queryMinAmount;
+    }
+    
+    public String getNowDateStr() {
+        return nowDateStr;
     }
 
 }

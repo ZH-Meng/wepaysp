@@ -48,12 +48,12 @@
 	                                <th>门店ID</th>
 	                                <th>门店名称</th>
 	                                <s:if test="listType == 'dealerEmployee'">
-		                                <s:set name="listCols"  value="12"/>
+		                                <s:set var="listCols"  value="12"/>
 		                                <th>收银员ID</th>
 		                                <th>收银员姓名</th>
 	                                </s:if>
 	                                <s:else>
-	                                	<s:set name="listCols"  value="10"/>
+	                                	<s:set var="listCols"  value="10"/>
 	                                </s:else>
 	                                <th>退款总笔数</th>
 	                                <th>退款总金额</th>

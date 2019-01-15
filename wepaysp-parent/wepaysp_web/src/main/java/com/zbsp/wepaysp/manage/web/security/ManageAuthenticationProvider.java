@@ -19,7 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
@@ -79,7 +79,7 @@ public class ManageAuthenticationProvider
             List<GrantedAuthority> auths = new ArrayList<GrantedAuthority>();
             String roleIndex = "";
             for (SysRole sysRole : userRoleList) {
-                GrantedAuthorityImpl authority = new GrantedAuthorityImpl(sysRole.getIwoid());
+                GrantedAuthority authority = new SimpleGrantedAuthority(sysRole.getIwoid());
                 auths.add(authority);
                 roleIndex = sysRole.getRoleIndex();
             }

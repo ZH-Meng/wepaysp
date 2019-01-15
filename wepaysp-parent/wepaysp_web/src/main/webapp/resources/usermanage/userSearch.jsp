@@ -114,13 +114,13 @@
  											</td>
  											<td title="<s:property value="#sysUserVO.age" />"><s:property value="#sysUserVO.age" /></td>
 											
-											<s:set name="roleNameStr" value=""/>
+											<s:set var="roleNameStr" value=""/>
 											<s:iterator value="#sysUserVO.userRoleList" var="sysRole" status="roleRow">
-												<s:set name="roleNameStr">
+												<s:set var="roleNameStr">
 													<s:property value="#roleNameStr" /><s:property value="#sysRole.roleName" />
 												</s:set>
 												<s:if test="#sysUserVO.userRoleList.size() != (#roleRow.index+1)">
-													<s:set name="roleNameStr" value="#roleNameStr" />&nbsp;
+													<s:set var="roleNameStr" value="#roleNameStr" />&nbsp;
 												</s:if>
 											</s:iterator>
 											<td title="<s:property value="#roleNameStr" />"><s:property value="#roleNameStr" escape="false"/></td>

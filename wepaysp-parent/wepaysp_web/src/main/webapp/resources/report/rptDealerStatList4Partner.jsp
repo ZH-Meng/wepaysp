@@ -7,10 +7,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<s:if test="listType == 'partner'">
-		<s:set name="title">代理商分润统计</s:set>
+		<s:set var="title">代理商分润统计</s:set>
 	</s:if>
 	<s:elseif test="listType == 'partnerEmployee'">
-		<s:set name="title">代理商员工分润统计</s:set>
+		<s:set var="title">代理商员工分润统计</s:set>
 	</s:elseif>
 	<title><s:property value="#title"/></title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
@@ -30,7 +30,7 @@
 							<%-- 服务商 --%>
 							<s:if test="userLevel == 1">
 								<s:if test="listType == 'partner' && (partnerLevel == 1 ||  partnerLevel == 2)">
-									<s:set name="resetFlag" value="true"/>
+									<s:set var="resetFlag" value="true"/>
 									<div class="condition_field">
 										<span class="field_label">代理商ID</span>
 										<s:textfield name="rptDealerStatVO.partnerId" id="partnerId" maxlength="8"/>
@@ -38,7 +38,7 @@
 									</div>
                                 </s:if>
                                 <s:elseif test="listType == 'partnerEmployee'">
-                                	<s:set name="resetFlag" value="true"/>
+                                	<s:set var="resetFlag" value="true"/>
                                 	<div class="condition_field">
 										<span class="field_label">业务员ID</span>
 										<s:textfield name="rptDealerStatVO.partnerEmployeeId" id="partnerEmployeeId" maxlength="10"/>
@@ -84,12 +84,12 @@
 		                            <th>代理商ID</th>
 	                                <th>代理商名称</th>
 	                                <s:if test="listType == 'partnerEmployee'">
-		                                <s:set name="listCols"  value="11"/>
+		                                <s:set var="listCols"  value="11"/>
 		                                <th>业务员ID</th>
 	                                	<th>业务员名称</th>
 	                                </s:if>
 	                                <s:else>
-	                                	<s:set name="listCols"  value="9"/>
+	                                	<s:set var="listCols"  value="9"/>
 	                                </s:else>
 	                                <th>退款总笔数</th>
 	                                <th>退款总金额</th>

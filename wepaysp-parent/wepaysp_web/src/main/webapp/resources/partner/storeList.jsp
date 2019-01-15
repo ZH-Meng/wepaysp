@@ -58,7 +58,7 @@
 				        			<s:set var="hasFindCashiersPermission">no</s:set>
 				        		</manage:notPass>
 				            </manage:permission>
-							<s:set name="backFlag" value="true"/>
+							<s:set var="backFlag" value="true"/>
 						</s:elseif>
 						
 						<%--绑定支付通知按钮权限验证 --%>

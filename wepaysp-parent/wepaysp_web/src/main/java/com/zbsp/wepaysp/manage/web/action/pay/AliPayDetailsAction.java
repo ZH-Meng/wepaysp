@@ -41,6 +41,7 @@ public class AliPayDetailsAction
     private String listType;
     private PayTotalVO totalVO;
     private String queryMinAmount;
+    private String nowDateStr;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -168,6 +169,32 @@ public class AliPayDetailsAction
         return goCurrent();
     }
     
+    /**
+     * 商户导出数据
+     * 
+     * @return
+     */
+    public String exportFile() {
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        logger.info("导出支付宝支付交易明细-商户（{}）", manageUser.getUserId() + "-" + manageUser.getUsername());
+        query(0, -1);
+        nowDateStr = DateUtil.getDate(new Date(), "yyyyMMdd");
+        return "aliPayDetailsExcel";
+    }
+    
+    /**
+     * 代理商导出数据
+     * 
+     * @return
+     */
+    public String exportFile4Dealer() {
+        ManageUser manageUser = (ManageUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        logger.info("导出支付宝支付交易明细-代理商（{}）", manageUser.getUserId() + "-" + manageUser.getUsername());
+        query(0, -1);
+        nowDateStr = DateUtil.getDate(new Date(), "yyyyMMdd");
+        return "aliPayDetailsExcel";
+    }
+    
     private void initDefaultDatesArgs() {
         if (StringUtils.isBlank(beginTime) || StringUtils.isBlank(endTime)) {
             // 默认查询时间为今天
@@ -246,6 +273,14 @@ public class AliPayDetailsAction
 
     public void setQueryMinAmount(String queryMinAmount) {
         this.queryMinAmount = queryMinAmount;
+    }
+    
+    public AliPayDetailsService getAliPayDetailsService() {
+        return aliPayDetailsService;
+    }
+
+    public String getNowDateStr() {
+        return nowDateStr;
     }
 
 }

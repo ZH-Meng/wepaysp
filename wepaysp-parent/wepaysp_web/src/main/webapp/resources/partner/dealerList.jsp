@@ -50,10 +50,10 @@
 			        		</manage:notPass>
 			            </manage:permission>
 			            
-						<s:set name="findStoresFlag" value="true"/>
+						<s:set var="findStoresFlag" value="true"/>
 						<%-- 服务商有编辑商户核心信息的开关 --%>
 						<s:if test="dealerVO != null && 'on' == dealerVO.coreDataFlag">
-							<s:set name="findStoresFlag" value="false"/>
+							<s:set var="findStoresFlag" value="false"/>
 				            <manage:permission validateUrl="/resources/partner/dealermanage!goToUpdateDealerCore.action">
 				        		<manage:pass>
 				        			<s:set var="hasUpdateCorePermission">yes</s:set>
@@ -66,7 +66,7 @@
 						<%-- 服务商向下钻取查看商户列表 --%>
 						<s:elseif test="partnerOid != null && partnerOid != '' ">
 							<%-- <s:set name="findStoresFlag" value="true"/> --%>
-							<s:set name="backFlag" value="true"/>
+							<s:set var="backFlag" value="true"/>
 						</s:elseif>
 						<%-- 代理商查看自己发展的商户列表 --%>
 						<s:elseif test="partnerOid == null || partnerOid == '' ">

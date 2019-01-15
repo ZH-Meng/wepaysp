@@ -21,7 +21,7 @@
 					<li>
 						<div class="query_condition">
 							<s:if test="userLevel  > 0 && userLevel  <= 4">
-								<s:set name="resetFlag" value="true"/>
+								<s:set var="resetFlag" value="true"/>
 								<s:if test="userLevel  == 1">
 									<s:if test="partnerVoListLevel == 2">
 										<div class="condition_field">
@@ -226,6 +226,16 @@
 	            <ul>
 	            	<li class="t-center">
 	                	<s:include value="/resources/include/page.jsp"></s:include>
+	                	<manage:permission validateUrl="/resources/pay/alipaydetails!exportFile.action">
+			        		<manage:pass>
+		                		<span class="bg_pagebutton"><a href="javascript:void(0);"   onclick="query('exportFile');" >数据导出</a></span>
+			        		</manage:pass>
+			            </manage:permission>
+	                	<manage:permission validateUrl="/resources/pay/alipaydetails!exportFile4Dealer.action">
+			        		<manage:pass>
+		                		<span class="bg_pagebutton"><a href="javascript:void(0);"   onclick="query('exportFile4Dealer');" >数据导出</a></span>
+			        		</manage:pass>
+			            </manage:permission>
 	                </li>
 	            </ul>
 	    	</div>

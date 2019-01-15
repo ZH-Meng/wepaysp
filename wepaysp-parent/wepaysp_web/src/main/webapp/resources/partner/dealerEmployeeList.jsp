@@ -6,12 +6,12 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<s:if test="resetFlag == 'yes'">
-		<s:set name="title">重置退款权限密码</s:set>
-		<s:set name="navTag">重置退款权限密码</s:set>
+		<s:set var="title">重置退款权限密码</s:set>
+		<s:set var="navTag">重置退款权限密码</s:set>
 	</s:if>
 	<s:else>
-		<s:set name="title">商户员工管理</s:set>
-		<s:set name="navTag">商户员工管理&gt;员工管理</s:set>
+		<s:set var="title">商户员工管理</s:set>
+		<s:set var="navTag">商户员工管理&gt;员工管理</s:set>
 	</s:else>
 	<title>${title }</title>
 	<link href="<%=request.getContextPath()%>/css/zxbgstyle.css" rel="stylesheet" />
@@ -59,7 +59,7 @@
 					            </manage:permission>
 							</s:if>
 							<s:else>
-								<s:set name="backFlag" value="true"/>
+								<s:set var="backFlag" value="true"/>
 							</s:else>
 							
 							<%--绑定支付通知按钮权限验证 --%>

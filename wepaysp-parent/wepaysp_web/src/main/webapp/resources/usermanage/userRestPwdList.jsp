@@ -95,7 +95,7 @@
 											
 											<s:set var="roleStr" value=""/>
 											<s:iterator value="#userInfo.userRoleList" var="role">
-												<s:set name="roleStr">
+												<s:set var="roleStr">
 													<s:property value="#roleStr" />&nbsp;<s:property value="#role.roleName" />&nbsp;</s:set>
 											</s:iterator>
 											<td title="<s:property value="#roleStr"/>">

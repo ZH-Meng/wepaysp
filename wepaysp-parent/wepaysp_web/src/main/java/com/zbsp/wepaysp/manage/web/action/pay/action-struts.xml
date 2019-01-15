@@ -6,6 +6,7 @@
 		<!-- 微信交易明细 -->
 		<action name="weixinpaydetails" class="weixinPayDetailsAction">
 			<result name="weixinPayDetailsList">/resources/pay/weixinPayDetailsList.jsp</result>
+			<result name="weixinPayDetailsExcel">/resources/pay/weixinPayDetailsExcel.jsp</result>
 		</action>
 		
 		<!-- 微信退款明细 -->
@@ -21,6 +22,7 @@
 		<!-- 支付宝交易明细 -->
 		<action name="alipaydetails" class="aliPayDetailsAction">
 			<result name="aliPayDetailsList">/resources/pay/aliPayDetailsList.jsp</result>
+			<result name="aliPayDetailsExcel">/resources/pay/aliPayDetailsExcel.jsp</result>
 		</action>
 		
 		<!-- 支付宝退款明细 -->
