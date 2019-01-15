@@ -17,7 +17,6 @@ import com.zbsp.wepaysp.po.app.AppManage;
  */
 public class AppManageServiceImpl extends BaseService implements AppManageService {
 
-    @SuppressWarnings("unchecked")
     @Override
     public CheckVersionResponse doJoinTransQueryLatestApp(Integer softType) throws IllegalArgumentException {
         Validator.checkArgument(!Validator.contains(AppManage.SoftType.class, softType), "客户端类型取值不正确");
@@ -27,7 +26,7 @@ public class AppManageServiceImpl extends BaseService implements AppManageServic
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("SOFTTYPE", softType);
 
-        List<AppManage> appManageList = (List<AppManage>) commonDAO.findObjectList(sql, paramMap, false, 0, 1);
+        List<AppManage> appManageList = commonDAO.findObjectList(sql, paramMap, false, 0, 1);
         CheckVersionResponse response = null;
         String responseId = Generator.generateIwoid();
         

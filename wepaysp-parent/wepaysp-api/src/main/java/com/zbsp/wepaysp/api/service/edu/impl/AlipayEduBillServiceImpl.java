@@ -38,8 +38,7 @@ public class AlipayEduBillServiceImpl
         StringBuilder jpqlBuilder = new StringBuilder("from AlipayEduBill a where 1=1");
         Map<String, Object> jpqlMap = assembleQueryCondition(jpqlBuilder, paramMap);
 
-        @SuppressWarnings("unchecked")
-        List<AlipayEduBill> billList = (List<AlipayEduBill>) commonDAO.findObjectList(jpqlBuilder.toString(), jpqlMap, false, startIndex, maxResult);
+        List<AlipayEduBill> billList = commonDAO.findObjectList(jpqlBuilder.toString(), jpqlMap, false, startIndex, maxResult);
         if (billList != null && !billList.isEmpty()) {
             for (AlipayEduBill bill : billList) {
                 AlipayEduBillVO billVO = new AlipayEduBillVO();
@@ -110,7 +109,6 @@ public class AlipayEduBillServiceImpl
         commonDAO.saveList(billList, 100);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<AlipayEduBill> doJoinTransQueryAlipayEduBillByStatus(String totalBillOid, OrderStatus status) {
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
@@ -123,7 +121,7 @@ public class AlipayEduBillServiceImpl
             jpql += " and a.orderStatus=:STATUS";
             jpqlMap.put("STATUS", status.name());
         }
-        return (List<AlipayEduBill>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        return commonDAO.findObjectList(jpql, jpqlMap, false);
     }
 
     @Override

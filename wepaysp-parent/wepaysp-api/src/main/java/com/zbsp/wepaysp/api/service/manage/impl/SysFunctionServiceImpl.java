@@ -39,7 +39,6 @@ public class SysFunctionServiceImpl extends BaseService implements SysFunctionSe
         return commonDAO.findObject(sql, queryMap, false);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysFunction> doJoinTransQuerySysFunctionList(Map<String, Object> paramMap) {
         Integer functionType = MapUtils.getInteger(paramMap, "functionType");
@@ -67,10 +66,9 @@ public class SysFunctionServiceImpl extends BaseService implements SysFunctionSe
         
         sql += " or f.parentFunctionOid is null order by f.displayOrder";
         
-        return (List<SysFunction>) commonDAO.findObjectList(sql, queryMap, false);
+        return commonDAO.findObjectList(sql, queryMap, false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysFunction> doJoinTransQueryLogSysFunctionList(Map<String, Object> paramMap) {
         Integer functionType = MapUtils.getInteger(paramMap, "functionType");
@@ -98,7 +96,7 @@ public class SysFunctionServiceImpl extends BaseService implements SysFunctionSe
         
         sql += " order by f.displayOrder";
         
-        return (List<SysFunction>) commonDAO.findObjectList(sql, queryMap, false);
+        return commonDAO.findObjectList(sql, queryMap, false);
     }
 
 }

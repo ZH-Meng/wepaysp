@@ -73,7 +73,7 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
 
         sql += " order by r.modifyTime desc";
 
-        return (List<SysRole>) commonDAO.findObjectList(sql, queryMap, false, startIndex, maxResult);
+        return commonDAO.findObjectList(sql, queryMap, false, startIndex, maxResult);
     }
 
     @SuppressWarnings("unchecked")
@@ -187,7 +187,7 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
 
         Date processBeginTime = new Date();
 
-        List<SysRole> sysRoleList = (List<SysRole>) commonDAO.findObjectList(sql, queryMap, false);
+        List<SysRole> sysRoleList = commonDAO.findObjectList(sql, queryMap, false);
 
         Date processEndTime = new Date();
 
@@ -198,7 +198,6 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
         return sysRoleList;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public List<String> doJoinTransQueryUniqueRoleNameList(Map<String, Object> paramMap) {
         Integer state = MapUtils.getInteger(paramMap, "state");
@@ -226,10 +225,9 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
 
         sql += " order by r.roleName";
 
-        return (List<String>) commonDAO.findObjectList(sql, queryMap, false);
+        return commonDAO.findObjectList(sql, queryMap, false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SysRole doTransAddRole(SysRole sysRole, String creator, String operatorUserOid, String logFunctionOid) throws AlreadyExistsException {
         Validator.checkArgument(StringUtils.isBlank(sysRole.getRoleId()), "角色代码不能为空");
@@ -245,7 +243,7 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
         mapParams.put("ROLENAME", sysRole.getRoleName());
         mapParams.put("STATE", SysRole.State.canceled.getValue());
 
-        List<SysRole> checkList = (List<SysRole>) commonDAO.findObjectList(sql.toString(), mapParams, false);
+        List<SysRole> checkList = commonDAO.findObjectList(sql.toString(), mapParams, false);
 
         if (checkList != null && !checkList.isEmpty()) {
             SysRole moreRole = checkList.get(0);
@@ -279,7 +277,6 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
         return sysRole;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SysRole doTransUpdateRole(SysRole sysRole, String modifier, String operatorUserOid, String logFunctionOid) throws AlreadyExistsException, IllegalArgumentException {
         Validator.checkArgument(StringUtils.isBlank(sysRole.getRoleId()), "角色代码不能为空");
@@ -325,7 +322,7 @@ public class SysRoleServiceImpl extends BaseService implements SysRoleService {
         mapParams.put("STATE", SysRole.State.canceled.getValue());
         mapParams.put("ROLEOID", sysRole.getIwoid());
 
-        List<SysRole> checkList = (List<SysRole>) commonDAO.findObjectList(sql.toString(), mapParams, false);
+        List<SysRole> checkList = commonDAO.findObjectList(sql.toString(), mapParams, false);
 
         if (checkList != null && !checkList.isEmpty()) {
             for (SysRole moreRole : checkList) {

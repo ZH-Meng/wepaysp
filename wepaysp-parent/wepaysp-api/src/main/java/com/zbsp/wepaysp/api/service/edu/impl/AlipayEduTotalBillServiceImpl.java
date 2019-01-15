@@ -53,7 +53,6 @@ public class AlipayEduTotalBillServiceImpl
         logger.info("支付宝教育缴费账单excel模板列头：{}", fixedExcelHeaders);
     }
 	
-    @SuppressWarnings("unchecked")
     @Override
     public List<AlipayEduTotalBillVO> doJoinTransQueryAlipayEduTotalBill(Map<String, Object> paramMap, int startIndex, int maxResult) {
         List<AlipayEduTotalBillVO> resultList = new ArrayList<AlipayEduTotalBillVO>();
@@ -61,7 +60,7 @@ public class AlipayEduTotalBillServiceImpl
         Map<String, Object> jpqlMap = assembleQueryCondition(jpqlBuilder, paramMap);
 
         jpqlBuilder.append(" order by a.createTime desc");
-        List<AlipayEduTotalBill> totalBillList = (List<AlipayEduTotalBill>) commonDAO.findObjectList(jpqlBuilder.toString(), jpqlMap, false, startIndex, maxResult);
+        List<AlipayEduTotalBill> totalBillList = commonDAO.findObjectList(jpqlBuilder.toString(), jpqlMap, false, startIndex, maxResult);
         if (totalBillList != null && !totalBillList.isEmpty()) {
             for (AlipayEduTotalBill totalBill : totalBillList) {
                 AlipayEduTotalBillVO billVO = new AlipayEduTotalBillVO();
@@ -356,7 +355,6 @@ public class AlipayEduTotalBillServiceImpl
         commonDAO.updateList(totalBills);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<AlipayEduTotalBill> doJoinTransQueryTotalBillOfWaitingSend(Integer validMins) {
         Map<String, Object> jpqlMap = new HashMap<String, Object>();
@@ -368,7 +366,7 @@ public class AlipayEduTotalBillServiceImpl
             jpql += " and a.createTime>=:MINCREATETIME";
             jpqlMap.put("MINCREATETIME", minCreateTime);
         }
-        return (List<AlipayEduTotalBill>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        return commonDAO.findObjectList(jpql, jpqlMap, false);
     }
 
     @Override

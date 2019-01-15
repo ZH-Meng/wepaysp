@@ -121,7 +121,7 @@ public class SysConfigServiceImpl
         // 检查appId4Face2FacePay是否存在
         Map<String, Object> eduApp = SysConfig.alipayAppMap.get(appId4Edu);
         if (eduApp == null) {
-            throw new SystemInitException("初始化系统配置信息appId4Face2FacePay错误，应用不存在appid=" + appId4Face2FacePay);   
+            throw new SystemInitException("初始化系统配置信息appId4Edu错误，应用不存在appid=" + appId4Edu);   
         }
         
         // 支付宝支付的配置

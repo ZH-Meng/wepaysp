@@ -171,7 +171,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
             null, null, SysLog.State.success.getValue(), null, null, null);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysUserVO> doJoinTransQuerySysUserList(Map<String, Object> paramMap, int startIndex, int maxResult) {
         String userId = MapUtils.getString(paramMap, "userId");
@@ -211,7 +210,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         sql.append(" order by u.modifyTime desc");
 
         List<SysUserVO> resultList = new ArrayList<SysUserVO>();
-        List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex,
+        List<SysUser> userList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex,
             maxResult);
         if (userList != null && !userList.isEmpty()) {
             for (SysUser sysUser : userList) {
@@ -223,7 +222,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
                 String sqlStr = "select s.sysRole from SysAuthority s where s.sysUser.iwoid = :IWOID)";
                 sqlMap.clear();
                 sqlMap.put("IWOID", sysUser.getIwoid());
-                List<SysRole> userRoleList = (List<SysRole>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                List<SysRole> userRoleList = commonDAO.findObjectList(sqlStr, sqlMap, false);
                 vo.setUserRoleList(userRoleList);
 
                 resultList.add(vo);
@@ -272,7 +271,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         return commonDAO.queryObjectCount(sql.toString(), sqlMap, false);
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysUserVO> doTransExportSysUserList(Map<String, Object> paramMap, String operatorUserOid, String logFunctionOid) {
         List<SysUserVO> resultList = new ArrayList<SysUserVO>();
@@ -337,7 +335,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         
         Date processBeginTime = new Date();
 
-        List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sql.toString(), sqlMap, false);
+        List<SysUser> userList = commonDAO.findObjectList(sql.toString(), sqlMap, false);
         if (userList != null && !userList.isEmpty()) {
             for (SysUser sysUser : userList) {
                 SysUserVO vo = new SysUserVO();
@@ -348,7 +346,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
                 String sqlStr = "select s.sysRole from SysAuthority s where s.sysUser.iwoid= :IWOID)";
                 sqlMap.clear();
                 sqlMap.put("IWOID", sysUser.getIwoid());
-                List<SysRole> userRoleList = (List<SysRole>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                List<SysRole> userRoleList = commonDAO.findObjectList(sqlStr, sqlMap, false);
                 vo.setUserRoleList(userRoleList);
 
                 resultList.add(vo);
@@ -364,7 +362,6 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
         return resultList;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public SysUserVO doJoinTransQueryUserByOid(String userOid) {
         Validator.checkArgument(StringUtils.isBlank(userOid), "用户Oid不能为空");
@@ -382,7 +379,7 @@ public class SysUserServiceImpl extends BaseService implements SysUserService {
             Map<String, Object> paramMap = new HashMap<String, Object>();
             paramMap.put("IWOID", userOid);
 
-            List<SysRole> userRoleList = (List<SysRole>) commonDAO.findObjectList(sql, paramMap, false);
+            List<SysRole> userRoleList = commonDAO.findObjectList(sql, paramMap, false);
             sysUserVO.setUserRoleList(userRoleList);
         }
 

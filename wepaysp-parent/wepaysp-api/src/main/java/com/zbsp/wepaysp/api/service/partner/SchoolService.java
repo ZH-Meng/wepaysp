@@ -6,7 +6,6 @@ import java.util.Map;
 import com.alipay.api.AlipayApiException;
 import com.zbsp.wepaysp.common.exception.AlreadyExistsException;
 import com.zbsp.wepaysp.common.exception.NotExistsException;
-import com.zbsp.wepaysp.vo.partner.DealerVO;
 import com.zbsp.wepaysp.vo.partner.SchoolVO;
 
 /**

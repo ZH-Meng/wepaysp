@@ -14,21 +14,87 @@
      	http://www.springframework.org/schema/context 
      	http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-	<!-- <context:component-scan base-package="cn.com" />
-	<util:properties id="configProperties" location="config/config.properties" /> -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">	
+		   	<list>	
+		    	<value>config/config.properties</value>
+		    	<value>config/config-db.properties</value>
+		   </list>	
+		</property>
+	</bean>
 
 	<!--MySQL -->
-	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
-		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+	<!-- 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${driverClass}" />
+		<property name="jdbcUrl" value="${jdbcUrl}" />
 		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/wepay_sp?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false" />
-		<property name="user" value="root" />
-		<property name="password" value="test" />
-		<property name="initialPoolSize" value="10"></property>
-		<property name="minPoolSize" value="5"></property>
-		<property name="maxPoolSize" value="30"></property>
-		<property name="maxIdleTime" value="60"></property>
-		<property name="acquireIncrement" value="5"></property>
-	</bean>
+		<property name="user" value="${user}" />
+		<property name="password" value="${password}" />
+		<property name="initialPoolSize" value="${initialPoolSize}" />
+		<property name="minPoolSize" value="${minPoolSize}" />
+		<property name="maxPoolSize" value="${maxPoolSize}" />
+		<property name="maxIdleTime" value="${maxIdleTime}" />
+		<property name="acquireIncrement" value="${acquireIncrement}" />
+	</bean> -->
+	
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">  
+        <!-- 驱动名称 -->    
+        <property name="driverClassName" value="${db.driverClass}" />    
+        <!-- JDBC连接串     -->
+        <property name="url" value="${db.jdbcUrl}" />    
+        <!--  数据库用户名称 -->    
+        <property name="username" value="${db.userName}" />    
+        <!-- 数据库密码 -->    
+        <property name="password" value="${db.password}" />    
+        <!-- 连接池最大使用连接数量 -->    
+        <property name="maxActive" value="${db.maxActive}" />    
+        <!-- 初始化大小 -->    
+        <property name="initialSize" value="${db.initialSize}" />  
+        <!-- 获取连接最大等待时间  -->   
+        <property name="maxWait" value="${db.maxWait}" />    
+        <!-- 逐出连接的检测时间间隔 -->    
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${db.timeBetweenEvictionRunsMillis}"/>
+        <!-- 最小逐出时间     -->
+        <!--  配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${db.minEvictableIdleTimeMillis}"/> 
+        <!-- 打开removeAbandoned功能   -->
+        <property name="removeAbandoned" value="${db.removeAbandoned}" />  
+        <!-- 1800秒，也就是30分钟   -->
+        <property name="removeAbandonedTimeout" value="${db.removeAbandonedTimeout}" />  
+        <!-- 关闭abanded连接时输出错误日志  --> 
+        <property name="logAbandoned" value="${db.logAbandoned}" />  
+        <!-- 开启Druid的监控统计功能   -->
+        <property name="filters" value="stat,Log4j2" />
+         
+        <property name="poolPreparedStatements" value="${db.poolPreparedStatements}"/>
+        <!-- <property name="maxOpenPreparedStatements" value="${db.maxOpenPreparedStatements}"/> -->
+        
+        <!-- 测试有效用的SQL Query -->     
+        <property name="validationQuery" value="${db.validationQuery}" /> 
+        <!-- 连接空闲时测试是否有效    -->
+        <property name="testWhileIdle" value="true" />      
+        <!-- 获取连接时测试是否有效     --> 
+        <property name="testOnBorrow" value="false" />    
+        <!-- 归还连接时是否测试有效    --> 
+        <property name="testOnReturn" value="false" />    
+        <property name="proxyFilters">
+            <list>
+                <ref bean="stat-filter"/>
+                <ref bean="log-filter"/>
+            </list>
+        </property>
+    </bean>  
+	
+    <bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">  
+        <property name="slowSqlMillis" value="${db.slowSqlMillis}" />  
+        <property name="mergeSql" value="true" />
+        <property name="logSlowSql" value="true" />  
+    </bean> 
+    
+    <bean id="log-filter" class="com.alibaba.druid.filter.logging.Log4j2Filter">
+        <property name="statementExecutableSqlLogEnable" value="true" />
+    </bean>
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
 		<property name="persistenceUnitName" value="wepaysp-po" />
@@ -72,7 +138,6 @@
 	</tx:advice>
 
 	<bean id="commonORMDAO" class="com.zbsp.wepaysp.api.dao.impl.CommonDAOJPAImpl">
-		<property name="entityManagerFactory" ref="entityManagerFactory" />
   	</bean>
   	
   	<bean id="baseService" class="com.zbsp.wepaysp.api.service.BaseService">

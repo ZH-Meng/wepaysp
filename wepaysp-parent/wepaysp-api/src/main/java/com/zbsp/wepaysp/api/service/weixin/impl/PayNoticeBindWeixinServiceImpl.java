@@ -75,8 +75,7 @@ public class PayNoticeBindWeixinServiceImpl
 
         jpql.append(" order by p.modifyTime desc");
         
-        @SuppressWarnings("unchecked")
-        List<PayNoticeBindWeixin> payNoticeBindWeixinList = (List<PayNoticeBindWeixin>) commonDAO.findObjectList(jpql.toString(), jpqlMap, false);
+        List<PayNoticeBindWeixin> payNoticeBindWeixinList = commonDAO.findObjectList(jpql.toString(), jpqlMap, false);
         if (payNoticeBindWeixinList != null && !payNoticeBindWeixinList.isEmpty()) {
             for (PayNoticeBindWeixin wx : payNoticeBindWeixinList) {
                 PayNoticeBindWeixinVO vo = new PayNoticeBindWeixinVO();
@@ -244,7 +243,6 @@ public class PayNoticeBindWeixinServiceImpl
         return vo;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> doJoinTransQueryBindInfo(String openid) {
         Validator.checkArgument(StringUtils.isBlank(openid), "openid不能为空！");
@@ -253,7 +251,7 @@ public class PayNoticeBindWeixinServiceImpl
         jpqlMap.put("OPENID", openid);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
-        List<PayNoticeBindWeixin> bindList = (List<PayNoticeBindWeixin>) commonDAO.findObjectList(jpql, jpqlMap, false);
+        List<PayNoticeBindWeixin> bindList = commonDAO.findObjectList(jpql, jpqlMap, false);
         for (PayNoticeBindWeixin bindInfo : bindList) {
             jpqlMap.clear();
             SysUser user = null;
@@ -298,8 +296,7 @@ public class PayNoticeBindWeixinServiceImpl
         	jpqlMap.put("STATE", state);
         	jpql += " and p.state=:STATE";
         }
-        @SuppressWarnings("unchecked")
-		List<PayNoticeBindWeixin> dealerBindList = (List<PayNoticeBindWeixin>) commonDAO.findObjectList(jpql, jpqlMap, false);
+		List<PayNoticeBindWeixin> dealerBindList = commonDAO.findObjectList(jpql, jpqlMap, false);
         if (dealerBindList != null && !dealerBindList.isEmpty()) {
         	bindVOList = new ArrayList<PayNoticeBindWeixinVO>();
         	for (PayNoticeBindWeixin dealerBind : dealerBindList) {

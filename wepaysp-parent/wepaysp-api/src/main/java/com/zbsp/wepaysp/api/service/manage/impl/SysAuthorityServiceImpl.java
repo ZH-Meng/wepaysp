@@ -24,7 +24,6 @@ import com.zbsp.wepaysp.api.service.manage.SysAuthorityService;
  */
 public class SysAuthorityServiceImpl extends BaseService implements SysAuthorityService {
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<SysRole> doJoinTransQueryUserRoleList(Map<String, Object> paramMap) {
         String sysUserOid = MapUtils.getString(paramMap, "sysUserOid");
@@ -44,7 +43,7 @@ public class SysAuthorityServiceImpl extends BaseService implements SysAuthority
             queryMap.put("ROLESTATE", roleState);
         }
         
-        return (List<SysRole>) commonDAO.findObjectList(sql, queryMap, false);
+        return commonDAO.findObjectList(sql, queryMap, false);
     }
 
 }

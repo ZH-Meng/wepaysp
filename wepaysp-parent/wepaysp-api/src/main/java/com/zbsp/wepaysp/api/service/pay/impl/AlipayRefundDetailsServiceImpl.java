@@ -122,8 +122,7 @@ public class AlipayRefundDetailsServiceImpl
         
         sql.append(" order by w.transBeginTime desc");
 
-        @SuppressWarnings("unchecked")
-        List<AlipayRefundDetails> alipayRefundDetailsList = (List<AlipayRefundDetails>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<AlipayRefundDetails> alipayRefundDetailsList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
         
         Long totalRefundAmount = 0L;
         Long totalRefundMoney = 0L;

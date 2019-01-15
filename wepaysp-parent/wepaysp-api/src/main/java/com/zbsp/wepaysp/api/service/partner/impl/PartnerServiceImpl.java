@@ -34,7 +34,6 @@ public class PartnerServiceImpl
 
     private SysLogService sysLogService;
 
-    @SuppressWarnings("unchecked")
     @Override
     public PartnerVO doJoinTransQueryPartnerByOid(String partnerOid) {
         Validator.checkArgument(StringUtils.isBlank(partnerOid), "服务商Oid不能为空");
@@ -47,7 +46,7 @@ public class PartnerServiceImpl
             String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
             Map<String, Object> sqlMap = new HashMap<String, Object>();
             sqlMap.put("IWOID", partner.getIwoid());
-            List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+            List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
             if (userList != null && !userList.isEmpty()) {
                 partnerVO.setLoginId(userList.get(0).getUserId());
                 // partnerVO.setLoginPwd(userList.get(0).getLoginPwd());
@@ -60,7 +59,6 @@ public class PartnerServiceImpl
         return partnerVO;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public List<Partner> doJoinTransQueryTopPartner(String queryKey, Integer type) { 
         if (StringUtils.isNotBlank(queryKey)) {
@@ -80,7 +78,7 @@ public class PartnerServiceImpl
                 jpqlMap.put("LEVEL", Partner.Level.LEVEL_TOP.getValue());
                 jpqlMap.put("STATE", Partner.State.frozen.getValue());
                 jpqlMap.put("APPID", queryKey);
-                return (List<Partner>) commonDAO.findObjectList(jpql, jpqlMap, false);
+                return commonDAO.findObjectList(jpql, jpqlMap, false);
         	}
         	 return topPartnerList;
         } else {
@@ -88,11 +86,10 @@ public class PartnerServiceImpl
             Map<String, Object> jpqlMap = new HashMap<String, Object>();
             jpqlMap.put("LEVEL", Partner.Level.LEVEL_TOP.getValue());
             jpqlMap.put("STATE", Partner.State.frozen.getValue());
-            return (List<Partner>) commonDAO.findObjectList(jpql, jpqlMap, false);
+            return commonDAO.findObjectList(jpql, jpqlMap, false);
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<PartnerVO> doJoinTransQueryPartnerList(Map<String, Object> paramMap, int startIndex, int maxResult) {
         List<PartnerVO> resultList = new ArrayList<PartnerVO>();
@@ -131,7 +128,7 @@ public class PartnerServiceImpl
         sqlMap.put("PARENTPARTNEROID", parentPartnerOid);
 
         sql.append(" order by p.createTime desc");
-        List<Partner> partnerList = (List<Partner>) commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
+        List<Partner> partnerList = commonDAO.findObjectList(sql.toString(), sqlMap, false, startIndex, maxResult);
 
         if (partnerList != null && !partnerList.isEmpty()) {
             for (Partner partner : partnerList) {
@@ -141,7 +138,7 @@ public class PartnerServiceImpl
                 String sqlStr = "from SysUser s where s.partner.iwoid = :IWOID";
                 sqlMap.clear();
                 sqlMap.put("IWOID", partner.getIwoid());
-                List<SysUser> userList = (List<SysUser>) commonDAO.findObjectList(sqlStr, sqlMap, false);
+                List<SysUser> userList = commonDAO.findObjectList(sqlStr, sqlMap, false);
                 if (userList != null && !userList.isEmpty()) {
                     vo.setLoginId(userList.get(0).getUserId());
                 }
